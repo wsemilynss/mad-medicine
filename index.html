@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MAD MEDICINE · 医理探案 —— 中医医理推理交互剧场</title>
+<style>
+/* ============================================================
+   MAD MEDICINE · 医理探案
+   单文件交互应用：四诊游戏 → 推理引擎 → 身体状态侧写报告
+   视觉：双人对坐、意念相通、环绕镜头（粒子生成艺术）
+   ============================================================ */
+:root{
+  --bg:#05070d;
+  --bg2:#0a0f1c;
+  --ink:#e9e4d6;
+  --ink-dim:#9a958a;
+  --gold:#d4af6a;
+  --gold-bright:#f0cf8e;
+  --teal:#6ad4c8;
+  --cinnabar:#d4706a;
+  --card:rgba(14,20,34,.82);
+  --line:rgba(212,175,106,.28);
+  --serif:"Songti SC","STSong","STZhongsong","SimSun","Noto Serif SC",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0}
+#figLayer{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;
+  align-items:center;justify-content:center;overflow:hidden}
+body.stage-live #figLayer{display:flex}
+.figGrain{position:absolute;width:min(46vh,72vw);aspect-ratio:9/20;max-height:94vh;object-fit:cover;opacity:.5;
+  filter:contrast(1.06) saturate(.94);will-change:transform,opacity;
+  -webkit-mask-image:radial-gradient(ellipse 60% 72% at 50% 47%,#000 42%,rgba(0,0,0,.5) 64%,transparent 86%),radial-gradient(circle,#000 0 34%,transparent 38%);
+  -webkit-mask-size:100% 100%,3.6px 3.6px;-webkit-mask-composite:source-in;
+  mask-image:radial-gradient(ellipse 60% 72% at 50% 47%,#000 42%,rgba(0,0,0,.5) 64%,transparent 86%),radial-gradient(circle,#000 0 34%,transparent 38%);
+  mask-size:100% 100%,3.6px 3.6px;mask-composite:intersect}
+.figGrain:nth-child(2){-webkit-mask-position:0 0,1.8px 0.9px;mask-position:0 0,1.8px 0.9px}
+.figGrain:nth-child(3){-webkit-mask-position:0 0,0.9px 1.8px;mask-position:0 0,0.9px 1.8px}
+#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 40%,transparent 26%,rgba(3,5,10,.55) 74%,rgba(2,3,7,.92) 100%)}
+#scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:multiply;animation:scanDrift 8s linear infinite}
+@keyframes scanDrift{from{background-position:0 0}to{background-position:0 6px}}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#app{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
+
+/* ---------- 顶栏 ---------- */
+#topbar{
+  position:fixed;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;pointer-events:none;
+}
+#brand{font-family:var(--serif);letter-spacing:.35em;font-size:13px;color:var(--gold);
+  pointer-events:auto;user-select:none}
+#brand b{color:var(--ink);font-weight:600}
+#clueToggle{pointer-events:auto;cursor:pointer;background:rgba(10,15,28,.7);
+  border:1px solid var(--line);color:var(--gold);font-size:12px;letter-spacing:.2em;
+  padding:8px 14px;border-radius:2px;font-family:var(--serif)}
+#clueToggle:hover{background:rgba(212,175,106,.12)}
+
+/* ---------- 线索簿 ---------- */
+#clueBook{
+  position:fixed;top:0;right:-360px;width:340px;height:100vh;z-index:20;
+  background:rgba(7,10,18,.96);border-left:1px solid var(--line);
+  transition:right .35s ease;padding:70px 22px 30px;overflow-y:auto;
+}
+#clueBook.open{right:0}
+#clueBook h3{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;
+  font-size:15px;margin-bottom:6px}
+#clueBook .sub{font-size:11px;color:var(--ink-dim);margin-bottom:18px;letter-spacing:.1em}
+.clueItem{border-left:2px solid var(--gold);padding:6px 10px;margin-bottom:8px;
+  font-size:12.5px;line-height:1.6;color:var(--ink);background:rgba(212,175,106,.05)}
+.clueItem small{display:block;color:var(--ink-dim);font-size:11px;margin-top:2px}
+.clueEmpty{color:var(--ink-dim);font-size:12px;letter-spacing:.1em}
+
+/* ---------- 屏幕容器 ---------- */
+.screen{display:none;flex:1;flex-direction:column;align-items:center;
+  justify-content:center;padding:90px 20px 60px;min-height:100vh}
+.screen.active{display:flex;animation:fadeUp .7s ease}
+@keyframes fadeUp{from{transform:translateY(18px)}to{transform:none}}
+
+/* ---------- 通用排版 ---------- */
+.kicker{font-family:var(--serif);color:var(--teal);letter-spacing:.5em;font-size:12px;
+  margin-bottom:14px;text-transform:uppercase;text-shadow:0 2px 14px rgba(0,0,0,.95)}
+h1.title{font-family:var(--serif);font-size:clamp(38px,7vw,72px);font-weight:600;
+  letter-spacing:.18em;line-height:1.2;text-align:center;
+  text-shadow:0 3px 26px rgba(0,0,0,.95),0 0 60px rgba(5,7,13,.9)}
+h1.title .en{display:block;font-size:clamp(12px,1.6vw,16px);letter-spacing:.7em;
+  color:var(--gold);margin-top:16px;font-family:var(--sans);font-weight:300}
+h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,34px);letter-spacing:.2em;
+  color:var(--ink);text-align:center;margin-bottom:8px;text-shadow:0 2px 18px rgba(0,0,0,.95)}
+.lede{max-width:620px;text-align:center;color:var(--ink-dim);font-size:14px;
+  line-height:2;margin-top:18px;letter-spacing:.05em;text-shadow:0 2px 12px rgba(0,0,0,.95)}
+.divider{width:60px;height:1px;background:var(--gold);margin:22px auto;opacity:.6}
+
+/* ---------- 按钮 ---------- */
+.btn{cursor:pointer;display:inline-block;font-family:var(--serif);letter-spacing:.35em;
+  font-size:15px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--gold-bright));
+  border:none;padding:16px 46px 16px 52px;border-radius:2px;margin-top:34px;
+  transition:transform .2s,box-shadow .2s;text-indent:0}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(212,175,106,.35)}
+.btn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);
+  box-shadow:none;font-size:13px;padding:12px 30px}
+.btn.ghost:hover{background:rgba(212,175,106,.1)}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btnRow{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+
+/* ---------- 卡片 / 面板 ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:4px;
+  padding:28px 30px;max-width:760px;width:100%;backdrop-filter:blur(6px);
+  box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.panel h3{font-family:var(--serif);color:var(--gold);letter-spacing:.25em;
+  font-size:16px;margin-bottom:18px}
+.caseNo{font-family:monospace;color:var(--teal);font-size:12px;letter-spacing:.25em;
+  margin-bottom:10px}
+
+/* ---------- 表单 ---------- */
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px 22px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;letter-spacing:.2em;color:var(--ink-dim);font-family:var(--serif)}
+.field input[type=text],.field input[type=number],.field select{
+  background:rgba(5,8,15,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);
+  padding:11px 12px;border-radius:2px;font-size:14px;font-family:var(--sans);outline:none}
+.field input:focus,.field select:focus{border-color:var(--gold)}
+.field input[type=range]{accent-color:var(--gold);height:26px}
+.rangeVal{font-size:13px;color:var(--gold);font-family:monospace}
+@media(max-width:620px){.formGrid{grid-template-columns:1fr}}
+
+/* ---------- 选项卡（单选/多选） ---------- */
+.optGroup{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.opt{cursor:pointer;border:1px solid rgba(233,228,214,.2);background:rgba(5,8,15,.55);
+  color:var(--ink);padding:10px 18px;border-radius:2px;font-size:13.5px;
+  transition:all .18s;user-select:none;line-height:1.5}
+.opt:hover{border-color:var(--gold);color:var(--gold-bright)}
+.opt.sel{border-color:var(--gold);background:rgba(212,175,106,.16);color:var(--gold-bright)}
+.opt.sel.multi{border-color:var(--teal);background:rgba(106,212,200,.13);color:var(--teal)}
+.qBlock{margin-bottom:26px}
+.qBlock .q{font-family:var(--serif);font-size:16px;letter-spacing:.12em;margin-bottom:12px;
+  color:var(--ink)}
+.qBlock .hint{font-size:11.5px;color:var(--ink-dim);margin-bottom:10px;letter-spacing:.05em}
+.symGroupTitle{font-family:var(--serif);color:var(--teal);font-size:13px;letter-spacing:.3em;
+  margin:22px 0 10px;border-bottom:1px dashed rgba(106,212,200,.25);padding-bottom:6px}
+
+/* ---------- 进度 ---------- */
+#progress{position:fixed;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
+  display:flex;justify-content:center;padding:12px}
+#progress .inner{display:flex;gap:8px;align-items:center;background:rgba(7,10,18,.8);
+  border:1px solid var(--line);border-radius:20px;padding:8px 18px}
+#progress .step{width:8px;height:8px;border-radius:50%;background:rgba(233,228,214,.18);
+  transition:all .3s}
+#progress .step.done{background:var(--gold)}
+#progress .step.now{background:var(--teal);box-shadow:0 0 10px var(--teal);transform:scale(1.3)}
+#progress .lbl{font-size:11px;color:var(--ink-dim);letter-spacing:.2em;margin-left:8px;
+  font-family:var(--serif)}
+
+/* ---------- 把脉游戏 ---------- */
+#pulseStage{display:flex;flex-direction:column;align-items:center;gap:16px}
+#pulseCanvas{width:100%;max-width:680px;height:230px;background:rgba(5,8,15,.6);
+  border:1px solid var(--line);border-radius:4px}
+.pressureRow{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--ink-dim);
+  letter-spacing:.15em}
+.pressureRow input{width:220px}
+.pulsePosRow{display:flex;gap:10px}
+.pulsePos{cursor:pointer;border:1px solid var(--line);padding:8px 20px;border-radius:2px;
+  font-family:var(--serif);letter-spacing:.3em;font-size:14px;color:var(--ink-dim)}
+.pulsePos.on{color:var(--gold-bright);border-color:var(--gold);background:rgba(212,175,106,.12)}
+#timerRing{font-family:monospace;font-size:44px;color:var(--teal);letter-spacing:.1em}
+
+/* ---------- 推理链 ---------- */
+#deduceLog{max-width:720px;width:100%;font-size:14px;line-height:2}
+.dl{opacity:0;transform:translateX(-8px);transition:all .5s;margin-bottom:10px;
+  padding-left:16px;border-left:2px solid rgba(106,212,200,.4)}
+.dl.show{opacity:1;transform:none}
+.dl .tag{font-family:var(--serif);color:var(--teal);letter-spacing:.2em;font-size:12px;
+  margin-right:10px}
+.dl.gold{border-color:var(--gold)}
+.dl.gold .tag{color:var(--gold)}
+.dl.verdict{border-color:var(--cinnabar)}
+.dl.verdict .tag{color:var(--cinnabar)}
+
+/* ---------- 报告 ---------- */
+#screen-report{justify-content:flex-start}
+.reportWrap{max-width:860px;width:100%;display:flex;flex-direction:column;gap:22px}
+.rCard{background:var(--card);border:1px solid var(--line);border-radius:4px;
+  padding:26px 30px;backdrop-filter:blur(6px)}
+.rCard h3{font-family:var(--serif);color:var(--gold);letter-spacing:.3em;font-size:16px;
+  margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.rCard h3::before{content:"◆";font-size:9px;color:var(--teal)}
+.statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
+.stat{border:1px solid rgba(233,228,214,.12);border-radius:3px;padding:12px 14px;
+  background:rgba(5,8,15,.5)}
+.stat .k{font-size:11px;color:var(--ink-dim);letter-spacing:.2em;font-family:var(--serif)}
+.stat .v{font-size:20px;color:var(--gold-bright);font-family:monospace;margin-top:6px}
+.stat .v small{font-size:11px;color:var(--ink-dim);font-family:var(--sans)}
+.chartsRow{display:flex;gap:22px;flex-wrap:wrap}
+.chartsRow .rCard{flex:1;min-width:300px}
+.chartBox{display:flex;justify-content:center}
+canvas.chart{max-width:100%}
+.patternCard{border:1px solid var(--line);border-radius:4px;margin-bottom:18px;
+  background:rgba(5,8,15,.45);overflow:hidden}
+.patternHead{display:flex;align-items:baseline;gap:14px;padding:16px 20px;
+  background:rgba(212,175,106,.07);flex-wrap:wrap}
+.patternHead .name{font-family:var(--serif);font-size:20px;letter-spacing:.2em;
+  color:var(--gold-bright)}
+.patternHead .conf{font-family:monospace;color:var(--teal);font-size:13px}
+.patternHead .oneLine{font-size:12px;color:var(--ink-dim);width:100%;margin-top:4px;
+  letter-spacing:.05em}
+.tabs{display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(233,228,214,.12)}
+.tab{cursor:pointer;padding:10px 16px;font-size:12.5px;letter-spacing:.15em;
+  color:var(--ink-dim);border-bottom:2px solid transparent;font-family:var(--serif)}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tabBody{padding:18px 22px;font-size:13.5px;line-height:2;color:var(--ink)}
+.tabBody ul{padding-left:20px}
+.tabBody li{margin-bottom:6px}
+.tabBody .em{color:var(--teal)}
+.teaF{border:1px solid rgba(106,212,200,.25);border-radius:3px;padding:12px 16px;
+  margin-bottom:12px;background:rgba(106,212,200,.04)}
+.teaN{font-family:var(--serif);color:var(--teal);letter-spacing:.15em;font-size:14px;margin-bottom:6px}
+.teaR{font-size:12.5px;line-height:1.9;color:var(--ink)}
+.teaR b{color:var(--gold)}
+.teaNote{font-size:11.5px;color:var(--ink-dim);line-height:1.9;margin-top:4px}
+
+/* ---------- 采访式引导语 ---------- */
+.interview{font-family:var(--serif);color:var(--gold);font-size:13.5px;line-height:2;
+  border-left:2px solid var(--gold);padding:8px 14px;margin:2px 0 14px;
+  background:rgba(212,175,106,.05);letter-spacing:.05em}
+.interview::before{content:"「问」 ";color:var(--teal);letter-spacing:.2em}
+
+/* ---------- 小剧场 ---------- */
+.scriptAct{margin-bottom:20px}
+.actTitle{font-family:var(--serif);color:var(--teal);letter-spacing:.3em;font-size:14px;
+  margin-bottom:10px}
+.actBody{font-size:13.5px;line-height:2.15;color:var(--ink)}
+.actBody p{margin-bottom:10px;text-indent:2em}
+.actBody p.scene{text-indent:0;color:var(--ink-dim);font-size:12.5px;letter-spacing:.05em}
+.actBody p.line{text-indent:0}
+.actBody .who{color:var(--gold);font-family:var(--serif);letter-spacing:.15em}
+.actBody .who.dr{color:var(--teal)}
+
+/* ---------- 语言切换 ---------- */
+#btnLang{pointer-events:auto;cursor:pointer;background:rgba(10,15,28,.7);
+  border:1px solid rgba(106,212,200,.4);color:var(--teal);font-size:12px;letter-spacing:.15em;
+  padding:8px 14px;border-radius:2px;font-family:monospace;margin-right:10px}
+#btnLang:hover{background:rgba(106,212,200,.12)}
+
+/* ---------- 探案舞台 ---------- */
+#screen-stage{padding:0;justify-content:flex-start;overflow:hidden;cursor:grab}
+#screen-stage:active{cursor:grabbing}
+#orbLayer{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden;perspective:900px}
+.orb{position:absolute;width:clamp(176px,18vw,270px);pointer-events:auto;cursor:pointer;
+  display:flex;align-items:center;gap:9px;transform:translate(-50%,-50%);color:var(--gold);
+  transition:filter .25s;will-change:left,top}
+.orb::before{content:"";position:absolute;right:100%;top:13px;width:34px;height:1px;
+  background:linear-gradient(90deg,transparent,currentColor);opacity:.5}
+.orb i{width:11px;height:11px;flex:0 0 11px;position:relative;transform:rotate(45deg);
+  border:1px solid currentColor;background:rgba(5,8,15,.8);box-shadow:0 0 16px currentColor}
+.orb i::after{content:"";position:absolute;inset:3px;background:currentColor;opacity:.7}
+.orb-copy{min-width:0;width:100%;padding:7px 10px 8px;border-left:1px solid currentColor;
+  border-top:1px solid rgba(233,228,214,.14);background:linear-gradient(90deg,rgba(5,8,15,.9),rgba(5,8,15,.42) 72%,transparent);
+  clip-path:polygon(0 0,94% 0,100% 18%,100% 100%,0 100%);text-shadow:0 2px 8px #000;transition:opacity .3s}
+.orb-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;
+  color:currentColor;font:9px/1.2 monospace;letter-spacing:.22em;text-transform:uppercase}
+.orb-meta code{font:9px/1 monospace;color:rgba(233,228,214,.45);letter-spacing:.08em}
+.orb-question{font-family:var(--serif);font-size:clamp(11px,1vw,13px);line-height:1.55;
+  letter-spacing:.06em;color:var(--ink);white-space:normal;text-wrap:balance;
+  display:-webkit-box;-webkit-line-clamp:1;line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.orb-state{margin-top:5px;font:9px/1.2 monospace;letter-spacing:.14em;color:currentColor;opacity:.72}
+.orb:hover{z-index:500!important;filter:brightness(1.4)}
+.orb:hover .orb-copy{background:linear-gradient(90deg,rgba(8,12,22,.97),rgba(12,18,29,.72) 78%,transparent);
+  box-shadow:-12px 0 32px currentColor,0 0 42px rgba(233,228,214,.12)}
+.orb:hover .orb-question{-webkit-line-clamp:5;line-clamp:5}
+.orb:hover .orb-state{opacity:1;color:var(--gold-bright)}
+.orb:hover i{animation:orbPulse 1.6s infinite;background:currentColor}
+.orb.locating{animation:locateClue 1.4s ease}
+.orb.faded .orb-copy{opacity:0}
+.orb.faded:hover .orb-copy{opacity:1}
+.orb.faded i{box-shadow:0 0 9px currentColor}
+.orb.focused{filter:brightness(1.7);pointer-events:none}
+.orb.done{pointer-events:auto;filter:saturate(.35)}
+.orb.done i{animation:none;background:currentColor;box-shadow:0 0 5px currentColor}
+.orb.done i::after{content:"";inset:2px;background:#05070d}
+.orb.done .orb-copy{opacity:.2}
+.orb.done .orb-question{text-decoration:line-through}
+.orb.just-unlocked .orb-copy{animation:decodeIn 1s steps(6,end)}
+.orb.absorbed{animation:orbAbsorb .65s ease-in forwards}
+.orb.cat-observe{color:var(--gold)}
+.orb.cat-listen{color:var(--teal)}
+.orb.cat-inquire{color:var(--cinnabar)}
+.orb.cat-pulse{color:#e9e4d6}
+@keyframes orbPulse{0%,100%{box-shadow:0 0 0 0 currentColor}50%{box-shadow:0 0 0 11px transparent}}
+@keyframes locateClue{0%,100%{filter:brightness(1.2)}50%{filter:brightness(2.4) drop-shadow(0 0 18px currentColor)}}
+@keyframes decodeIn{0%{clip-path:inset(0 0 82% 0)}35%{clip-path:inset(43% 0 18% 0)}70%{clip-path:inset(8% 0 56% 0)}100%{clip-path:inset(0)}}
+@keyframes orbAbsorb{to{left:50%!important;top:55%!important;transform:translate(-50%,-50%) scale(.08)!important;opacity:0}}
+#stageFrame{position:fixed;inset:58px 18px 48px;z-index:2;pointer-events:none;
+  border-left:1px solid rgba(212,175,106,.12);border-right:1px solid rgba(106,212,200,.08)}
+#stageFrame::before,#stageFrame::after{content:"";position:absolute;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--gold) 0 5%,transparent 5% 46%,rgba(233,228,214,.25) 46% 54%,transparent 54% 95%,var(--teal) 95%)}
+#stageFrame::before{top:0}#stageFrame::after{bottom:0}
+#contactReticle{position:absolute;left:50%;top:45%;width:82px;height:82px;transform:translate(-50%,-50%);
+  border:1px solid rgba(233,228,214,.1);border-radius:50%;animation:reticleTurn 14s linear infinite}
+#contactReticle::before,#contactReticle::after{content:"";position:absolute;background:rgba(233,228,214,.18)}
+#contactReticle::before{left:50%;top:-12px;width:1px;height:106px}
+#contactReticle::after{top:50%;left:-12px;height:1px;width:106px}
+@keyframes reticleTurn{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#stageHUD{position:fixed;left:24px;top:72px;z-index:8;pointer-events:none;width:min(310px,42vw);
+  padding-left:13px;border-left:1px solid rgba(212,175,106,.55)}
+#hudMode{font:9px/1.2 monospace;color:var(--teal);letter-spacing:.28em;margin-bottom:7px}
+#hudProg{font-family:var(--serif);color:var(--ink);font-size:13px;letter-spacing:.1em}
+#signalTrack{width:148px;height:2px;background:rgba(233,228,214,.12);margin:9px 0 8px;overflow:hidden}
+#signalFill{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--cinnabar),var(--gold),var(--teal));
+  box-shadow:0 0 10px var(--gold);transition:width .2s}
+#hudHint{font-size:10.5px;color:var(--ink-dim);letter-spacing:.08em;line-height:1.65;
+  text-shadow:0 1px 8px rgba(0,0,0,.9)}
+#stageControls{position:fixed;right:25px;bottom:60px;z-index:8;display:flex;align-items:center;gap:7px}
+#stageControls button{width:38px;height:38px;border:1px solid rgba(233,228,214,.2);border-radius:50%;
+  background:rgba(5,8,15,.62);color:var(--ink);font-size:20px;cursor:pointer;backdrop-filter:blur(5px)}
+#stageControls button:hover{border-color:var(--gold);color:var(--gold)}
+#stageControls span{font:9px/1 monospace;letter-spacing:.18em;color:var(--ink-dim);padding:0 5px}
+body.stage-answering #stageHUD,body.stage-answering #stageControls{opacity:.12;pointer-events:none}
+#signalToast{position:fixed;left:50%;top:17%;z-index:12;transform:translate(-50%,-8px);opacity:0;
+  pointer-events:none;font:10px/1.5 monospace;letter-spacing:.16em;color:var(--gold-bright);
+  padding:7px 12px;border-left:1px solid var(--gold);background:rgba(5,8,15,.68);transition:.25s}
+#signalToast.show{opacity:1;transform:translate(-50%,0)}
+#deduceGate{position:fixed;bottom:64px;left:0;right:0;z-index:8;display:none;
+  flex-direction:column;align-items:center;gap:12px}
+#deduceGate.show{display:flex}
+#btnDeduce{margin-top:0;animation:gateGlow 1.8s infinite;clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%)}
+@keyframes gateGlow{0%,100%{box-shadow:0 0 18px rgba(212,175,106,.35)}50%{box-shadow:0 0 42px rgba(212,175,106,.7)}}
+#skipLink{display:none!important}
+
+/* ---------- 场景内答案星环 ---------- */
+#qPanel{position:fixed;inset:0;z-index:9;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s}
+#qPanel.open{opacity:1;visibility:visible}
+#qPanel::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--focus-x,50%) var(--focus-y,48%),transparent 0 17%,rgba(2,4,9,.2) 48%,rgba(2,4,9,.66) 100%);opacity:0;transition:.3s}
+#qPanel.open::before{opacity:1}
+#qPanelInner{position:absolute;left:var(--focus-x,50vw);top:var(--focus-y,48vh);width:0;height:0;
+  pointer-events:none;color:var(--focus-color,var(--gold))}
+.focusQuestion{position:absolute;left:0;top:0;width:clamp(270px,29vw,390px);transform:translate(-50%,-50%);
+  pointer-events:auto;padding:14px 18px 15px;background:linear-gradient(100deg,rgba(6,9,16,.96),rgba(9,14,24,.78) 82%,transparent);
+  border-left:2px solid currentColor;border-top:1px solid rgba(233,228,214,.2);
+  clip-path:polygon(0 0,94% 0,100% 16%,100% 100%,4% 100%,0 85%);box-shadow:-18px 18px 48px rgba(0,0,0,.42)}
+.focusQuestion::after{content:"";position:absolute;left:0;right:7%;top:0;height:1px;background:currentColor;
+  box-shadow:0 0 15px currentColor;animation:focusScan 2.2s ease-in-out infinite}
+@keyframes focusScan{50%{transform:translateY(92px);opacity:.18}}
+.focusMeta{display:flex;justify-content:space-between;gap:12px;font:9px/1.3 monospace;
+  letter-spacing:.24em;color:currentColor;margin-bottom:7px}
+.focusTitle{font-family:var(--serif);font-size:clamp(15px,1.45vw,19px);line-height:1.65;
+  letter-spacing:.08em;color:var(--ink);text-wrap:balance}
+.focusLead{font-size:10.5px;line-height:1.65;color:var(--ink-dim);letter-spacing:.04em;margin-top:7px;max-height:3.3em;overflow:hidden}
+.focusActions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px}
+.focusCount{font:9px/1 monospace;letter-spacing:.12em;color:var(--ink-dim)}
+.archiveNode{cursor:pointer;border:1px solid currentColor;border-radius:0;background:rgba(5,8,15,.8);color:currentColor;
+  font-family:var(--serif);font-size:11px;letter-spacing:.18em;padding:8px 12px}
+.archiveNode:hover{background:currentColor;color:var(--bg)}
+.answerWire{position:absolute;left:0;top:0;height:1px;transform-origin:0 50%;pointer-events:none;
+  background:linear-gradient(90deg,currentColor,rgba(233,228,214,.04));opacity:.28}
+.answerNode{position:absolute;left:var(--answer-x);top:var(--answer-y);width:clamp(150px,17vw,218px);
+  min-height:52px;transform:translate(-50%,-50%);opacity:1;pointer-events:auto;cursor:pointer;
+  display:flex;align-items:flex-start;gap:8px;text-align:left;padding:9px 10px;border:0;border-left:1px solid currentColor;
+  border-bottom:1px solid rgba(233,228,214,.14);border-radius:0;color:var(--ink);
+  background:linear-gradient(100deg,rgba(6,9,16,.93),rgba(9,14,24,.6),transparent);
+  font-family:var(--serif);font-size:11.5px;line-height:1.5;letter-spacing:.04em;backdrop-filter:blur(4px)}
+#qPanel.open .answerNode{animation:answerDecode .42s var(--answer-delay,0ms) ease forwards}
+@keyframes answerDecode{0%{opacity:.78;transform:translate(-50%,-50%) scale(.92) skewX(-4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.answerNode .answerIndex{flex:0 0 auto;font:9px/1.4 monospace;color:currentColor;letter-spacing:0}
+.answerNode:hover,.answerNode.sel{border-left-width:3px;color:var(--gold-bright);filter:brightness(1.35);background:rgba(16,23,36,.9)}
+.answerNode.sel::after{content:"REC";position:absolute;right:6px;top:4px;color:currentColor;font:8px/1 monospace;letter-spacing:.08em}
+#qPanel.resolving .focusQuestion,#qPanel.resolving .answerNode{animation:fieldCollapse .48s ease-in forwards!important}
+@keyframes fieldCollapse{to{left:calc(50vw - var(--focus-x));top:calc(55vh - var(--focus-y));transform:translate(-50%,-50%) scale(.04);opacity:0}}
+#qPanelClose{position:fixed;left:calc(var(--focus-x,50vw) + min(24vw,320px));top:calc(var(--focus-y,48vh) - min(27vh,210px));
+  width:34px;height:34px;pointer-events:auto;cursor:pointer;background:rgba(5,8,15,.72);border:1px solid rgba(233,228,214,.2);
+  border-radius:50%;color:var(--ink-dim);font-size:18px;z-index:2;opacity:0;transition:.2s}
+#qPanel.open #qPanelClose{opacity:1}
+#qPanelClose:hover{color:var(--gold);border-color:var(--gold);transform:rotate(90deg)}
+.dataMote{position:fixed;z-index:14;left:var(--mote-x);top:var(--mote-y);width:3px;height:3px;
+  pointer-events:none;background:var(--mote-color);box-shadow:0 0 9px var(--mote-color);
+  animation:moteIn .72s var(--mote-delay) cubic-bezier(.55,0,.3,1) forwards}
+@keyframes moteIn{to{transform:translate(var(--mote-tx),var(--mote-ty)) scale(.1);opacity:0}}
+.pulseField{position:absolute;left:0;top:0;width:min(760px,calc(100vw - 36px));max-height:82vh;overflow:auto;
+  transform:translate(-50%,-50%);pointer-events:auto;padding:20px 24px;background:rgba(5,8,15,.91);
+  border-left:1px solid currentColor;border-right:1px solid rgba(233,228,214,.14);backdrop-filter:blur(10px);
+  box-shadow:0 24px 80px rgba(0,0,0,.68)}
+#pulseDock{display:none}
+
+@media(max-width:700px){
+  #topbar{padding:10px 10px}#brand{font-size:9px;letter-spacing:.18em}#brand>span{display:none}
+  #btnLang,#clueToggle{font-size:9px;padding:6px 8px;letter-spacing:.1em}
+  body.stage-answering #topbar{opacity:.18;pointer-events:none}
+  .orb{width:150px}.orb-question{font-size:10.5px;-webkit-line-clamp:2;line-clamp:2}.orb-meta{font-size:8px}
+  .orb .orb-state{display:none}.orb.done .orb-copy{opacity:.4;padding:5px 7px 6px}
+  #stageHUD{left:14px;top:62px;width:58vw}#hudHint{font-size:9.5px}
+  #stageControls{right:14px;top:58px;bottom:auto}#stageControls span,#turnLeft,#turnRight{display:none}
+  .focusQuestion{width:min(254px,70vw);padding:11px 13px}.focusLead{display:none}
+  .answerNode{width:min(112px,36vw);min-height:46px;padding:7px 8px;font-size:9.5px;line-height:1.35}
+  #qPanelClose{left:auto;right:12px;top:62px}
+  .pulseField{max-height:78vh;padding:16px 14px}
+}
+
+/* ---------- 奖励横幅 ---------- */
+.rewardBanner{text-align:center;border:1px solid var(--gold);border-radius:4px;
+  padding:26px 20px;background:linear-gradient(180deg,rgba(212,175,106,.14),rgba(212,175,106,.03));
+  animation:rewardIn 1.2s ease}
+.rewardBanner .big{font-family:var(--serif);font-size:26px;letter-spacing:.4em;color:var(--gold-bright)}
+.rewardBanner .sub{font-size:13px;color:var(--ink-dim);letter-spacing:.15em;margin-top:10px;line-height:2}
+@keyframes rewardIn{from{transform:scale(.94)}to{transform:none}}
+.dimRow{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:13px}
+.dimRow .n{width:88px;font-family:var(--serif);letter-spacing:.15em;color:var(--ink);
+  flex-shrink:0;font-size:12.5px}
+.dimRow .bar{flex:1;height:8px;background:rgba(233,228,214,.08);border-radius:4px;overflow:hidden}
+.dimRow .bar i{display:block;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--teal),var(--gold))}
+.dimRow .p{width:44px;text-align:right;font-family:monospace;color:var(--gold);font-size:12px}
+.disclaimer{font-size:11.5px;color:var(--ink-dim);line-height:1.9;text-align:center;
+  max-width:640px;margin:10px auto 0;letter-spacing:.05em}
+.stamp{display:inline-block;border:2px solid var(--cinnabar);color:var(--cinnabar);
+  font-family:var(--serif);letter-spacing:.4em;padding:6px 16px 6px 22px;font-size:14px;
+  transform:rotate(-4deg);border-radius:3px;opacity:.85}
+
+/* ---------- 打印 ---------- */
+@media print{
+  #bg,#vignette,#topbar,#clueBook,#progress,.btnRow,#clueToggle{display:none!important}
+  body{background:#fff;color:#111}
+  .rCard{background:#fff;border-color:#ccc;color:#111;box-shadow:none}
+  .rCard h3,.patternHead .name{color:#7a5c1e}
+  .tabBody,.stat .v{color:#111}
+  .screen{padding:0}
+}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-thumb{background:rgba(212,175,106,.3);border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="figLayer" aria-hidden="true">
+  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
+  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
+  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
+</div>
+<div id="vignette"></div>
+<div id="scanlines"></div>
+<div id="grain"></div>
+
+<div id="topbar">
+  <div id="brand"><b>MAD MEDICINE</b> · <span data-zh="医理探案" data-en="Body Profiler">医理探案</span></div>
+  <div>
+    <button id="btnLang">EN</button>
+    <button id="clueToggle" data-zh="线 索 簿" data-en="CLUE BOOK">线 索 簿</button>
+  </div>
+</div>
+
+<aside id="clueBook">
+  <h3 data-zh="线 索 簿" data-en="C L U E · B O O K">线 索 簿</h3>
+  <div class="sub" data-zh="四诊收集到的每一条线索，都会进入推理链" data-en="Every clue from the four examinations feeds the deduction">四诊收集到的每一条线索，都会进入推理链</div>
+  <div id="clueList"><div class="clueEmpty" data-zh="尚未收集线索 —— 开始探案后，线索将在此归档。" data-en="No clues yet — they will be filed here as you investigate.">尚未收集线索 —— 开始探案后，线索将在此归档。</div></div>
+</aside>
+
+<div id="app">
+
+  <!-- 0 · 开场 -->
+  <section class="screen" id="screen-intro">
+    <div class="kicker">A FORENSIC JOURNEY THROUGH THE BODY</div>
+    <h1 class="title"><span data-zh="医 理 探 案" data-en="BODY PROFILER">医 理 探 案</span>
+      <span class="en">MAD MEDICINE · 医理探案</span>
+    </h1>
+    <div class="divider"></div>
+    <p class="lede"
+      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成。<br>无需先填问卷。望·闻·问·切的线索漂浮在两人四周：把鼠标移上去，线索便会亮起、展开；<b>点击任意一条即可作答，顺序全由你定</b>。<br>每回收一条，人物便清晰一分；全部收齐后，人物凝为实体，并解锁侧写、调养处方与推理小剧场。"
+      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — not yet complete.<br>No preliminary form. Clues of Look · Listen · Ask · Pulse float around the pair: hover to make one light up and unfold, then <b>click any clue to answer — in any order you like</b>.<br>Each clue recovered sharpens the figures; gather them all to solidify the body and unlock the profile, care prescription and deduction theatre.">
+      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成。<br>无需先填问卷。望·闻·问·切的线索漂浮在两人四周：把鼠标移上去，线索便会亮起、展开；<b>点击任意一条即可作答，顺序全由你定</b>。<br>每回收一条，人物便清晰一分；全部收齐后，人物凝为实体，并解锁侧写、调养处方与推理小剧场。</p>
+    <div class="btnRow">
+      <button class="btn" id="btnStart" data-zh="进 入 双 生 诊 室" data-en="E N T E R · T H E  C H A M B E R">进 入 双 生 诊 室</button>
+      <button class="btn ghost" id="btnHow" data-zh="侦 查 手 册" data-en="M A N U A L">侦 查 手 册</button>
+    </div>
+    <p class="disclaimer" data-zh="本应用为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。如有不适，请及时就医。" data-en="An interactive work for cross-disciplinary health learning. All &quot;profiles&quot; are for reference only and are NOT medical diagnoses.">本应用为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。如有不适，请及时就医。</p>
+  </section>
+
+  <!-- 0.5 · 手册 -->
+  <section class="screen" id="screen-how">
+    <div class="panel">
+      <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
+      <div style="font-size:13.5px;line-height:2.1;color:var(--ink)"
+        data-zh="① <b style='color:var(--gold)'>进入诊室</b> —— 无需预填问卷，系统会建立匿名卷宗。<br>② <b style='color:var(--gold)'>寻找信号</b> —— 两个人影在镜头中央对坐。拖动屏幕或使用右下角按钮环绕视角；场上每次只有一枚线索完成解码。<br>③ <b style='color:var(--gold)'>场内取证</b> —— 点击发光问题，答案会直接在人物周围展开：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>④ <b style='color:var(--gold)'>吸收与解锁</b> —— 选中的证词飞入身体，人物清晰一分，并在别处解锁下一枚问题。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 最后的月白节点会打开把脉工具，在寸、关、尺三部辨认速率、深浅、力度与质感。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部回收后解锁身体侧写、调养处方和五幕推理小剧场。"
+        data-en="① <b style='color:var(--gold)'>Enter</b> — no preliminary form; an anonymous case file is created automatically.<br>② <b style='color:var(--gold)'>Locate</b> — the figures sit face to face. Drag or use the lower-right controls to orbit; only one clue is decoded at a time.<br>③ <b style='color:var(--gold)'>Investigate in scene</b> — open the glowing question and its answers unfold around the figures: <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>.<br>④ <b style='color:var(--gold)'>Absorb & unlock</b> — chosen testimony enters the body, sharpening it and decoding the next clue elsewhere in the room.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the final moon-white node opens the pulse instrument for rate, depth, strength and texture.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything to unlock the body profile, care prescription and five-act deduction theatre.">
+        ① <b style='color:var(--gold)'>进入诊室</b> —— 无需预填问卷，系统会建立匿名卷宗。<br>② <b style='color:var(--gold)'>唤醒线索</b> —— 望·闻·问·切的线索漂浮在人物四周，移动鼠标即可点亮、展开。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定；右下角 ◎ 可扫描未勘验线索。<br>④ <b style='color:var(--gold)'>吸收显影</b> —— 证词飞入身体，人物随回收而逐渐清晰。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 侧写报告、调养处方与推理小剧场。</div>
+      <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
+    </div>
+  </section>
+
+  <!-- 1 · 建档 -->
+  <section class="screen" id="screen-intake">
+    <div class="kicker" data-zh="FILE 01 · 建立档案" data-en="FILE 01 · INTAKE">FILE 01 · 建立档案</div>
+    <h2 data-zh="身 体 基 本 面" data-en="T H E · B A S I C S">身 体 基 本 面</h2>
+    <div class="divider"></div>
+    <div class="panel">
+      <div class="caseNo" id="caseNo"></div>
+      <div class="interview" data-zh="别紧张，这不像看病，更像一次聊天。我是你的「身体采访人」——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的名字，和你每天如何度过。" data-en="Relax — this is less a diagnosis than a conversation. I'm your &quot;body interviewer&quot;. Some answers ahead are things you've never noticed. Let's start simple: your name, and how your days pass.">别紧张，这不像看病，更像一次聊天。我是你的「身体采访人」——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的名字，和你每天如何度过。</div>
+      <div class="formGrid">
+        <div class="field"><label data-zh="称呼（代号即可）" data-en="Alias">称呼（代号即可）</label><input type="text" id="fName" maxlength="12" placeholder="阿辰 / Chen"></div>
+        <div class="field"><label data-zh="年龄段" data-en="Age group">年龄段</label>
+          <select id="fAge"><option>18-25</option><option selected>26-35</option><option>36-45</option><option>46-55</option><option>56+</option></select></div>
+        <div class="field"><label data-zh="生理性别" data-en="Sex">生理性别</label>
+          <select id="fSex"><option value="f" data-zh="女" data-en="Female">女</option><option value="m" data-zh="男" data-en="Male">男</option><option value="x" data-zh="不便透露" data-en="Prefer not to say">不便透露</option></select></div>
+        <div class="field"><label data-zh="日常体力模式" data-en="Daily physical pattern">日常体力模式</label>
+          <select id="fJob"><option value="sit" data-zh="久坐办公" data-en="Desk-bound">久坐办公</option><option value="stand" data-zh="久站/走动" data-en="Standing / walking">久站/走动</option><option value="phys" data-zh="体力劳动" data-en="Physical labor">体力劳动</option><option value="mix" data-zh="混合" data-en="Mixed">混合</option></select></div>
+        <div class="field"><label data-zh="身高（cm）" data-en="Height (cm)">身高（cm）</label><input type="number" id="fH" value="168" min="120" max="220"></div>
+        <div class="field"><label data-zh="体重（kg）" data-en="Weight (kg)">体重（kg）</label><input type="number" id="fW" value="60" min="30" max="200"></div>
+        <div class="field"><label><span data-zh="每晚睡眠时长" data-en="Sleep per night">每晚睡眠时长</span> <span class="rangeVal" id="vSleep">7h</span></label>
+          <input type="range" id="fSleep" min="4" max="10" step="0.5" value="7"></div>
+        <div class="field"><label><span data-zh="近期压力指数" data-en="Stress level">近期压力指数</span> <span class="rangeVal" id="vStress">5</span></label>
+          <input type="range" id="fStress" min="1" max="10" value="5"></div>
+        <div class="field"><label data-zh="每周运动频率" data-en="Exercise per week">每周运动频率</label>
+          <select id="fEx"><option value="0" data-zh="几乎不运动" data-en="Barely">几乎不运动</option><option value="1" data-zh="1-2 次" data-en="1-2 times">1-2 次</option><option value="3" selected data-zh="3-4 次" data-en="3-4 times">3-4 次</option><option value="5" data-zh="5 次以上" data-en="5+ times">5 次以上</option></select></div>
+        <div class="field"><label data-zh="饮食倾向" data-en="Diet tendency">饮食倾向</label>
+          <select id="fDiet"><option value="light" data-zh="清淡均衡" data-en="Light & balanced">清淡均衡</option><option value="oil" data-zh="油腻重口" data-en="Greasy & heavy">油腻重口</option><option value="sweet" data-zh="嗜甜/奶茶" data-en="Sweet tooth / milk tea">嗜甜/奶茶</option><option value="cold" data-zh="生冷偏多" data-en="Cold & raw food">生冷偏多</option><option value="irreg" data-zh="不规律/常外卖" data-en="Irregular / takeout">不规律/常外卖</option></select></div>
+        <div class="field full"><label data-zh="咖啡因 / 茶 / 酒" data-en="Caffeine / alcohol">咖啡因 / 茶 / 酒</label>
+          <select id="fStim"><option value="none" data-zh="几乎不碰" data-en="Barely any">几乎不碰</option><option value="coffee" data-zh="每日咖啡/浓茶" data-en="Daily coffee / strong tea">每日咖啡/浓茶</option><option value="alcohol" data-zh="常饮酒" data-en="Regular alcohol">常饮酒</option><option value="both" data-zh="咖啡与酒都不少" data-en="Plenty of both">咖啡与酒都不少</option></select></div>
+      </div>
+      <div style="text-align:center"><button class="btn" id="btnIntake" data-zh="存 档 · 走 上 舞 台" data-en="F I L E · T O  T H E  S T A G E">存 档 · 走 上 舞 台</button></div>
+    </div>
+  </section>
+
+  <!-- 2 · 探案舞台：光圈环绕旋转的两人 -->
+  <section class="screen" id="screen-stage">
+    <div id="orbLayer"></div>
+    <div id="stageFrame" aria-hidden="true"><div id="contactReticle"></div></div>
+    <div id="stageHUD">
+      <div id="hudMode">SPATIAL CLUE RECOVERY</div>
+      <div id="hudProg">线索 0 / 0 · 轮廓 30%</div>
+      <div id="signalTrack"><span id="signalFill"></span></div>
+      <div id="hudHint">拖动环视场景 · 点亮并作答线索 · 两人将由虚渐实</div>
+    </div>
+    <div id="qPanel"><button id="qPanelClose" aria-label="关闭当前线索" title="关闭当前线索">✕</button><div id="qPanelInner"></div></div>
+    <div id="signalToast"></div>
+    <div id="stageControls">
+      <button id="turnLeft" aria-label="向左环绕" title="向左环绕">↶</button>
+      <span>DRAG / ORBIT</span>
+      <button id="locateClue" aria-label="扫描未勘验线索" title="扫描未勘验线索">◎</button>
+      <button id="turnRight" aria-label="向右环绕" title="向右环绕">↷</button>
+    </div>
+    <div id="deduceGate">
+      <button class="btn" id="btnDeduce" data-zh="开 始 推 理" data-en="B E G I N · D E D U C T I O N">开 始 推 理</button>
+      <div id="skipLink" data-zh="跳过剩余问题，直接推理 →" data-en="Skip the rest and deduce →">跳过剩余问题，直接推理 →</div>
+    </div>
+  </section>
+
+  <!-- 切诊模块（舞台浮层调用） -->
+  <div id="pulseDock"><div id="pulseModule" style="display:none">
+    <div id="pulseIntro">
+      <h3 id="pulseIntroH">指 法 教 学</h3>
+      <div style="font-size:13.5px;line-height:2.1" id="pulseIntroTxt"></div>
+      <div style="text-align:center"><button class="btn" id="btnPulseStart" data-zh="伸 手 · 开 始 把 脉" data-en="R E A C H · F E E L T H E P U L S E">伸 手 · 开 始 把 脉</button></div>
+    </div>
+    <div id="pulseGame" style="display:none">
+      <div id="pulseStage">
+        <div class="pulsePosRow" id="pulsePosRow"></div>
+        <canvas id="pulseCanvas" width="680" height="230" style="max-width:100%"></canvas>
+        <div class="pressureRow">
+          <span id="lblFloat">浮取（轻按）</span>
+          <input type="range" id="pressure" min="0" max="100" value="25">
+          <span id="lblSink">沉取（重按）</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.1em" id="pulseHint"></div>
+      </div>
+      <div id="pulseQuiz" style="margin-top:18px"></div>
+      <div style="text-align:center"><button class="btn" id="btnPulseDone" disabled data-zh="呈 交 脉 案 · 自 测 心 率" data-en="S U B M I T · R E A L P U L S E">呈 交 脉 案 · 自 测 心 率</button></div>
+    </div>
+    <div id="pulseReal" style="display:none;text-align:center">
+      <h3 id="pulseRealH">自 测 真 实 脉 搏</h3>
+      <p style="font-size:13px;line-height:2;color:var(--ink-dim);max-width:520px;margin:0 auto" id="pulseRealTxt"></p>
+      <div id="timerRing" style="margin:18px 0">15</div>
+      <div class="btnRow">
+        <button class="btn ghost" id="btnTimer" data-zh="开 始 计 时" data-en="S T A R T">开 始 计 时</button>
+      </div>
+      <div style="margin-top:20px;display:none" id="beatInput">
+        <label style="font-size:12px;letter-spacing:.2em;color:var(--ink-dim)" id="beatLbl">15 秒内跳动次数：</label>
+        <input type="number" id="fBeats" min="8" max="45" value="18" style="width:80px;background:rgba(5,8,15,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);padding:10px;border-radius:2px;text-align:center;font-size:16px;margin-left:10px">
+        <div><button class="btn" id="btnBeatsDone" data-zh="录 入" data-en="R E C O R D">录 入</button></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- 6 · 推理 -->
+  <section class="screen" id="screen-deduce">
+    <div class="kicker" data-zh="FINAL · 演绎推理" data-en="FINAL · DEDUCTION">FINAL · 演绎推理</div>
+    <h2 data-zh="线 索 汇 流 · 病 机 浮 现" data-en="C L U E S · C O N V E R G E">线 索 汇 流 · 病 机 浮 现</h2>
+    <div class="divider"></div>
+    <div id="deduceLog"></div>
+    <div style="text-align:center"><button class="btn" id="btnReport" style="display:none" data-zh="领 取 奖 励 · 身 体 侧 写 报 告" data-en="C L A I M · T H E  R E W A R D">领 取 奖 励 · 身 体 侧 写 报 告</button></div>
+  </section>
+
+  <!-- 7 · 报告 -->
+  <section class="screen" id="screen-report">
+    <div class="kicker" data-zh="REWARD · 身体状态侧写" data-en="REWARD · BODY PROFILE">REWARD · 身体状态侧写</div>
+    <h2 data-zh="侧 写 报 告" data-en="T H E · P R O F I L E">侧 写 报 告</h2>
+    <div style="margin:10px 0 24px"><span class="stamp" data-zh="身 体 侦 探 事 务 所" data-en="BODY DETECTIVE AGENCY">身 体 侦 探 事 务 所</span></div>
+    <div class="reportWrap" id="reportWrap"></div>
+    <div class="btnRow" style="margin:26px 0 40px">
+      <button class="btn" id="btnExport" data-zh="导 出 报 告 存 档" data-en="E X P O R T · R E P O R T">导 出 报 告 存 档</button>
+      <button class="btn ghost" id="btnScript" data-zh="导 出 推 理 小 剧 场" data-en="E X P O R T · T H E A T R E">导 出 推 理 小 剧 场</button>
+      <button class="btn ghost" id="btnPrint" data-zh="打 印" data-en="P R I N T">打 印</button>
+      <button class="btn ghost" id="btnRestart" data-zh="重 新 探 案" data-en="R E S T A R T">重 新 探 案</button>
+    </div>
+    <p class="disclaimer" data-zh="本报告由跨学科知识模型推理生成，用于健康学习与自我观察，不能替代医师面诊与医学检验。若症状持续或加重，请寻求专业医疗帮助。" data-en="Generated by a cross-disciplinary knowledge model for health learning and self-observation only. It cannot replace medical consultation or lab tests. If symptoms persist or worsen, seek professional care.">本报告由跨学科知识模型推理生成，用于健康学习与自我观察，不能替代医师面诊与医学检验。若症状持续或加重，请寻求专业医疗帮助。</p>
+  </section>
+
+</div>
+
+<div id="progress"><div class="inner" id="progressInner"></div></div>
+
+<script>
+/* ============================================================
+   背景生成艺术：双人对坐 · 意念相通 · 环绕镜头
+   手写 3D 点云 + 透视投影，无任何外部依赖
+   ============================================================ */
+(function(){
+  const cv = document.getElementById('bg');
+  const ctx = cv.getContext('2d');
+  // 中央「颗粒双人」：多层视频 + 网点遮罩，随清晰度散开/聚拢
+  const grains=[...document.querySelectorAll('.figGrain')];
+  const GDIR=[[-1,-0.55],[1,0.42],[0.25,-1]]; GDIR.forEach(d=>{const m=Math.hypot(d[0],d[1])||1;d[0]/=m;d[1]/=m;});
+  const GPH=grains.map(()=>Math.random()*6.283), GFX=grains.map(()=>0.5+Math.random()*0.7);
+  // iOS/低电量模式下自动播放可能被拦截：首次触碰时补播
+  function kickGrains(){grains.forEach(v=>{const p=v.play&&v.play();if(p&&p.catch)p.catch(()=>{});});}
+  addEventListener('touchstart',kickGrains,{once:true,passive:true});
+  addEventListener('pointerdown',kickGrains,{once:true});
+  // 逸散联动余粒池（自两人身上飞向四周，与中心呼应）
+  const ESC=72, escX=new Float32Array(ESC),escY=new Float32Array(ESC),escVX=new Float32Array(ESC),escVY=new Float32Array(ESC),escLife=new Float32Array(ESC),escHue=new Int8Array(ESC); let escSlot=0;
+  let W=0,H=0,DPR=1;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 1.6);
+    W = cv.width = Math.floor(innerWidth*DPR);
+    H = cv.height = Math.floor(innerHeight*DPR);
+    window.__dpr = DPR;
+  }
+  addEventListener('resize', resize); resize();
+
+  // ---- 体积化「跪坐对坐人形」点云（本地坐标，面朝 +X，额首相抵）----
+  function inBall(){ let x,y,z,d; do{x=Math.random()*2-1;y=Math.random()*2-1;z=Math.random()*2-1;d=x*x+y*y+z*z;}while(d>1); return [x,y,z]; }
+  function blob(c,r,n,out){ for(let i=0;i<n;i++){const u=inBall();out.push([c[0]+u[0]*r[0],c[1]+u[1]*r[1],c[2]+u[2]*r[2]]);} }
+  function limb(a,b,rad,n,out){ for(let i=0;i<n;i++){const t=Math.random(),u=inBall();out.push([a[0]+(b[0]-a[0])*t+u[0]*rad,a[1]+(b[1]-a[1])*t+u[1]*rad,a[2]+(b[2]-a[2])*t+u[2]*rad]);} }
+  const DENS=1.45; // 点云密度系数
+  function buildFigure(){
+    const p=[]; const N=x=>Math.round(x*DENS);
+    // 头（微垂，向对方额首相抵）
+    blob([0.26,0.82,0],[0.125,0.15,0.125],N(430),p);
+    // 颈
+    limb([0.20,0.70,0],[0.15,0.62,0],0.06,N(90),p);
+    // 躯干（前倾、肩宽）
+    blob([0.09,0.52,0],[0.15,0.20,0.19],N(1050),p);
+    // 髋（坐于足跟）
+    blob([0.00,0.30,0],[0.16,0.12,0.20],N(430),p);
+    // 上臂 + 前臂（双手前伸，几近相触）
+    for(let s=-1;s<=1;s+=2){
+      limb([0.13,0.60,0.17*s],[0.30,0.52,0.14*s],0.062,N(210),p);
+      limb([0.30,0.52,0.14*s],[0.40,0.62,0.05*s],0.05,N(180),p);
+    }
+    // 大腿（前伸至膝）+ 小腿/足（折于身下）
+    for(let s=-1;s<=1;s+=2){
+      limb([0.00,0.28,0.14*s],[0.42,0.20,0.16*s],0.11,N(340),p);
+      limb([0.42,0.20,0.16*s],[0.16,0.05,0.18*s],0.10,N(300),p);
+    }
+    return p;
+  }
+  // 为每个点写入：[3]显影序号 [4-6]消散方向(单位向量) [7]湍流相位 [8]消散半径
+  function decorate(fig){
+    fig.forEach(q=>{
+      let dx=Math.random()-.5, dy=Math.random()-.5, dz=Math.random()-.5;
+      const m=Math.hypot(dx,dy,dz)||1;
+      q.push(Math.random(), dx/m, dy/m, dz/m, Math.random()*6.283, 0.3+Math.random()*0.7);
+    });
+  }
+  const GAP = 0.46; // 两人间距一半（额首相抵，与视频中两人接触点对齐）
+
+  // ---- 意念流：额首之间的三条微光河 ----
+  const STREAMS=[];
+  for(let s=0;s<3;s++){
+    const pts=[];
+    for(let i=0;i<56;i++) pts.push({t:Math.random(), sp:0.0018+Math.random()*0.0022, ph:Math.random()*Math.PI*2});
+    STREAMS.push({pts, off:(s-1)*0.06, hue:s});
+  }
+  // 数据网络节点 + 全息读数（中医脏象 / 体征碎片）
+  const WORDS=['气','血','阴','阳','脉','望','闻','问','切','脾','肾','肝','心','肺','HR 72','36.5°C','SpO₂ 98','BP 118/76','ΔE 0.7','0x7F3A','0xA10C','三焦','命门','气海','关元','足三里'];
+  const NODES=[];
+  for(let i=0;i<48;i++) NODES.push({p:[(Math.random()-.5)*5.8,0.3+Math.random()*2.4,(Math.random()-.5)*5.8], n:(Math.random()*9000+1000)|0, ph:Math.random()*7, label:WORDS[(Math.random()*WORDS.length)|0]});
+  const LINKS=[];
+  for(let i=0;i<NODES.length;i++)for(let j=i+1;j<NODES.length;j++){
+    const a=NODES[i].p,b=NODES[j].p;
+    if(Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])<1.6) LINKS.push([i,j]);
+  }
+  // 彩色纸屑地面
+  const FCOL=['214,112,106','106,212,200','212,175,106','233,228,214','91,143,212'];
+  const FLOOR=[];
+  for(let i=0;i<680;i++){
+    const a=Math.random()*Math.PI*2,r=0.25+Math.random()*2.8;
+    FLOOR.push([Math.cos(a)*r,0.005,Math.sin(a)*r,FCOL[(Math.random()*FCOL.length)|0],Math.random()*7,0.9+Math.random()*1.8]);
+  }
+  // 环境尘埃
+  const DUST=[];
+  for(let i=0;i<200;i++) DUST.push([(Math.random()-.5)*5,(Math.random()-.5)*3,(Math.random()-.5)*5, Math.random()*Math.PI*2]);
+  // 悬浮全息屏（参考影像里环绕的小画面）
+  const PANELS=[];
+  for(let i=0;i<4;i++){
+    const a=Math.random()*Math.PI*2, r=1.7+Math.random()*1.1;
+    PANELS.push({p:[Math.cos(a)*r,0.95+Math.random()*1.15,Math.sin(a)*r], w:0.52+Math.random()*0.3, h:0.36+Math.random()*0.18, ph:Math.random()*7});
+  }
+  // 数据雨（覆于身形上的代码流）
+  const MRAIN=[];
+  for(let i=0;i<12;i++) MRAIN.push({a:Math.random()*Math.PI*2, r:0.35+Math.random()*0.75, y:1.35+Math.random()*0.7, sp:0.35+Math.random()*0.5});
+
+  let mx=0,my=0;
+  addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);});
+  // 拖动环绕镜头（点击光圈/面板/控件时不触发）
+  let dragAng=0, dragX=null, focusDelta=0;
+  window.stageRotate=delta=>{focusDelta=0;dragAng+=delta;};
+  window.stageFocusWorld=(x,z)=>{
+    const current=autoAng+dragAng+mx*.35;
+    const target=Math.atan2(x,z)+Math.PI;
+    focusDelta=Math.atan2(Math.sin(target-current),Math.cos(target-current));
+  };
+  addEventListener('pointerdown',e=>{
+    const c=e.target.closest;
+    if(c&&(c.call(e.target,'.orb')||c.call(e.target,'#qPanel')||c.call(e.target,'button')||c.call(e.target,'input')||c.call(e.target,'select')||c.call(e.target,'#clueBook')||c.call(e.target,'#topbar'))) return;
+    focusDelta=0;dragX=e.clientX;
+  });
+  addEventListener('pointermove',e=>{ if(dragX!==null){ dragAng+=(e.clientX-dragX)*0.008; dragX=e.clientX; }});
+  addEventListener('pointerup',()=>dragX=null);
+  addEventListener('pointercancel',()=>dragX=null);
+
+  function project(x,y,z,ca,sa,camY,cosP,sinP){
+    // 世界→相机：绕Y轴旋转（环绕镜头），再绕X轴俯仰
+    const rx = x*ca - z*sa, rz0 = x*sa + z*ca;
+    const ry = y - camY;
+    const ry2 = ry*cosP - rz0*sinP, rz2 = ry*sinP + rz0*cosP;
+    const d = 4.6/(4.6+rz2);
+    return [W/2 + rx*d*H*0.62, H*0.56 - ry2*d*H*0.62, d];
+  }
+
+  let t0=performance.now(), lastFrame=t0, autoAng=0, lockedMx=0, lockedMy=0;
+  function frame(now){
+    const t=(now-t0)/1000;
+    const dt=Math.min(.05,(now-lastFrame)/1000); lastFrame=now;
+    if(!window.__stageFocus){autoAng+=dt*0.06;lockedMx=mx;lockedMy=my;}
+    if(Math.abs(focusDelta)>.001){const step=focusDelta*Math.min(1,dt*7);dragAng+=step;focusDelta-=step;}
+    ctx.clearRect(0,0,W,H);
+    // 底色渐变
+    const g=ctx.createRadialGradient(W/2,H*0.45,0,W/2,H*0.45,Math.max(W,H)*0.75);
+    g.addColorStop(0,'#0b1222'); g.addColorStop(1,'#04060c');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+    const viewMx=window.__stageFocus?lockedMx:mx, viewMy=window.__stageFocus?lockedMy:my;
+    const ang = autoAng + dragAng + viewMx*0.35;  // 缓慢环绕 + 拖动 + 视差
+    const ca=Math.cos(ang), sa=Math.sin(ang);
+    const camY = 0.55 + viewMy*0.5;
+    const pitch = 0.10 + viewMy*0.15;
+    const cosP=Math.cos(pitch), sinP=Math.sin(pitch);
+
+    ctx.globalCompositeOperation='lighter';
+
+    // 尘埃
+    for(const d of DUST){
+      const yy=d[1]+Math.sin(t*0.3+d[3])*0.12;
+      const pr=project(d[0],yy,d[2],ca,sa,camY,cosP,sinP);
+      const a=0.10*pr[2];
+      if(a<=0.01) continue;
+      ctx.fillStyle=`rgba(140,160,200,${a})`;
+      ctx.fillRect(pr[0],pr[1],1.4*DPR*pr[2],1.4*DPR*pr[2]);
+    }
+
+    // 彩色纸屑地面（拼贴地毯质感）
+    for(const f of FLOOR){
+      const tw=0.45+0.55*Math.sin(t*2+f[4]);
+      const pr=project(f[0],f[1],f[2],ca,sa,camY,cosP,sinP);
+      const a=0.62*tw*(pr[2]-0.22);
+      if(a<=0.02) continue;
+      ctx.fillStyle=`rgba(${f[3]},${Math.min(0.72,a)})`;
+      const s=1.7*DPR*pr[2]*f[5];
+      ctx.fillRect(pr[0]-s/2,pr[1]-s/2,s,s);
+    }
+
+    // 数据网络与全息读数
+    ctx.lineWidth=1;
+    for(const lk of LINKS){
+      const a=NODES[lk[0]],b=NODES[lk[1]];
+      const pa=project(a.p[0],a.p[1]+Math.sin(t*0.2+a.ph)*0.08,a.p[2],ca,sa,camY,cosP,sinP);
+      const pb=project(b.p[0],b.p[1]+Math.sin(t*0.2+b.ph)*0.08,b.p[2],ca,sa,camY,cosP,sinP);
+      ctx.strokeStyle=`rgba(150,170,210,${0.10*Math.min(pa[2],pb[2])})`;
+      ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();
+    }
+    // 暗房线框（透视网格空间）
+    ctx.strokeStyle='rgba(120,140,180,0.09)'; ctx.lineWidth=1;
+    const RS=2.7, RH=3.1, RC=[[-RS,-RS],[RS,-RS],[RS,RS],[-RS,RS]];
+    for(const c of RC){
+      const p0=project(c[0],0,c[1],ca,sa,camY,cosP,sinP), p1=project(c[0],RH,c[1],ca,sa,camY,cosP,sinP);
+      ctx.beginPath();ctx.moveTo(p0[0],p0[1]);ctx.lineTo(p1[0],p1[1]);ctx.stroke();
+    }
+    for(const yy of [0,RH]){
+      ctx.beginPath();
+      RC.forEach((c,idx)=>{const p=project(c[0],yy,c[1],ca,sa,camY,cosP,sinP); idx?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});
+      ctx.closePath();ctx.stroke();
+    }
+    for(let gi=-2;gi<=2;gi++){
+      const a0=project(gi*1.35,0,-RS,ca,sa,camY,cosP,sinP), a1=project(gi*1.35,0,RS,ca,sa,camY,cosP,sinP);
+      const b0=project(-RS,0,gi*1.35,ca,sa,camY,cosP,sinP), b1=project(RS,0,gi*1.35,ca,sa,camY,cosP,sinP);
+      ctx.beginPath();ctx.moveTo(a0[0],a0[1]);ctx.lineTo(a1[0],a1[1]);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(b0[0],b0[1]);ctx.lineTo(b1[0],b1[1]);ctx.stroke();
+    }
+    ctx.font=`${10*DPR}px "Songti SC",monospace`;
+    for(const nd of NODES){
+      const pr=project(nd.p[0],nd.p[1]+Math.sin(t*0.2+nd.ph)*0.08,nd.p[2],ca,sa,camY,cosP,sinP);
+      ctx.fillStyle=`rgba(170,190,225,${0.30*pr[2]})`;
+      ctx.fillRect(pr[0],pr[1],1.8*DPR,1.8*DPR);
+      if(pr[2]>0.7){
+        const flick=(Math.sin(t*7+nd.ph)>-.7)?1:0.25;   // 偶发闪烁
+        ctx.fillStyle=`rgba(190,205,235,${0.42*pr[2]*flick})`;
+        ctx.fillText(nd.label, pr[0]+5*DPR, pr[1]);
+      }
+    }
+    // 悬浮全息屏
+    ctx.globalCompositeOperation='source-over';
+    for(const pn of PANELS){
+      const pr=project(pn.p[0], pn.p[1]+Math.sin(t*0.3+pn.ph)*0.05, pn.p[2], ca,sa,camY,cosP,sinP);
+      if(pr[2]<0.42) continue;
+      const w=pn.w*pr[2]*H*0.42, h=pn.h*pr[2]*H*0.42;
+      const x=pr[0]-w/2, y=pr[1]-h/2;
+      ctx.fillStyle=`rgba(7,11,18,${0.55*pr[2]})`; ctx.fillRect(x,y,w,h);
+      const fg=ctx.createLinearGradient(x,y,x,y+h);
+      fg.addColorStop(0,`rgba(150,170,210,${0.14*pr[2]})`); fg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=fg; ctx.fillRect(x,y,w,h);
+      // 画面内容：人像剪影
+      const cxp=x+w*0.5, cyp=y+h*0.66, hr=h*0.15;
+      ctx.fillStyle=`rgba(150,180,215,${0.2*pr[2]})`;
+      ctx.beginPath(); ctx.arc(cxp,cyp-hr*1.3,hr,0,7); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cxp-hr*1.9,y+h); ctx.quadraticCurveTo(cxp,cyp,cxp+hr*1.9,y+h); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle=`rgba(106,212,200,${0.10*pr[2]})`; ctx.lineWidth=1;
+      for(let yy=y+3; yy<y+h; yy+=4){ ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+w,yy);ctx.stroke(); }
+      ctx.strokeStyle=`rgba(212,175,106,${(0.28+0.3*Math.sin(t*3+pn.ph))*pr[2]})`;
+      ctx.strokeRect(x,y,w,h);
+    }
+    ctx.globalCompositeOperation='lighter';
+
+    // 中央「颗粒双人」：多层网点视频随清晰度散开/聚拢；背景以光晕与逸散余粒呼应
+    const CL=window.__clarity==null?1:window.__clarity;
+    const cc=Math.max(0,Math.min(1,(CL-0.42)/0.58));       // 0 虚（散开）· 1 实（聚拢）
+    const scat=1-cc;
+    if(grains.length){
+      const spread=Math.min(innerWidth,innerHeight)*0.17*scat;
+      for(let i=0;i<grains.length;i++){
+        const d=GDIR[i%GDIR.length], fl=7+scat*11;
+        const tx=d[0]*spread+Math.sin(t*GFX[i]+GPH[i])*fl;
+        const ty=d[1]*spread+Math.cos(t*GFX[i]*1.1+GPH[i])*fl;
+        const sc=1+scat*0.14+Math.sin(t*0.6+GPH[i])*0.008;
+        grains[i].style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${sc.toFixed(3)})`;
+        grains[i].style.opacity=(0.3+0.6*cc).toFixed(3);
+      }
+    }
+    if(document.body.classList.contains('stage-live')){
+      const cx=W/2, cy=H*0.5, rad=Math.min(H*0.52,W*0.42);
+      ctx.globalCompositeOperation='lighter';
+      const rgl=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+      rgl.addColorStop(0,`rgba(212,190,150,${0.05+0.08*cc})`);
+      rgl.addColorStop(0.5,`rgba(106,150,170,${0.03+0.05*cc})`);
+      rgl.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rgl; ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.fill();
+      const boxH=Math.min(H*0.8,W*1.3), boxW=boxH*0.42;
+      const spawn=2+Math.round(scat*4);                    // 散开越强，飞散越多，与中心呼应
+      for(let k=0;k<spawn;k++){
+        if(Math.random()<0.6){
+          const slot=(escSlot++)%ESC;
+          const px=cx+(Math.random()-.5)*boxW, py=cy+(Math.random()-.5)*boxH;
+          escX[slot]=px;escY[slot]=py;
+          const ang=Math.atan2(py-cy,px-cx)+(Math.random()-.5)*0.8;
+          const sp=(0.5+Math.random()*(1.4+scat*1.2))*DPR;
+          escVX[slot]=Math.cos(ang)*sp;escVY[slot]=Math.sin(ang)*sp-0.25*DPR;
+          escLife[slot]=1; escHue[slot]=(Math.random()*3)|0;
+        }
+      }
+      const PAL=[[212,175,106],[106,212,200],[233,228,214]];
+      for(let i=0;i<ESC;i++){
+        if(escLife[i]<=0) continue;
+        escX[i]+=escVX[i];escY[i]+=escVY[i];escVY[i]+=0.03*DPR;escLife[i]-=0.011;
+        const col=PAL[escHue[i]];
+        ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},${Math.max(0,escLife[i])*0.5})`;
+        ctx.fillRect(escX[i],escY[i],1.7*DPR,1.7*DPR);
+      }
+      ctx.globalCompositeOperation='source-over';
+    }
+    // 数据雨（覆于身形之上的代码流）
+    ctx.font=`${11*DPR}px monospace`;
+    for(const mr of MRAIN){
+      const wx=Math.cos(mr.a)*mr.r, wz=Math.sin(mr.a)*mr.r, head=(t*mr.sp)%1;
+      for(let k=0;k<7;k++){
+        const yy=mr.y-((head+k*0.14)%1)*1.35;
+        const pr=project(wx,yy,wz,ca,sa,camY,cosP,sinP);
+        if(pr[2]<0.42) continue;
+        ctx.fillStyle=`rgba(150,230,200,${(1-k/7)*0.42*pr[2]})`;
+        ctx.fillText(Math.random()<.5?'0':'1', pr[0], pr[1]);
+      }
+    }
+
+    // 意念相接处的脉动光核
+    const mid=project(0,0.88,0,ca,sa,camY,cosP,sinP);
+    const pulse=mid[2]*(0.8+0.2*Math.sin(t*2.4));
+    const rg2=ctx.createRadialGradient(mid[0],mid[1],0,mid[0],mid[1],56*pulse*DPR);
+    rg2.addColorStop(0,'rgba(235,240,255,0.30)'); rg2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=rg2;
+    ctx.beginPath();ctx.arc(mid[0],mid[1],56*pulse*DPR,0,7);ctx.fill();
+
+    // 意念流（三条微光河，在相抵的额首之间往复）
+    const ax=-GAP+0.30, bx=GAP-0.30, hy=0.88;
+    for(const st of STREAMS){
+      for(const p of st.pts){
+        p.t+=p.sp; if(p.t>1)p.t-=1;
+        const x=ax+(bx-ax)*p.t;
+        const arc=Math.sin(p.t*Math.PI);          // 中段隆起
+        const y=hy+arc*(0.07+st.off*0.3)+Math.sin(t*2+p.ph)*0.015;
+        const z=st.off*arc*1.4+Math.cos(t*1.6+p.ph)*0.02*arc;
+        const pr=project(x,y,z,ca,sa,camY,cosP,sinP);
+        const fade=Math.sin(p.t*Math.PI);
+        const mix=p.t; // 颜色由蓝白渐暖白
+        const r=Math.round(150+(255-150)*mix), gg=Math.round(190+(240-190)*mix), b=Math.round(235+(215-235)*mix);
+        ctx.fillStyle=`rgba(${r},${gg},${b},${0.75*fade*pr[2]})`;
+        const s=1.8*DPR*pr[2];
+        ctx.fillRect(pr[0]-s/2,pr[1]-s/2,s,s);
+      }
+    }
+    // 结案凝实的光晕绽放
+    const BL=window.__bloom||0;
+    if(BL>0.001){
+      const c=project(0,0.7,0,ca,sa,camY,cosP,sinP);
+      const R=Math.max(W,H)*0.55*BL;
+      const rgB=ctx.createRadialGradient(c[0],c[1],0,c[0],c[1],R);
+      rgB.addColorStop(0,`rgba(240,207,142,${0.5*BL})`);
+      rgB.addColorStop(0.45,`rgba(212,175,106,${0.16*BL})`);
+      rgB.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=rgB; ctx.beginPath();ctx.arc(c[0],c[1],R,0,7);ctx.fill();
+    }
+    ctx.globalCompositeOperation='source-over';
+
+    // 舞台光圈位置同步（DOM 层）
+    if(window.stageTick) window.stageTick((x,y,z)=>project(x,y,z,ca,sa,camY,cosP,sinP));
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+/* ============================================================
+   知识库 KB
+   十个基础证型 · 五行映射 · 四诊题库（每条线索带权重）
+   ============================================================ */
+const PATTERN_KEYS = ['qi','xue','yin','yang','yu','pi','tan','re','yux','huo'];
+
+/* 五行归属：木=肝胆(郁/瘀) 火=心(火/血) 土=脾(虚/痰) 金=肺(气) 水=肾(阴阳) */
+const ELEMENT_OF = {qi:'金',xue:'火',yin:'水',yang:'水',yu:'木',pi:'土',tan:'土',re:'土',yux:'木',huo:'火'};
+
+const PULSE_OF = { // 证型 → 模拟脉象参数
+  yu:  {rate:78, depth:.40, strength:.72, shape:'xian'},
+  pi:  {rate:74, depth:.48, strength:.52, shape:'hua'},
+  tan: {rate:76, depth:.45, strength:.60, shape:'hua'},
+  yin: {rate:92, depth:.62, strength:.34, shape:'xi'},
+  huo: {rate:96, depth:.34, strength:.80, shape:'ping'},
+  yang:{rate:58, depth:.82, strength:.30, shape:'xi'},
+  qi:  {rate:70, depth:.66, strength:.30, shape:'xi'},
+  xue: {rate:82, depth:.55, strength:.32, shape:'xi'},
+  yux: {rate:66, depth:.50, strength:.50, shape:'se'},
+  _def:{rate:72, depth:.40, strength:.60, shape:'ping'}
+};
+const SHAPE_NAME = {xian:'弦（如按琴弦）',hua:'滑（如珠走盘）',xi:'细（如丝线应指）',se:'涩（如轻刀刮竹）',ping:'平和'};
+const SHAPE_NAME_EN = {xian:'Wiry (like a lute string)',hua:'Slippery (pearls rolling on a plate)',xi:'Thready (fine as silk)',se:'Choppy (knife scraping bamboo)',ping:'Moderate & calm'};
+const SN=k=>L(SHAPE_NAME[k],SHAPE_NAME_EN[k]);
+const PULSE_WEIGHTS = { // 脉象特征 → 证型加权
+  fast:{yin:2,huo:2}, slow:{yang:3,qi:1}, floating:{yin:1,huo:1}, deep:{yang:2,qi:1},
+  weak:{qi:3,xue:2,yang:2}, strong:{huo:2,yu:1},
+  xian:{yu:3}, hua:{tan:3,pi:2}, xi:{xue:2,yin:2,qi:1}, se:{yux:3}
+};
+
+/* ---------- 望诊（单选）---------- */
+const Q_OBSERVE = [
+ {q:'舌质颜色（对镜伸舌，看舌体本色）', qe:'Tongue body color (look in a mirror)', key:'tongue', opts:[
+   ['淡白',{qi:2,xue:2,yang:1},'Pale'],['淡红如常（健康色）',{},'Normal pink-red'],['偏红',{yin:2,huo:1,re:1},'Reddish'],
+   ['红绛、少津液',{yin:3,huo:2},'Deep red, dry'],['紫暗 / 有瘀点',{yux:3,yu:1},'Purplish / spotted']]},
+ {q:'舌苔（舌面上那层苔状物）', qe:'Tongue coating', key:'coating', opts:[
+   ['薄白润泽（正常）',{},'Thin white (normal)'],['白腻、像挂了一层霜',{pi:2,tan:2},'White & greasy'],['黄腻',{re:3,tan:1},'Yellow & greasy'],
+   ['少苔 / 地图样剥落',{yin:2,xue:1},'Peeled / patchy'],['厚腻、几乎看不见舌体',{tan:3,pi:1},'Thick & greasy']]},
+ {q:'面色与神态', qe:'Complexion & spirit', key:'face', opts:[
+   ['红润有神',{},'Rosy & bright'],['苍白少血色',{xue:2,qi:1},'Pale'],['萎黄、暗沉发黄',{pi:2,xue:1},'Sallow yellow'],
+   ['晦暗无华、有黑眼圈',{yux:2,yang:1},'Dull, dark eye circles'],['两颧潮红（尤其午后）',{yin:2,huo:1},'Flushed cheeks (esp. afternoon)']]},
+ {q:'形体状态', qe:'Body shape', key:'body', opts:[
+   ['匀称结实',{},'Well-built'],['偏瘦、怎么吃都不胖',{yin:1,xue:1},'Thin, hard to gain weight'],
+   ['偏胖、肌肉松软',{tan:2,pi:2},'Overweight, soft muscles'],['瘦而紧绷、肩颈僵硬',{yu:1,yin:1},'Lean but tense']]},
+ {q:'眼睛', qe:'Eyes', key:'eyes', opts:[
+   ['清澈明亮',{},'Clear & bright'],['干涩、易疲劳',{yin:1,xue:1,yu:1},'Dry, tired'],['血丝多、发红',{huo:2,re:1},'Bloodshot'],
+   ['眼睑浮肿（晨起明显）',{pi:2,tan:1,yang:1},'Puffy eyelids (morning)']]}
+];
+
+/* ---------- 闻诊（单选）---------- */
+const Q_LISTEN = [
+ {q:'平日说话的声音', qe:'Your usual speaking voice', key:'voice', opts:[
+   ['洪亮有力、中气足',{},'Loud & strong'],['低微、懒于开口',{qi:3},'Faint, reluctant to speak'],['说一会儿就气短',{qi:2,yu:1},'Out of breath quickly'],
+   ['语速快、音高、易急躁',{huo:2,yu:1},'Fast, high-pitched, irritable']]},
+ {q:'呼吸状态', qe:'Breathing', key:'breath', opts:[
+   ['平稳深长',{},'Steady & deep'],['短促、动则气喘',{qi:2,yang:1},'Short, winded on exertion'],['常要叹口气才舒服',{yu:3},'Needs deep sighs'],
+   ['鼾声重 / 喉中痰鸣',{tan:2},'Heavy snoring / phlegm sounds']]},
+ {q:'咳嗽与痰', qe:'Cough & phlegm', key:'cough', opts:[
+   ['基本不咳',{},'Rarely cough'],['痰多、色白清稀',{tan:2,pi:1},'Lots of thin white phlegm'],['干咳少痰、咽干',{yin:2},'Dry cough, dry throat'],
+   ['痰黄黏稠',{re:2},'Thick yellow phlegm']]},
+ {q:'口中感觉', qe:'Mouth feel & taste', key:'mouth', opts:[
+   ['无特殊',{},'Nothing unusual'],['口苦、口黏',{re:2,yu:1},'Bitter, sticky'],['口淡、吃什么都寡味',{pi:2},'Bland, tasteless'],
+   ['口干、总想喝水',{yin:2,huo:1},'Dry mouth, always thirsty']]}
+];
+
+/* ---------- 问诊（多选，凡近一月反复出现即可勾选） ---------- */
+const Q_INQUIRE = [
+ {g:'寒热 · 体温的证词', ge:'Cold & Heat', items:[
+   ['怕冷、手脚冰凉',{yang:3,qi:1},'Fear of cold, icy hands & feet'],['怕热、容易烦躁',{huo:2,yin:1},'Heat-intolerant, irritable'],
+   ['手足心热、午后潮热',{yin:3},'Hot palms/soles, afternoon flushing'],['夜间盗汗',{yin:2,huo:1},'Night sweats'],['忽冷忽热',{yu:2},'Alternating chills & heat']]},
+ {g:'头面五官 · 上部线索', ge:'Head & Senses', items:[
+   ['头晕（起立时明显）',{xue:2,qi:1},'Dizzy when standing up'],['头重、像裹着湿毛巾',{tan:2,pi:1},'Heavy, towel-wrapped head'],
+   ['偏头痛 / 太阳穴胀痛',{yu:2,yux:1},'Migraine / temple pressure'],['固定位置的刺痛',{yux:3},'Fixed stabbing pain'],
+   ['耳鸣（如蝉鸣细声）',{yin:2},'Tinnitus like faint cicadas']]},
+ {g:'胸腹 · 情志的战场', ge:'Chest & Emotions', items:[
+   ['胸闷、爱叹气',{yu:3},'Chest tightness, sighing'],['胁肋部位胀痛',{yu:2},'Distending rib-side pain'],['心悸、心慌',{xue:1,huo:1,qi:1},'Palpitations'],
+   ['烦躁易怒',{yu:2,huo:2},'Irritable, quick to anger'],['思虑多、脑子停不下来',{pi:1,yu:1,huo:1},'Racing, unstoppable thoughts'],
+   ['情绪低落、兴趣减退',{yu:2,qi:1,yang:1},'Low mood, loss of interest'],['莫名焦虑紧张',{huo:1,yu:1,yin:1},'Unexplained anxiety']]},
+ {g:'饮食消化 · 中焦报告', ge:'Appetite & Digestion', items:[
+   ['食欲不振',{pi:2,qi:1},'Poor appetite'],['吃一点就腹胀',{pi:2,yu:1},'Bloating after small meals'],['反酸、烧心',{yu:1,re:1},'Acid reflux / heartburn'],
+   ['爱吃生冷冰饮',{pi:1,tan:1},'Craves cold & icy drinks'],['饭后犯困得厉害',{pi:2,qi:1},'Very drowsy after meals']]},
+ {g:'二便 · 下游出口', ge:'Bowel & Urine', items:[
+   ['大便黏腻、粘马桶',{tan:2,pi:1},'Sticky stools'],['大便稀溏、不成形',{pi:3,yang:1},'Loose, unformed stools'],
+   ['便秘、干结难下',{yin:1,xue:1,huo:1},'Constipation, dry & hard'],['夜尿 ≥2 次',{yang:2},'Nocturia ≥2 times'],
+   ['小便黄赤、气味重',{re:1,huo:1},'Dark yellow urine, strong odor']]},
+ {g:'睡眠 · 夜间档案', ge:'Sleep', items:[
+   ['入睡困难（>30分钟）',{huo:2,yin:1,yu:1},'Hard to fall asleep (>30 min)'],['多梦、易醒',{xue:1,huo:1},'Dreamy, easily woken'],
+   ['凌晨早醒、难再睡',{yin:1,xue:1},'Early waking, can\'t return to sleep'],['嗜睡、怎么睡都困',{tan:2,pi:1,yang:1},'Always sleepy']]},
+ {g:'精力 · 筋骨状态', ge:'Energy & Body', items:[
+   ['容易疲劳、懒得动',{qi:3},'Easily fatigued'],['下午明显犯困',{pi:1,qi:1},'Afternoon slump'],
+   ['亢奋后突然透支',{yin:1,huo:1},'Wired then crashed'],['身体困重、四肢沉',{pi:2,tan:1},'Heavy body & limbs'],
+   ['腰膝酸软',{yin:1,yang:2},'Sore lower back & knees'],['肩颈僵硬、久坐加重',{yu:1,yux:1},'Stiff neck & shoulders, worse with sitting']]}
+];
+const Q_FEMALE = {g:'经期 · 女性专项', ge:'Menstrual', items:[
+  ['痛经（刺痛、有血块）',{yux:2,yu:1},'Cramping pain with clots'],['经量少、颜色淡',{xue:2},'Scanty, pale flow'],
+  ['经前乳房胀痛、烦躁',{yu:2},'Premenstrual breast tenderness & irritability'],['周期紊乱',{yu:1,yin:1},'Irregular cycle']]};
+
+/* 问诊各组的采访式引导语（带参与者回到未被留意的身体记忆） */
+const Q_LEAD = {
+ '寒热 · 体温的证词':['回想最近一个月的夜里。你把手脚伸出被子——是想取暖，还是想散热？清晨醒来时，后背有没有一层薄汗？','Think of recent nights. When your hands and feet leave the blanket — are you seeking warmth, or releasing heat? Any thin sweat on waking?'],
+ '头面五官 · 上部线索':['现在注意你的头。不是此刻——是上周末下午、开完长会之后、或者熬夜第二天的那个头。它是什么感觉？','Now, your head. Not right now — but last weekend, after a long meeting, or the morning after staying up late. How did it feel?'],
+ '胸腹 · 情志的战场':['这一组问题关于你的胸口和心事。最近有没有那么一个瞬间——你忽然想长长地叹一口气？想到了，就勾下来。','These are about your chest and your mind. Was there a moment lately when you suddenly needed a long, deep sigh? If so, tick it.'],
+ '饮食消化 · 中焦报告':['想想你的胃昨天经历了什么。早餐吃了吗？吃完午饭的那个小时，你是清醒的，还是困的？','What did your stomach go through yesterday? Did you eat breakfast? In the hour after lunch — were you awake, or drowsy?'],
+ '二便 · 下游出口':['这是采访里最不优雅、但最诚实的一组问题。身体最后的出口，从不说谎。','The least elegant but most honest questions of this interview. The body\'s exits never lie.'],
+ '睡眠 · 夜间档案':['回到昨晚。关灯之后，你用了多久才睡着？夜里醒过吗？醒来时，窗外是几点？','Back to last night. After lights out, how long until sleep? Did you wake? What time was it outside?'],
+ '精力 · 筋骨状态':['想象一块电池的电量条。下午三点的你，还剩百分之几？','Picture a battery bar. At 3 p.m., what percentage is left in you?'],
+ '经期 · 女性专项':['如果愿意，和自己的身体对一次账——它每个月都准时赴约吗？','If you\'re willing — does your body keep its monthly appointment on time?']
+};
+</script>
+
+<script>
+/* ============================================================
+   证型详情库：每个证型的五维解读
+   tcm 中医病机 | west 西医关联 | psy 心理侧写
+   nutri 营养处方 | move 运动康复 | life 生活调摄
+   ============================================================ */
+const PATTERNS = {
+qi:{name:'气虚',eng:'QI DEFICIENCY',organ:'脾肺',one:'气如电量：生成不足、消耗过度，身体进入低功耗模式。',
+ tcm:'「气」是身体的动力系统，主推动、温煦、固摄。脾为气血生化之源，肺主一身之气。久病、过劳、饮食不节或久坐少动，都会耗伤脾肺之气，出现疲乏、自汗、气短、易感冒等「低电量」表现。',
+ west:'对应现代医学的慢性疲劳状态、线粒体能量代谢效率下降、免疫功能偏低（反复上呼吸道感染）、低血压倾向、胃肠动力不足。需鉴别贫血、甲状腺功能减退、睡眠呼吸暂停等器质性问题。',
+ psy:'心理画像常见「心有余而力不足」：动机尚存但启动困难，容易因疲惫而回避社交与决策。长期气虚者易发展出习得性无助，需要用小目标、小胜利重建效能感，而非打鸡血式自我逼迫。',
+ nutri:['规律三餐，早餐必吃——脾喜规律，饥饱无常最伤脾气','优质蛋白每餐一掌：蛋、鱼、禽、豆制品','黄芪、山药、莲子、小米等药食同源可常备','减少生冷：冰饮冷食会进一步削弱脾的运化火力','少食多餐优于暴饮暴食，七分饱为宜'],
+ move:['从低强度有氧起步：快走、八段锦、太极，每周 3-5 次，每次 20-40 分钟','避免大汗淋漓——「汗为心之液」，气虚者大汗更伤气','加入轻阻力训练（弹力带、自重）逐步提升肌肉对能量的利用效率','运动后疲劳若持续超过 2 小时，说明强度超标，下次减半'],
+ life:['固定起床时间，顺应阳气升发','午后可小憩 20 分钟（午时养心）','工作每 45 分钟起身活动，避免久坐耗气']},
+
+xue:{name:'血虚',eng:'BLOOD DEFICIENCY',organ:'心肝',one:'血是身体的营养运输网：血量不足，末端与神明先失养。',
+ tcm:'血主濡养，藏神。肝藏血、心主血。失血、脾胃虚弱生化不足、长期熬夜或思虑过度均可耗血。血虚则面色无华、头晕眼花、心悸失眠、手足发麻、经量少色淡。「血不养神」则眠浅多梦。',
+ west:'首要鉴别缺铁性贫血、维生素 B12 / 叶酸缺乏（尤其经期量多、素食、胃肠吸收差者）。也与低血容量、体位性低血压、末梢循环灌注不足相关。长期血虚状态可影响认知速度与情绪稳定性。',
+ psy:'血虚者常见「背景性焦虑」：心神失养，像手机信号只有一格——容易慌、容易惊醒、注意力难以锚定。心理学上对应安全感不足的高警觉状态，需要稳定节律与身体安抚（如正念身体扫描）来「充值」。',
+ nutri:['血红素铁优先：红肉、动物血、肝脏（每周 1-2 次）','铁 + 维生素 C 同餐吸收率倍增（如牛肉配彩椒）','浓茶咖啡与正餐间隔 1 小时以上，避免抑制铁吸收','红枣、桂圆、桑葚、黑芝麻可作日常食养','长期素食者建议检测铁蛋白与 B12'],
+ move:['中等强度为主：瑜伽、普拉提、快走，避免过度训练（过量运动进一步耗血）','加入舒缓的拉伸与呼吸练习，改善末梢循环','避免空腹晨练与长时间高强度间歇','运动前后补足水分与碳水，防头晕'],
+ life:['23 点前入睡——「人卧则血归于肝」，熬夜是血虚最大漏口','用眼一小时远眺片刻，「久视伤血」','经期避免剧烈运动与寒凉']},
+
+yin:{name:'阴虚',eng:'YIN DEFICIENCY',organ:'肾肺',one:'阴是身体的冷却与润滑系统：水少了，虚火就往上窜。',
+ tcm:'阴主滋润、宁静、制约阳气。肾阴为一身阴液之本。长期熬夜、思虑过度、辛辣温燥、久病耗伤，都会让「水」亏「火」旺：手足心热、午后潮热、盗汗、口干咽燥、心烦失眠、舌红少苔。此为「虚热」，非实火。',
+ west:'对应交感神经长期偏亢、基础代谢率偏高、慢性脱水倾向；女性需关注围绝经期激素波动，长期压力导致的皮质醇节律紊乱也呈类似表现。鉴别甲亢、糖尿病（口干多饮消瘦）等。',
+ psy:'阴虚者的心理画像：内在「散热不良」——外表可以温和，内里烦躁、耐心阈值低、对声音光线敏感。高敏感人格（HSP）与此体质高度重叠。需要主动降噪、降刺激，给神经系统「物理降温」。',
+ nutri:['滋阴生津食材：银耳、百合、梨、桑葚、枸杞、鸭肉、牡蛎','少量多次饮水，避免一次牛饮','严格限制辛辣、烧烤、烈酒——都是「火上浇油」','晚餐七分饱，过饱生内热','咖啡限量每日一杯以内，下午后不喝'],
+ move:['选择「润」的运动：游泳、阴瑜伽、散步、拉伸','避免高温瑜伽、暴汗燃脂课——汗多更伤阴','最佳运动时段为清晨或傍晚，避开正午','睡前 1 小时做 10 分钟舒缓拉伸 + 腹式呼吸，引火下行'],
+ life:['熬夜是阴虚第一杀手，23 点前躺下比任何补品都有效','午后潮热明显时可静坐在阴凉通风处','减少夜间屏幕强光刺激，助阴分收藏']},
+
+yang:{name:'阳虚',eng:'YANG DEFICIENCY',organ:'肾脾',one:'阳是身体的炉膛：火力不足，全身进入「低温运行」。',
+ tcm:'阳主温煦、推动、气化。肾阳为一身阳气之根。先天不足、久居寒湿、过食生冷、年老体衰均可伤阳。表现为畏寒肢冷、精神萎靡、腰膝冷痛、夜尿频多、大便稀溏、舌淡胖有齿痕。',
+ west:'对应基础代谢率偏低、体温调节偏冷、循环偏慢；需鉴别甲状腺功能减退（怕冷+乏力+体重增加务必查甲功）、肾上腺疲劳样状态、低血压。女性痛经遇冷加重也属此类倾向。',
+ psy:'阳虚者的心理画像：情绪「低功耗」——不是激烈的痛苦，而是淡淡的提不起劲、晨重暮轻、冬天更明显。与季节性情绪失调（SAD）、轻度抑郁状态有交集。光照、温热、社会连接是它的「柴火」。',
+ nutri:['吃「热」的：温热熟食为主，晨起一杯温水','适量温阳食材：生姜、羊肉、韭菜、核桃、肉桂','戒生冷——冰饮、生食沙拉是阳虚者的「灭火器」','蛋白质要够：产热效应最高的营养素','避免盲目节食，低热量摄入会进一步压低代谢'],
+ move:['力量训练优先：肌肉是身体的「锅炉」，增肌即增火','日出后运动，借天阳补人阳；避免清晨寒风中锻炼','微微汗出即止，切忌大汗亡阳','八段锦「两手攀足固肾腰」、站桩都是对症之选'],
+ life:['注意腰腹、足部保暖，「寒从脚起」','晨起晒太阳 10-15 分钟，同步生物钟并补阳','泡脚（40℃ 左右，15-20 分钟）是简单有效的日常温阳法']},
+
+yu:{name:'肝郁气滞',eng:'QI STAGNATION',organ:'肝胆',one:'气该流动而不流动：情绪堵住的地方，身体最先知道。',
+ tcm:'肝主疏泄，调畅气机与情志。长期情绪压抑、压力、久坐不动，使肝气郁结：胸闷、善太息（爱叹气）、胁胀、烦躁易怒、咽中如有物（梅核气）、女性经前胀痛。郁久可化火、克脾、成瘀。',
+ west:'对应慢性压力下的 HPA 轴（下丘脑-垂体-肾上腺）持续激活、自主神经功能紊乱；与肠易激综合征（IBS）、紧张性头痛、经前综合征（PMS）、功能性消化不良高度相关。身心医学称之为「躯体化压力反应」。',
+ psy:'这是最「心理」的一个证型。画像是：责任重、自我要求高、情绪不轻易示人，「我应该」多过「我想要」。认知行为视角下的反刍思维与情绪压抑是其核心。出路不是「想开点」，而是给情绪建立出口：表达、书写、身体释放。',
+ nutri:['规律进食——肝气犯脾时，饥一顿饱一顿会加重腹胀','玫瑰花、陈皮、佛手泡水，芳香疏肝','镁是「抗压矿物质」：深绿叶菜、坚果、香蕉','严格限酒——借酒疏肝是恶性循环','咖啡因减量，它模拟并放大焦虑的生理反应'],
+ move:['有氧「泄压」：跑步、骑行、舞蹈，每周 3 次以上，让压力激素有代谢出口','扩胸、开肩、侧腰拉伸——舒展两胁即疏肝','呼吸训练：4-7-8 呼吸法，直接下调交感神经','团体运动（球类、团课）额外提供社会连接这一味「药」'],
+ life:['每天留 15 分钟「无目的时间」，不产出、不优化','把烦心事写下来（书写暴露疗法有充分证据）','培养一个纯粹因为喜欢的爱好，给「疏泄」一个通道']},
+
+pi:{name:'脾虚湿盛',eng:'SPLEEN DEFICIENCY',organ:'脾胃',one:'脾是身体的中央厨房：火弱了，食物变成「湿气」堆积。',
+ tcm:'脾主运化水谷与水湿。饮食不节、生冷甜腻、思虑过度、久坐伤脾，运化失职则水湿内停：食欲不振、腹胀、便溏黏腻、身体困重、头重如裹、舌胖有齿痕、苔腻。「脾为生痰之源」。',
+ west:'对应胃肠动力不足、肠道菌群失衡倾向、餐后嗜睡（血糖波动大）、轻度胰岛素抵抗前期、组织间隙水液代谢偏慢（晨起浮肿）。与「肠脑轴」功能紊乱密切相关。',
+ psy:'「思伤脾」——反刍思维、过度思虑者常见此证；反过来脾虚湿盛又带来脑雾、昏沉、决断力下降，形成「想得多→做得少→更焦虑」的循环。行为激活（先动起来再完善想法）是破解钥匙。',
+ nutri:['减三样：添加糖、精制碳水、过量乳制品——湿气三巨头','健脾四宝：山药、薏米（炒）、茯苓、白扁豆','吃热的、吃熟的：生冷直接消耗脾阳','晚餐减量提前，给脾胃夜间休息时间','细嚼慢咽，每餐 20 分钟以上'],
+ move:['饭后百步走：餐后 15-20 分钟快走，直接改善血糖与运化','激活核心：平板支撑、死虫式，中医讲「久坐伤肉（脾主肌肉）」','中等强度有氧至微微汗出，帮助「化湿」','避免久坐超过 1 小时——设闹钟起身'],
+ life:['早餐吃好，辰时（7-9点）胃经当令','思虑重时先散步 10 分钟再想问题','保持居所干燥通风，外湿会引动内湿']},
+
+tan:{name:'痰湿',eng:'PHLEGM-DAMPNESS',organ:'脾肺',one:'湿聚成痰：身体的「代谢库存」开始积压。',
+ tcm:'痰湿是脾虚湿盛的进阶版——水湿停聚日久，凝结成「痰」（广义的痰，包括无形之痰）。表现为形体肥胖松软、胸闷痰多、头昏沉、嗜睡、口黏、苔厚腻、大便黏。痰湿上泛则晕，阻络则麻，蒙蔽清窍则困。',
+ west:'直接对应代谢综合征谱系：中心性肥胖、血脂异常、脂肪肝倾向、血糖调节受损、睡眠呼吸暂停（OSA）风险。现代医学视之为慢性低度炎症与能量正平衡状态。',
+ psy:'痰湿者心理画像：动机「黏滞」——明知该动却启动困难，昏沉感让一切显得费力。这不是懒惰，是生理性的低唤醒。策略是「先身体后意志」：用外部节律（固定课表、运动搭子）替代内在驱动力。',
+ nutri:['热量平衡是第一原则：制造温和缺口（每日 300-500 kcal）','膳食纤维翻倍：蔬菜占餐盘一半，全谷物替代精米面','戒掉含糖饮料——痰湿体质最坏的朋友','晚餐早且少，睡前 3 小时不进食','烹饪方式：蒸煮炖替代煎炸'],
+ move:['Zone 2 有氧（能说话的强度）每周 150 分钟以上：快走、椭圆机、游泳','抗阻训练每周 2-3 次，保住并增加肌肉量','NEAT（日常非运动消耗）比健身房更重要：能站不坐、能走不车','打鼾明显者应评估睡眠呼吸暂停——先睡好再减脂'],
+ life:['固定三餐时间，避免深夜进食','沐浴后干刷或按摩四肢，促进淋巴回流','定期监测腰围（男<90cm，女<85cm）比体重更有意义']},
+
+re:{name:'湿热',eng:'DAMP-HEAT',organ:'脾胃肝胆',one:'湿与热勾结：身体像一间又闷又潮还开着暖气的屋子。',
+ tcm:'湿与热合，如油入面，难解难分。过食肥甘酒酪、辛辣厚味，或外感湿热，蕴结体内：口苦口黏、面油多易长痘、小便黄赤、大便黏臭、阴部潮湿、苔黄腻、身重困倦却烦躁。在肝胆则胁痛目赤，在膀胱则淋浊，在肌肤则疮疹。',
+ west:'对应慢性低度炎症状态：痤疮（尤其成人痘）、脂溢性皮炎、肠易激/肠道菌群失调、泌尿生殖系统反复感染倾向、高尿酸风险。酒精与高果糖摄入是现代医学确认的两大推手。',
+ psy:'湿热者的心理画像：烦躁与黏滞并存——心里有一团散不掉的闷火，急但提不起效率。对环境的杂乱、闷热、噪音耐受度低。清爽的环境、断舍离式的整理，对这个证型有切实的心理疗效。',
+ nutri:['戒酒是第一处方——酒是湿热之源，没有之一','减油减糖减辣，火锅烧烤频率降到每月 1-2 次','利湿清热食材：冬瓜、绿豆、赤小豆、苦瓜、荷叶','足量饮水（1500-2000ml），帮助湿热从小便出','高果糖水果（荔枝、榴莲、芒果）限量'],
+ move:['规律出汗是排湿热的通道：游泳、跑步、球类','汗出后及时擦干换衣，避免湿热反吸','游泳尤其适合——水中运动天然「清热」','避免在高温高湿环境（闷热健身房）长时间训练'],
+ life:['居所除湿，湿度控制在 40-60%','贴身衣物选透气材质，保持皮肤干爽','熬夜会加重湿热上炎（爆痘、口疮），作息是底层解药']},
+
+yux:{name:'血瘀',eng:'BLOOD STASIS',organ:'心肝',one:'血行不畅：身体的河流出现了淤塞段。',
+ tcm:'「不通则痛」。气滞、寒凝、气虚、外伤均可致血瘀：固定刺痛（夜间加重）、面色晦暗、唇甲色暗、舌紫有瘀点、痛经血块、肌肤甲错、某些部位麻木。瘀阻在哪里，问题就出在哪里。',
+ west:'对应微循环障碍、慢性疼痛（肌筋膜疼痛综合征）、静脉曲张倾向、纤维肌痛的部分表型；女性子宫内膜异位症/腺肌症常以血瘀表现就诊。久坐导致的局部循环淤滞是最常见的现代诱因。',
+ psy:'血瘀的心理画像常与「卡住」有关：一段没有处理完的过往、长期紧绷的身体记忆。身心医学发现慢性疼痛患者常伴情绪压抑史。身体层面的「通」（按摩、热敷、运动）常能松动心理层面的「结」。',
+ nutri:['Omega-3（深海鱼、亚麻籽）改善血液流变学','山楂、黑木耳、洋葱——温和的「活血食材」','足量饮水，血液黏稠度与饮水量直接相关','限制反式脂肪与深加工食品','红酒「活血」是伪命题，酒精弊大于利'],
+ move:['打破久坐：每 30-45 分钟起身活动 3 分钟，这是对治血瘀的第一要义','动态拉伸与筋膜放松（泡沫轴）松解「淤塞段」','全身性有氧促进循环：快走、跳绳、游泳','疼痛部位用「活动度训练」而非完全制动——在无痛范围内温柔地动'],
+ life:['注意保暖，尤其腰腹下肢——「血遇寒则凝」','睡前温水泡脚 + 小腿按摩','同一姿势（盘腿、跷二郎腿）不超过半小时']},
+
+huo:{name:'心火亢盛',eng:'HEART FIRE',organ:'心',one:'心神这盏灯烧得太旺：亮了别人，耗了自己。',
+ tcm:'心主神明。思虑劳心过度、情志化火、或过食温燥，使心火内炽：心烦失眠、入睡困难、多梦易醒、口舌生疮、面红目赤、小便短赤、舌尖红。心火亢则神不守舍——脑子停不下来，是此证的核心体验。',
+ west:'对应交感神经持续兴奋、入睡潜伏期延长、睡眠结构浅化（深睡比例低）、高觉醒状态（hyperarousal）——慢性失眠的现代医学模型。咖啡因/尼古丁摄入、睡前蓝光暴露、反刍思维是确认的放大器。',
+ psy:'画像：高速运转的大脑，停不下来的内心独白，「躺下即开会」。常与广泛性焦虑、高压职业状态并存。认知层面需要「心理下班」仪式；生理层面需要降低核心体温、减少交感输入。CBT-I（失眠认知行为疗法）是循证首选。',
+ nutri:['咖啡因半衰期约 5-6 小时：下午 2 点后不碰咖啡浓茶','晚餐避免过饱与辛辣——胃不和则卧不安','莲子心、淡竹叶、麦冬泡水，清心除烦','睡前避免酒精——它能催眠但会粉碎后半夜睡眠','色氨酸食材（牛奶、香蕉、燕麦）可适量晚餐用'],
+ move:['白天充分运动（尤其户外有氧）制造「睡眠压力」','但睡前 3 小时避免剧烈运动——核心体温升高会延迟入睡','睡前程序：渐进式肌肉放松、4-7-8 呼吸、身体扫描冥想','傍晚散步 20 分钟，给神经系统「降挡」'],
+ life:['建立固定睡前仪式：调暗灯光、远离屏幕、温水沐足','床只用于睡眠——躺 20 分钟睡不着就起身去暗处','写「焦虑清单」：睡前把担心的事倒在纸上，给大脑「存档」']}
+};
+
+/* 六维雷达的含义说明 */
+const DIMS = [
+ ['气血能量','身体的总电量与输送能力'],
+ ['脾胃运化','消化、吸收与能量转化效率'],
+ ['情志平衡','情绪流动与压力代谢能力'],
+ ['睡眠修复','夜间修复系统的完整度'],
+ ['代谢清净','身体清除代谢废物的能力'],
+ ['筋骨活络','循环通畅与身体活动度']
+];
+
+/* ============================================================
+   药茶（含配方剂量）· 生活习惯调整 · 疗养方式
+   tea: {n 方名, f 配方剂量, m 制法, w 饮法与注意}
+   剂量均为成人日常调理量级，非处方
+   ============================================================ */
+const TEA = {
+qi:[
+ {n:'黄芪红枣茶',f:'黄芪 10g、红枣 3 枚（掰开去核）、枸杞 6g',m:'加 500ml 水，大火煮开转小火 15 分钟，代茶温饮',w:'每日 1 剂分上下午饮完；连饮 2 周停 3 天；感冒发热、咽痛上火时停服'},
+ {n:'党参麦冬茶（生脉饮思路）',f:'党参 6g、麦冬 6g、五味子 3g',m:'沸水 400ml 焖泡 20 分钟，可回冲一次',w:'午后疲劳时饮用最佳；气短多汗、易疲劳者尤宜'}],
+xue:[
+ {n:'桂圆红枣茶',f:'桂圆肉 6g、红枣 4 枚、枸杞 6g、红糖 10g',m:'加 500ml 水煮 15 分钟',w:'下午 3-5 点饮用；感冒时暂停；易上火者桂圆减半'},
+ {n:'桑葚枸杞茶',f:'桑葚干 10g、枸杞 8g、红枣 2 枚',m:'沸水焖泡 15 分钟，桑葚可嚼食',w:'每日 1 剂；大便稀溏者减量'}],
+yin:[
+ {n:'百合麦冬饮',f:'百合 10g、麦冬 8g、冰糖少许',m:'加 500ml 水煮 20 分钟，或加银耳半朵同炖',w:'下午至傍晚温饮；咽干明显可加梨片同煮'},
+ {n:'桑葚枸杞菊花茶',f:'桑葚干 10g、枸杞 6g、杭白菊 3g',m:'沸水焖泡 15 分钟',w:'每日 1 剂；体质偏寒、易腹泻者慎用'}],
+yang:[
+ {n:'生姜红糖茶',f:'生姜 3-5 片、红糖 15g、红枣 3 枚',m:'加 400ml 水煮 10 分钟，晨起趁热温服',w:'早晨饮用顺应阳气升发；晚上不喝以免扰眠'},
+ {n:'桂圆肉桂茶',f:'桂圆肉 6g、肉桂 1-2g、枸杞 5g',m:'沸水焖泡 20 分钟',w:'畏寒明显时每日 1 剂；口干上火、阴虚内热者不宜'}],
+yu:[
+ {n:'玫瑰陈皮茶',f:'玫瑰花 5g、陈皮 3g、佛手 3g',m:'沸水焖泡 10 分钟，香气溢出即饮',w:'情绪闷堵时随时泡饮；女性经前一周每日 1 剂'},
+ {n:'菊花薄荷茶（郁而化热时用）',f:'菊花 4g、薄荷 2g、枸杞 6g',m:'沸水焖泡 8 分钟，薄荷后下',w:'烦躁口苦时用；胃寒者薄荷减半'}],
+pi:[
+ {n:'茯苓薏米茶',f:'茯苓 10g、炒薏苡仁 15g、陈皮 3g',m:'薏米先泡 1 小时，加 600ml 水煮 25 分钟',w:'每日 1 剂代水饮；孕妇去薏米'},
+ {n:'山药莲子芡实茶',f:'山药干 10g、莲子 8g、芡实 8g',m:'加 500ml 水煮 25 分钟，料可同食',w:'便溏明显时每日 1 剂；便秘者少用'}],
+tan:[
+ {n:'荷叶山楂茶',f:'荷叶 6g、山楂 8g、陈皮 3g',m:'加 500ml 水煮 12 分钟',w:'餐后 1 小时饮用；空腹不喝；胃酸过多者山楂减半'},
+ {n:'冬瓜皮玉米须茶',f:'冬瓜皮 10g（或冬瓜连皮 200g）、玉米须 10g',m:'加 800ml 水煮 20 分钟，代水饮',w:'身体困重、晨起浮肿时连饮 3-5 天'}],
+re:[
+ {n:'金银花菊花茶',f:'金银花 5g、菊花 4g、蒲公英 5g、生甘草 2g',m:'沸水焖泡 12 分钟',w:'长痘、口苦明显时每日 1 剂，连用不超过 1 周；脾胃虚寒腹泻者慎用'},
+ {n:'绿豆薏米汤',f:'绿豆 20g、生薏苡仁 20g',m:'浸泡后加水煮 30 分钟至开花，取汤饮',w:'夏季或湿热重时每周 3-4 次；不加糖或仅少量冰糖'}],
+yux:[
+ {n:'山楂玫瑰红糖茶',f:'山楂 10g、玫瑰花 4g、红糖 10g',m:'加 500ml 水煮 12 分钟',w:'经前 3-5 天开始饮用；月经量大者及孕期禁用活血类茶饮'},
+ {n:'黑豆红枣茶',f:'黑豆 15g（炒香）、红枣 3 枚、枸杞 5g',m:'加 600ml 水煮 25 分钟，豆可同食',w:'日常每周 3-4 次'}],
+huo:[
+ {n:'莲子心麦冬茶',f:'莲子心 2g、麦冬 8g、淡竹叶 3g',m:'沸水焖泡 15 分钟',w:'心烦口疮明显时下午饮用；莲子心味苦勿超 3g；脾胃虚寒者慎用'},
+ {n:'酸枣仁百合茶',f:'炒酸枣仁 10g（捣碎）、百合 10g、茯苓 6g',m:'加 500ml 水煮 20 分钟',w:'睡前 2 小时温服助眠；连续饮用不超过 2 周'}]
+};
+
+const HABIT = {
+qi:['把一天最难的事排在上午 9-11 点（脾经当令、精力最好）','工作每 45 分钟设一次起身提醒，倒杯温水','每周留半天完全不安排任务的「充电日」','说话多的职业（教师、销售等）学会「省气」：放慢语速、缩短连续发言'],
+xue:['设 22:30 的就寝提醒，躺下后不刷视频','经期后一周是养血黄金期，红肉与深色蔬菜加量','避免熬夜后的「补觉式」懒觉，保持起床时间固定','长时间用眼每 40 分钟远眺 6 米外 20 秒'],
+yin:['卧室温度调到 18-22℃、湿度 50-60%，给身体「降温」','辛辣火锅烧烤降到每月 1-2 次，并配足量蔬菜','下午 3 点后不喝咖啡浓茶，改喝温水或淡麦冬茶','睡前 1 小时把顶灯换成暖光小灯——光线暗下来，火才降得下'],
+yang:['床头备一件外套，起夜时披上，避免寒气直侵','睡前 40℃ 温水泡脚 15-20 分钟，做成固定仪式','冰箱取出的食物放到室温或加热后再吃','早晨拉开窗帘晒 10 分钟太阳，同步生物钟'],
+yu:['给情绪设「出口时段」：每天 15 分钟写下或说出真实的烦躁','把「应该」清单减半，换成「想要」清单','每周至少一次与不评判你的朋友见面或通话','情绪堵时看 3 分钟绿色植物或窗外远景'],
+pi:['早餐在 7-9 点（胃经当令）吃完，且吃热的','晚餐七分饱，睡前 3 小时不再进食','外卖备注「少油少盐」，含糖饮料换成无糖茶','梅雨季用除湿机或干燥剂，保持居所干爽'],
+tan:['冰箱贴一张「餐盘公式」：一半蔬菜、1/4 蛋白、1/4 主食','把含糖饮品从「每天」降级为「每周仪式」','换用小容量餐盘，从餐具上控制份量','每周固定一天晨起称重并记录腰围'],
+re:['酒局能推则推；不得不喝时先吃主食、席间多喝水','厨房改用蒸、煮、炖，煎炸留给偶尔','贴身衣物选纯棉透气，出汗后及时更换','湿热天回家先温水洗脸，减少皮肤油腻堆积'],
+yux:['设每 30-45 分钟的起身闹钟，哪怕只走 2 分钟','跷二郎腿、盘腿坐改为双脚平放触地','天冷出门护好腰腹与脚踝——血遇寒则凝','慢性酸痛部位每天热敷 15 分钟（急性损伤与经期除外）'],
+huo:['下午 2 点后咖啡因归零，改喝温水','睡前 1 小时手机移出卧室或开启灰度模式','卧室保持黑暗、安静、凉爽（18-22℃）','半夜醒来不看时间，避免「失眠焦虑」自我强化']
+};
+
+const HEAL = {
+qi:['艾灸足三里、气海、关元，每穴 10 分钟，隔日一次（孕妇与实热者忌）','上午阳光柔和时晒背 15 分钟','腹式呼吸：吸气鼓腹 4 秒、呼气 6 秒，每日 3 组','安排几日「低刺激疗养」：安静自然环境、减少信息输入'],
+xue:['艾灸血海、三阴交，每穴 8-10 分钟，隔日一次（经期暂停）','睡前温水泡脚 15 分钟，水位没过脚踝上三寸（三阴交）','每日 10 分钟正念身体扫描——养血先养神','头皮指压按摩 3 分钟，改善头部供血'],
+yin:['傍晚在公园或水边散步 30 分钟，借自然之阴','阴瑜伽或静坐冥想 15-20 分钟，躁动时加练','按揉太溪、三阴交穴，每穴 2 分钟','足浴水温 38-40℃ 即可，避免过烫大汗更伤阴'],
+yang:['艾灸是阳虚首选：关元、命门、足三里，每穴 10-15 分钟','温泉或热水浴每周 1-2 次，微微汗出即止','晴天背对太阳晒 20 分钟（晒背补阳）','晨起站桩 5-10 分钟，循序渐进'],
+yu:['「森林浴」：每月至少一次在林间慢走 1-2 小时','按揉太冲穴（足背第一、二跖骨间凹陷），每侧 2 分钟','柑橘调香薰（甜橙、佛手柑）扩香 30 分钟','情绪积压严重时，寻求心理咨询是强者的选择'],
+pi:['艾灸中脘、足三里、丰隆，每穴 10 分钟','饭后半小时顺时针揉腹 100 圈','泡脚至微微汗出，帮助运化水湿','四神汤（山药、莲子、芡实、茯苓）炖排骨，每周一次食疗'],
+tan:['背部膀胱经刮痧或走罐，2-3 周一次（由专业人员操作）','运动微微汗出后立刻擦干换衣，勿当风受凉','早晚腹式呼吸 5 分钟，推动气机运行','每月记录腰围与体脂趋势，用数据代替焦虑'],
+re:['游泳是首选疗养：水中散热，每周 2-3 次','专业刮痧/拔罐清热利湿，每 2 周一次','每日饮水 1500-2000ml，少量多次','皮肤温和清洁，避免过度去油反伤屏障'],
+yux:['泡沫轴放松大腿与背部筋膜，每部位 1-2 分钟','艾灸血海、膈俞，或热水袋隔衣温敷痛点防烫','太极、八段锦等「行气活血」的缓运动最对证','慢性疼痛可寻求专业推拿理疗'],
+huo:['睡前 10 分钟身体扫描冥想或 4-7-8 呼吸','傍晚散步 20 分钟给神经「降挡」，不看手机','温水沐足 15 分钟，引火下行','听舒缓音乐或白噪音助眠']
+};
+
+/* 并入证型库 */
+for(const k in TEA){ PATTERNS[k].tea=TEA[k]; PATTERNS[k].habit=HABIT[k]; PATTERNS[k].heal=HEAL[k]; }
+
+/* 药茶通用提示 */
+const TEA_NOTE='※ 以上剂量为成人日常调理量级，非处方。孕期、哺乳期、慢性病患者及正在服药者请先咨询中医师；感冒发热、经期等特殊时期遵医嘱调整；同一款茶连饮不宜超过 2 周。';
+const TEA_NOTE_EN='* Adult wellness-level dosages, not prescriptions. Consult a practitioner if pregnant, breastfeeding, chronically ill or on medication; pause during colds/fever; rotate teas every 2 weeks.';
+
+/* 五行 & 维度英文 */
+const EL_EN={'木':'Wood','火':'Fire','土':'Earth','金':'Metal','水':'Water'};
+const DIMS_EN=[['Vitality','Total energy & delivery'],['Digestion','Metabolic conversion'],['Emotion','Stress metabolism'],['Sleep','Nightly repair'],['Detox','Waste clearance'],['Mobility','Circulation & flexibility']];
+
+/* ---------- 证型英文版（精炼） ---------- */
+const PATTERNS_EN = {
+qi:{name:'Qi Deficiency',organ:'Spleen & Lung',one:'Qi is battery charge: under-produced and over-drained, the body runs on low-power mode.',
+ tcm:'Qi drives, warms and protects. Overwork, irregular meals and prolonged sitting weaken Spleen and Lung qi, causing fatigue, spontaneous sweating, shortness of breath and frequent colds.',
+ west:'Maps to chronic fatigue states, low mitochondrial efficiency, weakened immunity and low gastrointestinal motility. Rule out anemia, hypothyroidism and sleep apnea.',
+ psy:'Motivation exists but ignition fails. Long-term low qi breeds learned helplessness — rebuild self-efficacy with small wins, not self-pressure.',
+ nutri:['Three regular meals; never skip breakfast','A palm of quality protein per meal: eggs, fish, poultry, tofu','Astragalus, Chinese yam, lotus seed, millet as daily staples'],
+ tea:[{n:'Astragalus & Red Date Tea',f:'Astragalus 10g, red dates 3 (pitted), goji 6g',m:'Simmer in 500ml water for 15 min; drink warm',w:'1 dose daily for 2 weeks, then 3 days off; stop during colds or fever'},
+      {n:'Codonopsis & Ophiopogon Tea',f:'Codonopsis 6g, ophiopogon 6g, schisandra 3g',m:'Steep in 400ml boiling water for 20 min',w:'Best in the afternoon slump'}],
+ move:['Start low-intensity: brisk walks, Baduanjin, tai chi, 20-40 min','Avoid drenching sweats — they drain qi further','Light resistance bands to rebuild muscle'],
+ habit:['Schedule hardest tasks for 9-11 a.m. (peak spleen time)','Stand up every 45 minutes; keep a half-day weekly with zero tasks','Speak slower if your job is talk-heavy'],
+ heal:['Moxibustion on ST36, CV6, CV4 — 10 min each, every other day','Morning sun on your back, 15 min','Diaphragmatic breathing: inhale 4s, exhale 6s, 3 sets daily']},
+xue:{name:'Blood Deficiency',organ:'Heart & Liver',one:'Blood is the delivery network: when volume drops, the periphery and the mind go unfed.',
+ tcm:'Blood nourishes and houses the mind. Poor production, blood loss, late nights and overthinking drain it — causing dizziness, palpitations, light sleep and scanty pale periods.',
+ west:'First rule out iron/B12/folate deficiency anemia, low circulating volume and orthostatic hypotension. Chronic deficiency slows cognition and destabilizes mood.',
+ psy:'A background hum of anxiety — the mind under-nourished feels like a phone on one bar of signal. Stability and rhythm are the recharge.',
+ nutri:['Heme iron first: red meat, liver 1-2x weekly','Pair iron with vitamin C for absorption','Keep tea/coffee 1 hour away from meals'],
+ tea:[{n:'Longan & Red Date Tea',f:'Longan 6g, red dates 4, goji 6g, brown sugar 10g',m:'Simmer 500ml for 15 min',w:'Drink 3-5 p.m.; pause during colds'},
+      {n:'Mulberry & Goji Tea',f:'Dried mulberry 10g, goji 8g, red dates 2',m:'Steep 15 min; eat the mulberries',w:'Daily; reduce if stools loosen'}],
+ move:['Moderate intensity only: yoga, Pilates, brisk walks','Avoid overtraining — it further drains blood','Never fast before morning workouts'],
+ habit:['Lights out by 23:00 — blood returns to the liver at night','Every 40 min of screens, look 6m away for 20s','Post-period week: double down on iron-rich food'],
+ heal:['Moxibustion SP10 & SP6, 8-10 min each (pause during period)','Warm foot soak 15 min before bed','10 min body-scan meditation daily']},
+yin:{name:'Yin Deficiency',organ:'Kidney & Lung',one:'Yin is the cooling system: when fluid runs low, empty heat flares upward.',
+ tcm:'Yin moistens, calms and anchors yang. Late nights, worry and spicy food deplete it — hot palms, afternoon flushing, night sweats, dry mouth, vexed insomnia.',
+ west:'Maps to sympathetic overdrive, perimenopausal fluctuation and cortisol rhythm disruption. Rule out hyperthyroidism and diabetes.',
+ psy:'Poor internal heat dissipation: gentle outside, irritable inside, low threshold for noise and light. Overlaps with high sensitivity (HSP).',
+ nutri:['Yin-nourishing foods: tremella, lily bulb, pear, mulberry, duck','Sip water across the day','Strictly limit chili, BBQ and hard liquor'],
+ tea:[{n:'Lily & Ophiopogon Drink',f:'Lily bulb 10g, ophiopogon 8g, rock sugar to taste',m:'Simmer 500ml for 20 min, or stew with tremella',w:'Warm, afternoon to evening'},
+      {n:'Mulberry Goji Chrysanthemum Tea',f:'Mulberry 10g, goji 6g, chamomile-type chrysanthemum 3g',m:'Steep 15 min',w:'Daily; avoid if cold-prone with loose stools'}],
+ move:['Choose "moist" sports: swimming, yin yoga, stretching','Avoid hot yoga and sweat-marathons','Exercise early morning or dusk, never midday'],
+ habit:['Bedroom at 18-22°C, 50-60% humidity','No coffee or strong tea after 3 p.m.','Dim warm lamps one hour before bed'],
+ heal:['30-min evening walks near water or trees','Massage KI3 & SP6, 2 min each','Foot soak at only 38-40°C — avoid heavy sweating']},
+yang:{name:'Yang Deficiency',organ:'Kidney & Spleen',one:'Yang is the furnace: low fire, and the whole body runs cold.',
+ tcm:'Yang warms, moves and transforms. Its root is kidney yang. Cold environments, raw cold food and aging weaken it — chilliness, low spirit, cold back and knees, frequent night urination.',
+ west:'Low basal metabolism and slow circulation; rule out hypothyroidism (cold + fatigue + weight gain = check thyroid) and low blood pressure.',
+ psy:'Low-power mood: not sharp pain but flatness, worse in mornings and winter. Overlaps with seasonal affective patterns. Light, warmth and people are its firewood.',
+ nutri:['Warm, cooked food only; warm water on waking','Ginger, lamb, leek, walnut, cinnamon in moderation','Adequate protein — the most thermogenic nutrient'],
+ tea:[{n:'Ginger & Brown Sugar Tea',f:'Ginger 3-5 slices, brown sugar 15g, red dates 3',m:'Simmer 400ml for 10 min; drink warm in the morning',w:'Mornings only — not at night'},
+      {n:'Longan & Cinnamon Tea',f:'Longan 6g, cinnamon 1-2g, goji 5g',m:'Steep 20 min',w:'Daily when chilled; avoid if dry-mouthed or heat-prone'}],
+ move:['Strength training first — muscle is the boiler','Exercise after sunrise; avoid cold dawn wind','Light sweat only; never drench'],
+ habit:['Keep waist and feet warm; jacket ready for night trips','40°C foot soak 15-20 min before bed, as ritual','10 min morning sunlight to set your clock'],
+ heal:['Moxibustion is first choice: CV4, GV4, ST36, 10-15 min each','Hot spring or warm bath 1-2x weekly','Sun your back 20 min on clear days']},
+yu:{name:'Qi Stagnation',organ:'Liver & Gallbladder',one:'Qi must flow: where emotions jam, the body keeps the score.',
+ tcm:'The liver governs free flow of qi and emotion. Suppressed feelings and sitting stiffen it — chest tightness, sighing, rib-side distension, irritability, plum-pit throat.',
+ west:'Maps to chronic HPA-axis activation and autonomic dysregulation; strongly linked with IBS, tension headaches, PMS and functional dyspepsia.',
+ psy:'The most psychological pattern: high duty, high self-demand, feelings rarely shown. The exit is not "think positive" but channels of expression.',
+ nutri:['Regular meals — erratic eating worsens bloating','Rose, chenpi and bergamot teas','Magnesium: leafy greens, nuts, bananas'],
+ tea:[{n:'Rose & Chenpi Tea',f:'Rose 5g, dried tangerine peel 3g, finger citron 3g',m:'Steep 10 min until fragrant',w:'Anytime emotions feel stuck; daily in the premenstrual week'},
+      {n:'Chrysanthemum & Mint Tea',f:'Chrysanthemum 4g, mint 2g, goji 6g',m:'Steep 8 min, mint added last',w:'For irritable, bitter-taste days; halve mint if cold-stomached'}],
+ move:['Aerobic "venting": runs, cycling, dance 3x weekly','Chest-opening and side stretches for the rib-sides','4-7-8 breathing to downshift the sympathetic system'],
+ habit:['15 min daily of purposeless time — no output allowed','Write the worries down (expressive writing is evidence-based)','One non-judging friend meetup per week'],
+ heal:['Monthly "forest bathing" — 1-2 slow hours among trees','Massage LV3 (between 1st-2nd metatarsals), 2 min each side','Citrus aromatherapy (sweet orange, bergamot) 30 min']},
+pi:{name:'Spleen Deficiency with Dampness',organ:'Spleen & Stomach',one:'The spleen is the central kitchen: low fire turns food into damp sludge.',
+ tcm:'The spleen transforms food and fluids. Rich cold food, worry and sitting impair it — poor appetite, bloating, sticky loose stools, heaviness, scalloped tongue.',
+ west:'Low gut motility, dysbiosis tendency, post-meal glucose dips, early insulin resistance, morning puffiness. Tied to gut-brain axis dysfunction.',
+ psy:'Rumination injures the spleen; dampness then fogs thinking, feeding the loop. Behavioral activation — move first, refine later — breaks it.',
+ nutri:['Cut the trio: added sugar, refined carbs, excess dairy','Spleen four: Chinese yam, roasted job\'s tears, poria, hyacinth bean','Hot and cooked over cold and raw'],
+ tea:[{n:'Poria & Job\'s Tears Tea',f:'Poria 10g, roasted job\'s tears 15g, chenpi 3g',m:'Soak tears 1h, simmer 600ml for 25 min',w:'Daily as water; remove tears if pregnant'},
+      {n:'Yam Lotus Euryale Tea',f:'Dried yam 10g, lotus seed 8g, euryale 8g',m:'Simmer 500ml for 25 min; eat the solids',w:'Daily when stools are loose'}],
+ move:['15-20 min brisk walk right after meals','Core activation: planks, dead-bugs','Stand every hour — sitting injures the spleen'],
+ habit:['Hot breakfast within 7-9 a.m.','Dinner 70% full, nothing 3h before bed','Dehumidify your home in damp seasons'],
+ heal:['Moxibustion CV12, ST36, ST40 — 10 min each','Clockwise belly massage, 100 circles after meals','Weekly Si-Shen soup (yam, lotus, euryale, poria)']},
+tan:{name:'Phlegm-Dampness',organ:'Spleen & Lung',one:'Dampness condenses into phlegm: the body\'s metabolic inventory piles up.',
+ tcm:'The advanced stage of dampness — visible as soft central obesity, chest stuffiness, heavy head, sleepiness, sticky mouth, thick greasy coating.',
+ west:'The metabolic syndrome spectrum: central obesity, dyslipidemia, fatty liver tendency, impaired glucose regulation, OSA risk. A state of chronic low-grade inflammation.',
+ psy:'Motivation turns viscous — knowing without starting is physiological low arousal, not laziness. External rhythm beats inner willpower.',
+ nutri:['Gentle caloric deficit: 300-500 kcal/day','Double fiber: half the plate vegetables','Kill sugary drinks completely'],
+ tea:[{n:'Lotus Leaf & Hawthorn Tea',f:'Lotus leaf 6g, hawthorn 8g, chenpi 3g',m:'Simmer 500ml for 12 min',w:'1h after meals; not on empty stomach'},
+      {n:'Wax Gourd Peel & Corn Silk Tea',f:'Wax gourd peel 10g, corn silk 10g',m:'Simmer 800ml for 20 min, drink as water',w:'3-5 days when puffy and heavy'}],
+ move:['Zone-2 cardio 150+ min weekly (talk-pace)','Resistance training 2-3x weekly to keep muscle','NEAT over gym: stand more, walk more'],
+ habit:['Plate formula on the fridge: half veg, quarter protein, quarter carbs','Small plates to shrink portions','Weekly same-time weigh-in + waist log'],
+ heal:['Gua sha on the back bladder meridian, every 2-3 weeks (professional)','Dry off and change right after sweating','Track waist & body-fat trend, not anxiety']},
+re:{name:'Damp-Heat',organ:'Spleen, Liver & Gallbladder',one:'Damp plus heat: a room that is humid, stuffy, with the heater left on.',
+ tcm:'Dampness bound with heat — bitter sticky mouth, oily acne-prone skin, dark urine, sticky stools, yellow greasy coating, restless heaviness.',
+ west:'Chronic low-grade inflammation: adult acne, seborrheic dermatitis, gut dysbiosis, recurrent urogenital irritation, high uric acid risk. Alcohol and fructose are proven drivers.',
+ psy:'Irritable yet stuck — a smothered fire. Low tolerance for clutter, heat and noise. A clean, cool, decluttered space is real medicine here.',
+ nutri:['Alcohol abstinence is the first prescription','Less oil, sugar, chili; hotpot max 1-2x monthly','Hydrate 1500-2000ml daily'],
+ tea:[{n:'Honeysuckle & Chrysanthemum Tea',f:'Honeysuckle 5g, chrysanthemum 4g, dandelion 5g, licorice 2g',m:'Steep 12 min',w:'During breakouts, max 1 week; avoid if cold-stomached'},
+      {n:'Mung Bean & Job\'s Tears Soup',f:'Mung bean 20g, raw job\'s tears 20g',m:'Simmer 30 min until split; drink the broth',w:'3-4x weekly in summer or flare-ups'}],
+ move:['Regular sweating as drainage: swimming, running, ball games','Swimming is ideal — water dissipates heat','Avoid long sessions in hot humid gyms'],
+ habit:['Decline drinking events; eat before unavoidable ones','Steam, boil, stew — fry rarely','Cotton breathable underwear; change after sweating'],
+ heal:['Swimming 2-3x weekly as primary therapy','Professional gua sha / cupping every 2 weeks','Gentle skincare — over-cleansing backfires']},
+yux:{name:'Blood Stasis',organ:'Heart & Liver',one:'Blood flow jams: silted sections in the body\'s rivers.',
+ tcm:'"No flow, then pain." Stagnant qi, cold, deficiency or injury cause stasis — fixed stabbing pain worse at night, dark complexion, purple spotted tongue, clotted cramps.',
+ west:'Microcirculation impairment, myofascial pain, varicose tendency; prolonged sitting is the most common modern driver.',
+ psy:'Often paired with something "stuck" — unprocessed pasts held in a tense body. Loosening the body can loosen the knot.',
+ nutri:['Omega-3: deep-sea fish, flaxseed','Hawthorn, black fungus, onion as daily foods','Hydrate — blood viscosity tracks water intake'],
+ tea:[{n:'Hawthorn Rose Brown Sugar Tea',f:'Hawthorn 10g, rose 4g, brown sugar 10g',m:'Simmer 500ml for 12 min',w:'Start 3-5 days before period; forbidden in pregnancy & heavy flow'},
+      {n:'Black Bean & Red Date Tea',f:'Roasted black beans 15g, red dates 3, goji 5g',m:'Simmer 600ml for 25 min; eat the beans',w:'3-4x weekly'}],
+ move:['Break sitting every 30-45 min — the #1 rule','Foam rolling and dynamic stretching for jammed segments','Whole-body cardio: brisk walks, swimming, rope'],
+ habit:['Uncross legs; feet flat on the floor','Warm waist, belly and ankles in cold weather','Heat-pack chronic sore spots 15 min daily'],
+ heal:['Foam roll thighs & back, 1-2 min per zone','Moxibustion SP10 & BL17, or warm compress on pain points','Tai chi / Baduanjin — the blood-moving slow arts']},
+huo:{name:'Heart Fire',organ:'Heart',one:'The mind\'s lamp burns too bright: lighting others, draining itself.',
+ tcm:'The heart houses the mind. Overthinking and worry kindle heart fire — vexed insomnia, racing dreams, mouth ulcers, red face, scanty dark urine, red tongue tip.',
+ west:'Sympathetic overdrive, prolonged sleep latency, shallow sleep architecture — the hyperarousal model of chronic insomnia. Caffeine, late screens and rumination amplify it.',
+ psy:'A high-speed brain that won\'t stop narrating — "lie down and the meeting starts". Needs a psychological clock-out ritual plus physiological cooling. CBT-I is the evidence base.',
+ nutri:['Caffeine curfew at 2 p.m.','Light early dinners — a restless stomach ruins sleep','Skip nightcaps — alcohol fragments late-night sleep'],
+ tea:[{n:'Lotus Plumule & Ophiopogon Tea',f:'Lotus plumule 2g, ophiopogon 8g, lophatherum 3g',m:'Steep 15 min',w:'On irritable ulcer days; max 3g plumule; avoid if cold-stomached'},
+      {n:'Sour Jujube & Lily Tea',f:'Roasted sour jujube seed 10g (crushed), lily 10g, poria 6g',m:'Simmer 500ml for 20 min',w:'Warm, 2h before bed; max 2 weeks straight'}],
+ move:['Full daytime exercise builds sleep pressure','No intense workouts within 3h of bed','Evening 20-min walk to downshift'],
+ habit:['Phone out of the bedroom 1h before sleep','Dark, quiet, cool bedroom (18-22°C)','Never check the clock on night waking'],
+ heal:['10-min body scan or 4-7-8 breathing in bed','Warm foot soak 15 min to draw fire downward','Write the worry list before bed — archive the brain']}
+};
+for(const k in PATTERNS_EN){ PATTERNS[k].en = PATTERNS_EN[k]; }
+</script>
+
+<script>
+/* ============================================================
+   应用引擎：状态 · 导航 · 线索 · 评分
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const state = {
+  intake:{}, clues:[], weights:{}, pulseTruth:null, pulseAnswered:0,
+  scores:{}, dims:[], elements:{}, top:[], caseNo:''
+};
+PATTERN_KEYS.forEach(k=>state.weights[k]=0);
+
+/* ---------- 线索簿 ---------- */
+function addClue(src, txt, w){
+  state.clues.push({src, txt, w:w||{}});
+  for(const k in (w||{})) state.weights[k]+=w[k];
+  const list=$('#clueList');
+  if(list.querySelector('.clueEmpty')) list.innerHTML='';
+  const d=document.createElement('div');
+  d.className='clueItem';
+  d.innerHTML = txt.replace(/</g,'&lt;') + `<small>〔${src}〕</small>`;
+  list.prepend(d);
+}
+$('#clueToggle').onclick=()=>$('#clueBook').classList.toggle('open');
+
+/* ---------- 语言系统 ---------- */
+let LANG='zh';
+const L=(zh,en)=>LANG==='en'?en:zh;
+const EL=e=>LANG==='en'?(EL_EN[e]||e):e;
+const pName=k=>LANG==='en'&&PATTERNS[k].en?PATTERNS[k].en.name:PATTERNS[k].name;
+function applyLang(){
+  document.querySelectorAll('[data-zh]').forEach(el=>{
+    const v=el.dataset[LANG]; if(v!=null) el.innerHTML=v;
+  });
+  document.documentElement.lang = LANG==='en'?'en':'zh-CN';
+  $('#btnLang').textContent = LANG==='en'?'中文':'EN';
+  ORBS.forEach(o=>{ if(o.el) updateOrbCopy(o); });
+  if(orbTotal) updateHUD();
+  closePanel();
+}
+
+/* ---------- 导航与进度 ---------- */
+const FLOW=['screen-intro','screen-stage','screen-deduce','screen-report'];
+const STEP_LABEL={ 'screen-stage':['探案','STAGE'],'screen-deduce':['推理','DEDUCE'],'screen-report':['报告','REPORT'] };
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  document.body.classList.toggle('stage-live',id==='screen-stage');
+  window.scrollTo({top:0});
+  renderProgress(id);
+}
+function renderProgress(id){
+  const inner=$('#progressInner'); inner.innerHTML='';
+  const steps=Object.keys(STEP_LABEL);
+  const idx=FLOW.indexOf(id);
+  steps.forEach((sid,i)=>{
+    const d=document.createElement('div');
+    const si=FLOW.indexOf(sid);
+    d.className='step'+(si<idx?' done':si===idx?' now':'');
+    inner.appendChild(d);
+  });
+  const l=document.createElement('div'); l.className='lbl';
+  l.textContent = STEP_LABEL[id]? L(`第 ${idx} 步 · ${STEP_LABEL[id][0]}`, `STEP ${idx} · ${STEP_LABEL[id][1]}`) : L('医理探案','Body Profiler');
+  inner.appendChild(l);
+}
+
+/* ---------- 题目渲染（中英双语） ---------- */
+function optText(o){ return LANG==='en' ? (o[2]||o[0]) : o[0]; }
+function renderOptsSingle(container,g){
+  const og=document.createElement('div'); og.className='optGroup';
+  g.opts.forEach(opt=>{
+    const o=document.createElement('div'); o.className='opt'; o.textContent=optText(opt);
+    if(g._sel && g._sel.opt===opt) o.classList.add('sel');
+    o.onclick=()=>{
+      og.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+      o.classList.add('sel');
+      g._sel={opt, w:opt[1]};
+    };
+    og.appendChild(o);
+  });
+  container.appendChild(og);
+}
+function renderOptsMulti(container,g){
+  const og=document.createElement('div'); og.className='optGroup';
+  g.items.forEach(item=>{
+    const o=document.createElement('div'); o.className='opt'; o.textContent=optText(item);
+    if(o._on){o.classList.add('sel','multi');}
+    o.onclick=()=>{ o._on=!o._on; o.classList.toggle('sel'); o.classList.toggle('multi'); };
+    o._item=item; og.appendChild(o);
+  });
+  g._og=og; container.appendChild(og);
+}
+function collectSingle(groups, srcName){
+  groups.forEach(g=>{
+    if(g._sel) addClue(srcName, (LANG==='en'?(g.qe||g.q):g.q.split('（')[0])+' — '+optText(g._sel.opt), g._sel.w);
+  });
+}
+function collectMulti(groups, srcName){
+  groups.forEach(g=>{
+    if(!g._og) return;
+    g._og.querySelectorAll('.opt').forEach(o=>{
+      if(o._on) addClue(srcName, (LANG==='en'?g.ge:g.g.split(' ')[0])+' · '+optText(o._item), o._item[1]);
+    });
+  });
+}
+
+/* ---------- 探案舞台：光圈环绕 ---------- */
+const CATS={
+ observe:{zh:'望诊',en:'LOOK',col:'#d4af6a'},
+ listen:{zh:'闻诊',en:'LISTEN',col:'#6ad4c8'},
+ inquire:{zh:'问诊',en:'ASK',col:'#d4706a'},
+ pulse:{zh:'切诊',en:'PULSE',col:'#e9e4d6'}
+};
+let ORBS=[], orbDone=0, orbTotal=0, curOrb=null;
+let inquireGroups = Q_INQUIRE.slice();
+let toastTimer=null;
+
+function orbLabel(o){
+  if(o.cat==='pulse') return L('伸出手腕：你能辨认指下的脉象吗？','Offer your wrist: can you identify the pulse beneath your fingers?');
+  if(o.cat==='inquire') return (LANG==='en'?o.g.ge:o.g.g)+L('：近一个月，哪些信号反复出现？',': which signals have repeated in the past month?');
+  return LANG==='en'?(o.g.qe||o.g.q):o.g.q;
+}
+function updateOrbCopy(o){
+  const cat=CATS[o.cat];
+  o.el.querySelector('.orb-cat').textContent=L(cat.zh,cat.en);
+  o.el.querySelector('.orb-question').textContent=orbLabel(o);
+  o.el.querySelector('.orb-state').textContent=o.done
+    ?L('已归档 / FILED','FILED')
+    :L('点击展开 · 勘验','OPEN · INSPECT');
+}
+function syncOrbState(o){
+  o.el.classList.toggle('done',o.done);
+  positionOrbAtRest(o);
+  updateOrbCopy(o);
+}
+function showSignal(message){
+  const toast=$('#signalToast');
+  toast.textContent=message;toast.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1800);
+}
+const DESKTOP_ORB_SLOTS=[
+  [12,24],[88,24],[19,34],[81,34],[11,44],[89,44],[19,54],[81,54],[11,64],
+  [89,64],[19,74],[81,74],[11,84],[89,84],[28,14],[72,14],[50,86]
+];
+function orbAnchor(index){
+  const slot=DESKTOP_ORB_SLOTS[index]||[50,50];
+  return {x:slot[0],y:slot[1]};
+}
+function presentationAnchor(o){
+  if(innerWidth>=700)return orbAnchor(o.order);
+  return {x:o.order%2?80:20,y:12+Math.floor(o.order/2)*9.6};
+}
+function positionOrbAtRest(o){
+  const mobile=innerWidth<700;
+  const anchor=presentationAnchor(o);
+  o.sx=innerWidth*anchor.x/100;o.sy=innerHeight*anchor.y/100;
+  o.el.style.left=anchor.x+'%';o.el.style.top=anchor.y+'%';
+  o.el.style.opacity=o===curOrb?0:o.done?.28:.86;
+  o.el.style.transform=`translate(-50%,-50%) scale(${o.done?.8:(mobile?.82:.9)})`;
+  o.el.style.zIndex=o.done?12:40+o.order;
+}
+function scanClues(){
+  const rest=ORBS.filter(o=>!o.done);
+  if(!rest.length){showSignal(L('全部线索已归档','All clues filed'));return;}
+  rest.forEach(o=>{o.el.classList.remove('locating');void o.el.offsetWidth;o.el.classList.add('locating');
+    setTimeout(()=>o.el.classList.remove('locating'),1500);});
+  showSignal(L(`未勘验线索 ${rest.length} 条 · 任选其一`,`${rest.length} clues remain · pick any`));
+}
+function buildStage(){
+  ORBS=[]; orbDone=0; curOrb=null;
+  window.__stageFocus=false;
+  $('#orbLayer').innerHTML='';
+  const queues=[
+    Q_OBSERVE.map(g=>({cat:'observe',g})),
+    inquireGroups.map(g=>({cat:'inquire',g})),
+    Q_LISTEN.map(g=>({cat:'listen',g}))
+  ];
+  const longest=Math.max(...queues.map(q=>q.length));
+  for(let i=0;i<longest;i++)queues.forEach(q=>{if(q[i])ORBS.push(q[i]);});
+  ORBS.push({cat:'pulse',done:false});
+  orbTotal=ORBS.length;
+  // 线索作为 3D 标记环绕在两人四周，随镜头旋转而流动。
+  const rings=[{r:1.72,y:0.5},{r:2.12,y:1.04},{r:1.82,y:1.52}];
+  ORBS.forEach((o,i)=>{
+    const ring=i%3;
+    const a=-Math.PI/2+i*2.399963+ring*.18;
+    o.wx=Math.cos(a)*rings[ring].r; o.wy=rings[ring].y; o.wz=Math.sin(a)*rings[ring].r;
+    o.done=false;o.locked=false;o.order=i;
+    const d=document.createElement('div');
+    d.className='orb cat-'+o.cat;
+    d.innerHTML=`<i></i><div class="orb-copy"><div class="orb-meta"><span class="orb-cat"></span><code>CLUE-${String(i+1).padStart(2,'0')}</code></div><div class="orb-question"></div><div class="orb-state"></div></div>`;
+    d.onclick=e=>{e.stopPropagation();openOrb(o);};
+    $('#orbLayer').appendChild(d);
+    o.el=d;
+    syncOrbState(o);
+  });
+  $('#deduceGate').classList.remove('show');
+  updateHUD();
+  showSignal(L('线索环绕两人 · 拖动环视，点亮作答 · 两人将逐渐清晰','Clues orbit the pair · rotate, light up and answer — they sharpen with every clue'));
+}
+/* 由背景渲染循环每帧调用：同步光圈屏幕位置 */
+window.stageTick=function(project){
+  const on=$('#screen-stage').classList.contains('active');
+  $('#orbLayer').style.display=on?'':'none';
+  if(!on||!ORBS.length) return;
+  const dpr=window.__dpr||1,mobile=innerWidth<700;
+  const mX=mobile?66:118,mT=mobile?54:70,mB=mobile?46:56;
+  ORBS.forEach(o=>{
+    if(o===curOrb){o.el.style.opacity='0';return;}
+    const p=project(o.wx,o.wy,o.wz);
+    const depth=p[2];
+    let x=p[0]/dpr, y=p[1]/dpr;
+    x=Math.max(mX,Math.min(innerWidth-mX,x));
+    y=Math.max(mT,Math.min(innerHeight-mB,y));
+    o.sx=x;o.sy=y;o.depth=depth;
+    const near=Math.max(0,Math.min(1,(depth-0.65)/0.7));   // 0 远（淡为光点）· 1 近（明亮可读）
+    o.el.style.left=x+'px';o.el.style.top=y+'px';
+    o.el.style.opacity=(o.done?.2:(0.2+0.8*near)).toFixed(3);
+    const sc=(mobile?.66:.72)+.36*near;
+    o.el.style.transform=`translate(-50%,-50%) scale(${o.done?sc*.9:sc})`;
+    o.el.style.zIndex=(o.done?8:16)+Math.round(near*320);
+    o.el.classList.toggle('faded',!o.done&&near<0.5);
+  });
+  const filed=ORBS.filter(o=>o.done).length;
+  $('#signalFill').style.width=Math.round(filed/Math.max(1,orbTotal)*100)+'%';
+};
+function updateHUD(animate=false){
+  const clarity=Math.min(1, 0.42+0.58*orbDone/Math.max(1,orbTotal));
+  if(animate){
+    window.__clarity=clarity;window.__bloom=.12;
+    setTimeout(()=>{if(window.__bloom<=.12)window.__bloom=0;},320);
+  }else window.__clarity=clarity;
+  $('#hudProg').textContent = LANG==='en'
+    ? `RECOVERED ${String(orbDone).padStart(2,'0')} / ${orbTotal} · MATERIAL ${Math.round(clarity*100)}%`
+    : `已回收 ${String(orbDone).padStart(2,'0')} / ${orbTotal} · 显形 ${Math.round(clarity*100)}%`;
+  if(orbTotal && orbDone>=orbTotal) $('#deduceGate').classList.add('show');
+}
+function placeFocus(o){
+  const mobile=innerWidth<700;
+  const x=mobile?innerWidth*.5:Math.max(innerWidth*.29,Math.min(innerWidth*.71,o.sx||innerWidth*.5));
+  const y=mobile?innerHeight*.43:Math.max(innerHeight*.31,Math.min(innerHeight*.67,o.sy||innerHeight*.48));
+  const panel=$('#qPanel');
+  panel.style.setProperty('--focus-x',x+'px');panel.style.setProperty('--focus-y',y+'px');
+  panel.style.setProperty('--focus-color',CATS[o.cat].col);
+  o.focusX=x;o.focusY=y;
+}
+function focusQuestion(o,withAction=false){
+  const cat=CATS[o.cat],box=document.createElement('div');
+  box.className='focusQuestion';
+  const lead=o.cat==='inquire'&&Q_LEAD[o.g.g]?Q_LEAD[o.g.g][LANG==='en'?1:0]:'';
+  box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusTitle"></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusCount"></span><button class="archiveNode"></button></div>':''}`;
+  box.querySelector('.focusTitle').textContent=orbLabel(o);
+  if(lead)box.querySelector('.focusLead').textContent=lead;
+  return box;
+}
+function answerPositions(count){
+  const mobile=innerWidth<700;
+  if(mobile){
+    const edge=Math.max(68,Math.min(92,(innerWidth-124)/2));
+    const compact=[{x:0,y:-175},{x:edge,y:-92},{x:-edge,y:-92},{x:edge,y:135},{x:-edge,y:135}];
+    if(count<=5)return compact.slice(0,count);
+    const leftY=[-190,-102,125,215],rightY=[-190,-102,125];
+    return Array.from({length:count},(_,i)=>i%2===0
+      ?{x:-edge,y:leftY[Math.floor(i/2)]}
+      :{x:edge,y:rightY[Math.floor(i/2)]});
+  }
+  const rx=Math.min(390,innerWidth*.34),ry=Math.min(205,innerHeight*.235);
+  return Array.from({length:count},(_,i)=>{
+    const angle=-Math.PI/2+(Math.PI*2*i/count)+(count%2?0:.18);
+    return {x:Math.cos(angle)*rx,y:Math.sin(angle)*ry};
+  });
+}
+function addAnswerNodes(inner,items,onChoose){
+  const positions=answerPositions(items.length);
+  items.forEach((item,i)=>{
+    const pos=positions[i],dist=Math.hypot(pos.x,pos.y);
+    const wire=document.createElement('span');wire.className='answerWire';
+    wire.style.width=dist+'px';wire.style.transform=`rotate(${Math.atan2(pos.y,pos.x)}rad)`;
+    inner.appendChild(wire);
+    const node=document.createElement('button');node.className='answerNode';
+    node.style.setProperty('--answer-x',pos.x+'px');node.style.setProperty('--answer-y',pos.y+'px');node.style.setProperty('--answer-delay',(i*55)+'ms');
+    node.innerHTML=`<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span>`;
+    node.querySelector('.answerText').textContent=optText(item);
+    node.onclick=e=>{e.stopPropagation();onChoose(item,node);};
+    inner.appendChild(node);
+  });
+}
+function emitAbsorption(o){
+  const color=CATS[o.cat].col;
+  for(let i=0;i<18;i++){
+    const mote=document.createElement('i');mote.className='dataMote';
+    const x=o.focusX+(Math.random()-.5)*260,y=o.focusY+(Math.random()-.5)*150;
+    mote.style.setProperty('--mote-x',x+'px');mote.style.setProperty('--mote-y',y+'px');
+    mote.style.setProperty('--mote-tx',(innerWidth*.5-x)+'px');mote.style.setProperty('--mote-ty',(innerHeight*.55-y)+'px');
+    mote.style.setProperty('--mote-color',color);mote.style.setProperty('--mote-delay',(Math.random()*.18)+'s');
+    document.body.appendChild(mote);setTimeout(()=>mote.remove(),1000);
+  }
+}
+function afterAnswer(){
+  const left=ORBS.filter(o=>!o.done).length;
+  showSignal(left>0
+    ?L(`已归档 ${orbDone} 条 · 还剩 ${left} 条线索`,`${orbDone} filed · ${left} clues remain`)
+    :L('全部线索归档 · 可以开始推理','All clues filed · ready to deduce'));
+}
+function completeOrb(o,record){
+  if(o._completing)return;o._completing=true;
+  record();o.done=true;orbDone++;syncOrbState(o);o.el.classList.add('absorbed');
+  emitAbsorption(o);$('#qPanel').classList.add('resolving');updateHUD(true);
+  setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();},560);
+}
+function openOrb(o){
+  if(o===curOrb)return;
+  if(o.done){showSignal(L('这枚线索已经归档并进入人物轮廓','This clue is archived inside the figures'));return;}
+  curOrb=o;
+  window.__stageFocus=true;document.body.classList.add('stage-answering');o.el.classList.add('focused');o.el.style.opacity='0';
+  const panel=$('#qPanel');panel.className='';panel.classList.add('open');placeFocus(o);
+  const inner=$('#qPanelInner'); inner.innerHTML='';
+  const cat=CATS[o.cat];
+  if(o.cat==='pulse'){
+    panel.classList.add('pulse-open');
+    panel.style.setProperty('--focus-x','50vw');panel.style.setProperty('--focus-y','52vh');
+    const field=document.createElement('div');field.className='pulseField';
+    field.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / FINAL TOOL</span><span>PALPATION LINK</span></div>`;
+    const pm=$('#pulseModule');
+    field.appendChild(pm);inner.appendChild(field);pm.style.display='block';
+    $('#pulseIntro').style.display=''; $('#pulseGame').style.display='none'; $('#pulseReal').style.display='none';
+    $('#btnPulseDone').disabled=true; $('#beatInput').style.display='none'; $('#timerRing').textContent='15';
+    $('#btnTimer').disabled=false;
+    if(timerIv){clearInterval(timerIv);timerIv=null;}
+    enterPulse(); applyPulseLang();
+    return;
+  }
+  if(o.cat==='inquire'){
+    const prompt=focusQuestion(o,true),selected=new Set();inner.appendChild(prompt);
+    const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode');
+    const refresh=()=>{count.textContent=L(`已标记 ${selected.size} 条（可为 0）`,`MARKED ${selected.size} · ZERO ALLOWED`);archive.textContent=L('封 存 这 组','ARCHIVE SET');};refresh();
+    addAnswerNodes(inner,o.g.items,(item,node)=>{selected.has(item)?selected.delete(item):selected.add(item);node.classList.toggle('sel',selected.has(item));refresh();});
+    archive.onclick=e=>{e.stopPropagation();completeOrb(o,()=>{
+      if(!selected.size)addClue(L(cat.zh,cat.en),L(`${o.g.g} · 未发现反复信号`,`${o.g.ge} · no recurring signals`),{});
+      selected.forEach(item=>addClue(L(cat.zh,cat.en),(LANG==='en'?o.g.ge:o.g.g.split(' ')[0])+' · '+optText(item),item[1]));
+    });};
+  }else{
+    inner.appendChild(focusQuestion(o));
+    addAnswerNodes(inner,o.g.opts,(item,node)=>{node.classList.add('sel');completeOrb(o,()=>addClue(L(cat.zh,cat.en),(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0])+' — '+optText(item),item[1]));});
+  }
+}
+function closePanel(){
+  const panel=$('#qPanel');panel.className='';
+  const pm=$('#pulseModule');if(pm&&pm.parentElement!==$('#pulseDock')){$('#pulseDock').appendChild(pm);pm.style.display='none';}
+  const prev=curOrb;
+  curOrb=null;window.__stageFocus=false;document.body.classList.remove('stage-answering');
+  if(prev&&prev.el){prev.el.classList.remove('focused');syncOrbState(prev);}
+  if(pulseAnim){cancelAnimationFrame(pulseAnim);pulseAnim=null;}
+}
+$('#qPanelClose').onclick=closePanel;
+$('#turnLeft').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(-.48);};
+$('#locateClue').onclick=e=>{e.stopPropagation();scanClues();};
+$('#turnRight').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(.48);};
+$('#btnDeduce').onclick=()=>{ closePanel(); startDeduce(); };
+/* 切诊光圈完成（由把脉模块末尾调用） */
+function markPulseDone(){
+  const orb=ORBS.find(o=>o.cat==='pulse');
+  if(orb&&!orb.done)completeOrb(orb,()=>{});
+}
+
+/* ---------- 开场 ---------- */
+state.caseNo = 'MMD-' + Date.now().toString(36).toUpperCase().slice(-6);
+$('#caseNo').textContent = 'FILE · ' + state.caseNo;
+$('#btnStart').onclick=()=>enterStage(false);
+$('#btnHow').onclick=()=>show('screen-how');
+$('#btnHowBack').onclick=()=>show('screen-intro');
+$('#btnLang').onclick=()=>{ LANG = LANG==='zh'?'en':'zh'; applyLang(); };
+
+/* ---------- 建档 ---------- */
+$('#fSleep').oninput=e=>$('#vSleep').textContent=e.target.value+'h';
+$('#fStress').oninput=e=>$('#vStress').textContent=e.target.value;
+$('#btnIntake').onclick=()=>enterStage(true);
+function enterStage(useForm){
+  const v=id=>$('#'+id).value;
+  state.intake=useForm
+    ?{name:v('fName')||L('匿名者','Anonymous'),age:v('fAge'),sex:v('fSex'),job:v('fJob'),
+      h:+v('fH')||168,w:+v('fW')||60,sleep:+v('fSleep'),stress:+v('fStress'),
+      ex:+v('fEx'),diet:v('fDiet'),stim:v('fStim')}
+    :{name:L('匿名侦探','Anonymous detective'),age:'26-35',sex:'x',job:'mix',h:168,w:60,
+      sleep:7,stress:5,ex:3,diet:'light',stim:'none'};
+  applyIntakeWeights();
+  if(state.intake.sex==='f' && !inquireGroups.includes(Q_FEMALE)){
+    inquireGroups.push(Q_FEMALE);
+  }
+  addClue(L('建档','Intake'), `${state.intake.name} · ${state.intake.age} · BMI ${bmi().toFixed(1)} · ${L('睡眠','sleep')}${state.intake.sleep}h · ${L('压力','stress')}${state.intake.stress}/10`, {});
+  buildStage();
+  show('screen-stage');
+}
+function bmi(){ return state.intake.w / Math.pow(state.intake.h/100,2); }
+
+function applyIntakeWeights(){
+  const i=state.intake, W={};
+  const add=(k,n)=>W[k]=(W[k]||0)+n;
+  if(i.sleep<6){add('huo',1);add('yin',1);}
+  if(i.stress>=8){add('yu',2);add('huo',1);} else if(i.stress>=6){add('yu',1);}
+  if(i.ex===0){add('qi',1);add('tan',1);add('yux',1);}
+  ({oil:()=>{add('tan',1);add('re',1);}, sweet:()=>{add('tan',2);add('pi',1);},
+    cold:()=>{add('pi',2);add('yang',1);}, irreg:()=>add('pi',1)}[i.diet]||(()=>{}))();
+  ({coffee:()=>add('huo',1), alcohol:()=>add('re',2), both:()=>{add('re',2);add('huo',1);}}[i.stim]||(()=>{}))();
+  if(i.job==='sit'){add('yux',1);add('yu',1);}
+  const b=bmi();
+  if(b>=26){add('tan',2);add('pi',1);} else if(b<18.5){add('xue',1);add('yin',1);}
+  if(i.age==='46-55'||i.age==='56+'){add('yang',1);add('yin',1);}
+  const parts=[];
+  for(const k in W){state.weights[k]+=W[k]; parts.push(`${PATTERNS[k].name}+${W[k]}`);}
+  if(parts.length) addClue(L('建档推演','Intake analysis'),L('生活档案指向：','Lifestyle points to: ')+parts.join('、'),{});
+}
+</script>
+
+<script>
+/* ============================================================
+   切诊 · 把脉小游戏
+   依据已收集线索推定最可能的脉象，由用户亲手辨认
+   ============================================================ */
+let pulseAnim=null, pulsePos=0, pulseShape='ping', pulseParams=null;
+let POS_NAMES=['寸','关','尺'];
+const POS_AMP=[1.0,0.85,0.72];
+
+function applyPulseLang(){
+  POS_NAMES = LANG==='en' ? ['Cun','Guan','Chi'] : ['寸','关','尺'];
+  $('#pulseIntroH').textContent = L('指 法 教 学','H O W   T O   P A L P A T E');
+  $('#pulseIntroTxt').innerHTML = L(
+    '三指落腕：<b>寸、关、尺</b>三部，分候脏腑。指力由轻到重——<b>浮取</b>轻触皮肤，<b>沉取</b>按至筋骨。<br>拖动下方「指力」滑杆，感受同一脉象在不同压力下的显现与隐没；切换三部，比较脉力的差异。深浅之间，藏着病位与病性的线索。',
+    'Three fingers on the wrist: <b>cun, guan, chi</b>, each mapping different organs. <b>Light pressure</b> skims the skin; <b>deep pressure</b> reaches toward the bone.<br>Drag the pressure slider to feel how one pulse appears and vanishes at different depths; switch the three positions to compare strength. Depth hides the clues of location and nature.');
+  $('#lblFloat').textContent = L('浮取（轻按）','Light (superficial)');
+  $('#lblSink').textContent = L('沉取（重按）','Deep (heavy)');
+  $('#pulseHint').textContent = L('切换三部 · 拖动指力 · 然后回答下方辨脉四问','Switch positions · drag pressure · then answer the four questions below');
+  $('#pulseRealH').textContent = L('自 测 真 实 脉 搏','T A K E   Y O U R   O W N   P U L S E');
+  $('#pulseRealTxt').textContent = L('现在轮到你自己：两指按在对侧手腕桡侧（拇指根下方），计时 15 秒，数出跳动次数。','Your turn: press two fingers on the thumb side of the opposite wrist, count beats for 15 seconds.');
+  $('#beatLbl').textContent = L('15 秒内跳动次数：','Beats in 15 s:');
+}
+
+function enterPulse(){
+  // 推定当前最可能的证型 → 生成模拟脉象
+  let best=null,bestV=-1;
+  for(const k of PATTERN_KEYS) if(state.weights[k]>bestV){bestV=state.weights[k];best=k;}
+  state.pulseTruth = (bestV>=3 && best)? PULSE_OF[best] : PULSE_OF._def;
+}
+
+$('#btnPulseStart').onclick=()=>{
+  $('#pulseIntro').style.display='none';
+  $('#pulseGame').style.display='block';
+  initPulseGame();
+};
+
+function initPulseGame(){
+  pulseParams=state.pulseTruth; pulseShape=pulseParams.shape; pulsePos=0;
+  // 三部按钮
+  const row=$('#pulsePosRow'); row.innerHTML='';
+  POS_NAMES.forEach((n,i)=>{
+    const b=document.createElement('div'); b.className='pulsePos'+(i===0?' on':''); b.textContent=n;
+    b.onclick=()=>{pulsePos=i; row.querySelectorAll('.pulsePos').forEach((x,j)=>x.classList.toggle('on',j===i));};
+    row.appendChild(b);
+  });
+  buildPulseQuiz();
+  startPulseAnim();
+}
+
+/* 脉象波形：主波峰 + 重搏波，随指力（压力）与脉位深浅改变振幅 */
+function waveAt(phase, shape){
+  const g=(p,c,w)=>Math.exp(-((p-c)*(p-c))/(2*w*w));
+  switch(shape){
+    case 'xian': return g(phase,0.20,0.045)*1.15 + g(phase,0.46,0.07)*0.22;   // 弦：端直而长
+    case 'hua':  return g(phase,0.22,0.10)*0.95 + g(phase,0.50,0.13)*0.38;    // 滑：圆滑如珠
+    case 'xi':   return (g(phase,0.20,0.06) + g(phase,0.45,0.09)*0.25)*0.62;  // 细：细软如丝
+    case 'se':   return g(phase,0.19,0.06)*0.8 + g(phase,0.47,0.08)*0.15;     // 涩：艰涩不畅
+    default:     return g(phase,0.20,0.07) + g(phase,0.46,0.10)*0.28;         // 平
+  }
+}
+function startPulseAnim(){
+  const cv=$('#pulseCanvas'), ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  let t0=performance.now(), beatJitter=0;
+  if(pulseAnim) cancelAnimationFrame(pulseAnim);
+  function draw(now){
+    const t=(now-t0)/1000;
+    ctx.clearRect(0,0,W,H);
+    // 底纹：腕部三道关格
+    ctx.strokeStyle='rgba(212,175,106,.15)';
+    for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(W/4*i,0);ctx.lineTo(W/4*i,H);ctx.stroke();}
+    ctx.fillStyle='rgba(233,228,214,.35)';ctx.font='12px serif';
+    ctx.fillText(L('腕横纹 · ','Wrist crease · ')+POS_NAMES[pulsePos]+L('部',''),12,20);
+    // 指力 → 振幅（高斯响应，中心在脉位深浅处）
+    const press=+$('#pressure').value/100;
+    const depth=pulseParams.depth;
+    const resp=Math.exp(-Math.pow(press-depth,2)/(2*0.16*0.16));
+    const amp=pulseParams.strength*resp*POS_AMP[pulsePos];
+    // 涩脉：节律不齐
+    if(pulseShape==='se' && Math.floor(t*pulseParams.rate/60)!==Math.floor((t-0.05)*pulseParams.rate/60))
+      beatJitter=(Math.random()-.5)*0.35;
+    const bps=pulseParams.rate/60;
+    const base=H*0.62;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=3){
+      const tt=t-(W-x)/W*3.2; // 3.2 秒窗口向右滚动
+      const ph=((tt*bps)+beatJitter)%1;
+      const y=base - waveAt(ph<0?ph+1:ph, pulseShape)*amp*H*0.42
+                   - Math.sin(tt*2.2)*2; // 轻微呼吸漂移
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle= amp>0.12?'rgba(106,212,200,.95)':'rgba(106,212,200,.4)';
+    ctx.lineWidth=2; ctx.stroke();
+    // 指感强度提示
+    ctx.fillStyle='rgba(212,175,106,.8)';ctx.font='13px monospace';
+    ctx.fillText(L('指下脉感：','Felt pulse: ')+'●'.repeat(Math.max(1,Math.round(amp*5)))+'○'.repeat(Math.max(0,5-Math.round(amp*5))),12,H-14);
+    pulseAnim=requestAnimationFrame(draw);
+  }
+  pulseAnim=requestAnimationFrame(draw);
+}
+
+/* 辨脉四问 */
+function buildPulseQuiz(){
+  const truth=pulseParams;
+  const R=[['迟（一息不足四至，<60次/分）','Slow (<60 bpm)'],['平和（60-90次/分）','Moderate (60-90 bpm)'],['数（一息五至以上，>90次/分）','Rapid (>90 bpm)']];
+  const D=[['浮（轻取即得）','Floating (light touch)'],['中（不轻不重）','Middle'],['沉（重按始得）','Deep (heavy pressure)']];
+  const S=[['无力（应指软弱）','Weak (soft under finger)'],['中等','Moderate'],['有力（应指充实）','Forceful (full & bounding)']];
+  const tRate  = truth.rate<60?R[0]:truth.rate<=90?R[1]:R[2];
+  const tDepth = truth.depth<0.35?D[0]:truth.depth<0.65?D[1]:D[2];
+  const tStr   = truth.strength<0.4?S[0]:truth.strength<0.68?S[1]:S[2];
+  const tShape = [SHAPE_NAME[truth.shape], SHAPE_NAME_EN[truth.shape]];
+  const li = LANG==='en'?1:0; // 当前语言的标签下标
+  const keyOf = pair=>pair[li];
+  const WHY = (zhMap,enMap)=>({zh:zhMap,en:enMap});
+  const quiz=[
+    {q:L('① 速率 —— 一息几至？','① Rate — how many beats per breath?'),opts:R,truth:tRate,
+     why:WHY(
+       {'迟':'迟脉主寒、主阳虚——炉膛火力不足，跳动自然放缓。','平和':'不快不慢，气血调和之象。','数':'数脉主热——无论实火还是阴虚虚热，热迫血行则脉快。'},
+       {'迟':'A slow pulse signals cold or yang deficiency — the furnace burns low.','平和':'Neither fast nor slow — qi and blood in harmony.','数':'A rapid pulse signals heat — excess fire or yin-deficient heat hastens the blood.'})},
+    {q:L('② 深浅 —— 几多斤两方得？','② Depth — how hard must you press?'),opts:D,truth:tDepth,
+     why:WHY(
+       {'浮':'浮脉主表、主虚阳外越——轻轻一触便得。','中':'不浮不沉，胃气充足。','沉':'沉脉主里、主阳虚气陷——要按到筋骨边才清晰。'},
+       {'浮':'Floating signals an exterior pattern or yang floating outward.','中':'Neither floating nor deep — healthy stomach qi.','沉':'Deep signals an interior pattern — felt only near the bone.'})},
+    {q:L('③ 力度 —— 应指是否有根？','③ Strength — is there root under the finger?'),opts:S,truth:tStr,
+     why:WHY(
+       {'无力':'无力为虚——气血阴阳任何一面的不足，都会让脉「没有底气」。','中等':'从容和缓，是为常脉。','有力':'有力为实——体内有热、有滞，脉来充实搏指。'},
+       {'无力':'Weak means deficiency — qi, blood, yin or yang running low.','中等':'Calm and steady — the normal pulse.','有力':'Forceful means excess — heat or stagnation pounding the finger.'})},
+    {q:L('④ 质感 —— 指下如触何物？','④ Texture — what does it feel like?'),
+     opts:Object.keys(SHAPE_NAME).map(k=>[SHAPE_NAME[k],SHAPE_NAME_EN[k]]),truth:tShape,
+     why:WHY(
+       {'弦':'弦脉主肝郁、主痛——气机绷紧，如按琴弦。','滑':'滑脉主痰湿、食积——气血壅盛而滑利，如珠走盘。','细':'细脉主血虚、阴虚、气虚——脉道不充，细如丝线。','涩':'涩脉主血瘀——血行艰涩，如轻刀刮竹。','平':'脉来和缓，不大不小，是为平脉。'},
+       {'弦':'Wiry signals liver-qi constraint or pain — taut like a string.','滑':'Slippery signals phlegm-damp or food stagnation — pearls rolling.','细':'Thready signals blood, yin or qi deficiency — fine as silk.','涩':'Choppy signals blood stasis — rough, like scraping bamboo.','平':'Calm and moderate — the healthy pulse.'})}
+  ];
+  const box=$('#pulseQuiz'); box.innerHTML=''; state.pulseAnswered=0;
+  quiz.forEach(item=>{
+    const qb=document.createElement('div'); qb.className='qBlock';
+    qb.innerHTML=`<div class="q">${item.q}</div>`;
+    const og=document.createElement('div'); og.className='optGroup';
+    const fb=document.createElement('div'); fb.style.cssText='font-size:12.5px;line-height:1.9;margin-top:8px;display:none';
+    item.opts.forEach(pair=>{
+      const label=keyOf(pair);
+      const o=document.createElement('div'); o.className='opt'; o.textContent=label;
+      o.onclick=()=>{
+        if(qb._done) return; qb._done=true;
+        og.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+        o.classList.add('sel');
+        const right = label===keyOf(item.truth);
+        const whyMap = item.why[LANG==='en'?'en':'zh'];
+        const tag = label.replace(/（.*?）|\(.*?\)/g,'').trim().slice(0,2);
+        let whyTxt = whyMap[tag] || whyMap[label] || '';
+        if(!whyTxt){ for(const k in whyMap){ if(label.indexOf(k)===0){whyTxt=whyMap[k];break;} } }
+        fb.style.display='block';
+        fb.innerHTML=(right?`<span style="color:var(--teal)">${L('✓ 指法精准。','✓ Precise reading.')}</span>`:`<span style="color:var(--cinnabar)">${L('✗ 再细辨 —— 此脉实为','✗ Look closer — it is actually')}「${keyOf(item.truth)}」。</span>`)
+          +`<span style="color:var(--ink-dim)"> ${whyTxt}</span>`;
+        state.pulseAnswered++;
+        if(state.pulseAnswered>=4) $('#btnPulseDone').disabled=false;
+      };
+      og.appendChild(o);
+    });
+    qb.appendChild(og); qb.appendChild(fb); box.appendChild(qb);
+  });
+}
+
+/* 呈交脉案 → 自测真实心率 */
+$('#btnPulseDone').onclick=()=>{
+  if(pulseAnim){cancelAnimationFrame(pulseAnim);pulseAnim=null;}
+  const t=pulseParams;
+  const w={};
+  const merge=k=>{for(const p in (PULSE_WEIGHTS[k]||{})) w[p]=(w[p]||0)+PULSE_WEIGHTS[k][p];};
+  if(t.rate>90)merge('fast'); if(t.rate<60)merge('slow');
+  if(t.depth<0.35)merge('floating'); if(t.depth>=0.65)merge('deep');
+  if(t.strength<0.4)merge('weak'); if(t.strength>=0.68)merge('strong');
+  merge(t.shape);
+  const desc = LANG==='en'
+    ? `${t.rate<60?'Slow':t.rate<=90?'Moderate':'Rapid'} · ${t.depth<0.35?'Floating':t.depth<0.65?'Middle':'Deep'} · ${t.strength<0.4?'Weak':t.strength<0.68?'Moderate':'Forceful'} · ${SHAPE_NAME_EN[t.shape]}`
+    : `${t.rate<60?'迟':t.rate<=90?'平':'数'} · ${t.depth<0.35?'浮':t.depth<0.65?'中':'沉'} · ${t.strength<0.4?'无力':t.strength<0.68?'中等':'有力'} · ${SHAPE_NAME[t.shape]}`;
+  addClue(L('切诊','Palpation'),L('脉案：','Pulse reading: ')+desc, w);
+  $('#pulseGame').style.display='none';
+  $('#pulseReal').style.display='block';
+};
+
+/* 15 秒自测 */
+let timerIv=null;
+$('#btnTimer').onclick=()=>{
+  let n=15; $('#timerRing').textContent=n; $('#btnTimer').disabled=true;
+  timerIv=setInterval(()=>{
+    n--; $('#timerRing').textContent=n;
+    if(n<=0){clearInterval(timerIv);$('#timerRing').textContent='✓';$('#beatInput').style.display='block';}
+  },1000);
+};
+$('#btnBeatsDone').onclick=()=>{
+  const bpm=(+$('#fBeats').value||18)*4;
+  const w={};
+  if(bpm>90){for(const p in PULSE_WEIGHTS.fast)w[p]=(w[p]||0)+PULSE_WEIGHTS.fast[p];}
+  else if(bpm<60){for(const p in PULSE_WEIGHTS.slow)w[p]=(w[p]||0)+PULSE_WEIGHTS.slow[p];}
+  addClue(L('切诊','Palpation'),
+    L('自测静息脉搏：'+bpm+' 次/分'+(bpm>90?'（偏数）':bpm<60?'（偏迟）':'（平和）'),
+      'Resting pulse: '+bpm+' bpm'+(bpm>90?' (rapid)':bpm<60?' (slow)':' (moderate)')), w);
+  markPulseDone();
+};
+</script>
+
+<script>
+/* ============================================================
+   推理引擎 → 侧写报告 → 可视化 → 导出
+   ============================================================ */
+const clampD=v=>Math.max(12,Math.min(96,Math.round(v)));
+let radarPNG='', wheelPNG='', SCRIPT=[];
+
+/* 结案奖励：人影由当前清晰度快速凝实到 1，并绽放一次金色光晕 */
+function solidifyReward(){
+  const start=window.__clarity==null?0.55:window.__clarity;
+  const t0=performance.now(), DUR=1000;
+  (function step(now){
+    const k=Math.min(1,(now-t0)/DUR);
+    const e=1-Math.pow(1-k,3);
+    window.__clarity=start+(1-start)*e;
+    window.__bloom=Math.sin(k*Math.PI);
+    if(k<1) requestAnimationFrame(step);
+    else { window.__clarity=1; window.__bloom=0; }
+  })(t0);
+}
+
+function computeResults(){
+  state.scores={}; PATTERN_KEYS.forEach(k=>state.scores[k]=state.weights[k]);
+  // 五行
+  state.elements={'木':0,'火':0,'土':0,'金':0,'水':0};
+  PATTERN_KEYS.forEach(k=>state.elements[ELEMENT_OF[k]]+=state.scores[k]);
+  // 排序
+  state.top = PATTERN_KEYS.slice().sort((a,b)=>state.scores[b]-state.scores[a]);
+  // 六维
+  const i=state.intake,s=state.scores;
+  state.dims=[
+    clampD(92-(s.qi+s.xue)*5 + i.ex*2 + (i.sleep>=7?4:-8)),
+    clampD(92-(s.pi+s.tan)*5 + (i.diet==='light'?4:-6)),
+    clampD(92-(s.yu+s.huo)*5 -(i.stress-5)*3),
+    clampD(92-(s.huo+s.yin)*4 -(7-Math.min(i.sleep,7))*9),
+    clampD(92-(s.tan+s.re)*5 + (i.stim==='none'?4:-6)),
+    clampD(92-(s.yux+s.yu*0.5)*5 + i.ex*4 + (i.job==='sit'?-8:3))
+  ];
+}
+
+/* ---------- 推理演绎 ---------- */
+function startDeduce(){
+  computeResults();
+  show('screen-deduce');
+  const log=$('#deduceLog'); log.innerHTML='';
+  const lines=[];
+  const topS=state.scores[state.top[0]];
+  lines.push({tag:L('汇总','SUM'), text:L(`四诊共收录线索 <b>${state.clues.length}</b> 条，加权演绎开始……`,`<b>${state.clues.length}</b> clues on file. Weighted deduction begins…`), cls:''});
+  if(topS<3){
+    lines.push({tag:L('辨证','PATTERN'), text:L('诸证权重皆轻 —— 十问九平，脉象和缓。','All pattern weights stay light — a calm pulse and even answers.'), cls:'gold'});
+    lines.push({tag:L('结论','VERDICT'), text:L('侧写结论：<b>平和质</b> —— 身体大系统运转均衡。报告将给出「保养式」跨学科处方。','Verdict: <b>Balanced constitution</b> — the system runs in equilibrium. The report prescribes maintenance, cross-discipline style.'), cls:'verdict'});
+  }else{
+    state.top.slice(0,3).forEach(k=>{
+      const s=state.scores[k]; if(s<2) return;
+      const ev=state.clues.filter(c=>c.w[k]).slice(0,3)
+        .map(c=>'「'+c.txt.replace(/^.*?：/,'').slice(0,12)+'」').join(' ＋ ');
+      lines.push({tag:L('辨证','PATTERN'), text:L(`${ev||'（生活档案指向）'} ⇒ <b>${PATTERNS[k].name}</b>之象渐明（权重 ${s}）`,`${ev||'(lifestyle profile)'} ⇒ the picture of <b>${pName(k)}</b> emerges (weight ${s})`), cls:''});
+    });
+    const els=Object.entries(state.elements).sort((a,b)=>b[1]-a[1]);
+    lines.push({tag:L('五行','ELEMENTS'), text:L(`五行侧写：<b>${els[0][0]}</b>行最盛（${els[0][1]}点）· <b>${els[4][0]}</b>行最弱（${els[4][1]}点）—— ${els[0][1]-els[4][1]>=6?'五行失衡明显，调护需有侧重。':'整体尚在动态平衡之内。'}`,`Five elements: <b>${EL(els[0][0])}</b> strongest (${els[0][1]}) · <b>${EL(els[4][0])}</b> weakest (${els[4][1]}) — ${els[0][1]-els[4][1]>=6?'clear imbalance; care needs focus.':'still within dynamic balance.'}`), cls:'gold'});
+    lines.push({tag:L('印证','CROSS-REF'), text:L('跨学科印证：西医病理、心理画像、营养学与运动康复的平行证据将在报告中逐一展开。','Cross-reference: western pathology, psychology, nutrition and rehab evidence unfold in the report.'), cls:'gold'});
+    state.top.slice(0,3).forEach((k,i)=>{
+      const s=state.scores[k]; if(s<2) return;
+      const conf=Math.min(95, Math.round(38+60*s/topS));
+      lines.push({tag:L('结论','VERDICT'), text:L(`侧写结论 ${i+1}：<b>${PATTERNS[k].name}</b>（${PATTERNS[k].eng}） —— 吻合度 ${conf}%`,`Verdict ${i+1}: <b>${pName(k)}</b> — match ${conf}%`), cls:'verdict'});
+    });
+  }
+  lines.push({tag:L('备忘','NOTE'), text:L('以下为学习性推理，非医学诊断。真凶是否落网，仍需时间与专业检查验证。','This is educational reasoning, not a medical diagnosis. Time and proper tests make the final call.'), cls:''});
+  // 逐行上演
+  lines.forEach((l,i)=>{
+    setTimeout(()=>{
+      const d=document.createElement('div');
+      d.className='dl '+l.cls;
+      d.innerHTML=`<span class="tag">〔${l.tag}〕</span>${l.text}`;
+      log.appendChild(d);
+      requestAnimationFrame(()=>d.classList.add('show'));
+      if(i===lines.length-1) setTimeout(()=>{$('#btnReport').style.display='inline-block';},600);
+    }, 500+i*750);
+  });
+}
+
+/* ---------- 图表 ---------- */
+function drawRadar(cv, vals){
+  const ctx=cv.getContext('2d'), S=cv.width, cx=S/2, cy=S/2, R=S*0.34;
+  ctx.clearRect(0,0,S,S);
+  const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3; return [cx+Math.cos(a)*r, cy+Math.sin(a)*r];};
+  for(let ring=1;ring<=4;ring++){
+    ctx.beginPath();
+    for(let i=0;i<6;i++){const p=pt(i,R*ring/4); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}
+    ctx.closePath(); ctx.strokeStyle='rgba(233,228,214,.12)'; ctx.stroke();
+  }
+  for(let i=0;i<6;i++){
+    const p=pt(i,R); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p[0],p[1]);
+    ctx.strokeStyle='rgba(233,228,214,.1)'; ctx.stroke();
+    const lp=pt(i,R+26); ctx.fillStyle='rgba(233,228,214,.8)';
+    ctx.font='13px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(LANG==='en'?DIMS_EN[i]:DIMS[i][0], lp[0], lp[1]);
+  }
+  ctx.beginPath();
+  vals.forEach((v,i)=>{const p=pt(i,R*v/100); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});
+  ctx.closePath();
+  ctx.fillStyle='rgba(106,212,200,.22)'; ctx.fill();
+  ctx.strokeStyle='rgba(106,212,200,.9)'; ctx.lineWidth=2; ctx.stroke();
+  vals.forEach((v,i)=>{
+    const p=pt(i,R*v/100);
+    ctx.beginPath(); ctx.arc(p[0],p[1],3.5,0,7);
+    ctx.fillStyle='#d4af6a'; ctx.fill();
+  });
+}
+function drawWheel(cv, els){
+  const ctx=cv.getContext('2d'), S=cv.width, cx=S/2, cy=S/2;
+  const COL={'木':'#4caf7d','火':'#d4706a','土':'#d4af6a','金':'#cfd6dd','水':'#5b8fd4'};
+  const ORG={'木':['肝','Liver'],'火':['心','Heart'],'土':['脾','Spleen'],'金':['肺','Lung'],'水':['肾','Kidney']};
+  const EN={'木':'Wood','火':'Fire','土':'Earth','金':'Metal','水':'Water'};
+  const max=Math.max(1,...Object.values(els));
+  ctx.clearRect(0,0,S,S);
+  ['木','火','土','金','水'].forEach((e,i)=>{
+    const a0=-Math.PI/2+i*Math.PI*2/5, a1=a0+Math.PI*2/5-0.09;
+    const r=S*0.16+S*0.24*(els[e]/max);
+    ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1);
+    ctx.strokeStyle=COL[e]; ctx.lineWidth=S*0.075; ctx.globalAlpha=0.85; ctx.stroke();
+    ctx.globalAlpha=1;
+    const am=(a0+a1)/2, lr=S*0.44;
+    ctx.fillStyle='rgba(233,228,214,.85)'; ctx.font='14px serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(LANG==='en'?`${EN[e]}·${ORG[e][1]}`:`${e}·${ORG[e][0]}`, cx+Math.cos(am)*lr, cy+Math.sin(am)*lr);
+    ctx.fillStyle=COL[e]; ctx.font='11px monospace';
+    ctx.fillText(els[e]+L('点',''), cx+Math.cos(am)*lr, cy+Math.sin(am)*lr+17);
+  });
+  ctx.fillStyle='rgba(233,228,214,.5)'; ctx.font='12px serif';
+  ctx.textAlign='center'; ctx.fillText(L('五行能量分布','Five Elements'), cx, cy);
+}
+
+/* ---------- 报告 ---------- */
+function tabHTML(p){
+  const F=(LANG==='en'&&p.en)?Object.assign({},p,p.en):p;
+  const li=a=>a.map(x=>`<li>${x}</li>`).join('');
+  const teas=(F.tea||[]).map(t=>`<div class="teaF"><div class="teaN">🍵 ${t.n}</div>
+    <div class="teaR"><b>${L('配方：','Formula: ')}</b>${t.f}</div>
+    <div class="teaR"><b>${L('制法：','Prep: ')}</b>${t.m}</div>
+    <div class="teaR"><b>${L('饮法：','Dosage: ')}</b>${t.w}</div></div>`).join('');
+  return [
+    `<p><span class="em">${L('【病机】','[Mechanism] ')}</span>${F.tcm}</p>`,
+    `<p><span class="em">${L('【西医关联】','[Western view] ')}</span>${F.west}</p>`,
+    `<p><span class="em">${L('【心理侧写】','[Psych profile] ')}</span>${F.psy}</p>`,
+    `<ul>${li(F.nutri)}</ul>`,
+    teas + `<p class="teaNote">${L(TEA_NOTE,TEA_NOTE_EN)}</p>`,
+    `<ul>${li(F.move)}</ul>`,
+    `<ul>${li(F.habit||[])}</ul>`,
+    `<ul>${li(F.heal||[])}</ul>`
+  ];
+}
+const TAB_NAMES=[['中医病机','TCM View'],['西医关联','Western'],['心理侧写','Psyche'],['营养处方','Nutrition'],['药茶调理','Herbal Tea'],['运动康复','Movement'],['生活调整','Habits'],['疗养方式','Retreat']];
+
+$('#btnReport').onclick=()=>{
+  show('screen-report');
+  solidifyReward();
+  const i=state.intake, wrap=$('#reportWrap');
+  const topS=state.scores[state.top[0]];
+  const balanced = topS<3;
+  const b=bmi();
+  const bmiTxt=b<18.5?L('偏瘦','Underweight'):b<24?L('正常','Normal'):b<28?L('超重','Overweight'):L('肥胖','Obese');
+  const shown = balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+
+  let html=`
+  <div class="rewardBanner"><div class="big">${L('案 件 告 破','C A S E   C L O S E D')}</div>
+    <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div></div>
+  <div class="rCard"><h3>${L('案件档案','Case File')} · ${state.caseNo}</h3>
+    <div class="statGrid">
+      <div class="stat"><div class="k">${L('代号','Alias')}</div><div class="v">${i.name}</div></div>
+      <div class="stat"><div class="k">${L('年龄段','Age')}</div><div class="v">${i.age}</div></div>
+      <div class="stat"><div class="k">BMI</div><div class="v">${b.toFixed(1)} <small>${bmiTxt}</small></div></div>
+      <div class="stat"><div class="k">${L('睡眠','Sleep')}</div><div class="v">${i.sleep}<small> ${L('h/晚','h/night')}</small></div></div>
+      <div class="stat"><div class="k">${L('压力指数','Stress')}</div><div class="v">${i.stress}<small> /10</small></div></div>
+      <div class="stat"><div class="k">${L('周运动','Exercise')}</div><div class="v">${i.ex}<small> ${L('次','/wk')}</small></div></div>
+    </div></div>
+  <div class="chartsRow">
+    <div class="rCard"><h3>${L('六维状态雷达','Six-Dimension Radar')}</h3><div class="chartBox"><canvas class="chart" id="radarC" width="320" height="320"></canvas></div></div>
+    <div class="rCard"><h3>${L('五行能量轮','Five-Element Wheel')}</h3><div class="chartBox"><canvas class="chart" id="wheelC" width="320" height="320"></canvas></div></div>
+  </div>
+  <div class="rCard"><h3>${L('维度读数','Dimension Readings')}</h3>
+    ${DIMS.map((d,di)=>`<div class="dimRow"><div class="n">${LANG==='en'?DIMS_EN[di][0]:d[0]}</div><div class="bar"><i style="width:${state.dims[di]}%"></i></div><div class="p">${state.dims[di]}</div></div>
+      <div style="font-size:11px;color:var(--ink-dim);margin:-6px 0 12px 100px">${LANG==='en'?DIMS_EN[di][1]:d[1]}</div>`).join('')}
+  </div>`;
+
+  if(balanced){
+    html+= LANG==='en'
+    ? `<div class="rCard"><h3>Verdict · Balanced Constitution</h3>
+      <p style="font-size:13.5px;line-height:2.1">No clear bias across the four examinations — qi, blood, yin and yang in dynamic balance. This "non-verdict" is exactly what TCM pursues: <b style="color:var(--gold)">calm yin, guarded yang.</b></p>
+      <ul style="font-size:13.5px;line-height:2.1;padding-left:20px;margin-top:10px">
+        <li>Keep the rhythm: regular meals, sleep before 23:00, 150 min moderate exercise weekly</li>
+        <li>Re-run this case quarterly — prevention means catching bias early</li>
+        <li>Stress is your biggest variable: keep outlets ready (exercise, writing, talking)</li>
+      </ul>
+      <div class="teaF" style="margin-top:16px"><div class="teaN">🍵 Four-Season Maintenance Tea</div>
+        <div class="teaR"><b>Base:</b> Chenpi (dried tangerine peel) 3g + Goji berry 6g, steeped 10 min, 1 dose daily</div>
+        <div class="teaR"><b>Seasonal:</b> spring + rose 3g ｜ summer + chrysanthemum 3g ｜ autumn + lily bulb 8g ｜ winter + longan 5g</div>
+        <div class="teaR"><b>Dosage:</b> drink warm as tea, 2 weeks on / 3 days off; pause during colds or fever</div></div>
+      <ul style="font-size:13.5px;line-height:2.1;padding-left:20px;margin-top:12px">
+        <li>Retreat: a monthly forest walk or hot spring — low-stimulation rest</li>
+        <li>Retreat: warm foot soak 15 min before bed — the most universal self-care</li>
+        <li>Retreat: morning belly breathing ×3 sets (inhale 4s, exhale 6s) to steady the nerves</li>
+      </ul></div>`
+    : `<div class="rCard"><h3>侧写结论 · 平和质</h3>
+      <p style="font-size:13.5px;line-height:2.1">四诊合参，未见明显偏颇 —— 气血阴阳处于动态均衡。这份「没有结论的结论」恰恰是中医追求的状态：<b style="color:var(--gold)">阴平阳秘，精神乃治</b>。</p>
+      <ul style="font-size:13.5px;line-height:2.1;padding-left:20px;margin-top:10px">
+        <li>维持现有节律：规律三餐、23 点前入睡、每周 150 分钟中等强度运动</li>
+        <li>每季度自测一次本探案，观察偏颇的萌芽 —— 治未病的要义在于「早」</li>
+        <li>压力是平和质最大的变量，预留情绪出口（运动、书写、倾诉）</li>
+      </ul>
+      <div class="teaF" style="margin-top:16px"><div class="teaN">🍵 平和质四季药茶（保养量）</div>
+        <div class="teaR"><b>基础方：</b>陈皮 3g + 枸杞 6g，沸水焖泡 10 分钟，每日 1 剂</div>
+        <div class="teaR"><b>顺时加减：</b>春加玫瑰花 3g 疏肝 ｜ 夏加菊花 3g 清暑 ｜ 秋加百合 8g 润燥 ｜ 冬加桂圆 5g 温补</div>
+        <div class="teaR"><b>饮法：</b>代茶温饮，连饮 2 周停 3 天；感冒发热时停服</div></div>
+      <ul style="font-size:13.5px;line-height:2.1;padding-left:20px;margin-top:12px">
+        <li>疗养：每月一次森林浴或温泉，做「低刺激」休整</li>
+        <li>疗养：睡前温水泡脚 15 分钟，是最普惠的自我疗养</li>
+        <li>疗养：晨起腹式呼吸 3 组（吸 4 秒、呼 6 秒），稳定自主神经</li>
+      </ul></div>`;
+  }else{
+    html+=`<div class="rCard"><h3>${L('证型侧写 · 三大主线','Pattern Profile · Top Three')}</h3><div id="patternCards"></div></div>`;
+  }
+
+  // 人物小传 · 推理小剧场
+  SCRIPT=buildScript();
+  html+=`<div class="rCard"><h3>${L('人物小传 · 推理小剧场','Profile Story · The Mini-Play')}</h3>
+    <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.08em;margin-bottom:16px">${L(state.clues.length+' 条线索，串成一出五幕小剧 —— 主角是你。点击页面底部「导出推理小剧场」可单独存档。',state.clues.length+' clues woven into a five-act play — starring you. Export it alone via the button at the bottom.')}</div>
+    ${SCRIPT.map(a=>`<div class="scriptAct"><div class="actTitle">${a.t}</div><div class="actBody">${a.ps.join('')}</div></div>`).join('')}</div>`;
+
+  // 整合生活处方（生活调摄 + 习惯调整，去重后取前 8 条）
+  const lifeSet=[];
+  shown.forEach(k=>{
+    const F=(LANG==='en'&&PATTERNS[k].en)?Object.assign({},PATTERNS[k],PATTERNS[k].en):PATTERNS[k];
+    (F.life||[]).concat(F.habit||[]).forEach(x=>{if(!lifeSet.includes(x))lifeSet.push(x);});
+  });
+  if(!lifeSet.length) lifeSet.push(L('规律作息，饮食有节，情志调畅，动静结合','Regular rest, measured meals, steady moods, balanced motion'));
+  html+=`<div class="rCard"><h3>${L('整合生活处方','Integrated Life Prescription')}</h3>
+    <ul style="padding-left:20px;font-size:13.5px;line-height:2.1">${lifeSet.slice(0,8).map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+
+  // 推理链回览
+  html+=`<div class="rCard"><h3>${L('推理链回览','Deduction Chain')} · ${state.clues.length} ${L('条线索','clues')}</h3>
+    ${state.clues.map(c=>`<div class="clueItem">${c.txt.replace(/</g,'&lt;')}<small>〔${c.src}〕</small></div>`).join('')}</div>`;
+
+  wrap.innerHTML=html;
+
+  // 证型卡
+  if(!balanced){
+    const pc=$('#patternCards');
+    shown.forEach((k,idx)=>{
+      const p=PATTERNS[k], s=state.scores[k];
+      const conf=Math.min(95, Math.round(38+60*s/topS));
+      const card=document.createElement('div'); card.className='patternCard';
+      card.innerHTML=`<div class="patternHead">
+          <span class="name">${idx+1} · ${pName(k)}</span>
+          <span class="conf">${L('吻合度','Match')} ${conf}% ｜ ${p.organ}${L('系',' system')} ｜ ${L('五行属','Element: ')}${EL(ELEMENT_OF[k])}</span>
+          <span class="oneLine">${LANG==='en'&&p.en?p.en.one:p.one}</span></div>
+        <div class="tabs">${TAB_NAMES.map((t,ti)=>`<div class="tab${ti===0?' on':''}" data-t="${ti}">${L(t[0],t[1])}</div>`).join('')}</div>
+        ${tabHTML(p).map((h,ti)=>`<div class="tabBody" data-b="${ti}" style="${ti?'display:none':''}">${h}</div>`).join('')}`;
+      pc.appendChild(card);
+    });
+    pc.addEventListener('click',e=>{
+      const t=e.target.closest('.tab'); if(!t) return;
+      const card=t.closest('.patternCard');
+      card.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+      card.querySelectorAll('.tabBody').forEach(b=>b.style.display=b.dataset.b===t.dataset.t?'':'none');
+    });
+  }
+
+  // 图表
+  drawRadar($('#radarC'), state.dims);
+  drawWheel($('#wheelC'), state.elements);
+  radarPNG=$('#radarC').toDataURL('image/png');
+  wheelPNG=$('#wheelC').toDataURL('image/png');
+};
+
+/* ---------- 导出独立 HTML 报告 ---------- */
+$('#btnExport').onclick=()=>{
+  const i=state.intake, topS=state.scores[state.top[0]], balanced=topS<3;
+  const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+  const sec=(t,h)=>`<h2>${t}</h2>${h}`;
+  const PF=k=>Object.assign({},PATTERNS[k],(LANG==='en'&&PATTERNS[k].en)||{});
+  const body=`
+  ${sec(L('案件档案','Case File')+' · '+state.caseNo,`<p>${i.name} · ${i.age} · BMI ${bmi().toFixed(1)} · ${L('睡眠','Sleep')} ${i.sleep}h/${L('晚','night')} · ${L('压力','Stress')} ${i.stress}/10 · ${L('周运动','Exercise')} ${i.ex}${L('次','/wk')}</p>`)}
+  ${sec(L('状态可视化','Visualization'),`<div class="charts"><img src="${radarPNG}"><img src="${wheelPNG}"></div>
+    <table>${DIMS.map((d,di)=>`<tr><td>${LANG==='en'?DIMS_EN[di][0]:d[0]}</td><td>${state.dims[di]}</td><td>${LANG==='en'?DIMS_EN[di][1]:d[1]}</td></tr>`).join('')}</table>`)}
+  ${balanced?sec(L('侧写结论','Verdict'),L('<p><b>平和质</b> —— 四诊合参未见明显偏颇，保持现有节律，定期复测。</p><p><b>平和质四季药茶：</b>陈皮 3g + 枸杞 6g 泡水为底；春加玫瑰、夏加菊花、秋加百合、冬加桂圆。连饮 2 周停 3 天。</p><p><b>疗养建议：</b>每月一次森林浴或温泉；睡前温水泡脚 15 分钟；晨起腹式呼吸 3 组。</p>','<p><b>Balanced constitution</b> — no clear bias; keep the current rhythm and re-test regularly.</p><p><b>Four-season tea:</b> chenpi 3g + goji 6g as base; rose in spring, chrysanthemum in summer, lily in autumn, longan in winter. 2 weeks on / 3 days off.</p><p><b>Retreat:</b> monthly forest walk or hot spring; 15-min warm foot soak before bed; morning belly breathing ×3 sets.</p>'))
+    :sec(L('证型侧写','Pattern Profile'), shown.map((k,idx)=>{const p=PF(k);const conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+      return `<div class="pat"><h3>${idx+1}. ${p.name}${LANG==='en'?'':'（'+p.eng+'）'} · ${L('吻合度','match')} ${conf}%</h3>
+      <p><i>${p.one}</i></p>
+      <p><b>${L('中医病机：','TCM mechanism: ')}</b>${p.tcm}</p><p><b>${L('西医关联：','Western view: ')}</b>${p.west}</p><p><b>${L('心理侧写：','Psych profile: ')}</b>${p.psy}</p>
+      <p><b>${L('营养处方：','Nutrition: ')}</b></p><ul>${p.nutri.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <p><b>${L('药茶调理：','Herbal teas: ')}</b></p><ul>${(p.tea||[]).map(t=>`<li><b>${t.n}</b> ｜ ${L('配方','Formula')}：${t.f} ｜ ${L('制法','Prep')}：${t.m} ｜ ${L('饮法','Dosage')}：${t.w}</li>`).join('')}</ul>
+      <p><b>${L('运动康复：','Movement & rehab: ')}</b></p><ul>${p.move.map(x=>`<li>${x}</li>`).join('')}</ul>
+      <p><b>${L('生活调整：','Habits: ')}</b></p><ul>${(p.habit||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
+      <p><b>${L('疗养方式：','Retreat & healing: ')}</b></p><ul>${(p.heal||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
+      <p><b>${L('生活调摄：','Daily regimen: ')}</b></p><ul>${p.life.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;}).join(''))}
+  <p class="dis">${L(TEA_NOTE,TEA_NOTE_EN)}</p>
+  ${sec(L('推理链','Deduction Chain')+' · '+state.clues.length+' '+L('条线索','clues'),`<ol>${state.clues.map(c=>`<li>[${c.src}] ${c.txt.replace(/</g,'&lt;')}</li>`).join('')}</ol>`)}
+  <p class="dis">${L('本报告由「MAD MEDICINE · 医理探案」跨学科知识模型生成，仅供健康学习与自我观察，不构成医学诊断。如有持续不适，请及时就医。','Generated by MAD MEDICINE for health education and self-observation only — not a medical diagnosis. Seek professional care for persistent symptoms.')}</p>`;
+  const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('身体状态侧写报告','Body Profile Report')} · ${state.caseNo}</title>
+<style>body{font-family:"Songti SC","SimSun",serif;max-width:760px;margin:40px auto;padding:0 24px;color:#1c1c1c;line-height:1.9;background:#faf7f0}
+h1{letter-spacing:.3em;border-bottom:2px solid #b8934a;padding-bottom:14px}h2{color:#8a6a24;letter-spacing:.2em;margin-top:36px;border-left:4px solid #b8934a;padding-left:12px}
+h3{color:#444}.pat{border:1px solid #ddd;border-radius:6px;padding:16px 22px;margin:14px 0;background:#fff}
+table{border-collapse:collapse;width:100%}td{border:1px solid #e0d8c8;padding:6px 12px;font-size:14px}
+.charts{display:flex;gap:16px;flex-wrap:wrap}.charts img{width:300px;border:1px solid #e0d8c8;border-radius:6px;background:#0a0f1c}
+ol{font-size:13px;color:#555}.dis{font-size:12px;color:#888;margin-top:40px;border-top:1px solid #ddd;padding-top:14px}</style></head>
+<body><h1>${L('身体状态侧写报告','Body Profile Report')}</h1><p style="color:#8a6a24;letter-spacing:.2em">MAD MEDICINE ｜ ${new Date().toLocaleString(LANG==='en'?'en-US':'zh-CN')}</p>${body}</body></html>`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([doc],{type:'text/html;charset=utf-8'}));
+  a.download=`${L('身体侧写报告','BodyProfile')}_${state.caseNo}.html`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+$('#btnPrint').onclick=()=>window.print();
+$('#btnRestart').onclick=()=>location.reload();
+
+/* ============================================================
+   推理小剧场：把线索串成戏剧式人物小传（五幕）
+   ============================================================ */
+function buildScript(){
+  if(LANG==='en') return buildScriptEN();
+  const i=state.intake;
+  const pron=i.sex==='f'?'她':i.sex==='m'?'他':'TA';
+  const nm=String(i.name).replace(/</g,'&lt;');
+  const b=bmi(), bmiTxt=b<18.5?'偏瘦':b<24?'匀称':b<28?'偏重':'肥胖';
+  const jobTxt={sit:'久坐办公，与椅子和屏幕为伴',stand:'工作要久站、走动',phys:'靠体力吃饭，身体常年在负荷里',mix:'动静参半，节奏不定'}[i.job];
+  const dietTxt={light:'吃得清淡',oil:'口重，偏爱油腻',sweet:'嗜甜，奶茶不离手',cold:'贪凉，生冷不断',irreg:'三餐不定，外卖为生'}[i.diet];
+  const stimTxt={none:'烟酒咖啡都不碰',coffee:'每天靠咖啡或浓茶吊着精神',alcohol:'常有酒局',both:'咖啡与酒都不少'}[i.stim];
+  const exTxt={0:'几乎不运动',1:'每周动一两次',3:'每周运动三四次',5:'每周运动五次以上'}[i.ex];
+  const topS=state.scores[state.top[0]];
+  const balanced=topS<3;
+  const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+  const els=Object.entries(state.elements).sort((a,b)=>b[1]-a[1]);
+  const bySrc={};
+  state.clues.forEach(c=>{(bySrc[c.src]=bySrc[c.src]||[]).push(c.txt);});
+  const oneSentence=s=>{const t=s.split('。')[0];return t.length>64?t.slice(0,64)+'……':t;};
+  // 台词构造器
+  const DR =(t)=>`<p class="line"><span class="who dr">医　生</span>　${t}</p>`;
+  const VI =(t)=>`<p class="line"><span class="who">来访者</span>　${t}</p>`;
+  const NA =(t)=>`<p class="line"><span class="who" style="color:var(--ink-dim)">旁　白</span>　${t}</p>`;
+  const SC =(t)=>`<p class="scene">【场景】${t}</p>`;
+  const acts=[];
+
+  /* 第一幕 · 初诊 */
+  acts.push({t:'第一幕 · 初 诊', ps:[
+    SC('深夜。一间亮着暖灯的诊室，两个人隔桌对坐。桌上摊着一本空白的卷宗：'+state.caseNo+'。'),
+    DR('「怎么称呼？」'),
+    VI('「'+nm+'。」'),
+    DR('「'+i.age+'。平时的一天，是怎么过的？」'),
+    VI('「'+jobTxt+'。'+dietTxt+'，'+stimTxt+'。」'),
+    DR('「睡得好吗？运动呢？」'),
+    VI('「每晚 '+i.sleep+' 个小时。压力的话……十分满分，我给 '+i.stress+' 分。'+exTxt+'。」'),
+    NA('医生在卷宗上写下：身高 '+i.h+'cm，体重 '+i.w+'kg，BMI '+b.toFixed(1)+'，身形'+bmiTxt+'。然后抬起头：「哪里不舒服？」'+pron+'想了想：「说不上来，就是觉得……不太对。」——最值得查的案子，往往从这句「说不上来」开始。')
+  ]});
+
+  /* 第二幕 · 身体的证词 */
+  const ps2=[SC('灯光推近。取证开始——不用仪器，只用眼睛、耳朵、问题，和三根手指。')];
+  if(bySrc['望诊']) ps2.push(
+    DR('「站到镜前去，伸出舌头。看着这个你最熟悉、也最陌生的人。」'),
+    NA(pron+'照做了。'+bySrc['望诊'].map(x=>x.replace('：','——')).join('；')+'。这些细节，'+pron+'以前从未留意。')
+  );
+  if(bySrc['闻诊']) ps2.push(
+    DR('「闭上眼睛，回想你今天说的第一段话。声音有多大？说到第几句开始累？」'),
+    NA('声音与呼吸的证词被一一记下：'+bySrc['闻诊'].map(x=>x.replace('：','——')).join('；')+'。')
+  );
+  if(bySrc['问诊']) ps2.push(
+    DR('「接下来，我要带你回到过去一个月的身体里。不用想算不算病——只问一句：它最近是不是常常发生？」'),
+    VI('「'+bySrc['问诊'].slice(0,8).map(x=>x.replace(/^.*? · /,'')).join('。')+'。」'+(bySrc['问诊'].length>8?'（另有 '+String(bySrc['问诊'].length-8)+' 条证词收入卷宗）':'')),
+    NA('有些答案出口时，'+pron+'自己愣了一下——原来身体早就说过，只是没人听。')
+  );
+  if(bySrc['切诊']) ps2.push(
+    DR('「最后，把手伸出来。三根手指，搭在寸、关、尺上。」'),
+    NA(bySrc['切诊'].join('。')+'。脉象落定，像案发现场最后一张照片。')
+  );
+  ps2.push(NA('四诊合参，共录得 '+state.clues.length+' 条线索。身体从不说谎，它只是说得含蓄。'));
+  acts.push({t:'第二幕 · 身体的证词', ps:ps2});
+
+  /* 第三幕 · 拼图与指认 */
+  const ps3=[SC('诊室安静。线索在桌上一字排开，医生开始拼图。')];
+  ps3.push(DR('「五行的天平称过了：'+els[0][0]+'行最盛（'+els[0][1]+' 点），'+els[4][0]+'行最弱（'+els[4][1]+' 点）。」'));
+  if(balanced){
+    ps3.push(DR('「反复推演，诸证权重皆轻——这不是悬案，是好消息。你的身体正站在『阴平阳秘』的均衡里。」'),
+      NA('没有嫌疑人。这具身体的案子，是一桩「无案之案」——而侦探最喜欢的结局，正是没有凶手。'));
+  }else{
+    shown.forEach((k,idx)=>{
+      const p=PATTERNS[k], conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+      ps3.push(DR('「嫌疑人 '+('一二三'[idx])+' 号：<b>'+p.name+'</b>（'+p.eng+'，吻合度 '+conf+'%）——'+p.one+'」'));
+      ps3.push(NA('西医的放大镜下，这条线索对应：'+oneSentence(p.west)+'。而在心理画像里，'+pron+'或许是这样的人：'+oneSentence(p.psy)+'。'));
+    });
+  }
+  acts.push({t:'第三幕 · 拼图与指认', ps:ps3});
+
+  /* 第四幕 · 给这具身体的处方 */
+  const ps4=[SC('医生合上卷宗，开始写一张不一样的处方。')];
+  if(balanced){
+    ps4.push(DR('「对平和的人，处方只有一句话：别把好日子过坏。规律三餐，23 点前入睡，每周 150 分钟运动。」'),
+      DR('「想喝茶的话——陈皮 3g、枸杞 6g 泡水为底；春加玫瑰，夏加菊花，秋加百合，冬加桂圆。顺时而饮，是为上策。」'));
+  }else{
+    const p0=PATTERNS[shown[0]];
+    if(p0.tea&&p0.tea.length){
+      ps4.push(DR('「第一味药，不在药房，在茶盏里。<b>'+p0.tea[0].n+'</b>：'+p0.tea[0].f+'。'+p0.tea[0].m+'。'+p0.tea[0].w+'。」'));
+      if(p0.tea[1]) ps4.push(DR('「若想换着喝，还有 <b>'+p0.tea[1].n+'</b>：'+p0.tea[1].f+'。（'+p0.tea[1].w+'）」'));
+    }
+    const habits=(p0.habit||[]).slice(0,3);
+    if(habits.length) ps4.push(DR('「然后是日子本身——'+habits.join('；')+'。」'));
+    const heals=(p0.heal||[]).slice(0,3);
+    if(heals.length) ps4.push(DR('「至于疗养：'+heals.join('；')+'。」'));
+    if(shown[1]){
+      const p1=PATTERNS[shown[1]];
+      ps4.push(NA('处方角落还有一行小字：兼顾「'+p1.name+'」这条暗线'+(p1.tea&&p1.tea[0]?'，'+p1.tea[0].n+'可交替饮用':'')+'——破案要抓主犯，也不能放过从犯。'));
+    }
+  }
+  acts.push({t:'第四幕 · 给这具身体的处方', ps:ps4});
+
+  /* 尾声 · 未完待续 */
+  acts.push({t:'尾声 · 未完待续', ps:[
+    SC(''+pron+'推门离开时，天快亮了。卷宗合上，却没有归档。'),
+    NA('三十天后，'+pron+'会回到这里，再探一次案。证型的权重会移动，线索簿会重写——身体这本案卷，永远在续写。'),
+    NA('把线索串成故事的医生只是引路人。真正的侦探是'+pron+'自己；而最终的判决，交给时间、生活，与专业医师。（本剧由四诊线索自动演绎，仅供健康学习，不构成医学诊断。）')
+  ]});
+  return acts;
+}
+
+/* English five-act version of the mini-play */
+function buildScriptEN(){
+  const i=state.intake;
+  const pron=i.sex==='f'?'she':i.sex==='m'?'he':'they';
+  const PRON=i.sex==='f'?'She':i.sex==='m'?'He':'They';
+  const nm=String(i.name).replace(/</g,'&lt;');
+  const b=bmi(), bmiTxt=b<18.5?'slim':b<24?'well-proportioned':b<28?'heavyset':'obese';
+  const jobTxt={sit:'desk-bound, married to a chair and a screen',stand:'on their feet all day',phys:'physical labor, the body always under load',mix:'a shifting mix of motion and stillness'}[i.job];
+  const dietTxt={light:'eats lightly',oil:'loves it greasy',sweet:'a sweet tooth, milk tea always in hand',cold:'cold and raw food, constantly',irreg:'irregular meals, living on delivery'}[i.diet];
+  const stimTxt={none:'no cigarettes, no alcohol, no coffee',coffee:'runs on coffee or strong tea',alcohol:'frequent drinking nights',both:'plenty of coffee and alcohol'}[i.stim];
+  const exTxt={0:'barely exercises',1:'moves once or twice a week',3:'exercises three or four times a week',5:'trains five-plus times a week'}[i.ex];
+  const topS=state.scores[state.top[0]];
+  const balanced=topS<3;
+  const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+  const els=Object.entries(state.elements).sort((a,b)=>b[1]-a[1]);
+  const bySrc={};
+  state.clues.forEach(c=>{(bySrc[c.src]=bySrc[c.src]||[]).push(c.txt);});
+  const FP=k=>Object.assign({},PATTERNS[k],PATTERNS[k].en||{});
+  const oneSentence=s=>{const t=s.split('. ')[0].split('。')[0];return t.length>80?t.slice(0,80)+'…':t;};
+  const DR =(t)=>`<p class="line"><span class="who dr">DOCTOR</span>　${t}</p>`;
+  const VI =(t)=>`<p class="line"><span class="who">VISITOR</span>　${t}</p>`;
+  const NA =(t)=>`<p class="line"><span class="who" style="color:var(--ink-dim)">NARRATOR</span>　${t}</p>`;
+  const SC =(t)=>`<p class="scene">[SCENE] ${t}</p>`;
+  const acts=[];
+
+  /* Act I · First Visit */
+  acts.push({t:'ACT I · FIRST VISIT', ps:[
+    SC('Late night. A warmly lit consulting room. Two people sit across a table, an empty file between them: '+state.caseNo+'.'),
+    DR('"What shall I call you?"'),
+    VI('"'+nm+'."'),
+    DR('"'+i.age+'. Walk me through an ordinary day."'),
+    VI('"'+jobTxt+'. '+PRON+' '+dietTxt+'; '+stimTxt+'."'),
+    DR('"Sleep? Exercise?"'),
+    VI('"'+i.sleep+' hours a night. Stress… out of ten, a '+i.stress+'. And '+pron+' '+exTxt+'."'),
+    NA('The doctor writes: '+i.h+'cm, '+i.w+'kg, BMI '+b.toFixed(1)+', build '+bmiTxt+'. Then looks up: "So what troubles you?" A pause. "Hard to say. Something just feels… off." — The best cases always begin with "hard to say."')
+  ]});
+
+  /* Act II · Testimony of the Body */
+  const ps2=[SC('The light closes in. Evidence gathering — no machines, only eyes, ears, questions, and three fingertips.')];
+  if(bySrc['LOOK']) ps2.push(
+    DR('"Stand before the mirror. Show your tongue. Look at this person you know best — and least."'),
+    NA(PRON+' obeys. '+bySrc['LOOK'].map(x=>x.replace('：',' — ')).join('; ')+'. Details never noticed before.')
+  );
+  if(bySrc['LISTEN']) ps2.push(
+    DR('"Close your eyes. Recall the first thing you said today. How loud was your voice? At which sentence did it tire?"'),
+    NA('Testimony of voice and breath, entered into the file: '+bySrc['LISTEN'].map(x=>x.replace('：',' — ')).join('; ')+'.')
+  );
+  if(bySrc['ASK']) ps2.push(
+    DR('"Now I will walk you back through your own body of the past month. Never mind whether it counts as illness — only answer: has it happened often?"'),
+    VI('"'+bySrc['ASK'].slice(0,8).map(x=>x.replace(/^.*? · /,'').replace(/^.*?:\s*/,'')).join('. ')+'."'+(bySrc['ASK'].length>8?' (+'+String(bySrc['ASK'].length-8)+' more statements filed)':'')),
+    NA('Some answers surprise even '+pron+' — the body had been speaking all along. Nobody was listening.')
+  );
+  if(bySrc['Palpation']) ps2.push(
+    DR('"Finally — your wrist. Three fingers, on cun, guan and chi."'),
+    NA(bySrc['Palpation'].join('. ')+'. The pulse settles like the last photograph of a scene.')
+  );
+  ps2.push(NA(state.clues.length+' clues in total. The body never lies; it merely speaks quietly.'));
+  acts.push({t:'ACT II · TESTIMONY OF THE BODY', ps:ps2});
+
+  /* Act III · The Line-up */
+  const ps3=[SC('Silence. The clues lie in a row. The doctor begins to assemble the picture.')];
+  ps3.push(DR('"The five-element scale reads: '+EL(els[0][0])+' strongest ('+els[0][1]+' pts), '+EL(els[4][0])+' weakest ('+els[4][1]+' pts)."'));
+  if(balanced){
+    ps3.push(DR('"Every weight stays light — this is no mystery, it is good news. Your body stands in balance: calm yin, guarded yang."'),
+      NA('No suspect. A case without a crime — the ending every detective secretly loves.'));
+  }else{
+    shown.forEach((k,idx)=>{
+      const p=FP(k), conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+      ps3.push(DR('"Suspect number '+['one','two','three'][idx]+': <b>'+p.name+'</b> (match '+conf+'%) — '+p.one+'"'));
+      ps3.push(NA('Under the western lens: '+oneSentence(p.west)+'. And the psychological sketch: '+pron+' may well be someone who '+oneSentence(p.psy)+'.'));
+    });
+  }
+  acts.push({t:'ACT III · THE LINE-UP', ps:ps3});
+
+  /* Act IV · A Prescription for This Body */
+  const ps4=[SC('The doctor closes the file and begins to write an unusual prescription.')];
+  if(balanced){
+    ps4.push(DR('"For the balanced, one line only: do not ruin a good life. Regular meals, asleep by 23:00, 150 minutes of movement a week."'),
+      DR('"If you want tea — chenpi 3g and goji 6g as a base; rose in spring, chrysanthemum in summer, lily in autumn, longan in winter. Drink with the seasons."'));
+  }else{
+    const p0=FP(shown[0]);
+    if(p0.tea&&p0.tea.length){
+      ps4.push(DR('"The first medicine is not from a pharmacy but a teacup. <b>'+p0.tea[0].n+'</b>: '+p0.tea[0].f+'. '+p0.tea[0].m+'. '+p0.tea[0].w+'."'));
+      if(p0.tea[1]) ps4.push(DR('"To alternate: <b>'+p0.tea[1].n+'</b> — '+p0.tea[1].f+'. ('+p0.tea[1].w+')"'));
+    }
+    const habits=(p0.habit||[]).slice(0,3);
+    if(habits.length) ps4.push(DR('"Then, the days themselves — '+habits.join('; ')+'."'));
+    const heals=(p0.heal||[]).slice(0,3);
+    if(heals.length) ps4.push(DR('"And for retreat and repair: '+heals.join('; ')+'."'));
+    if(shown[1]){
+      const p1=FP(shown[1]);
+      ps4.push(NA('A note in the margin: mind the second thread, "'+p1.name+'"'+(p1.tea&&p1.tea[0]?' — '+p1.tea[0].n+' may be alternated':'')+'. Catch the ringleader, but never ignore the accomplice.'));
+    }
+  }
+  acts.push({t:'ACT IV · A PRESCRIPTION FOR THIS BODY', ps:ps4});
+
+  /* Epilogue */
+  acts.push({t:'EPILOGUE · TO BE CONTINUED', ps:[
+    SC('As '+pron+' steps out, dawn is breaking. The file closes — but is never archived.'),
+    NA('In thirty days '+pron+' will return and open the case again. Weights will shift, the clue book will be rewritten — the body is a dossier forever in draft.'),
+    NA('The doctor who strung clues into a story was only a guide. The real detective is '+pron+' — and the final verdict belongs to time, to life, and to licensed physicians. (Generated from your own answers; for health education only, not a medical diagnosis.)')
+  ]});
+  return acts;
+}
+$('#btnScript').onclick=()=>{
+  if(!SCRIPT.length) return;
+  const i=state.intake;
+  const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('推理小剧场','The Mini-Play')} · ${state.caseNo}</title>
+<style>body{font-family:"Songti SC","SimSun",serif;max-width:680px;margin:48px auto;padding:0 26px;color:#1c1c1c;line-height:2.1;background:#f7f3ea}
+h1{text-align:center;letter-spacing:.35em;font-size:26px}h2{text-align:center;color:#8a6a24;font-size:13px;letter-spacing:.3em;font-weight:normal;margin-bottom:40px}
+h3{letter-spacing:.25em;color:#8a6a24;margin-top:40px;border-bottom:1px dashed #c9b98a;padding-bottom:6px}
+p{margin:10px 0}.scene{color:#777;font-size:13px}.line{text-indent:0}
+.who{font-weight:bold;color:#8a6a24;margin-right:.5em}.who.dr{color:#3a5c58}
+.dis{font-size:12px;color:#999;margin-top:48px;text-align:center}</style></head>
+<body><h1>${L('身体侧写 · 推理小剧场','Body Profile · The Mini-Play')}</h1>
+<h2>${L('卷宗','File')} ${state.caseNo} ｜ ${L('主角','Starring')}：${String(i.name).replace(/</g,'&lt;')} ｜ ${new Date().toLocaleDateString(LANG==='en'?'en-US':'zh-CN')}</h2>
+${SCRIPT.map(a=>`<h3>${a.t}</h3>${a.ps.join('')}`).join('')}
+<p class="dis">MAD MEDICINE ｜ ${L('本剧由四诊线索自动演绎生成，仅供健康学习，不构成医学诊断','Auto-generated from your four-examination clues. For health education only — not a medical diagnosis.')}</p>
+</body></html>`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([doc],{type:'text/html;charset=utf-8'}));
+  a.download=`${L('推理小剧场','MiniPlay')}_${state.caseNo}.html`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+
+/* ---------- 启动 ---------- */
+window.__clarity=0.55; // 开场即半虚粒子态，点明「由虚到实」
+show('screen-intro');
+</script>
+</body>
+</html>
