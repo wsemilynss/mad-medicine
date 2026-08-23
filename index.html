@@ -453,6 +453,28 @@ body.stage-answering #stageHUD,body.stage-answering #stageControls{opacity:.12;p
   .tab{padding:9px 12px}
   .btn{letter-spacing:.2em;padding:15px 30px;font-size:14px}
 }
+/* ---------- 超小屏（≤360px）更宽松 ---------- */
+@media(max-width:360px){
+  h1.title{font-size:clamp(30px,9vw,42px);letter-spacing:.08em}
+  h1.title .en{letter-spacing:.4em}
+  .kicker{font-size:10px;letter-spacing:.26em}
+  .lede{font-size:12px;line-height:1.85}
+  .btn{padding:14px 22px;letter-spacing:.14em}
+  .btn.ghost{padding:11px 16px}
+  .interview{font-size:12px}
+  .qBlock .q{font-size:14.5px}
+  .opt{font-size:12.5px;padding:9px 14px}
+  .rewardBanner .big{font-size:22px;letter-spacing:.28em}
+}
+/* ---------- 横屏手机（矮视口）：压缩纵向留白 ---------- */
+@media(max-height:480px) and (orientation:landscape){
+  .screen{padding:58px 20px 46px;justify-content:flex-start}
+  h1.title{font-size:clamp(26px,5.5vh,40px)}
+  h1.title .en{margin-top:8px}
+  .divider{margin:12px auto}
+  .lede{margin-top:10px;line-height:1.7}
+  .btn{margin-top:16px}
+}
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-thumb{background:rgba(212,175,106,.3);border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
