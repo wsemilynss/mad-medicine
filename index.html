@@ -33,7 +33,7 @@ body{
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
-#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:0}
 #figLayer{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;
   align-items:center;justify-content:center;overflow:hidden}
 body.stage-live #figLayer{display:flex}
@@ -59,7 +59,7 @@ body.stage-live #figLayer{display:flex}
 #topbar{
   position:fixed;top:0;left:0;right:0;z-index:10;
   display:flex;align-items:center;justify-content:space-between;
-  padding:14px 22px;pointer-events:none;
+  padding:14px 22px;padding-top:max(14px,env(safe-area-inset-top));pointer-events:none;
 }
 #brand{font-family:var(--serif);letter-spacing:.35em;font-size:13px;color:var(--gold);
   pointer-events:auto;user-select:none}
@@ -71,7 +71,7 @@ body.stage-live #figLayer{display:flex}
 
 /* ---------- 线索簿 ---------- */
 #clueBook{
-  position:fixed;top:0;right:-360px;width:340px;height:100vh;z-index:20;
+  position:fixed;top:0;right:-360px;width:340px;height:100vh;height:100dvh;z-index:20;
   background:rgba(7,10,18,.96);border-left:1px solid var(--line);
   transition:right .35s ease;padding:70px 22px 30px;overflow-y:auto;
 }
@@ -86,7 +86,7 @@ body.stage-live #figLayer{display:flex}
 
 /* ---------- 屏幕容器 ---------- */
 .screen{display:none;flex:1;flex-direction:column;align-items:center;
-  justify-content:center;padding:90px 20px 60px;min-height:100vh}
+  justify-content:center;padding:90px 20px 60px;min-height:100vh;min-height:100dvh}
 .screen.active{display:flex;animation:fadeUp .7s ease}
 @keyframes fadeUp{from{transform:translateY(18px)}to{transform:none}}
 
@@ -155,7 +155,7 @@ h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,34px);letter-spacing:.2em
 
 /* ---------- 进度 ---------- */
 #progress{position:fixed;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
-  display:flex;justify-content:center;padding:12px}
+  display:flex;justify-content:center;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 #progress .inner{display:flex;gap:8px;align-items:center;background:rgba(7,10,18,.8);
   border:1px solid var(--line);border-radius:20px;padding:8px 18px}
 #progress .step{width:8px;height:8px;border-radius:50%;background:rgba(233,228,214,.18);
@@ -395,7 +395,8 @@ body.stage-answering #stageHUD,body.stage-answering #stageControls{opacity:.12;p
 #pulseDock{display:none}
 
 @media(max-width:700px){
-  #topbar{padding:10px 10px}#brand{font-size:9px;letter-spacing:.18em}#brand>span{display:none}
+  #topbar{padding:10px 10px;padding-top:max(10px,env(safe-area-inset-top))}#brand{font-size:9px;letter-spacing:.18em}#brand>span{display:none}
+  #clueBook{width:min(86vw,340px)}
   #btnLang,#clueToggle{font-size:9px;padding:6px 8px;letter-spacing:.1em}
   body.stage-answering #topbar{opacity:.18;pointer-events:none}
   .orb{width:150px}.orb-question{font-size:10.5px;-webkit-line-clamp:2;line-clamp:2}.orb-meta{font-size:8px}
@@ -403,7 +404,7 @@ body.stage-answering #stageHUD,body.stage-answering #stageControls{opacity:.12;p
   #stageHUD{left:14px;top:62px;width:58vw}#hudHint{font-size:9.5px}
   #stageControls{right:14px;top:58px;bottom:auto}#stageControls span,#turnLeft,#turnRight{display:none}
   .focusQuestion{width:min(254px,70vw);padding:11px 13px}.focusLead{display:none}
-  .answerNode{width:min(112px,36vw);min-height:46px;padding:7px 8px;font-size:9.5px;line-height:1.35}
+  .answerNode{width:min(118px,38vw);min-height:48px;padding:7px 8px;font-size:10.5px;line-height:1.4}
   #qPanelClose{left:auto;right:12px;top:62px}
   .pulseField{max-height:78vh;padding:16px 14px}
 }
@@ -436,6 +437,21 @@ body.stage-answering #stageHUD,body.stage-answering #stageControls{opacity:.12;p
   .rCard h3,.patternHead .name{color:#7a5c1e}
   .tabBody,.stat .v{color:#111}
   .screen{padding:0}
+}
+/* ---------- 竖版手机适配（字体与交互内容自适应） ---------- */
+@media(max-width:600px){
+  .screen{padding:78px 14px 72px}
+  .lede{font-size:clamp(12.5px,3.6vw,14px);line-height:1.9}
+  .panel{padding:22px 16px}
+  .rCard{padding:20px 16px}
+  .reportWrap{gap:16px}
+  .chartsRow{gap:14px;flex-direction:column}
+  .chartsRow .rCard{min-width:0}
+  .statGrid{grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:10px}
+  .patternHead .name{font-size:17px}
+  .tabBody{padding:14px 14px;font-size:13px}
+  .tab{padding:9px 12px}
+  .btn{letter-spacing:.2em;padding:15px 30px;font-size:14px}
 }
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-thumb{background:rgba(212,175,106,.3);border-radius:4px}
