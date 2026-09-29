@@ -181,10 +181,50 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 .pressureRow{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--ink-dim);
   letter-spacing:.15em}
 .pressureRow input{width:220px}
-.pulsePosRow{display:flex;gap:10px}
-.pulsePos{cursor:pointer;border:1px solid var(--line);padding:8px 20px;border-radius:2px;
-  font-family:var(--serif);letter-spacing:.3em;font-size:14px;color:var(--ink-dim)}
+.pulseTutorial{display:grid;grid-template-columns:minmax(240px,1.1fr) minmax(210px,.9fr);gap:14px;margin:18px 0 22px}
+.pulseMapWrap,.pressureSteps{border:1px solid rgba(233,228,214,.12);background:rgba(5,8,15,.48);padding:12px 14px}
+.pulseMapTitle{font-family:var(--serif);font-size:12px;letter-spacing:.16em;color:var(--gold);margin-bottom:4px}
+.pulseMap{display:block;width:100%;height:auto;max-height:176px;overflow:visible}
+/* 手形分两层绘制：底层略粗作描边，上层实色填充，避免自由曲线变形 */
+.pulseMap .handOutline{fill:rgba(233,228,214,.82);stroke:rgba(233,228,214,.82);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.pulseMap .handOutline line{stroke-width:26}
+.pulseMap .handFill{fill:#243047;stroke:#243047;stroke-width:0;stroke-linecap:round;stroke-linejoin:round}
+.pulseMap .handFill line{stroke-width:22}
+.pulseMap .palmLine{fill:none;stroke:rgba(233,228,214,.3);stroke-width:1.2;stroke-linecap:round}
+.pulseMap .artery{fill:none;stroke:var(--cinnabar);stroke-width:2;stroke-dasharray:5 4;opacity:.9}
+.pulseMap .wristLine{stroke:rgba(212,175,106,.75);stroke-width:1.4;stroke-dasharray:4 4}
+.pulseMap .guideLine{stroke:rgba(233,228,214,.4);stroke-width:1}
+.pulseMap text{font-family:var(--sans);font-size:10px;fill:rgba(233,228,214,.75)}
+.pulseMap .siteLabel{fill:var(--gold-bright);font-size:12px;font-weight:600;text-anchor:middle}
+.pulseMap .arteryLabel{fill:var(--cinnabar)}
+.pulseMap .pulseMapPoint{cursor:pointer;pointer-events:all}
+.pulseMap .pulseHit{fill:transparent;pointer-events:all}
+.pulseMap .pulseSite{fill:rgba(212,175,106,.25);stroke:var(--gold);stroke-width:2;pointer-events:none;transition:fill .2s,r .2s}
+.pulseMap .pulseSite.active{fill:var(--teal);stroke:#d8fff8;r:8;filter:drop-shadow(0 0 5px rgba(106,212,200,.8))}
+.pulseMap .pulseSite:focus{outline:none;stroke:#fff;stroke-width:3}
+.pulseMapNote{font-size:10.5px;line-height:1.6;color:var(--ink-dim)}
+.pulsePosRow{display:flex;gap:8px;width:100%;justify-content:center}
+.pulsePos{cursor:pointer;min-width:82px;border:1px solid var(--line);padding:8px 14px;border-radius:2px;
+  background:rgba(5,8,15,.55);font-family:var(--serif);color:var(--ink-dim);text-align:center}
+.pulsePosName{display:block;letter-spacing:.24em;font-size:14px}
+.pulsePos small{display:block;font:9px/1.5 var(--sans);letter-spacing:.04em;color:var(--ink-dim)}
 .pulsePos.on{color:var(--gold-bright);border-color:var(--gold);background:rgba(212,175,106,.12)}
+.pulsePos.on small{color:var(--teal)}
+.pressureSteps{padding:10px 12px}
+.pressureStepsTitle{font:10px/1.5 monospace;letter-spacing:.14em;color:var(--ink-dim);margin-bottom:8px}
+.pressureStepRow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.pressureStep{display:flex;align-items:center;gap:7px;min-height:48px;padding:6px;border:1px solid rgba(233,228,214,.1);color:var(--ink-dim);transition:.2s;background:transparent;font-family:var(--sans);text-align:left}
+.pressureStep[data-interactive="true"]{cursor:pointer}
+.pressureStep.on{border-color:var(--teal);color:var(--gold-bright);background:rgba(106,212,200,.07)}
+.pressGlyph{position:relative;flex:0 0 23px;height:30px;border-bottom:2px solid currentColor}
+.pressGlyph::before{content:"";position:absolute;left:6px;top:2px;width:11px;height:9px;border-radius:7px 7px 3px 3px;background:currentColor;opacity:.75}
+.pressGlyph::after{content:"↓";position:absolute;left:8px;top:var(--press-y,12px);font:12px/1 monospace;color:var(--teal)}
+.pressureStep[data-level="0"] .pressGlyph{--press-y:11px}
+.pressureStep[data-level="1"] .pressGlyph{--press-y:15px}
+.pressureStep[data-level="2"] .pressGlyph{--press-y:19px}
+.pressureStep span:last-child{font-size:10px;line-height:1.4}
+.pulsePositionHint{font-size:11px;color:var(--ink-dim);text-align:center;line-height:1.7}
+@media(max-width:520px){.pulseTutorial{grid-template-columns:1fr}.pulseMap{max-height:150px}.pressureStep{gap:4px;padding:5px}.pressureStep span:last-child{font-size:9px}}
 #timerRing{font-family:monospace;font-size:44px;color:var(--teal);letter-spacing:.1em}
 
 /* ---------- 推理链 ---------- */
@@ -415,10 +455,26 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   background:linear-gradient(90deg,currentColor,rgba(233,228,214,.04));opacity:.28}
 .answerNode{position:absolute;left:var(--answer-x);top:var(--answer-y);width:190px;width:clamp(150px,17vw,218px);
   min-height:52px;transform:translate(-50%,-50%);opacity:1;pointer-events:auto;cursor:pointer;
-  display:flex;align-items:flex-start;gap:8px;text-align:left;padding:9px 10px;border:0;border-left:1px solid currentColor;
+  display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:9px 10px;border:0;border-left:1px solid currentColor;
   border-bottom:1px solid rgba(233,228,214,.14);border-radius:0;color:var(--ink);
   background:linear-gradient(100deg,rgba(6,9,16,.93),rgba(9,14,24,.6),transparent);
   font-family:var(--serif);font-size:11.5px;line-height:1.5;letter-spacing:.04em;backdrop-filter:blur(4px)}
+.answerMain{display:flex;align-items:flex-start;gap:8px}
+.answerDeg{display:none;margin-top:8px;padding-top:7px;border-top:1px dashed rgba(233,228,214,.16)}
+.answerNode.sel .answerDeg{display:block}
+.answerDeg input[type=range]{width:100%;height:22px;margin:0;accent-color:var(--gold);cursor:pointer}
+.answerDegLbl{display:flex;justify-content:space-between;align-items:baseline;font:9px/1.4 monospace;letter-spacing:.1em;color:var(--ink-dim)}
+.answerDegLbl b{color:var(--gold-bright);font-family:var(--serif);font-size:10.5px;letter-spacing:.06em}
+.ctxRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ctxLbl{width:100%;font:9px/1.5 monospace;letter-spacing:.16em;color:var(--ink-dim)}
+.ctxRow .miniChip{font-size:10px;padding:6px 9px}
+.ctxRow .miniChip.on{border-color:var(--teal);color:var(--teal);background:rgba(106,212,200,.12)}
+/* 桌面端：情境标签离开证词卡，停靠在屏幕底部，免得卡片过高被星环覆盖 */
+.ctxDock{position:fixed;left:50%;bottom:max(70px,6vh);transform:translateX(-50%);width:min(780px,92vw);justify-content:center;
+  margin:0;padding:10px 14px 12px;background:rgba(6,9,16,.88);border-top:1px solid rgba(233,228,214,.18);
+  pointer-events:auto;z-index:3;backdrop-filter:blur(6px);color:var(--focus-color,var(--gold))}
+.ctxDock .ctxLbl{text-align:center}
+.ctxAfter{margin-top:14px;padding:12px 4px 2px;border-top:1px dashed rgba(233,228,214,.18);color:var(--focus-color,var(--gold))}
 #qPanel.open .answerNode{animation:answerDecode .42s var(--answer-delay,0ms) ease forwards}
 @keyframes answerDecode{0%{opacity:.78;transform:translate(-50%,-50%) scale(.92) skewX(-4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 .answerNode .answerIndex{flex:0 0 auto;font:9px/1.4 monospace;color:currentColor;letter-spacing:0}
@@ -715,9 +771,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     </h1>
     <div class="divider"></div>
     <p class="lede"
-      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每条证词可标「偶尔 / 经常 / 持续」，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。"
-      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — grey, blurred, scattered into grain.<br>Spend 30 seconds on a basic file (or skip it). Then the clues of Look · Listen · Ask · Pulse become <b>orbs drifting around the figures</b> — <b>tap an orb to lock on and capture it</b>, then give your testimony. Mark each as occasional / frequent / constant, add your own words, or skip.<br>Every capture lifts a veil: the world turns from grey to colour, the figures sharpen, confetti lights up, holo-screens wake — until the case is solved and the report, path chart and theatre unlock.">
-      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每条证词可标「偶尔 / 经常 / 持续」，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。</p>
+      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每道题可<b>多选并存</b>，每条证词有<b>五档程度条</b>，还可标记「何时加重」做交叉印证，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。"
+      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — grey, blurred, scattered into grain.<br>Spend 30 seconds on a basic file (or skip it). Then the clues of Look · Listen · Ask · Pulse become <b>orbs drifting around the figures</b> — <b>tap an orb to lock on and capture it</b>, then give your testimony. <b>Select several signs at once</b>, set a <b>five-step degree bar</b> for each, tag when it is worse for cross-checking, add your own words, or skip.<br>Every capture lifts a veil: the world turns from grey to colour, the figures sharpen, confetti lights up, holo-screens wake — until the case is solved and the report, path chart and theatre unlock.">
+      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每道题可<b>多选并存</b>，每条证词有<b>五档程度条</b>，还可标记「何时加重」做交叉印证，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。</p>
     <div class="btnRow">
       <button class="btn" id="btnStart" data-zh="进 入 双 生 诊 室" data-en="E N T E R · T H E  C H A M B E R">进 入 双 生 诊 室</button>
       <button class="btn ghost" id="btnHow" data-zh="侦 查 手 册" data-en="M A N U A L">侦 查 手 册</button>
@@ -730,9 +786,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <div class="panel">
       <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
       <div style="font-size:13.5px;line-height:2.1;color:var(--ink)"
-        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
-        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>Capture the orbs</b> — the clues of Look · Listen · Ask · Pulse drift on three orbits around the figures: <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>. The one nearest the camera enlarges and shows its tag; <b>tap an orb → reticle locks → testimony opens</b>. Drag to orbit the camera; the ◎ button turns the camera to the nearest uncaptured orb; the top-left “LIST” opens a plain checklist.<br>③ <b style='color:var(--gold)'>Answer</b> — <b>every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform); for Ask, <b>tap a clue repeatedly to cycle occasional → frequent → constant → clear</b>; each question has a <b>free-text field</b>; choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>The world develops &amp; XP</b> — every capture sharpens the figures, refines the grain, turns confetti from grey to colour and wakes the holo-screens; consecutive captures within 25 s trigger a <b>COMBO</b> bonus; the <b>live weight engine</b> on the board shows backend scores in real time, with three profile updates along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
-        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
+        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；每道题<b>可多选并存</b>（如「淡白」与「齿痕」同时成立），选中后拖动<b>五档程度条</b>标记轻重，再勾选「何时更明显」做<b>情境交叉印证</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，先看<b>掌心朝上的寸关尺定位图</b>与轻/中/重按压示意，再上手；辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
+        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>Capture the orbs</b> — the clues of Look · Listen · Ask · Pulse drift on three orbits around the figures: <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>. The one nearest the camera enlarges and shows its tag; <b>tap an orb → reticle locks → testimony opens</b>. Drag to orbit the camera; the ◎ button turns the camera to the nearest uncaptured orb; the top-left “LIST” opens a plain checklist.<br>③ <b style='color:var(--gold)'>Answer</b> — <b>every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform); <b>select several signs at once</b> (e.g. pale AND teeth-marked), drag each <b>five-step degree bar</b>, then tag <b>when it is worse</b> for cross-checking; each question has a <b>free-text field</b>; choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>The world develops &amp; XP</b> — every capture sharpens the figures, refines the grain, turns confetti from grey to colour and wakes the holo-screens; consecutive captures within 25 s trigger a <b>COMBO</b> bonus; the <b>live weight engine</b> on the board shows backend scores in real time, with three profile updates along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument with a <b>palm-up Cun/Guan/Chi map</b> and light/mid/deep pressure guide; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
+        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；每道题<b>可多选并存</b>（如「淡白」与「齿痕」同时成立），选中后拖动<b>五档程度条</b>标记轻重，再勾选「何时更明显」做<b>情境交叉印证</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，先看<b>掌心朝上的寸关尺定位图</b>与轻/中/重按压示意，再上手；辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
     </div>
   </section>
@@ -809,17 +865,21 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <div id="pulseIntro">
       <h3 id="pulseIntroH">指 法 教 学</h3>
       <div style="font-size:13.5px;line-height:2.1" id="pulseIntroTxt"></div>
+      <div id="pulseIntroVisual"></div>
       <div style="text-align:center"><button class="btn" id="btnPulseStart" data-zh="伸 手 · 开 始 把 脉" data-en="R E A C H · F E E L T H E P U L S E">伸 手 · 开 始 把 脉</button></div>
     </div>
     <div id="pulseGame" style="display:none">
       <div id="pulseStage">
+        <div id="pulseGameVisual"></div>
         <div class="pulsePosRow" id="pulsePosRow"></div>
+        <div class="pulsePositionHint" id="pulsePositionHint"></div>
         <canvas id="pulseCanvas" width="680" height="230" style="max-width:100%"></canvas>
         <div class="pressureRow">
           <span id="lblFloat">浮取（轻按）</span>
           <input type="range" id="pressure" min="0" max="100" value="25">
           <span id="lblSink">沉取（重按）</span>
         </div>
+        <div class="pressureSteps" id="pressureSteps"></div>
         <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.1em" id="pulseHint"></div>
       </div>
       <div id="pulseQuiz" style="margin-top:18px"></div>
@@ -1282,6 +1342,27 @@ const DEGREES=[
   ['经常 · 明显',1.0,'Frequent · clear'],
   ['持续 · 严重',1.5,'Constant · severe']
 ];
+/* 五档程度条：答题时每条证词独立拖动，中档 = 题库原权重 */
+const DEG5=[
+  ['轻微 · 偶尔',0.5,'Mild · occasional'],
+  ['较轻 · 时有',0.75,'Slight · sometimes'],
+  ['明显 · 经常',1.0,'Clear · frequent'],
+  ['较重 · 频繁',1.3,'Marked · very frequent'],
+  ['严重 · 持续',1.6,'Severe · constant']
+];
+/* 情境交叉标签：同一条证词在何时加重，是区分相近证型的关键旁证 */
+const CONTEXTS=[
+  ['晨起更明显',{pi:.5,tan:.5,yang:.5},'Worse on waking'],
+  ['午后/傍晚加重',{yin:.5,qi:.5},'Worse in the afternoon'],
+  ['夜间/睡前加重',{yin:.5,huo:.5},'Worse at night'],
+  ['饭后出现',{pi:1},'After meals'],
+  ['压力大时加重',{yu:1,huo:.5},'Worse under stress'],
+  ['经期前后',{yu:.5,yux:.5,xue:.5},'Around period'],
+  ['受凉/天冷加重',{yang:1,yux:.5},'Worse in cold'],
+  ['熬夜后加重',{yin:.5,huo:.5,xue:.5},'After late nights'],
+  ['久坐后加重',{yux:.5,yu:.5},'After long sitting'],
+  ['阴雨潮湿天加重',{pi:.5,tan:.5},'Worse in damp weather']
+];
 function scaleWeights(w,m){
   const o={}; for(const k in w){const v=Math.round(w[k]*m*2)/2; if(v>0)o[k]=v;} return o;
 }
@@ -1292,7 +1373,8 @@ const Q_OBSERVE = [
  {q:'舌质颜色与形态（对镜伸舌，看舌体本色）', qe:'Tongue body color & shape (look in a mirror)', key:'tongue', opts:[
    ['淡白',{qi:2,xue:2,yang:1},'Pale'],['淡红如常（健康色）',{},'Normal pink-red'],['偏红',{yin:2,huo:1,re:1},'Reddish'],
    ['红绛、少津液',{yin:3,huo:2},'Deep red, dry'],['紫暗 / 有瘀点',{yux:3,yu:1},'Purplish / spotted'],
-   ['淡胖、边有齿痕',{pi:2,tan:1,yang:1},'Pale puffy, teeth-marked edges'],['看不太清 / 不确定',{},'Hard to tell / not sure']]},
+   ['淡胖、边有齿痕',{pi:2,tan:1,yang:1},'Pale puffy, teeth-marked edges'],['舌尖偏红、有小红点',{huo:2,yin:1},'Red tip with small dots'],
+   ['舌体瘦薄、有裂纹',{yin:2,xue:1},'Thin tongue with cracks'],['看不太清 / 不确定',{},'Hard to tell / not sure']]},
  {q:'舌苔（舌面上那层苔状物）', qe:'Tongue coating', key:'coating', opts:[
    ['薄白润泽（正常）',{},'Thin white (normal)'],['白腻、像挂了一层霜',{pi:2,tan:2},'White & greasy'],['黄腻',{re:3,tan:1},'Yellow & greasy'],
    ['少苔 / 地图样剥落',{yin:2,xue:1},'Peeled / patchy'],['厚腻、几乎看不见舌体',{tan:3,pi:1},'Thick & greasy'],
@@ -1357,7 +1439,16 @@ const Q_INQUIRE = [
  {g:'精力 · 筋骨状态', ge:'Energy & Body', items:[
    ['容易疲劳、懒得动',{qi:3},'Easily fatigued'],['下午明显犯困',{pi:1,qi:1},'Afternoon slump'],
    ['亢奋后突然透支',{yin:1,huo:1},'Wired then crashed'],['身体困重、四肢沉',{pi:2,tan:1},'Heavy body & limbs'],
-   ['腰膝酸软',{yin:1,yang:2},'Sore lower back & knees'],['肩颈僵硬、久坐加重',{yu:1,yux:1},'Stiff neck & shoulders, worse with sitting']]}
+   ['腰膝酸软',{yin:1,yang:2},'Sore lower back & knees'],['肩颈僵硬、久坐加重',{yu:1,yux:1},'Stiff neck & shoulders, worse with sitting']]},
+ {g:'心神 · 心理状态', ge:'Mind & Mood', items:[
+   ['近两周对多数事失去兴趣',{yu:2,qi:1,yang:1},'Lost interest in most things (past 2 weeks)'],
+   ['难以放松、身体总是紧绷',{yu:2,huo:1},'Cannot relax, body always tense'],
+   ['注意力涣散、脑雾',{pi:1,tan:1,xue:1},'Poor focus, brain fog'],
+   ['对自己要求高、停不下来',{yu:1,huo:1,yin:1},'Perfectionistic, cannot stop'],
+   ['压力一来先是胃肠反应',{yu:2,pi:1},'Stress hits the gut first'],
+   ['情绪起伏大、易哭易怒',{yu:2,huo:1,xue:1},'Mood swings, tearful or angry'],
+   ['对声光气味特别敏感',{yin:1,huo:1},'Hypersensitive to noise, light, smells'],
+   ['长期感到孤独或缺乏支持',{qi:1,yang:1,yu:1},'Lonely or unsupported for a long time']]}
 ];
 const Q_FEMALE = {g:'经期 · 女性专项', ge:'Menstrual', items:[
   ['痛经（刺痛、有血块）',{yux:2,yu:1},'Cramping pain with clots'],['经量少、颜色淡',{xue:2},'Scanty, pale flow'],
@@ -1372,6 +1463,7 @@ const Q_LEAD = {
  '二便 · 下游出口':['这是采访里最不优雅、但最诚实的一组问题。身体最后的出口，从不说谎。','The least elegant but most honest questions of this interview. The body\'s exits never lie.'],
  '睡眠 · 夜间档案':['回到昨晚。关灯之后，你用了多久才睡着？夜里醒过吗？醒来时，窗外是几点？','Back to last night. After lights out, how long until sleep? Did you wake? What time was it outside?'],
  '精力 · 筋骨状态':['想象一块电池的电量条。下午三点的你，还剩百分之几？','Picture a battery bar. At 3 p.m., what percentage is left in you?'],
+ '心神 · 心理状态':['这一组不问身体，问心。回答时不用评判自己——情绪也是信号，信号从不丢人。中医讲「心主神明」，心理学讲身心一体，说的是同一件事。','This set asks the mind, not the body. No judgment — emotions are signals too, and signals are never shameful. TCM says the heart houses the mind; psychology says body and mind are one.'],
  '经期 · 女性专项':['如果愿意，和自己的身体对一次账——它每个月都准时赴约吗？','If you\'re willing — does your body keep its monthly appointment on time?']
 };
 </script>
@@ -1541,6 +1633,60 @@ huo:['睡前 10 分钟身体扫描冥想或 4-7-8 呼吸','傍晚散步 20 分�
 /* 并入证型库 */
 for(const k in TEA){ PATTERNS[k].tea=TEA[k]; PATTERNS[k].habit=HABIT[k]; PATTERNS[k].heal=HEAL[k]; }
 
+/* ============================================================
+   医学理论库 THEORY：经典出处 + 现代机制
+   心理深探 PSYDEEP：情绪模式 / 认知倾向 / 行为处方 / 自评参考
+   ============================================================ */
+const THEORY={
+qi:'【经典】《素问·通评虚实论》「精气夺则虚」；李东垣《脾胃论》以脾胃为元气之本，「内伤脾胃，百病由生」，补中益气汤立「甘温除热、升举清阳」之法。【现代机制】能量代谢与自主神经张力偏低的综合状态：线粒体 ATP 产出效率、骨骼肌量与基础代谢率下降；迷走张力不足使餐后消化与体位调节迟缓；黏膜 IgA 分泌降低对应反复上呼吸道感染。',
+xue:'【经典】《灵枢·决气》「中焦受气取汁，变化而赤，是谓血」；《景岳全书》「血者……凡为七窍之灵，为四肢之用」。四物汤养血，归脾汤治心脾两虚。【现代机制】携氧与营养输送能力不足：铁蛋白、血红蛋白、B12/叶酸下降限制组织氧供，脑灌注与视网膜供血最先受累；铁同时是多巴胺合成辅因子，缺铁与注意力、情绪稳定和不宁腿相关。',
+yin:'【经典】《素问·阴阳应象大论》「阴在内，阳之守也」；朱丹溪立「阳常有余，阴常不足」论，《景岳全书》「阴虚者，水亏也」。六味地黄丸滋肾阴，知柏地黄丸兼清虚热。【现代机制】交感偏亢叠加体液与散热储备不足：夜间核心体温下降迟缓、皮质醇昼夜曲线扁平、体温调节中枢阈值窄化（潮热、盗汗）；长期睡眠剥夺进一步放大内热与口干。',
+yang:'【经典】《素问·生气通天论》「阳气者，若天与日，失其所则折寿而不彰」；张景岳「人之大宝，只此一息真阳」。金匮肾气丸、右归丸温补肾阳。【现代机制】产热与代谢率偏低：甲状腺激素轴、棕色脂肪活性、肌肉量与外周循环均偏弱；昼夜节律相位延迟与冬季光照不足加重晨起低迷与怕冷。',
+yu:'【经典】《素问·举痛论》「百病生于气也」；朱丹溪「气血冲和，万病不生，一有怫郁，诸病生焉」。逍遥散、柴胡疏肝散疏肝解郁。【现代机制】慢性心理压力下 HPA 轴持续激活与自主神经失衡：交感优势、心率变异性降低；脑-肠轴紊乱引发肠易激样症状；肌肉持续微收缩形成紧张性头痛与胁肋不适。',
+pi:'【经典】《素问·至真要大论》「诸湿肿满，皆属于脾」；李东垣「脾胃内伤，百病由生」。参苓白术散、四君子汤健脾化湿。【现代机制】消化-代谢转化效率不足：胃排空延迟、胰岛素敏感性下降与餐后血糖波动引发嗜睡；肠道菌群多样性降低与水盐调节偏慢，使人「重、胀、黏」。',
+tan:'【经典】《丹溪心法》「百病多由痰作祟」；《医门法律》「肥人多痰湿」。二陈汤、温胆汤燥湿化痰。【现代机制】能量正平衡与慢性低度炎症：中心性肥胖、脂肪因子失衡、胰岛素抵抗与阻塞性睡眠呼吸暂停互为因果；日间嗜睡与头昏常源于夜间间歇缺氧。',
+re:'【经典】叶天士《温热论》「湿热之邪，始虽外受，终归脾胃」，「热得湿而愈炽，湿得热而愈横」。龙胆泻肝汤、三仁汤分消湿热。【现代机制】饮食-炎症-微生态轴：酒精与高果糖促进肝脏脂肪新生与内毒素入血，hs-CRP 等炎症标志升高；皮脂分泌与皮肤菌群失衡表现为成人痤疮与脂溢。',
+yux:'【经典】《素问·调经论》「血气不和，百病乃变化而生」；王清任《医林改错》以血府逐瘀汤等五逐瘀汤系统论瘀；叶天士言「久病入络」。【现代机制】微循环与筋膜系统的慢性受限：久坐使静脉回流受阻、内皮功能下降；肌筋膜触发点与中枢敏化使疼痛「定点、夜重」。',
+huo:'【经典】《素问·至真要大论》「诸痛痒疮，皆属于心」；朱丹溪「气有余便是火」。导赤散清心利水，酸枣仁汤养心安神。【现代机制】慢性失眠的过度觉醒模型：24 小时皮质激活与代谢率升高、入睡潜伏期延长、深睡比例下降；咖啡因、蓝光与睡前反刍是三大放大器。'
+};
+const PSYDEEP={
+qi:['情绪模式：疲惫主导的低唤醒——不是不想，而是「启动电压」不够，常伴自责与内疚。','认知倾向：把疲劳解读为懒惰或能力不足，形成「越自责越耗能」的循环。','行为处方：行为激活（BA）——把任务切到 10 分钟可完成的颗粒度，先动再评价；记录「完成感」而非「完成量」。','自评参考：疲劳严重度量表 FSS；若两周以上伴兴趣减退，用 PHQ-9 初筛并考虑就诊。'],
+xue:['情绪模式：底色式不安——心神「供血不足」，易惊、易慌，遇事先感到不稳。','认知倾向：灾难化预期与过度警觉，夜间尤甚；常把身体信号误读为危险。','行为处方：节律先于内容——固定起床、进餐、入睡；睡前身体扫描 10 分钟给神经系统「充电」。','自评参考：GAD-7 筛查焦虑；持续心悸头晕请先查血常规与铁蛋白，排除器质因素。'],
+yin:['情绪模式：内在过热——外表克制，内里烦躁，耐心阈值低，容易被声音、光线点燃。','认知倾向：高标准与内耗并存，入夜后思维反刍最盛。','行为处方：给神经系统「物理降温」——傍晚后调暗灯光、减少信息输入、4-7-8 呼吸 3 组；把最耗心力的事放在上午。','自评参考：失眠严重程度指数 ISI；感觉处理敏感性（HSP）量表帮助理解「敏感」是特质而非缺陷。'],
+yang:['情绪模式：低功耗的平淡——不是剧烈痛苦，而是「提不起劲」，晨重暮轻、冬重夏轻。','认知倾向：回避与拖延被误认为意志薄弱，其实是生理性低唤醒。','行为处方：晨间 10-30 分钟明亮光照 + 温热早餐 + 一次短促力量训练，用外部刺激点火；保持社交「最低剂量」。','自评参考：季节性情绪问卷 SPAQ；伴怕冷、体重增加务必查 TSH。'],
+yu:['情绪模式：压抑与责任感——「我应该」远多于「我想要」，情绪被吞下，身体替你表达。','认知倾向：反刍思维与完美主义，难以对他人说不。','行为处方：表达性书写（每日 15 分钟写真实感受）、有氧「泄压」、每周一次不被评判的对话；练习一句「这不是我的责任」。','自评参考：PSS-10 压力知觉量表；PHQ-15 评估躯体化程度。'],
+pi:['情绪模式：黏滞的困顿——想得多、动得少，情绪不激烈但持续昏沉。','认知倾向：「思伤脾」的现代版是反刍与犹疑，决策拖延的成本被低估。','行为处方：先动再想——饭后 15 分钟步行、把决策限定在 3 个选项内；用外部清单替代脑内盘旋。','自评参考：反刍反应量表 RRS；脑雾明显者同时排查睡眠与血糖。'],
+tan:['情绪模式：动机黏滞——知道该做却启动不了，伴随对身体的疏离与羞耻感。','认知倾向：全或无思维（要么彻底节食，要么放弃），导致反复循环。','行为处方：把目标从体重改为「今日步数 / 蔬菜份数」；找运动搭子用外部节律替代意志；睡好再减脂。','自评参考：STOP-BANG 筛查睡眠呼吸暂停；TFEQ 了解情绪性进食倾向。'],
+re:['情绪模式：烦闷与急躁并存，像一团散不出去的闷火。','认知倾向：对环境杂乱、闷热、噪音耐受低，易迁怒。','行为处方：环境清爽化（除湿、整理、通风）本身就是情绪干预；把酒局替换为运动约。','自评参考：饮酒问题 AUDIT-C；易怒持续可用 GAD-7 复核。'],
+yux:['情绪模式：卡住感——身体某处一直紧着，像一段没有处理完的过往。','认知倾向：疼痛灾难化与回避活动，形成「怕痛→不动→更痛」循环。','行为处方：在无痛范围内温柔地动（活动度训练）、热敷 + 缓慢呼吸；必要时借助身体导向的心理治疗释放紧绷。','自评参考：疼痛灾难化量表 PCS；痛经进行性加重请做妇科影像评估。'],
+huo:['情绪模式：停不下来的大脑——躺下即开会，白天精神、夜里失守。','认知倾向：对睡眠本身的焦虑（怕睡不着）成为失眠最大的维持因素。','行为处方：CBT-I 三件事——固定起床时间、睡不着就离床、睡前写「担忧清单」把大脑存档。','自评参考：ISI 失眠指数、睡前唤醒量表 PSAS；持续 3 个月以上建议专业 CBT-I。']
+};
+const THEORY_EN={
+qi:'[Classics] Suwen: "when essence-qi is plundered, deficiency follows"; Li Dongyuan made the spleen-stomach the root of source qi (Bu Zhong Yi Qi Tang). [Mechanism] A low-energy, low-autonomic-tone state: reduced mitochondrial output, muscle mass and basal metabolism; weak vagal tone slows digestion and postural regulation; lower mucosal IgA maps to recurrent colds.',
+xue:'[Classics] Lingshu: "the middle burner takes the essence and turns it red — this is blood"; Si Wu Tang nourishes blood, Gui Pi Tang treats heart-spleen deficiency. [Mechanism] Reduced oxygen and nutrient delivery: low ferritin, hemoglobin, B12/folate; iron is also a dopamine cofactor, linking deficiency to attention, mood stability and restless legs.',
+yin:'[Classics] "Yin dwells within, guarding yang"; Zhu Danxi: "yang is often in excess, yin often insufficient" (Liu Wei / Zhi Bai Di Huang Wan). [Mechanism] Sympathetic overdrive plus low fluid and cooling reserve: slow night-time core-temperature drop, flattened cortisol curve, narrowed thermoneutral zone (flushing, night sweats).',
+yang:'[Classics] Suwen: "yang qi is like the sun to the heavens"; Zhang Jingyue: "the great treasure of man is one breath of true yang" (Jin Gui Shen Qi Wan). [Mechanism] Low thermogenesis: weak thyroid axis, brown-fat activity, muscle mass and peripheral circulation; delayed circadian phase and winter light deficit worsen morning lows.',
+yu:'[Classics] Suwen: "the hundred diseases arise from qi"; Zhu Danxi: "once qi is constrained, every illness may arise" (Xiao Yao San, Chai Hu Shu Gan San). [Mechanism] Chronic HPA activation and autonomic imbalance: sympathetic dominance, low HRV, gut-brain axis dysregulation, sustained muscle micro-contraction.',
+pi:'[Classics] Suwen: "all dampness, swelling and fullness belong to the spleen" (Shen Ling Bai Zhu San, Si Jun Zi Tang). [Mechanism] Poor digestive-metabolic conversion: delayed gastric emptying, reduced insulin sensitivity, post-meal glucose swings, lower microbial diversity, sluggish fluid handling.',
+tan:'[Classics] Zhu Danxi: "most diseases are the mischief of phlegm"; "the corpulent have much phlegm-damp" (Er Chen Tang, Wen Dan Tang). [Mechanism] Positive energy balance and low-grade inflammation: central obesity, adipokine imbalance, insulin resistance and OSA reinforcing one another.',
+re:'[Classics] Ye Tianshi: "damp-heat, though received from outside, ends in the spleen-stomach; heat grows fiercer with damp, damp more unruly with heat" (Long Dan Xie Gan Tang, San Ren Tang). [Mechanism] Diet-inflammation-microbiome axis: alcohol and fructose drive hepatic lipogenesis and endotoxemia; hs-CRP rises; sebum and skin flora shift toward adult acne.',
+yux:'[Classics] Suwen: "when blood and qi are disharmonious, the hundred diseases arise"; Wang Qingren systematised stasis with the five Zhu Yu decoctions; Ye Tianshi: "long illness enters the network vessels". [Mechanism] Chronic microcirculatory and fascial restriction: impaired venous return, endothelial dysfunction, myofascial trigger points and central sensitisation.',
+huo:'[Classics] Suwen: "all pain, itching and sores belong to the heart"; Zhu Danxi: "excess qi becomes fire" (Dao Chi San, Suan Zao Ren Tang). [Mechanism] The hyperarousal model of insomnia: elevated 24-h cortical and metabolic activation, long sleep latency, reduced deep sleep; caffeine, blue light and rumination amplify it.'
+};
+const PSYDEEP_EN={
+qi:['Mood pattern: fatigue-led low arousal — the "ignition voltage" is missing, often with guilt.','Cognitive bias: reading tiredness as laziness, fuelling a self-blame loop.','Behavioural prescription: behavioural activation — 10-minute task grains, act before judging, log completion not volume.','Self-check: Fatigue Severity Scale; PHQ-9 if interest is lost for 2+ weeks.'],
+xue:['Mood pattern: a background hum of unease — startles easily, feels unsteady first.','Cognitive bias: catastrophic expectation and hypervigilance, worse at night.','Behavioural prescription: rhythm before content — fixed wake, meals, bedtime; 10-min body scan before sleep.','Self-check: GAD-7; check blood count and ferritin for persistent palpitations or dizziness.'],
+yin:['Mood pattern: inner overheating — composed outside, irritable inside, low tolerance for noise and light.','Cognitive bias: high standards with rumination peaking after dark.','Behavioural prescription: physically cool the nervous system — dim lights, cut input after dusk, 3 rounds of 4-7-8 breathing.','Self-check: Insomnia Severity Index; HSP scale to reframe sensitivity as a trait.'],
+yang:['Mood pattern: low-power flatness — not sharp pain but no drive, worse in mornings and winter.','Cognitive bias: avoidance mistaken for weak will; it is physiological low arousal.','Behavioural prescription: morning bright light + warm breakfast + a short strength set; keep a minimum dose of social contact.','Self-check: SPAQ seasonal questionnaire; test TSH if cold intolerance and weight gain coexist.'],
+yu:['Mood pattern: suppression and duty — far more "should" than "want"; the body speaks for swallowed feelings.','Cognitive bias: rumination and perfectionism; hard to say no.','Behavioural prescription: expressive writing 15 min/day, aerobic venting, one non-judging conversation a week; practise "this is not my responsibility".','Self-check: PSS-10 perceived stress; PHQ-15 for somatisation.'],
+pi:['Mood pattern: sticky heaviness — much thinking, little moving, persistent fog.','Cognitive bias: rumination and indecision; the cost of delayed decisions is underestimated.','Behavioural prescription: move first — 15-min post-meal walk, cap decisions at 3 options, externalise lists.','Self-check: Ruminative Responses Scale; screen sleep and glucose when fog is marked.'],
+tan:['Mood pattern: viscous motivation — knowing without starting, with body shame and detachment.','Cognitive bias: all-or-nothing dieting cycles.','Behavioural prescription: shift goals from weight to daily steps / vegetable servings; find a workout partner; sleep first, then fat loss.','Self-check: STOP-BANG for sleep apnoea; TFEQ for emotional eating.'],
+re:['Mood pattern: smothered restlessness — a fire that cannot vent.','Cognitive bias: low tolerance for clutter, heat and noise; irritation displaced onto others.','Behavioural prescription: a cool, dry, tidy environment is itself an intervention; swap drinking dates for exercise dates.','Self-check: AUDIT-C for alcohol; GAD-7 if irritability persists.'],
+yux:['Mood pattern: stuckness — a part of the body held tight, like unfinished business.','Cognitive bias: pain catastrophising and activity avoidance ("fear → stillness → more pain").','Behavioural prescription: gentle movement within a pain-free range, heat plus slow breathing; body-oriented therapy if tension persists.','Self-check: Pain Catastrophizing Scale; imaging for progressive dysmenorrhoea.'],
+huo:['Mood pattern: a brain that will not stop — lie down and the meeting starts.','Cognitive bias: anxiety about sleep itself becomes the main maintaining factor.','Behavioural prescription: CBT-I essentials — fixed wake time, leave the bed when awake, write a worry list before sleep.','Self-check: ISI, Pre-Sleep Arousal Scale; seek CBT-I after 3 months.']
+};
+for(const k in THEORY){ PATTERNS[k].theory=THEORY[k]; PATTERNS[k].psyDeep=PSYDEEP[k]; }
+
 /* 药茶通用提示 */
 const TEA_NOTE='※ 以上剂量为成人日常调理量级，非处方。孕期、哺乳期、慢性病患者及正在服药者请先咨询中医师；感冒发热、经期等特殊时期遵医嘱调整；同一款茶连饮不宜超过 2 周。';
 const TEA_NOTE_EN='* Adult wellness-level dosages, not prescriptions. Consult a practitioner if pregnant, breastfeeding, chronically ill or on medication; pause during colds/fever; rotate teas every 2 weeks.';
@@ -1652,7 +1798,7 @@ huo:{name:'Heart Fire',organ:'Heart',one:'The mind\'s lamp burns too bright: lig
  habit:['Phone out of the bedroom 1h before sleep','Dark, quiet, cool bedroom (18-22°C)','Never check the clock on night waking'],
  heal:['10-min body scan or 4-7-8 breathing in bed','Warm foot soak 15 min to draw fire downward','Write the worry list before bed — archive the brain']}
 };
-for(const k in PATTERNS_EN){ PATTERNS[k].en = PATTERNS_EN[k]; }
+for(const k in PATTERNS_EN){ PATTERNS[k].en = PATTERNS_EN[k]; PATTERNS[k].en.theory=THEORY_EN[k]; PATTERNS[k].en.psyDeep=PSYDEEP_EN[k]; }
 </script>
 
 <script>
@@ -1685,7 +1831,8 @@ yang:[
  {d:['内分泌学','Endocrinology'],s:'A',c:['「畏寒 + 乏力 + 体重增加 + 便溏」是甲状腺功能减退的教科书组合。此侧写出现时，检测 TSH 的优先级高于任何食养调整。','Cold intolerance with fatigue and weight gain is textbook hypothyroidism. Checking TSH outranks any dietary adjustment.'],r:['证据层级：甲状腺疾病诊疗指南','Level: thyroid guidelines']},
  {d:['运动科学','Exercise science'],s:'A',c:['抗阻训练增加去脂体重，进而提升静息能量消耗与产热能力——「增肌即增火」是可由间接热量测定验证的表述。','Resistance training raises lean mass and resting energy expenditure — verifiable by indirect calorimetry.'],r:['证据层级：抗阻训练代谢RCT','Level: resistance-training metabolic RCTs']},
  {d:['时间生物学','Chronobiology'],s:'A',c:['晨间明亮光照（>1000 lux，10-30 分钟）可前移昼夜节律相位，并对季节性情绪低落有明确疗效——与「晒背补阳、晨起见光」指向同一生理开关。','Morning bright light advances circadian phase and treats seasonal low mood — the same switch as "sunning the back".'],r:['证据层级：光照疗法RCT与元分析','Level: light-therapy RCTs & meta-analyses']},
- {d:['营养学','Nutrition'],s:'B',c:['蛋白质的食物热效应（约 20-30%）远高于碳水与脂肪；长期低热量节食会下调静息代谢——这为「阳虚忌盲目节食」提供了量化支撑。','Protein has the highest thermic effect (20-30%); chronic under-eating downregulates resting metabolism.'],r:['证据层级：食物热效应与代谢适应研究','Level: TEF & metabolic-adaptation research']}],
+ {d:['营养学','Nutrition'],s:'B',c:['蛋白质的食物热效应（约 20-30%）远高于碳水与脂肪；长期低热量节食会下调静息代谢——这为「阳虚忌盲目节食」提供了量化支撑。','Protein has the highest thermic effect (20-30%); chronic under-eating downregulates resting metabolism.'],r:['证据层级：食物热效应与代谢适应研究','Level: TEF & metabolic-adaptation research']},
+ {d:['临床心理学','Clinical psychology'],s:'B',c:['「晨重暮轻、冬重夏轻」的情绪低落与季节性情感障碍谱系重叠；行为激活与晨间光照的联合干预对季节性低落有可复现效果，与「温阳靠外部柴火」的思路一致。','Morning-heavy, winter-heavy low mood overlaps the seasonal affective spectrum; behavioural activation plus morning light shows reproducible benefit.'],r:['证据层级：季节性情感障碍干预研究','Level: seasonal affective disorder intervention studies']}],
 yu:[
  {d:['身心医学','Psychosomatic medicine'],s:'A',c:['慢性压力下 HPA 轴持续激活与自主神经失衡，是「胸闷·太息·胁胀·烦躁」最直接的现代解释。躯体化症状不是「想出来的」，而是真实的生理输出。','Chronic HPA activation and autonomic imbalance directly explain the chest-tightness/sighing cluster. Somatic symptoms are real physiological output.'],r:['证据层级：应激生理学机制与队列研究','Level: stress physiology & cohorts']},
  {d:['消化病学','Gastroenterology'],s:'A',c:['脑-肠轴证据充分：肠易激综合征（罗马IV）与功能性消化不良的症状强度随心理压力波动，心理干预已被写入一线管理方案——与「肝气犯脾」的描述结构一致。','Gut-brain axis evidence is solid: IBS and functional dyspepsia fluctuate with stress, and psychological therapy is first-line management.'],r:['证据层级：罗马IV共识与心理干预RCT','Level: Rome IV consensus & psychotherapy RCTs']},
@@ -1700,17 +1847,20 @@ tan:[
  {d:['代谢医学','Metabolic medicine'],s:'A',c:['「形体肥胖松软·困重·苔厚腻」在指标层面可被代谢综合征五项直接检验：腰围、甘油三酯、HDL-C、血压、空腹血糖。用腰围与体脂趋势替代体重焦虑，有明确的风险分层依据。','The picture is testable via the five metabolic-syndrome criteria; waist circumference outperforms weight as a risk marker.'],r:['证据层级：代谢综合征国际诊断标准','Level: international MetS criteria']},
  {d:['睡眠医学','Sleep medicine'],s:'A',c:['「鼾声重·嗜睡」须筛查阻塞性睡眠呼吸暂停。OSA 与肥胖互为因果，未处理的 OSA 会让减脂努力事倍功半——「先睡好再减脂」有明确证据支持。','Snoring with hypersomnolence warrants OSA screening; untreated OSA undermines fat-loss efforts.'],r:['证据层级：STOP-BANG 筛查与OSA指南','Level: STOP-BANG & OSA guidelines']},
  {d:['运动科学','Exercise science'],s:'A',c:['WHO 推荐每周 150-300 分钟中等强度有氧，加每周 2 次抗阻训练；日常非运动性消耗(NEAT)对全日能量平衡的贡献常被低估——「能站不坐」有实测支持。','WHO recommends 150-300 min moderate aerobic plus twice-weekly resistance; NEAT contributes substantially to daily balance.'],r:['证据层级：WHO 身体活动指南','Level: WHO physical activity guidelines']},
- {d:['营养流行病学','Nutritional epidemiology'],s:'A',c:['含糖饮料摄入与体重增加、非酒精性脂肪肝风险的关联，在多个大型前瞻队列中结论一致——「戒掉含糖饮料」是本证型性价比最高的单一动作。','Sugar-sweetened beverages consistently associate with weight gain and fatty liver across large cohorts.'],r:['证据层级：大型前瞻队列与元分析','Level: large prospective cohorts']}],
+ {d:['营养流行病学','Nutritional epidemiology'],s:'A',c:['含糖饮料摄入与体重增加、非酒精性脂肪肝风险的关联，在多个大型前瞻队列中结论一致——「戒掉含糖饮料」是本证型性价比最高的单一动作。','Sugar-sweetened beverages consistently associate with weight gain and fatty liver across large cohorts.'],r:['证据层级：大型前瞻队列与元分析','Level: large prospective cohorts']},
+ {d:['健康心理学','Health psychology'],s:'B',c:['情绪性进食与体重羞耻感会削弱长期体重管理效果；基于自我关怀与行为目标（步数、蔼菜份数）而非体重数字的干预，依从性与维持率更高。','Emotional eating and weight shame undermine long-term outcomes; self-compassion and behaviour-based goals improve adherence.'],r:['证据层级：体重管理行为干预研究','Level: behavioural weight-management trials']}],
 re:[
  {d:['肝病学','Hepatology'],s:'A',c:['酒精与高果糖摄入通过肝脏从头脂肪合成与内毒素通路驱动炎症——「戒酒是第一处方」在代谢性肝病领域有最强的一致性。','Alcohol and high fructose drive hepatic lipogenesis and inflammation — abstinence is the highest-consistency recommendation.'],r:['证据层级：脂肪肝与酒精性肝病指南','Level: fatty-liver & alcoholic liver disease guidelines']},
  {d:['皮肤科','Dermatology'],s:'B',c:['「面油多易长痘」与高血糖负荷饮食、部分乳制品（尤其脱脂奶与乳清蛋白）的关联有一致的观察证据；过度清洁反而破坏皮肤屏障，与「温和清洁」建议一致。','Adult acne associates with high-glycemic-load diets and certain dairy; over-cleansing impairs the barrier.'],r:['证据层级：饮食-痤疮观察与干预研究','Level: diet-acne studies']},
  {d:['风湿代谢','Rheumatology'],s:'A',c:['酒精（尤其啤酒）与含果糖饮料升高血尿酸并增加痛风发作风险，是「湿热忌酒」中最可量化的一条。','Alcohol (especially beer) and fructose beverages raise urate and gout risk.'],r:['证据层级：痛风管理指南','Level: gout management guidelines']},
- {d:['免疫学','Immunology'],s:'B',c:['慢性低度炎症可用 hs-CRP 等指标部分刻画，并与高脂高糖饮食、睡眠不足、酒精相关——为「湿热」提供了一个可测量的现代代理指标。','Chronic low-grade inflammation is partly captured by hs-CRP and tracks diet, sleep loss and alcohol.'],r:['证据层级：炎症标志物队列研究','Level: inflammatory-marker cohorts']}],
+ {d:['免疫学','Immunology'],s:'B',c:['慢性低度炎症可用 hs-CRP 等指标部分刻画，并与高脂高糖饮食、睡眠不足、酒精相关——为「湿热」提供了一个可测量的现代代理指标。','Chronic low-grade inflammation is partly captured by hs-CRP and tracks diet, sleep loss and alcohol.'],r:['证据层级：炎症标志物队列研究','Level: inflammatory-marker cohorts']},
+ {d:['环境心理学','Environmental psychology'],s:'C',c:['高温高湿与环境杂乱与易怒、注意力下降相关，整理与降温干预可短期改善情绪；证据多为小样本实验，应视为可尝试的低成本假设。','Heat, humidity and clutter associate with irritability and reduced attention; tidying and cooling give short-term mood gains, but evidence is small-sample.'],r:['证据层级：小样本环境-情绪实验','Level: small environmental-mood experiments']}],
 yux:[
  {d:['疼痛医学','Pain medicine'],s:'A',c:['「不通则痛」与现代慢性疼痛管理的核心共识罕见地一致：在无痛范围内温和活动优于完全制动，长期制动会加重中枢敏化与功能退化。','"No flow, then pain" aligns with modern consensus: gentle movement within painless range beats immobilization.'],r:['证据层级：慢性肌骨疼痛管理指南','Level: chronic musculoskeletal pain guidelines']},
  {d:['血管医学','Vascular medicine'],s:'B',c:['长时间静坐导致下肢静脉回流受阻与内皮功能短时下降；每 30 分钟起身活动数分钟即可逆转这一急性变化——「打破久坐」有直接的生理测量支持。','Prolonged sitting impairs venous return and endothelial function acutely; breaking it every 30 min reverses the change.'],r:['证据层级：久坐中断的内皮功能试验','Level: sitting-interruption endothelial trials']},
  {d:['妇科学','Gynecology'],s:'B',c:['「痛经伴血块、疼痛进行性加重」须警惕子宫内膜异位症或子宫腺肌症，二者平均确诊延迟长达数年。此侧写应导向专科影像评估，而不是仅靠茶饮调理。','Progressive clotted dysmenorrhea warrants evaluation for endometriosis/adenomyosis — conditions with years of diagnostic delay.'],r:['证据层级：子宫内膜异位症诊疗指南','Level: endometriosis guidelines']},
- {d:['血液流变学','Hemorheology'],s:'C',c:['Omega-3 对血小板聚集与炎症指标的影响在实验室层面可见，但「活血食材」对临床终点的效果证据薄弱；红酒「活血」的说法已被后续研究推翻，酒精弊大于利。','Omega-3 effects appear in lab markers, but clinical endpoints for "blood-moving foods" remain weak; the red-wine claim has not held up.'],r:['证据层级：以机制研究为主，临床终点证据不足','Level: mechanistic only; clinical endpoints lacking']}],
+ {d:['血液流变学','Hemorheology'],s:'C',c:['Omega-3 对血小板聚集与炎症指标的影响在实验室层面可见，但「活血食材」对临床终点的效果证据薄弱；红酒「活血」的说法已被后续研究推翻，酒精弊大于利。','Omega-3 effects appear in lab markers, but clinical endpoints for "blood-moving foods" remain weak; the red-wine claim has not held up.'],r:['证据层级：以机制研究为主，临床终点证据不足','Level: mechanistic only; clinical endpoints lacking']},
+ {d:['疼痛心理学','Pain psychology'],s:'A',c:['疼痛灾难化与恐惧-回避是慢性疼痛持续的核心心理机制；针对慢性疼痛的认知行为疗法与接纳承诺疗法能改善功能与生活质量，与「通则不痛」强调的恢复活动方向一致。','Pain catastrophising and fear-avoidance maintain chronic pain; CBT and ACT for chronic pain improve function and quality of life.'],r:['证据层级：慢性疼痛心理干预的系统评价','Level: systematic reviews of psychological pain interventions']}],
 huo:[
  {d:['睡眠医学','Sleep medicine'],s:'A',c:['失眠认知行为疗法(CBT-I)是慢性失眠的一线治疗，长期效果优于安眠药且无依赖风险。「心火亢盛」的失眠侧写应优先导向 CBT-I——这是本报告中证据等级最高的一条建议。','CBT-I is first-line for chronic insomnia, outperforming hypnotics long-term. The highest-evidence recommendation in this report.'],r:['证据层级：多学会临床实践指南一致推荐','Level: multi-society clinical guidelines']},
  {d:['药理学','Pharmacology'],s:'A',c:['咖啡因半衰期约 5-6 小时且个体差异大（CYP1A2 基因型影响显著）；睡前 6 小时摄入仍会客观缩短总睡眠时间——「下午 2 点后归零」有剂量-时间依据。','Caffeine half-life is 5-6 h with wide genetic variability; intake 6 h before bed still shortens objective sleep.'],r:['证据层级：咖啡因-睡眠剂量时间试验','Level: caffeine dose-timing trials']},
@@ -1735,6 +1885,8 @@ function artSVG(sp){
     if(sp.spot) g+=`<circle cx="15" cy="20" r="1.7" fill="#4d1f3d"/><circle cx="24.5" cy="26" r="1.5" fill="#4d1f3d"/><circle cx="23" cy="14.5" r="1.2" fill="#4d1f3d"/>`;
     if(sp.dry) g+=`<path d="M16 14v12M24 15v10" stroke="rgba(255,255,255,.45)" stroke-width="1" fill="none"/>`;
     if(sp.wet) g+=`<circle cx="16" cy="16" r="2.2" fill="rgba(255,255,255,.6)"/><circle cx="25" cy="24" r="1.7" fill="rgba(255,255,255,.5)"/>`;
+    if(sp.tip) g+=`<ellipse cx="20" cy="31" rx="5.5" ry="3.2" fill="#c9403f" opacity=".85"/><circle cx="17" cy="27" r=".9" fill="#c9403f"/><circle cx="23" cy="27.5" r=".9" fill="#c9403f"/>`;
+    if(sp.crack) g+=`<path d="M20 11v18M17 19l3 3 3-3M16 26l4 2 4-2" fill="none" stroke="rgba(90,30,40,.7)" stroke-width="1"/>`;
     return S+g+'</g>'+E;
   }
   if(sp.t==='face'){
@@ -1800,7 +1952,8 @@ function artSVG(sp){
 const UNK={t:'q'};
 const ART={
  tongue:[{t:'tongue',c:'#e4bfb4'},{t:'tongue',c:'#d98c86'},{t:'tongue',c:'#cc6b69'},
-   {t:'tongue',c:'#b33f47',dry:1},{t:'tongue',c:'#8e5f7d',spot:1},{t:'tongue',c:'#e0b1a8',teeth:1},UNK],
+   {t:'tongue',c:'#b33f47',dry:1},{t:'tongue',c:'#8e5f7d',spot:1},{t:'tongue',c:'#e0b1a8',teeth:1},
+   {t:'tongue',c:'#d98c86',tip:1},{t:'tongue',c:'#cf6f6d',crack:1},UNK],
  coating:[{t:'tongue',c:'#d98c86',coat:'#f6f2e6',coatA:.42},{t:'tongue',c:'#d98c86',coat:'#f8f6ee',coatA:.85},
    {t:'tongue',c:'#d98c86',coat:'#d9c268',coatA:.82},{t:'tongue',c:'#cf6f6d',peel:1},
    {t:'tongue',c:'#d98c86',coat:'#efe7d2',coatA:.95},{t:'tongue',c:'#d98c86',coat:'#e8f3f2',coatA:.6,wet:1},UNK],
@@ -2292,6 +2445,17 @@ function focusQuestion(o,withAction=false){
   box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusTitle"></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusCount"></span><button class="archiveNode"></button></div>':''}<div class="degreeRow"></div>`;
   box.querySelector('.focusTitle').textContent=orbLabel(o);
   if(lead)box.querySelector('.focusLead').textContent=lead;
+  // 情境交叉：何时加重（可多选），只在选中了异常证词时计入权重
+  o.ctx=o.ctx||new Set();
+  const cr=document.createElement('div'); cr.className='ctxRow';
+  cr.innerHTML=`<span class="ctxLbl">${L('何时更明显？（可多选 · 用于交叉印证）','WHEN IS IT WORSE? (MULTI · CROSS-CHECK)')}</span>`;
+  CONTEXTS.forEach(c=>{
+    const chip=document.createElement('span'); chip.className='miniChip'+(o.ctx.has(c)?' on':''); chip.textContent=L(c[0],c[2]);
+    chip.onclick=e=>{e.stopPropagation();o.ctx.has(c)?o.ctx.delete(c):o.ctx.add(c);chip.classList.toggle('on',o.ctx.has(c));};
+    cr.appendChild(chip);
+  });
+  if(innerWidth<700) cr.classList.add('ctxAfter'); else cr.classList.add('ctxDock');
+  box._ctxRow=cr;
   const cw=document.createElement('div'); cw.className='customWrap';
   const ci=document.createElement('input'); ci.type='text'; ci.maxLength=80;
   ci.placeholder=L('以上都不贴切？自行补充这条证词（选填）','None quite fits? Add your own testimony (optional)');
@@ -2305,34 +2469,44 @@ function focusQuestion(o,withAction=false){
   box.appendChild(sk);
   return box;
 }
-function answerPositions(count){
-  const rx=Math.min(390,innerWidth*.34),ry=Math.min(205,innerHeight*.235);
+function answerPositions(count,ry){
+  const rx=Math.min(390,innerWidth*.34); ry=ry||Math.min(205,innerHeight*.235);
   return Array.from({length:count},(_,i)=>{
     const angle=-Math.PI/2+(Math.PI*2*i/count)+(count%2?0:.18);
     return {x:Math.cos(angle)*rx,y:Math.sin(angle)*ry};
   });
 }
 function addAnswerNodes(inner,items,onChoose,art){
-  const mobile=innerWidth<700, positions=answerPositions(items.length);
+  const mobile=innerWidth<700;
+  const card=inner.querySelector('.focusQuestion'), cardH=card?card.offsetHeight:0;
+  const ry=mobile?0:Math.min(innerHeight*.5-130,Math.max(innerHeight*.235,cardH/2+58));
+  const positions=answerPositions(items.length,ry);
   const fr=inner.getBoundingClientRect();
   items.forEach((item,i)=>{
     let pos=positions[i];
-    if(!mobile){ // 桌面星环：把节点收进视口边界内
+    if(!mobile){ // 桌面星环：把节点收进视口边界内（底部留出情境停靠条）
       const hw=118,hh=52;
       const ax=Math.max(hw+10,Math.min(innerWidth-hw-10,fr.left+pos.x));
-      const ay=Math.max(hh+10,Math.min(innerHeight-hh-10,fr.top+pos.y));
+      const ay=Math.max(hh+10,Math.min(innerHeight-hh-125,fr.top+pos.y));
       pos={x:ax-fr.left,y:ay-fr.top};
     }
     const dist=Math.hypot(pos.x,pos.y);
     const wire=document.createElement('span');wire.className='answerWire';
     wire.style.width=dist+'px';wire.style.transform=`rotate(${Math.atan2(pos.y,pos.x)}rad)`;
     inner.appendChild(wire);
-    const node=document.createElement('button');node.className='answerNode';
+    const node=document.createElement('div');node.className='answerNode';node.setAttribute('role','button');node.tabIndex=0;
     node.style.setProperty('--answer-x',pos.x+'px');node.style.setProperty('--answer-y',pos.y+'px');node.style.setProperty('--answer-delay',(i*55)+'ms');
-    node.innerHTML=(art&&art[i]?artSVG(art[i]):'')+
-      `<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span>`;
+    node.innerHTML=`<div class="answerMain">${art&&art[i]?artSVG(art[i]):''}<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span></div>`+
+      `<div class="answerDeg"><input type="range" min="0" max="4" value="2" aria-label="${L('程度','Degree')}"><div class="answerDegLbl"><span>${L('程度','DEGREE')}</span><b></b></div></div>`;
     node.querySelector('.answerText').textContent=optText(item);
+    const rng=node.querySelector('input'),lbl=node.querySelector('.answerDegLbl b');
+    const paint=()=>{const d=+rng.value;lbl.textContent=L(DEG5[d][0],DEG5[d][2]);node.style.borderLeftWidth=(2+d)+'px';};
+    paint();
+    rng.addEventListener('click',e=>e.stopPropagation());
+    rng.addEventListener('pointerdown',e=>e.stopPropagation());
+    rng.addEventListener('input',()=>{paint();node.dispatchEvent(new CustomEvent('degree',{detail:+rng.value}));});
     node.onclick=e=>{e.stopPropagation();onChoose(item,node);};
+    node.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onChoose(item,node);}};
     inner.appendChild(node);
   });
 }
@@ -2379,6 +2553,7 @@ function openOrb(o){
   window.__stageFocus=true;document.body.classList.add('stage-answering');o.el.classList.add('focused');o.el.style.opacity='0';
   collapseDock();
   const panel=$('#qPanel');panel.className='';panel.classList.add('open');placeFocus(o);
+  panel.querySelectorAll('.ctxDock').forEach(e=>e.remove());
   const inner=$('#qPanelInner'); inner.innerHTML='';
   const cat=CATS[o.cat];
   if(o.cat==='pulse'){
@@ -2399,62 +2574,47 @@ function openOrb(o){
     enterPulse(); applyPulseLang();
     return;
   }
-  if(o.cat==='inquire'){
-    const prompt=focusQuestion(o,true),marks=new Map();inner.appendChild(prompt);
-    const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode');
-    const degRow=prompt.querySelector('.degreeRow');
-    degRow.innerHTML=`<span class="degreeLbl">${L('连点一条证词，依次标记 偶尔 → 经常 → 持续 → 取消','TAP A CLUE REPEATEDLY: OCCASIONAL → FREQUENT → CONSTANT → CLEAR')}</span>`;
-    const refresh=()=>{count.textContent=L(`已标记 ${marks.size} 条（可为 0）`,`MARKED ${marks.size} · ZERO ALLOWED`);archive.textContent=L('封 存 这 组','ARCHIVE SET');};refresh();
-    addAnswerNodes(inner,o.g.items,(item,node)=>{
-      const lv=((marks.get(item)||0)+1)%4;
-      node.classList.remove('lv1','lv2','lv3');
-      let badge=node.querySelector('.degBadge');
-      if(lv===0){marks.delete(item);node.classList.remove('sel');if(badge)badge.remove();}
-      else{
-        marks.set(item,lv);node.classList.add('sel','lv'+lv);
-        if(!badge){badge=document.createElement('span');badge.className='degBadge';node.appendChild(badge);}
-        badge.textContent=L(DEGREES[lv-1][0],DEGREES[lv-1][2]);
-      }
-      refresh();
-    });
-    archive.onclick=e=>{e.stopPropagation();
-      o._bonus=marks.size*3;
-      completeOrb(o,()=>{
-        if(!marks.size)addClue(L(cat.zh,cat.en),L(`${o.g.g} · 未发现反复信号`,`${o.g.ge} · no recurring signals`),{});
-        marks.forEach((lv,item)=>addClue(L(cat.zh,cat.en),
-          (LANG==='en'?o.g.ge:o.g.g.split(' ')[0])+' · '+optText(item)+'（'+L(DEGREES[lv-1][0],DEGREES[lv-1][2])+'）',
-          scaleWeights(item[1],DEGREES[lv-1][1])));
-      });};
-    return;
-  }
-  // 望 / 闻：单选，配动态图示；非「正常」证词需再标三档程度
-  inner.appendChild(focusQuestion(o));
-  const artList=ART[o.g.key];
-  let picking=false;
-  const askDegree=(item)=>{
-    inner.innerHTML='';
-    const card=focusQuestion(o); inner.appendChild(card);
-    const note=document.createElement('div'); note.className='degreeNote';
-    note.innerHTML=`<span>${L('已取证词','Testimony')}：</span><b></b> —— ${L('它的程度有多明显？','how pronounced is it?')}`;
-    note.querySelector('b').textContent=optText(item);
-    card.appendChild(note);
-    addAnswerNodes(inner,DEGREES,deg=>{
-      o._bonus=(DEGREES.indexOf(deg)+1)*2;
-      completeOrb(o,()=>addClue(L(cat.zh,cat.en),(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0])+' — '+optText(item)+'（'+optText(deg)+'）',scaleWeights(item[1],deg[1])));
-    },DEG_ART);
-  };
-  addAnswerNodes(inner,o.g.opts,(item,node)=>{
-    if(picking||o._completing)return;
-    picking=true; node.classList.add('sel');
-    if(!hasWeights(item[1])){ // 「正常 / 不确定」类证词：无需程度，直接归档
-      completeOrb(o,()=>addClue(L(cat.zh,cat.en),(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0])+' — '+optText(item),{}));
-    }else{
-      setTimeout(()=>{picking=false;askDegree(item);},170);
+  // 望 / 闻 / 问 统一流程：可多选并存的证词，每条独立程度条，外加情境交叉标签
+  const isAsk=o.cat==='inquire';
+  const items=isAsk?o.g.items:o.g.opts, artList=isAsk?null:ART[o.g.key];
+  const qTitle=isAsk?(LANG==='en'?o.g.ge:o.g.g.split(' ')[0]):(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0]);
+  const prompt=focusQuestion(o,true),marks=new Map();inner.appendChild(prompt);
+  const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode');
+  prompt.querySelector('.degreeRow').innerHTML=`<span class="degreeLbl">${L('点选证词可多选并存 · 拖动每条的程度条标记轻重','TAP TO SELECT (MULTIPLE ALLOWED) · DRAG EACH DEGREE BAR')}</span>`;
+  const refresh=()=>{
+    count.textContent=L(`已选 ${marks.size} 条（可为 0）`,`SELECTED ${marks.size} · ZERO ALLOWED`);
+    archive.textContent=marks.size?L('封 存 这 组','ARCHIVE SET'):L(isAsk?'无异常 · 封存':'未见异常 · 封存',isAsk?'NONE · ARCHIVE':'NORMAL · ARCHIVE');
+  };refresh();
+  addAnswerNodes(inner,items,(item,node)=>{
+    if(o._completing)return;
+    if(!hasWeights(item[1])){ // 「正常 / 不确定」：不与异常证词并存
+      if(marks.size){showSignal(L('已选异常证词 · 请先取消再选「正常/不确定」','Clear the selected signs before choosing normal / unsure'));return;}
+      node.classList.add('sel');
+      completeOrb(o,()=>addClue(L(cat.zh,cat.en),qTitle+' — '+optText(item),{}));
+      return;
     }
+    if(marks.has(item)){marks.delete(item);node.classList.remove('sel');}
+    else{marks.set(item,+node.querySelector('input').value);node.classList.add('sel');}
+    refresh();
   },artList);
+  if(prompt._ctxRow) (innerWidth<700?inner:panel).appendChild(prompt._ctxRow);
+  inner.querySelectorAll('.answerNode').forEach((node,i)=>node.addEventListener('degree',e=>{if(marks.has(items[i]))marks.set(items[i],e.detail);}));
+  archive.onclick=e=>{e.stopPropagation();
+    const ctx=marks.size?[...o.ctx]:[];
+    o._bonus=marks.size*3+ctx.length*2;
+    completeOrb(o,()=>{
+      if(!marks.size){addClue(L(cat.zh,cat.en),qTitle+L(isAsk?' · 未发现反复信号':' — 未见异常',' · no recurring signals'),{});return;}
+      marks.forEach((d,item)=>addClue(L(cat.zh,cat.en),
+        qTitle+(isAsk?' · ':' — ')+optText(item)+'（'+L(DEG5[d][0],DEG5[d][2])+'）',scaleWeights(item[1],DEG5[d][1])));
+      if(ctx.length){
+        const w={};ctx.forEach(c=>{for(const k in c[1])w[k]=(w[k]||0)+c[1][k];});
+        addClue(L(cat.zh,cat.en),L('情境交叉：','Context: ')+ctx.map(c=>L(c[0],c[2])).join(L('、',', ')),w);
+      }
+    });};
 }
 function closePanel(){
   const panel=$('#qPanel');panel.className='';
+  panel.querySelectorAll('.ctxDock').forEach(e=>e.remove());
   const pm=$('#pulseModule');if(pm&&pm.parentElement!==$('#pulseDock')){$('#pulseDock').appendChild(pm);pm.style.display='none';}
   const prev=curOrb;
   curOrb=null;window.__stageFocus=false;document.body.classList.remove('stage-answering');
@@ -2615,14 +2775,76 @@ function applyPulseLang(){
   POS_NAMES = LANG==='en' ? ['Cun','Guan','Chi'] : ['寸','关','尺'];
   $('#pulseIntroH').textContent = L('指 法 教 学','H O W   T O   P A L P A T E');
   $('#pulseIntroTxt').innerHTML = L(
-    '三指落腕：<b>寸、关、尺</b>三部，分候脏腑。指力由轻到重——<b>浮取</b>轻触皮肤，<b>沉取</b>按至筋骨。<br>拖动下方「指力」滑杆，感受同一脉象在不同压力下的显现与隐没；切换三部，比较脉力的差异。深浅之间，藏着病位与病性的线索。',
-    'Three fingers on the wrist: <b>cun, guan, chi</b>, each mapping different organs. <b>Light pressure</b> skims the skin; <b>deep pressure</b> reaches toward the bone.<br>Drag the pressure slider to feel how one pulse appears and vanishes at different depths; switch the three positions to compare strength. Depth hides the clues of location and nature.');
+    '先找到拇指一侧的桡动脉，再沿手腕向手肘排开三指：<b>寸（近手掌）→ 关（腕横纹附近）→ 尺（近手肘）</b>。下图为掌心朝上的示意，位置仅供学习定位。<br>每处依次轻、中、重按：轻触皮肤为浮取，逐渐加力为中取，按至较深处为沉取；不要用力按到疼痛。',
+    'Find the radial artery on the thumb side, then place three fingers along the wrist: <b>cun (toward palm) → guan (near wrist crease) → chi (toward elbow)</b>. The palm-up diagram is an approximate learning guide.<br>At each point, feel lightly, moderately, then deeper. Do not press hard enough to cause pain.');
+  $('#pulseIntroVisual').innerHTML=pulseGuideHTML(false);
+  $('#pulseGameVisual').innerHTML=pulseGuideHTML(true);
+  document.querySelectorAll('.pulseMapPoint[data-interactive="true"]').forEach(point=>{
+    point.onclick=()=>selectPulsePos(+point.dataset.pos);
+    point.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPulsePos(+point.dataset.pos);}};
+  });
+  document.querySelectorAll('.pressureStep[data-interactive="true"]').forEach(step=>{
+    step.onclick=()=>{$('#pressure').value=[18,50,82][+step.dataset.level];syncPulseVisuals();};
+  });
+  syncPulseVisuals();
   $('#lblFloat').textContent = L('浮取（轻按）','Light (superficial)');
   $('#lblSink').textContent = L('沉取（重按）','Deep (heavy)');
-  $('#pulseHint').textContent = L('切换三部 · 拖动指力 · 然后回答下方辨脉四问','Switch positions · drag pressure · then answer the four questions below');
+  $('#pulseHint').textContent = L('点选手腕图或寸关尺 · 调整指力 · 再回答下方辨脉四问','Select a wrist point or Cun/Guan/Chi · adjust pressure · answer the four questions below');
+  $('#pressure').oninput=syncPulseVisuals;
   $('#pulseRealH').textContent = L('自 测 真 实 脉 搏','T A K E   Y O U R   O W N   P U L S E');
-  $('#pulseRealTxt').textContent = L('现在轮到你自己：两指按在对侧手腕桡侧（拇指根下方），计时 15 秒，数出跳动次数。','Your turn: press two fingers on the thumb side of the opposite wrist, count beats for 15 seconds.');
+  $('#pulseRealTxt').textContent = L('现在轮到你自己：掌心朝上，在拇指根部下方的手腕处轻按桡动脉；找到跳动后计时 15 秒，数出次数。','Your turn: palm up, lightly feel the radial artery just below the thumb at the opposite wrist. Once you find the beat, count for 15 seconds.');
   $('#beatLbl').textContent = L('15 秒内跳动次数：','Beats in 15 s:');
+}
+
+function pulseGuideHTML(interactive){
+  const attr=interactive?'data-interactive="true"':'';
+  const point=(pos,x,y,name,side)=>`<g class="pulseMapPoint" data-pos="${pos}" ${attr} role="${interactive?'button':'img'}" tabindex="${interactive?'0':'-1'}" aria-label="${name} · ${side}">
+    <line class="guideLine" x1="${x}" y1="${y+8}" x2="${x}" y2="158"></line>
+    <circle class="pulseHit" cx="${x}" cy="${y}" r="16"></circle>
+    <circle class="pulseSite${pos===pulsePos?' active':''}" cx="${x}" cy="${y}" r="6"></circle>
+    <text class="siteLabel" x="${x}" y="172">${name}</text></g>`;
+  // 前臂 + 掌心朝上的手掌 + 五指（胶囊形线段）：同一组形状绘两遍，底层作描边
+  const hand='<path d="M420 58 L268 70 Q252 74 252 100 Q252 126 268 130 L420 142 Z"/><ellipse cx="200" cy="100" rx="58" ry="50"/>'+
+    '<line x1="172" y1="62" x2="112" y2="58"/><line x1="168" y1="86" x2="94" y2="84"/><line x1="166" y1="110" x2="90" y2="112"/>'+
+    '<line x1="170" y1="134" x2="102" y2="140"/><line x1="230" y1="140" x2="186" y2="182"/>';
+  const pressureStep=(level,title,subtitle)=>`<${interactive?'button type="button"':'div'} class="pressureStep" data-level="${level}" ${interactive?'data-interactive="true"':''}>
+    <i class="pressGlyph" aria-hidden="true"></i><span>${title}<br>${subtitle}</span></${interactive?'button':'div'}>`;
+  return `<div class="pulseTutorial">
+    <div class="pulseMapWrap"><div class="pulseMapTitle">${L('掌心朝上 · 拇指侧桡动脉','PALM UP · THUMB-SIDE RADIAL ARTERY')}</div>
+      <svg class="pulseMap" viewBox="0 0 420 200" role="${interactive?'group':'img'}" aria-label="${L('掌心朝上的手腕寸关尺位置示意','Palm-up wrist map showing Cun, Guan and Chi positions')}">
+        <g class="handOutline">${hand}</g><g class="handFill">${hand}</g>
+        <path class="palmLine" d="M176 80 Q200 94 226 86 M174 120 Q198 108 226 118"/>
+        <line class="wristLine" x1="254" y1="70" x2="254" y2="130"/>
+        <path class="artery" d="M262 122 L420 132"/>
+        <text x="68" y="30">← ${L('手掌方向','PALM')}</text><text x="330" y="30">${L('手肘方向','ELBOW')} →</text>
+        <text x="228" y="54">${L('腕横纹','WRIST CREASE')}</text>
+        <text x="118" y="192">${L('拇指','THUMB')}</text>
+        <text class="arteryLabel" x="262" y="192">${L('虚线 = 桡动脉（拇指侧，可触到跳动）','Dashed = radial artery (thumb side, feel the beat)')}</text>
+        ${point(2,348,127,POS_NAMES[2],L('近手肘','toward elbow'))}
+        ${point(1,312,125,POS_NAMES[1],L('腕横纹附近','near wrist crease'))}
+        ${point(0,276,123,POS_NAMES[0],L('近手掌','toward palm'))}
+      </svg>
+      <div class="pulseMapNote">${L('三指沿桡动脉并列；关部作定位参照。示意不按真实比例绘制。','Place three fingers along the radial artery; Guan is the reference point. Diagram not to scale.')}</div>
+    </div>
+    <div class="pressureSteps"><div class="pressureStepsTitle">${L('每一部都按顺序感受','AT EACH POINT, FEEL IN ORDER')}</div>
+      <div class="pressureStepRow">${pressureStep(0,L('浮取','LIGHT'),'轻触')}${pressureStep(1,L('中取','MID'),'适中')}${pressureStep(2,L('沉取','DEEP'),'渐深')}</div>
+      <div class="pulseMapNote" style="margin-top:8px">${L('操作：定位 → 轻按 → 逐渐加力。力度示意，不代表真实诊脉标准。','Flow: locate → touch lightly → increase pressure gradually. This is an interaction guide, not a clinical standard.')}</div>
+    </div>
+  </div>`;
+}
+
+function selectPulsePos(index){
+  pulsePos=Math.max(0,Math.min(2,index));
+  syncPulseVisuals();
+}
+
+function syncPulseVisuals(){
+  document.querySelectorAll('.pulseMapPoint').forEach(point=>point.querySelector('.pulseSite').classList.toggle('active',+point.dataset.pos===pulsePos));
+  document.querySelectorAll('.pulsePos').forEach((button,index)=>button.classList.toggle('on',index===pulsePos));
+  const hint=$('#pulsePositionHint');
+  if(hint) hint.textContent=L(`${POS_NAMES[pulsePos]}部 · ${['近手掌','腕横纹附近','近手肘'][pulsePos]} · 桡动脉`,` ${POS_NAMES[pulsePos]} · ${['toward palm','near wrist crease','toward elbow'][pulsePos]} · radial artery`);
+  const pressure=+$('#pressure').value, level=pressure<34?0:pressure<68?1:2;
+  document.querySelectorAll('.pressureStep').forEach(step=>step.classList.toggle('on',+step.dataset.level===level));
 }
 
 function enterPulse(){
@@ -2643,10 +2865,12 @@ function initPulseGame(){
   // 三部按钮
   const row=$('#pulsePosRow'); row.innerHTML='';
   POS_NAMES.forEach((n,i)=>{
-    const b=document.createElement('div'); b.className='pulsePos'+(i===0?' on':''); b.textContent=n;
-    b.onclick=()=>{pulsePos=i; row.querySelectorAll('.pulsePos').forEach((x,j)=>x.classList.toggle('on',j===i));};
+    const b=document.createElement('button'); b.type='button'; b.className='pulsePos'+(i===0?' on':'');
+    b.innerHTML=`<span class="pulsePosName">${n}</span><small>${L(['近掌','腕纹','近肘'][i],['PALM','CREASE','ELBOW'][i])}</small>`;
+    b.onclick=()=>selectPulsePos(i);
     row.appendChild(b);
   });
+  syncPulseVisuals();
   buildPulseQuiz();
   startPulseAnim();
 }
@@ -2844,6 +3068,12 @@ function computeResults(){
     clampD(92-(s.tan+s.re)*5 + (i.stim==='none'?4:-6)),
     clampD(92-(s.yux+s.yu*0.5)*5 + i.ex*4 + (i.job==='sit'?-8:3))
   ];
+  state.psy=[
+    clampD(18+(s.yu+s.huo)*6+(i.stress-5)*6),
+    clampD(88-(s.qi+s.yang+s.xue)*5+i.ex*2),
+    clampD(16+(s.huo+s.yin)*6+(7-Math.min(i.sleep,7))*9),
+    clampD(14+(s.yu*1.5+s.yux+s.pi*.5)*5)
+  ];
 }
 
 /* ---------- 推理演绎 ---------- */
@@ -2957,8 +3187,10 @@ function tabHTML(p,key){
     <div class="teaR"><b>${L('饮法：','Dosage: ')}</b>${t.w}</div></div>`).join('');
   return [
     `<p><span class="em">${L('【病机】','[Mechanism] ')}</span>${F.tcm}</p>`,
+    `<p>${(F.theory||'').replace(/【([^】]+)】|\[([^\]]+)\]/g,(m,a,b)=>a?`<span class="em">【${a}】</span>`:`<span class="em">[${b}] </span>`)}</p>`,
     `<p><span class="em">${L('【西医关联】','[Western view] ')}</span>${F.west}</p>`,
     `<p><span class="em">${L('【心理侧写】','[Psych profile] ')}</span>${F.psy}</p>`,
+    `<ul>${li(F.psyDeep||[])}</ul>`,
     `<ul>${li(F.nutri)}</ul>`,
     teas + `<p class="teaNote">${L(TEA_NOTE,TEA_NOTE_EN)}</p>`,
     `<ul>${li(F.move)}</ul>`,
@@ -2967,7 +3199,21 @@ function tabHTML(p,key){
     evHTML(key)
   ];
 }
-const TAB_NAMES=[['中医病机','TCM View'],['西医关联','Western'],['心理侧写','Psyche'],['营养处方','Nutrition'],['药茶调理','Herbal Tea'],['运动康复','Movement'],['生活调整','Habits'],['疗养方式','Retreat'],['循证交叉','Evidence']];
+const TAB_NAMES=[['中医病机','TCM View'],['理论依据','Theory'],['西医关联','Western'],['心理侧写','Psyche'],['心理深探','Mind'],['营养处方','Nutrition'],['药茶调理','Herbal Tea'],['运动康复','Movement'],['生活调整','Habits'],['疗养方式','Retreat'],['循证交叉','Evidence']];
+/* 心理四维：由情志类证词、心神组与建档压力/睡眠共同推算 */
+const PSY_DIMS=[['压力负荷','HPA 轴激活与紧绷程度（越高越需疏泄）'],['情绪能量','动机与启动能力（越高越好）'],['夜间觉醒','入睡前脑力过度活跃度（越高越难安睡）'],['躯体化倾向','情绪转化为身体症状的程度（越高越需身心同调）']];
+const PSY_DIMS_EN=[['Stress load','HPA activation & tension (higher = more release needed)'],['Mood energy','Drive & ignition (higher = better)'],['Night arousal','Pre-sleep hyperarousal (higher = harder to sleep)'],['Somatisation','How much emotion turns into body symptoms']];
+function psyProfileHTML(balanced){
+  const psyTop=state.top.find(k=>state.scores[k]>=2)||state.top[0];
+  const PD=(LANG==='en'&&PATTERNS[psyTop].en)?PATTERNS[psyTop].en.psyDeep:PATTERNS[psyTop].psyDeep;
+  return `<div class="rCard"><h3>${L('心理层面侧写 · 身心交叉','Mind Profile · Body-Mind Cross-Check')}</h3>
+    <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:12px">${L('由问诊「心神」组、情志类证词、建档压力与睡眠共同推算。它描述的是「状态」而非「人格」，会随生活改变。','Derived from the Mind group, emotional testimony, stress and sleep intake. It describes a state, not a personality, and shifts with life.')}</div>
+    ${PSY_DIMS.map((d,di)=>`<div class="dimRow"><div class="n">${LANG==='en'?PSY_DIMS_EN[di][0]:d[0]}</div><div class="bar"><i style="width:${state.psy[di]}%"></i></div><div class="p">${state.psy[di]}</div></div>
+      <div style="font-size:11px;color:var(--ink-dim);margin:-6px 0 12px 100px">${LANG==='en'?PSY_DIMS_EN[di][1]:d[1]}</div>`).join('')}
+    ${balanced?`<div class="msQuote">${L('证词平和，心理层面未见明显偏颇——保持情绪出口与睡眠节律即可。','Testimony stays balanced — no clear psychological bias; keep your emotional outlets and sleep rhythm.')}</div>`
+      :`<div class="msQuote">${L('主线心理画像 · ','Lead mind sketch · ')+pName(psyTop)}</div><ul style="padding-left:20px;font-size:13px;line-height:2;margin-top:8px">${PD.map(x=>`<li>${x}</li>`).join('')}</ul>`}
+    <div class="evLegend">${L('※ 自评量表仅作筛查提示，不构成诊断。若情绪低落或焦虑持续两周以上、明显影响生活，或出现自伤念头，请立即联系专业心理/精神科医生或当地心理援助热线。','* Self-check scales are screening prompts, not diagnoses. If low mood or anxiety persists for two weeks, disrupts daily life, or thoughts of self-harm appear, contact a mental-health professional or local crisis line immediately.')}</div></div>`;
+}
 
 $('#btnReport').onclick=()=>{
   show('screen-report');
@@ -3002,6 +3248,7 @@ $('#btnReport').onclick=()=>{
     ${DIMS.map((d,di)=>`<div class="dimRow"><div class="n">${LANG==='en'?DIMS_EN[di][0]:d[0]}</div><div class="bar"><i style="width:${state.dims[di]}%"></i></div><div class="p">${state.dims[di]}</div></div>
       <div style="font-size:11px;color:var(--ink-dim);margin:-6px 0 12px 100px">${LANG==='en'?DIMS_EN[di][1]:d[1]}</div>`).join('')}
   </div>
+  ${psyProfileHTML(balanced)}
   <div class="rCard"><h3>${L('推理路径图 · 后台权重演算','Deduction Path · Weight Engine')}</h3>
     <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:13px">${L('左列是你交出的证词，右列是候选证型；连线的粗细与明暗，就是该条证词对该证型的贡献权重。这就是引擎的全部算法 —— 没有黑箱。','Left: your testimony. Right: candidate patterns. Line weight = contributed score. This is the entire algorithm — no black box.')}</div>
     <div id="pathWrap"><canvas id="pathC"></canvas></div>
@@ -3123,11 +3370,13 @@ $('#btnExport').onclick=()=>{
   ${sec(L('案件档案','Case File')+' · '+state.caseNo,`<p>${i.name} · ${i.age} · BMI ${bmi().toFixed(1)} · ${L('睡眠','Sleep')} ${i.sleep}h/${L('晚','night')} · ${L('压力','Stress')} ${i.stress}/10 · ${L('周运动','Exercise')} ${i.ex}${L('次','/wk')}</p>`)}
   ${sec(L('状态可视化','Visualization'),`<div class="charts"><img src="${radarPNG}"><img src="${wheelPNG}"></div>
     <table>${DIMS.map((d,di)=>`<tr><td>${LANG==='en'?DIMS_EN[di][0]:d[0]}</td><td>${state.dims[di]}</td><td>${LANG==='en'?DIMS_EN[di][1]:d[1]}</td></tr>`).join('')}</table>`)}
+  ${sec(L('心理层面侧写','Mind Profile'),`<table>${PSY_DIMS.map((d,di)=>`<tr><td>${LANG==='en'?PSY_DIMS_EN[di][0]:d[0]}</td><td>${state.psy[di]}</td><td>${LANG==='en'?PSY_DIMS_EN[di][1]:d[1]}</td></tr>`).join('')}</table>`)}
   ${balanced?sec(L('侧写结论','Verdict'),L('<p><b>平和质</b> —— 四诊合参未见明显偏颇，保持现有节律，定期复测。</p><p><b>平和质四季药茶：</b>陈皮 3g + 枸杞 6g 泡水为底；春加玫瑰、夏加菊花、秋加百合、冬加桂圆。连饮 2 周停 3 天。</p><p><b>疗养建议：</b>每月一次森林浴或温泉；睡前温水泡脚 15 分钟；晨起腹式呼吸 3 组。</p>','<p><b>Balanced constitution</b> — no clear bias; keep the current rhythm and re-test regularly.</p><p><b>Four-season tea:</b> chenpi 3g + goji 6g as base; rose in spring, chrysanthemum in summer, lily in autumn, longan in winter. 2 weeks on / 3 days off.</p><p><b>Retreat:</b> monthly forest walk or hot spring; 15-min warm foot soak before bed; morning belly breathing ×3 sets.</p>'))
     :sec(L('证型侧写','Pattern Profile'), shown.map((k,idx)=>{const p=PF(k);const conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
       return `<div class="pat"><h3>${idx+1}. ${p.name}${LANG==='en'?'':'（'+p.eng+'）'} · ${L('吻合度','match')} ${conf}%</h3>
       <p><i>${p.one}</i></p>
-      <p><b>${L('中医病机：','TCM mechanism: ')}</b>${p.tcm}</p><p><b>${L('西医关联：','Western view: ')}</b>${p.west}</p><p><b>${L('心理侧写：','Psych profile: ')}</b>${p.psy}</p>
+      <p><b>${L('中医病机：','TCM mechanism: ')}</b>${p.tcm}</p><p><b>${L('理论依据：','Theory: ')}</b>${p.theory||''}</p><p><b>${L('西医关联：','Western view: ')}</b>${p.west}</p><p><b>${L('心理侧写：','Psych profile: ')}</b>${p.psy}</p>
+      <p><b>${L('心理深探：','Mind in depth: ')}</b></p><ul>${(p.psyDeep||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
       <p><b>${L('营养处方：','Nutrition: ')}</b></p><ul>${p.nutri.map(x=>`<li>${x}</li>`).join('')}</ul>
       <p><b>${L('药茶调理：','Herbal teas: ')}</b></p><ul>${(p.tea||[]).map(t=>`<li><b>${t.n}</b> ｜ ${L('配方','Formula')}：${t.f} ｜ ${L('制法','Prep')}：${t.m} ｜ ${L('饮法','Dosage')}：${t.w}</li>`).join('')}</ul>
       <p><b>${L('运动康复：','Movement & rehab: ')}</b></p><ul>${p.move.map(x=>`<li>${x}</li>`).join('')}</ul>
