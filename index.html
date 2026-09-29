@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -38,26 +38,29 @@ body{
   font-family:var(--sans);
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
+  --cl:1;   /* 显影度 0→1：由背景引擎实时写入，驱动整个视觉层从虚到实 */
 }
-#bg{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:0}
-#figLayer{position:fixed;inset:0;z-index:1;pointer-events:none;display:none;
-  align-items:center;justify-content:center;overflow:hidden}
+#bg{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;width:100vw;height:100vh;height:100dvh;z-index:0}
+#figLayer{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;display:none;
+  align-items:center;justify-content:center;overflow:hidden;--dot:3.6px}
 body.stage-live #figLayer{display:flex}
-.figGrain{position:absolute;width:min(46vh,72vw);aspect-ratio:9/20;max-height:94vh;object-fit:cover;opacity:.5;
+.figGrain{position:absolute;width:46vh;width:min(46vh,72vw);aspect-ratio:9/20;max-height:94vh;object-fit:cover;opacity:.5;
   filter:contrast(1.06) saturate(.94);will-change:transform,opacity;
   -webkit-mask-image:radial-gradient(ellipse 60% 72% at 50% 47%,#000 42%,rgba(0,0,0,.5) 64%,transparent 86%),radial-gradient(circle,#000 0 34%,transparent 38%);
-  -webkit-mask-size:100% 100%,3.6px 3.6px;-webkit-mask-composite:source-in;
+  -webkit-mask-size:100% 100%,var(--dot) var(--dot);-webkit-mask-composite:source-in;
   mask-image:radial-gradient(ellipse 60% 72% at 50% 47%,#000 42%,rgba(0,0,0,.5) 64%,transparent 86%),radial-gradient(circle,#000 0 34%,transparent 38%);
-  mask-size:100% 100%,3.6px 3.6px;mask-composite:intersect}
-.figGrain:nth-child(2){-webkit-mask-position:0 0,1.8px 0.9px;mask-position:0 0,1.8px 0.9px}
-.figGrain:nth-child(3){-webkit-mask-position:0 0,0.9px 1.8px;mask-position:0 0,0.9px 1.8px}
-#vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+  mask-size:100% 100%,var(--dot) var(--dot);mask-composite:intersect}
+.figGrain:nth-child(2){-webkit-mask-position:0 0,calc(var(--dot)*.5) calc(var(--dot)*.25);mask-position:0 0,calc(var(--dot)*.5) calc(var(--dot)*.25)}
+.figGrain:nth-child(3){-webkit-mask-position:0 0,calc(var(--dot)*.25) calc(var(--dot)*.5);mask-position:0 0,calc(var(--dot)*.25) calc(var(--dot)*.5)}
+#vignette{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse at 50% 40%,transparent 26%,rgba(3,5,10,.55) 74%,rgba(2,3,7,.92) 100%)}
-#scanlines{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+body.stage-live #vignette{opacity:calc(1.3 - var(--cl)*.55)}
+#scanlines{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;opacity:.5;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) 1px,transparent 1px,transparent 3px);
   mix-blend-mode:multiply;animation:scanDrift 8s linear infinite}
+body.stage-live #scanlines{opacity:calc(.82 - var(--cl)*.62)}
 @keyframes scanDrift{from{background-position:0 0}to{background-position:0 6px}}
-#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+#grain{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 #app{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
 
@@ -99,12 +102,12 @@ body.stage-live #figLayer{display:flex}
 /* ---------- 通用排版 ---------- */
 .kicker{font-family:var(--serif);color:var(--teal);letter-spacing:.5em;font-size:12px;
   margin-bottom:14px;text-transform:uppercase;text-shadow:0 2px 14px rgba(0,0,0,.95)}
-h1.title{font-family:var(--serif);font-size:clamp(38px,7vw,72px);font-weight:600;
+h1.title{font-family:var(--serif);font-size:48px;font-size:clamp(38px,7vw,72px);font-weight:600;
   letter-spacing:.18em;line-height:1.2;text-align:center;
   text-shadow:0 3px 26px rgba(0,0,0,.95),0 0 60px rgba(5,7,13,.9)}
-h1.title .en{display:block;font-size:clamp(12px,1.6vw,16px);letter-spacing:.7em;
+h1.title .en{display:block;font-size:14px;font-size:clamp(12px,1.6vw,16px);letter-spacing:.7em;
   color:var(--gold);margin-top:16px;font-family:var(--sans);font-weight:300}
-h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,34px);letter-spacing:.2em;
+h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);letter-spacing:.2em;
   color:var(--ink);text-align:center;margin-bottom:8px;text-shadow:0 2px 18px rgba(0,0,0,.95)}
 .lede{max-width:620px;text-align:center;color:var(--ink-dim);font-size:14px;
   line-height:2;margin-top:18px;letter-spacing:.05em;text-shadow:0 2px 12px rgba(0,0,0,.95)}
@@ -264,15 +267,28 @@ canvas.chart{max-width:100%}
 /* ---------- 探案舞台 ---------- */
 #screen-stage{padding:0;justify-content:flex-start;overflow:hidden;cursor:grab}
 #screen-stage:active{cursor:grabbing}
-#orbLayer{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
-/* 环绕光点为纯氛围装饰：发现与作答全部在线索板进行 */
-.orb{position:absolute;width:13px;height:13px;pointer-events:none;color:var(--gold);
-  will-change:left,top,opacity}
-.orb i{display:block;position:relative;width:11px;height:11px;transform:rotate(45deg);
-  border:1px solid currentColor;background:rgba(5,8,15,.8);box-shadow:0 0 16px currentColor}
-.orb i::after{content:"";position:absolute;inset:3px;background:currentColor;opacity:.7}
+#orbLayer{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+/* 环绕光点 = 可捕捉的线索目标：在两人周围漂浮，点按锁定即打开证词 */
+.orb{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:auto;cursor:pointer;
+  color:var(--gold);will-change:left,top,opacity,transform;-webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:center}
+.orb i{display:block;position:relative;width:13px;height:13px;transform:rotate(45deg);
+  border:1px solid currentColor;background:rgba(5,8,15,.82);box-shadow:0 0 18px currentColor;
+  transition:transform .25s,box-shadow .25s}
+.orb i::after{content:"";position:absolute;top:3px;left:3px;right:3px;bottom:3px;background:currentColor;opacity:.75}
+.orb b{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;
+  border:1px dashed currentColor;opacity:.32;animation:orbSpin 9s linear infinite}
+.orb em{position:absolute;left:50%;top:100%;transform:translate(-50%,-6px);font:9px/1 monospace;
+  letter-spacing:.2em;color:currentColor;opacity:0;white-space:nowrap;transition:opacity .2s;font-style:normal;
+  text-shadow:0 0 8px rgba(0,0,0,.9)}
+.orb:hover i,.orb.near i{transform:rotate(45deg) scale(1.3);box-shadow:0 0 28px currentColor}
+.orb:hover em,.orb.near em{opacity:.9}
+.orb.locking b{animation:orbLock .55s cubic-bezier(.3,.9,.3,1) forwards;border-style:solid;opacity:1}
+.orb.locking i{animation:orbLockCore .55s ease forwards}
 .orb.locating{animation:locateClue 1.4s ease}
-.orb.done i{box-shadow:0 0 5px currentColor}
+.orb.done{pointer-events:none;cursor:default}
+.orb.done b,.orb.done em{display:none}
+.orb.done i{box-shadow:0 0 5px currentColor;width:8px;height:8px}
 .orb.done i::after{background:#05070d}
 .orb.skipped i{opacity:.45}
 .orb.absorbed{animation:orbAbsorb .65s ease-in forwards}
@@ -280,9 +296,21 @@ canvas.chart{max-width:100%}
 .orb.cat-listen{color:var(--teal)}
 .orb.cat-inquire{color:var(--cinnabar)}
 .orb.cat-pulse{color:#e9e4d6}
+@keyframes orbSpin{to{transform:rotate(360deg)}}
+@keyframes orbLock{0%{transform:scale(1.9);opacity:.2}100%{transform:scale(.55);opacity:1}}
+@keyframes orbLockCore{50%{transform:rotate(45deg) scale(1.9);filter:brightness(2.6)}100%{transform:rotate(45deg) scale(1.2)}}
 @keyframes locateClue{0%,100%{filter:brightness(1.2)}50%{filter:brightness(2.4) drop-shadow(0 0 18px currentColor)}}
-@keyframes orbAbsorb{to{left:50%!important;top:55%!important;transform:translate(-50%,-50%) scale(.08)!important;opacity:0}}
-#stageFrame{position:fixed;inset:58px 18px 48px;z-index:2;pointer-events:none;
+@keyframes orbAbsorb{to{left:50%!important;top:55%!important;transform:scale(.08)!important;opacity:0}}
+body.stage-live #contactReticle{transition:left .5s cubic-bezier(.2,.8,.2,1),top .5s cubic-bezier(.2,.8,.2,1),
+  width .5s,height .5s,border-color .5s}
+#contactReticle.lock{border-color:var(--gold);width:64px;height:64px;animation:none}
+/* 连击提示 */
+#streakTag{position:fixed;right:24px;top:70px;z-index:8;font:10px/1.6 monospace;letter-spacing:.2em;
+  color:var(--gold-bright);text-align:right;opacity:0;transform:translateY(-6px);transition:.3s;pointer-events:none;
+  text-shadow:0 0 12px rgba(212,175,106,.7)}
+#streakTag.show{opacity:1;transform:none}
+#streakTag b{display:block;font-family:var(--serif);font-size:22px;letter-spacing:.12em}
+#stageFrame{position:fixed;top:58px;left:18px;right:18px;bottom:48px;inset:58px 18px 48px;z-index:2;pointer-events:none;
   border-left:1px solid rgba(212,175,106,.12);border-right:1px solid rgba(106,212,200,.08)}
 #stageFrame::before,#stageFrame::after{content:"";position:absolute;left:0;right:0;height:1px;
   background:linear-gradient(90deg,var(--gold) 0 5%,transparent 5% 46%,rgba(233,228,214,.25) 46% 54%,transparent 54% 95%,var(--teal) 95%)}
@@ -301,12 +329,17 @@ canvas.chart{max-width:100%}
 #hudHint{font-size:10.5px;color:var(--ink-dim);letter-spacing:.08em;line-height:1.65;
   text-shadow:0 1px 8px rgba(0,0,0,.9)}
 /* ---------- 线索板（稳定清单，取代追逐移动光圈） ---------- */
-#clueDock{position:fixed;left:18px;top:66px;bottom:58px;width:min(298px,32vw);z-index:8;
+#clueDock{position:fixed;left:18px;top:66px;width:298px;width:min(298px,32vw);max-height:calc(100vh - 124px);z-index:8;
   display:flex;flex-direction:column;background:rgba(7,10,18,.84);border:1px solid var(--line);
   border-radius:4px;backdrop-filter:blur(9px);overflow:hidden;
   transition:opacity .3s,transform .3s,max-height .32s ease}
-#dockHead{padding:14px 16px 12px;border-bottom:1px solid rgba(233,228,214,.1);flex:0 0 auto;position:relative}
-#dockBody{flex:1;overflow-y:auto;padding:10px 12px 14px}
+#dockHead{padding:14px 16px 12px;border-bottom:1px solid rgba(233,228,214,.1);flex:0 0 auto;position:relative;cursor:pointer}
+#dockBody{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 14px}
+#clueDock:not(.open) #dockBody{display:none}
+#clueDock:not(.open) #dockHead{border-bottom:0}
+#dockToggle{position:absolute;right:14px;top:12px;font:9px/1 monospace;letter-spacing:.16em;color:var(--ink-dim);
+  border:1px solid rgba(233,228,214,.18);padding:5px 8px;border-radius:2px;background:transparent}
+#clueDock.open #dockToggle{color:var(--gold);border-color:var(--gold)}
 body.stage-live #progress{display:none}   /* 舞台屏的进度由线索板承担，避免底部重叠 */
 body.stage-answering #clueDock{opacity:.22;pointer-events:none}
 .dockGroup{margin-bottom:14px}
@@ -355,13 +388,13 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 @keyframes gateGlow{0%,100%{box-shadow:0 0 18px rgba(212,175,106,.35)}50%{box-shadow:0 0 42px rgba(212,175,106,.7)}}
 
 /* ---------- 场景内答案星环 ---------- */
-#qPanel{position:fixed;inset:0;z-index:9;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s}
+#qPanel{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:9;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s}
 #qPanel.open{opacity:1;visibility:visible;pointer-events:auto}
-#qPanel::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--focus-x,50%) var(--focus-y,48%),transparent 0 17%,rgba(2,4,9,.2) 48%,rgba(2,4,9,.66) 100%);opacity:0;transition:.3s}
+#qPanel::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;inset:0;background:radial-gradient(circle at var(--focus-x,50%) var(--focus-y,48%),transparent 0 17%,rgba(2,4,9,.2) 48%,rgba(2,4,9,.66) 100%);opacity:0;transition:.3s}
 #qPanel.open::before{opacity:1}
 #qPanelInner{position:absolute;left:var(--focus-x,50vw);top:var(--focus-y,48vh);width:0;height:0;
   pointer-events:none;color:var(--focus-color,var(--gold))}
-.focusQuestion{position:absolute;left:0;top:0;width:clamp(270px,29vw,390px);transform:translate(-50%,-50%);
+.focusQuestion{position:absolute;left:0;top:0;width:330px;width:clamp(270px,29vw,390px);transform:translate(-50%,-50%);
   pointer-events:auto;padding:14px 18px 15px;background:linear-gradient(100deg,rgba(6,9,16,.96),rgba(9,14,24,.78) 82%,transparent);
   border-left:2px solid currentColor;border-top:1px solid rgba(233,228,214,.2);
   clip-path:polygon(0 0,94% 0,100% 16%,100% 100%,4% 100%,0 85%);box-shadow:-18px 18px 48px rgba(0,0,0,.42)}
@@ -370,7 +403,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 @keyframes focusScan{50%{transform:translateY(92px);opacity:.18}}
 .focusMeta{display:flex;justify-content:space-between;gap:12px;font:9px/1.3 monospace;
   letter-spacing:.24em;color:currentColor;margin-bottom:7px}
-.focusTitle{font-family:var(--serif);font-size:clamp(15px,1.45vw,19px);line-height:1.65;
+.focusTitle{font-family:var(--serif);font-size:17px;font-size:clamp(15px,1.45vw,19px);line-height:1.65;
   letter-spacing:.08em;color:var(--ink);text-wrap:balance}
 .focusLead{font-size:10.5px;line-height:1.65;color:var(--ink-dim);letter-spacing:.04em;margin-top:7px;max-height:3.3em;overflow:hidden}
 .focusActions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px}
@@ -380,7 +413,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .archiveNode:hover{background:currentColor;color:var(--bg)}
 .answerWire{position:absolute;left:0;top:0;height:1px;transform-origin:0 50%;pointer-events:none;
   background:linear-gradient(90deg,currentColor,rgba(233,228,214,.04));opacity:.28}
-.answerNode{position:absolute;left:var(--answer-x);top:var(--answer-y);width:clamp(150px,17vw,218px);
+.answerNode{position:absolute;left:var(--answer-x);top:var(--answer-y);width:190px;width:clamp(150px,17vw,218px);
   min-height:52px;transform:translate(-50%,-50%);opacity:1;pointer-events:auto;cursor:pointer;
   display:flex;align-items:flex-start;gap:8px;text-align:left;padding:9px 10px;border:0;border-left:1px solid currentColor;
   border-bottom:1px solid rgba(233,228,214,.14);border-radius:0;color:var(--ink);
@@ -402,7 +435,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   pointer-events:none;background:var(--mote-color);box-shadow:0 0 9px var(--mote-color);
   animation:moteIn .72s var(--mote-delay) cubic-bezier(.55,0,.3,1) forwards}
 @keyframes moteIn{to{transform:translate(var(--mote-tx),var(--mote-ty)) scale(.1);opacity:0}}
-.pulseField{position:absolute;left:0;top:0;width:min(760px,calc(100vw - 36px));max-height:82vh;overflow:auto;
+.pulseField{position:absolute;left:0;top:0;width:calc(100vw - 36px);width:min(760px,calc(100vw - 36px));max-height:82vh;overflow:auto;
   transform:translate(-50%,-50%);pointer-events:auto;padding:20px 24px;background:rgba(5,8,15,.91);
   border-left:1px solid currentColor;border-right:1px solid rgba(233,228,214,.14);backdrop-filter:blur(10px);
   box-shadow:0 24px 80px rgba(0,0,0,.68)}
@@ -416,7 +449,8 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   /* 线索板 → 底部抽屉（常态为一条进度横条，点按展开） */
   #clueDock{left:0;right:0;top:auto;bottom:0;width:100%;max-height:76px;border-left:0;border-right:0;
     border-bottom:0;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom)}
-  #clueDock.open{max-height:66dvh}
+  #clueDock.open{max-height:66vh;max-height:66dvh}
+  #dockToggle{display:none}
   body.stage-answering #clueDock{opacity:1;transform:translateY(105%);pointer-events:none}
   #dockHead{cursor:pointer;padding:16px 16px 10px}
   #dockHead::before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);
@@ -437,32 +471,42 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .dockItem{min-height:44px;font-size:12.5px}
   #stageControls{right:14px;top:58px;bottom:auto}#stageControls span,#turnLeft,#turnRight{display:none}
   #deduceGate{bottom:calc(106px + env(safe-area-inset-bottom))}
-  /* 答题面板 → 底部抽屉（整行大按钮，题目完整可读） */
-  #qPanelInner{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;max-height:76dvh;overflow-y:auto;
+  /* 答题面板 → 底部抽屉（整行大按钮，题目完整可读）
+     注：必须重置基础规则的 height:0，否则内容被 overflow 裁掉 */
+  #qPanelInner{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;height:auto;max-height:76vh;max-height:76dvh;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
     padding:18px 15px calc(22px + env(safe-area-inset-bottom));pointer-events:auto;color:var(--focus-color,var(--gold));
     background:rgba(7,10,18,.97);border-top:1px solid var(--focus-color,var(--gold));border-radius:16px 16px 0 0;
-    transform:translateY(103%);transition:transform .3s ease}
+    transform:translateY(103%);transition:transform .3s ease;box-sizing:border-box}
   #qPanel.open #qPanelInner{transform:none}
-  .focusQuestion{position:static;width:100%;transform:none;padding:13px 14px;box-shadow:none}
+  .focusQuestion{position:static;width:100%;transform:none;padding:13px 14px;box-shadow:none;
+    clip-path:none;background:rgba(6,9,16,.9);display:flex;flex-direction:column}
+  .focusQuestion .degreeNote{order:5}.focusQuestion .customWrap{order:8}.focusQuestion .skipOrbBtn{order:9}
   .focusQuestion::after{display:none}
   .focusTitle{font-size:15.5px}
   .focusLead{font-size:11px;max-height:none}
   .focusActions{margin-top:12px}
   .archiveNode{padding:11px 14px;font-size:12px}
   .answerWire{display:none}
-  .answerNode{position:static;width:100%;min-height:48px;transform:none;margin-top:8px;padding:12px;
+  .answerNode{position:relative;left:auto;top:auto;width:100%;min-height:48px;transform:none;margin-top:8px;padding:12px;
     font-size:13px;line-height:1.5;border:1px solid rgba(233,228,214,.16);border-left:2px solid currentColor;
-    background:rgba(9,14,24,.7);backdrop-filter:none}
-  #qPanel.open .answerNode{animation:none}
+    background:rgba(9,14,24,.7);backdrop-filter:none;display:flex}
+  .answerNode.lv1{border-left-width:3px}.answerNode.lv2{border-left-width:5px}.answerNode.lv3{border-left-width:7px}
+  #qPanel.open .answerNode{animation:none;opacity:1}
   .answerNode .answerIndex{line-height:1.8}
   #qPanel.resolving .focusQuestion,#qPanel.resolving .answerNode{animation:none}
   #qPanelClose{left:auto;right:12px;top:calc(60px + env(safe-area-inset-top));width:44px;height:44px;font-size:20px}
   .pulseField{position:static;width:100%;max-height:none;overflow:visible;transform:none;
     padding:6px 2px;background:transparent;border:0;box-shadow:none;backdrop-filter:none}
-  #qPanel.pulse-open #qPanelInner{max-height:88dvh}
+  #qPanel.pulse-open #qPanelInner{max-height:88vh;max-height:88dvh}
   .skipOrbBtn{margin:14px auto 0;font-size:11px;padding:9px 4px}
   .miniChip{font-size:11px;padding:8px 10px}
   .msCard{padding:20px 18px 16px}
+  /* 捕捉目标：手指可点的最小尺寸 */
+  .orb{width:56px;height:56px;margin:-28px 0 0 -28px}
+  .orb b{width:52px;height:52px;margin:-26px 0 0 -26px}
+  .orb em{font-size:8.5px}
+  #streakTag{right:14px;top:112px}
 }
 
 /* ---------- 奖励横幅 ---------- */
@@ -501,7 +545,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .skipOrbBtn:hover{color:var(--cinnabar);border-color:var(--cinnabar)}
 
 /* ---------- 阶段侧写奖励弹窗 ---------- */
-#milestoneModal{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;
+#milestoneModal{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;
   padding:22px;background:rgba(2,4,9,.6);backdrop-filter:blur(4px);
   opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
 #milestoneModal.show{opacity:1;visibility:visible}
@@ -593,7 +637,6 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .optArt .flowLine{stroke-dasharray:3 4;animation:artFlow 1.6s linear infinite}
 @keyframes artFlow{to{stroke-dashoffset:-14}}
 .opt{display:inline-flex;align-items:center;gap:9px}
-.answerNode{position:relative}
 .answerNode .optArt{align-self:center}
 .degBadge{position:absolute;right:7px;bottom:4px;font:8px/1 monospace;letter-spacing:.1em;color:currentColor;opacity:.95}
 .answerNode.lv1{border-left-width:2px}
@@ -672,9 +715,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     </h1>
     <div class="divider"></div>
     <p class="lede"
-      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成。<br>先花 30 秒建立基础档案（赶时间可跳过），生成初步侧写；望·闻·问·切的线索会整齐列在「线索板」上，<b>点击任意一条即可作答，顺序全由你定</b>——每条证词可标注「偶尔 / 经常 / 持续」的程度；不确定或不想答的，都可以跳过。<br>每回收一条，人物便清晰一分；侧写随证据分阶段显影，直至水落石出，解锁报告、调养处方与推理小剧场。"
-      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — not yet complete.<br>Spend 30 seconds on a basic file (or skip it) to unlock a first sketch. All clues of Look · Listen · Ask · Pulse are listed on the clue board — <b>tap any one to answer, in any order you like</b>. Mark each testimony as occasional / frequent / constant, and skip anything you can't or won't answer.<br>Every clue recovered sharpens the figures; the profile develops in stages until the case is solved — unlocking the report, care prescription and deduction theatre.">
-      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成。<br>先花 30 秒建立基础档案（赶时间可跳过），生成初步侧写；望·闻·问·切的线索会整齐列在「线索板」上，<b>点击任意一条即可作答，顺序全由你定</b>——每条证词可标注「偶尔 / 经常 / 持续」的程度；不确定或不想答的，都可以跳过。<br>每回收一条，人物便清晰一分；侧写随证据分阶段显影，直至水落石出，解锁报告、调养处方与推理小剧场。</p>
+      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每条证词可标「偶尔 / 经常 / 持续」，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。"
+      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — grey, blurred, scattered into grain.<br>Spend 30 seconds on a basic file (or skip it). Then the clues of Look · Listen · Ask · Pulse become <b>orbs drifting around the figures</b> — <b>tap an orb to lock on and capture it</b>, then give your testimony. Mark each as occasional / frequent / constant, add your own words, or skip.<br>Every capture lifts a veil: the world turns from grey to colour, the figures sharpen, confetti lights up, holo-screens wake — until the case is solved and the report, path chart and theatre unlock.">
+      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每条证词可标「偶尔 / 经常 / 持续」，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。</p>
     <div class="btnRow">
       <button class="btn" id="btnStart" data-zh="进 入 双 生 诊 室" data-en="E N T E R · T H E  C H A M B E R">进 入 双 生 诊 室</button>
       <button class="btn ghost" id="btnHow" data-zh="侦 查 手 册" data-en="M A N U A L">侦 查 手 册</button>
@@ -687,9 +730,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <div class="panel">
       <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
       <div style="font-size:13.5px;line-height:2.1;color:var(--ink)"
-        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定。<b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>，可补充选项没盖到的特殊情况；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>阶段侧写与经验值</b> —— 每归档一条线索都计 XP，线索板上的<b>后台权重条实时公开</b>；回收途中会三次弹出「侧写更新」，人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
-        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>The clue board</b> — all clues of Look · Listen · Ask · Pulse are grouped on the left board (on phones, a bottom drawer — tap the bar to expand): <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>.<br>③ <b style='color:var(--gold)'>Answer freely</b> — tap any clue, in any order. <b>Every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform) so you can simply match what you see. For Ask, <b>tap a clue repeatedly to cycle occasional → frequent → constant → clear</b>. Each question also has a <b>free-text field</b> for anything the options miss. Choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>Staged profiling &amp; XP</b> — every filed clue earns XP, and the <b>live weight engine</b> on the board shows the backend scores in real time; three &quot;profile updates&quot; pop up along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
-        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定。<b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>，可补充选项没盖到的特殊情况；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>阶段侧写与经验值</b> —— 每归档一条线索都计 XP，线索板上的<b>后台权重条实时公开</b>；回收途中会三次弹出「侧写更新」，人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
+        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
+        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>Capture the orbs</b> — the clues of Look · Listen · Ask · Pulse drift on three orbits around the figures: <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>. The one nearest the camera enlarges and shows its tag; <b>tap an orb → reticle locks → testimony opens</b>. Drag to orbit the camera; the ◎ button turns the camera to the nearest uncaptured orb; the top-left “LIST” opens a plain checklist.<br>③ <b style='color:var(--gold)'>Answer</b> — <b>every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform); for Ask, <b>tap a clue repeatedly to cycle occasional → frequent → constant → clear</b>; each question has a <b>free-text field</b>; choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>The world develops &amp; XP</b> — every capture sharpens the figures, refines the grain, turns confetti from grey to colour and wakes the holo-screens; consecutive captures within 25 s trigger a <b>COMBO</b> bonus; the <b>live weight engine</b> on the board shows backend scores in real time, with three profile updates along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
+        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
     </div>
   </section>
@@ -736,18 +779,20 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <div id="stageFrame" aria-hidden="true"><div id="contactReticle"></div></div>
     <aside id="clueDock">
       <div id="dockHead">
+        <span id="dockToggle">LIST</span>
         <div id="hudMode" data-zh="CLUE BOARD · 线索板" data-en="CLUE BOARD">CLUE BOARD · 线索板</div>
         <div id="hudProg">已回收 00 / 00</div>
         <div id="signalTrack"><span id="signalFill"></span></div>
         <div id="xpRow"><span id="xpTrack"><span id="xpFill"></span></span><span id="xpVal">XP 0</span></div>
         <div id="liveWeights"></div>
-        <div id="hudHint" data-zh="点击任意线索作答 · 可标程度 / 可自填 / 可跳过" data-en="Tap any clue · degree, own note &amp; skip supported">点击任意线索作答 · 可标程度 / 可自填 / 可跳过</div>
+        <div id="hudHint" data-zh="点按两人周围漂浮的光点捕捉线索 · 或展开此清单直选" data-en="Tap the floating orbs around the figures to capture clues · or expand this list">点按两人周围漂浮的光点捕捉线索 · 或展开此清单直选</div>
         <button id="btnSkipRest" data-zh="跳过剩余 · 直接推理 →" data-en="Skip the rest · deduce now →">跳过剩余 · 直接推理 →</button>
       </div>
       <div id="dockBody"></div>
     </aside>
     <div id="qPanel"><button id="qPanelClose" aria-label="关闭当前线索" title="关闭当前线索">✕</button><div id="qPanelInner"></div></div>
     <div id="signalToast"></div>
+    <div id="streakTag"><b>×2</b>COMBO</div>
     <div id="stageControls">
       <button id="turnLeft" aria-label="向左环绕" title="向左环绕">↶</button>
       <span>DRAG / ORBIT</span>
@@ -912,13 +957,14 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     const a=NODES[i].p,b=NODES[j].p;
     if(Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])<1.6) LINKS.push([i,j]);
   }
-  // 彩色纸屑地面
-  const FCOL=['214,112,106','106,212,200','212,175,106','233,228,214','91,143,212'];
+  // 彩色纸屑地面（预解析 RGB，便于随显影度从灰调向彩色插值）
+  const FCOL=['214,112,106','106,212,200','212,175,106','233,228,214','91,143,212'].map(s=>s.split(',').map(Number));
   const FLOOR=[];
   for(let i=0;i<680;i++){
     const a=Math.random()*Math.PI*2,r=0.25+Math.random()*2.8;
     FLOOR.push([Math.cos(a)*r,0.005,Math.sin(a)*r,FCOL[(Math.random()*FCOL.length)|0],Math.random()*7,0.9+Math.random()*1.8]);
   }
+  const tint=(c,k)=>{const g=(c[0]*.3+c[1]*.59+c[2]*.11);return `${Math.round(g+(c[0]-g)*k)},${Math.round(g+(c[1]-g)*k)},${Math.round(g+(c[2]-g)*k)}`;};
   // 环境尘埃
   const DUST=[];
   for(let i=0;i<200;i++) DUST.push([(Math.random()-.5)*5,(Math.random()-.5)*3,(Math.random()-.5)*5, Math.random()*Math.PI*2]);
@@ -981,6 +1027,19 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 
     ctx.globalCompositeOperation='lighter';
 
+    // 显影度：驱动整个背景从灰淡虚散到彩色实体
+    const CL=window.__clarity==null?1:window.__clarity;
+    const cc=Math.max(0,Math.min(1,(CL-0.42)/0.58));       // 0 虚（散开）· 1 实（聚拢）
+    const scat=1-cc, live=document.body.classList.contains('stage-live');
+    const chroma=live?0.18+0.82*cc:1;                      // 色彩饱和度
+    if(Math.abs((window.__clLast||-1)-cc)>0.004){
+      window.__clLast=cc;
+      document.body.style.setProperty('--cl',cc.toFixed(3));
+      const fl=document.getElementById('figLayer');
+      fl.style.setProperty('--dot',(6.2-3.4*cc).toFixed(2)+'px');
+      fl.style.filter=`blur(${(3.2*(1-cc)*(1-cc)).toFixed(2)}px) saturate(${(0.25+1.05*cc).toFixed(2)}) contrast(${(0.9+0.22*cc).toFixed(2)}) brightness(${(0.82+0.28*cc).toFixed(2)})`;
+    }
+
     // 尘埃
     for(const d of DUST){
       const yy=d[1]+Math.sin(t*0.3+d[3])*0.12;
@@ -991,14 +1050,16 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
       ctx.fillRect(pr[0],pr[1],1.4*DPR*pr[2],1.4*DPR*pr[2]);
     }
 
-    // 彩色纸屑地面（拼贴地毯质感）
-    for(const f of FLOOR){
+    // 彩色纸屑地面（拼贴地毯质感；显影越高越鲜艳、越密）
+    const floorN=live?Math.round(FLOOR.length*(0.45+0.55*cc)):FLOOR.length;
+    for(let fi=0;fi<floorN;fi++){
+      const f=FLOOR[fi];
       const tw=0.45+0.55*Math.sin(t*2+f[4]);
       const pr=project(f[0],f[1],f[2],ca,sa,camY,cosP,sinP);
-      const a=0.62*tw*(pr[2]-0.22);
+      const a=(0.45+0.3*chroma)*tw*(pr[2]-0.22);
       if(a<=0.02) continue;
-      ctx.fillStyle=`rgba(${f[3]},${Math.min(0.72,a)})`;
-      const s=1.7*DPR*pr[2]*f[5];
+      ctx.fillStyle=`rgba(${tint(f[3],chroma)},${Math.min(0.78,a)})`;
+      const s=1.7*DPR*pr[2]*f[5]*(0.85+0.3*cc);
       ctx.fillRect(pr[0]-s/2,pr[1]-s/2,s,s);
     }
 
@@ -1040,7 +1101,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
         ctx.fillText(nd.label, pr[0]+5*DPR, pr[1]);
       }
     }
-    // 悬浮全息屏
+    // 悬浮全息屏（显影越高越亮）
     ctx.globalCompositeOperation='source-over';
     for(const pn of PANELS){
       const pr=project(pn.p[0], pn.p[1]+Math.sin(t*0.3+pn.ph)*0.05, pn.p[2], ca,sa,camY,cosP,sinP);
@@ -1049,24 +1110,21 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
       const x=pr[0]-w/2, y=pr[1]-h/2;
       ctx.fillStyle=`rgba(7,11,18,${0.55*pr[2]})`; ctx.fillRect(x,y,w,h);
       const fg=ctx.createLinearGradient(x,y,x,y+h);
-      fg.addColorStop(0,`rgba(150,170,210,${0.14*pr[2]})`); fg.addColorStop(1,'rgba(0,0,0,0)');
+      fg.addColorStop(0,`rgba(150,170,210,${(0.08+0.14*chroma)*pr[2]})`); fg.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=fg; ctx.fillRect(x,y,w,h);
       // 画面内容：人像剪影
       const cxp=x+w*0.5, cyp=y+h*0.66, hr=h*0.15;
-      ctx.fillStyle=`rgba(150,180,215,${0.2*pr[2]})`;
+      ctx.fillStyle=`rgba(${tint([150,190,215],chroma)},${(0.1+0.16*chroma)*pr[2]})`;
       ctx.beginPath(); ctx.arc(cxp,cyp-hr*1.3,hr,0,7); ctx.fill();
       ctx.beginPath(); ctx.moveTo(cxp-hr*1.9,y+h); ctx.quadraticCurveTo(cxp,cyp,cxp+hr*1.9,y+h); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle=`rgba(106,212,200,${0.10*pr[2]})`; ctx.lineWidth=1;
+      ctx.strokeStyle=`rgba(106,212,200,${0.10*chroma*pr[2]})`; ctx.lineWidth=1;
       for(let yy=y+3; yy<y+h; yy+=4){ ctx.beginPath();ctx.moveTo(x,yy);ctx.lineTo(x+w,yy);ctx.stroke(); }
-      ctx.strokeStyle=`rgba(212,175,106,${(0.28+0.3*Math.sin(t*3+pn.ph))*pr[2]})`;
+      ctx.strokeStyle=`rgba(${tint([212,175,106],chroma)},${(0.28+0.3*Math.sin(t*3+pn.ph))*pr[2]*(0.5+0.5*chroma)})`;
       ctx.strokeRect(x,y,w,h);
     }
     ctx.globalCompositeOperation='lighter';
 
     // 中央「颗粒双人」：多层网点视频随清晰度散开/聚拢；背景以光晕与逸散余粒呼应
-    const CL=window.__clarity==null?1:window.__clarity;
-    const cc=Math.max(0,Math.min(1,(CL-0.42)/0.58));       // 0 虚（散开）· 1 实（聚拢）
-    const scat=1-cc;
     if(grains.length){
       const spread=Math.min(innerWidth,innerHeight)*0.17*scat;
       for(let i=0;i<grains.length;i++){
@@ -1075,10 +1133,10 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
         const ty=d[1]*spread+Math.cos(t*GFX[i]*1.1+GPH[i])*fl;
         const sc=1+scat*0.14+Math.sin(t*0.6+GPH[i])*0.008;
         grains[i].style.transform=`translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${sc.toFixed(3)})`;
-        grains[i].style.opacity=(0.3+0.6*cc).toFixed(3);
+        grains[i].style.opacity=(0.26+0.7*cc).toFixed(3);
       }
     }
-    if(document.body.classList.contains('stage-live')){
+    if(live){
       const cx=W/2, cy=H*0.5, rad=Math.min(H*0.52,W*0.42);
       ctx.globalCompositeOperation='lighter';
       const rgl=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
@@ -1109,15 +1167,17 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
       }
       ctx.globalCompositeOperation='source-over';
     }
-    // 数据雨（覆于身形之上的代码流）
+    // 数据雨（覆于身形之上的代码流；随显影逐步点亮）
     ctx.font=`${11*DPR}px monospace`;
-    for(const mr of MRAIN){
+    const rainN=live?Math.round(MRAIN.length*(0.35+0.65*cc)):MRAIN.length;
+    for(let ri=0;ri<rainN;ri++){
+      const mr=MRAIN[ri];
       const wx=Math.cos(mr.a)*mr.r, wz=Math.sin(mr.a)*mr.r, head=(t*mr.sp)%1;
       for(let k=0;k<7;k++){
         const yy=mr.y-((head+k*0.14)%1)*1.35;
         const pr=project(wx,yy,wz,ca,sa,camY,cosP,sinP);
         if(pr[2]<0.42) continue;
-        ctx.fillStyle=`rgba(150,230,200,${(1-k/7)*0.42*pr[2]})`;
+        ctx.fillStyle=`rgba(${tint([150,230,200],chroma)},${(1-k/7)*0.42*pr[2]})`;
         ctx.fillText(Math.random()<.5?'0':'1', pr[0], pr[1]);
       }
     }
@@ -1935,7 +1995,7 @@ function applyLang(){
   });
   document.documentElement.lang = LANG==='en'?'en':'zh-CN';
   $('#btnLang').textContent = LANG==='en'?'中文':'EN';
-  if(ORBS.length) buildDock();
+  if(ORBS.length){ buildDock(); ORBS.forEach(o=>{const em=o.el&&o.el.querySelector('em'); if(em) em.textContent=L(CATS[o.cat].zh,CATS[o.cat].en)+' '+String(o.order+1).padStart(2,'0');}); }
   if(orbTotal) updateHUD();
   closePanel();
 }
@@ -2034,16 +2094,17 @@ function showSignal(message){
 function scanClues(){
   const rest=ORBS.filter(o=>!o.done);
   if(!rest.length){showSignal(L('全部线索已归档','All clues filed'));return;}
-  openDock();
   rest.forEach(o=>{o.el.classList.remove('locating');void o.el.offsetWidth;o.el.classList.add('locating');
     setTimeout(()=>o.el.classList.remove('locating'),1500);});
-  const first=rest[0];
-  if(first.dockEl){
+  // 镖头转向最近的未捕捉目标，让它转到正前方
+  const first=_nearOrb&&!_nearOrb.done?_nearOrb:rest[0];
+  if(window.stageFocusWorld) window.stageFocusWorld(first.wx,first.wz);
+  if(first.dockEl&&$('#clueDock').classList.contains('open')){
     first.dockEl.scrollIntoView({behavior:'smooth',block:'nearest'});
     first.dockEl.classList.remove('flash');void first.dockEl.offsetWidth;first.dockEl.classList.add('flash');
     setTimeout(()=>{if(first.dockEl)first.dockEl.classList.remove('flash');},1500);
   }
-  showSignal(L(`未勘验线索 ${rest.length} 条 · 任选其一`,`${rest.length} clues remain · pick any`));
+  showSignal(L(`尚有 ${rest.length} 条线索漂浮中 · 镜头已转向最近一条`,`${rest.length} clues adrift · camera turned to the nearest`));
 }
 function buildStage(){
   ORBS=[]; orbDone=0; curOrb=null; msShown=0;
@@ -2054,26 +2115,46 @@ function buildStage(){
   inquireGroups.forEach(g=>ORBS.push({cat:'inquire',g}));
   ORBS.push({cat:'pulse',done:false});
   orbTotal=ORBS.length;
-  // 光点作为纯氛围装饰环绕两人，随镜头旋转流动；发现与作答全部在线索板进行
+  // 光点 = 漂浮在两人周围的可捕捉线索：沿三条轨道缓慢巡游，点按锁定即开启证词
   const rings=[{r:1.72,y:0.5},{r:2.12,y:1.04},{r:1.82,y:1.52}];
   ORBS.forEach((o,i)=>{
     const ring=i%3;
-    const a=-Math.PI/2+i*2.399963+ring*.18;
-    o.wx=Math.cos(a)*rings[ring].r; o.wy=rings[ring].y; o.wz=Math.sin(a)*rings[ring].r;
+    o.ring=ring; o.a0=-Math.PI/2+i*2.399963+ring*.18;
+    o.spd=(0.05+Math.random()*0.05)*(ring%2?1:-1);      // 各轨道反向巡游
+    o.bob=Math.random()*6.283; o.r=rings[ring].r; o.wy0=rings[ring].y;
+    o.wx=Math.cos(o.a0)*o.r; o.wy=o.wy0; o.wz=Math.sin(o.a0)*o.r;
     o.done=false;o.skipped=false;o.order=i;
     const d=document.createElement('div');
     d.className='orb cat-'+o.cat;
-    d.innerHTML='<i></i>';
+    d.innerHTML='<b></b><i></i><em></em>';
+    d.querySelector('em').textContent=L(CATS[o.cat].zh,CATS[o.cat].en)+' '+String(i+1).padStart(2,'0');
+    d.addEventListener('click',e=>{e.stopPropagation();captureOrb(o);});
     $('#orbLayer').appendChild(d);
     o.el=d;
     syncOrbState(o);
   });
   buildDock();
   $('#deduceGate').classList.remove('show');
-  state.xp=0; $('#xpFill').style.width='0'; $('#xpVal').textContent='XP 0';
+  state.xp=0; state.streak=0; state.lastCap=0;
+  $('#xpFill').style.width='0'; $('#xpVal').textContent='XP 0';
   updateLive();
   updateHUD();
-  showSignal(L('全部线索已列在线索板 · 任选一条开始勘验','All clues are listed on the board · pick any to begin'));
+  showSignal(L('线索正漂浮在两人周围 · 点按光点捕捉','Clues drift around the figures · tap an orb to capture'));
+}
+/* 捕捉：锁定动画 → 十字准星飞向目标 → 打开证词 */
+function captureOrb(o){
+  if(o.done||o._locking||curOrb) return;
+  o._locking=true;
+  o.el.classList.add('locking');
+  const ret=$('#contactReticle');
+  if(ret&&o.sx!=null){ret.style.left=o.sx+'px';ret.style.top=o.sy+'px';ret.classList.add('lock');}
+  window.__stageFocus=true;   // 锁定期间暂停自动环绕
+  showSignal(L('锁定 · '+dockShortLabel(o),'LOCKED · '+dockShortLabel(o)));
+  setTimeout(()=>{
+    o.el.classList.remove('locking'); o._locking=false;
+    if(ret){ret.classList.remove('lock');ret.style.left='';ret.style.top='';}
+    openOrb(o);
+  },520);
 }
 
 /* ---------- 线索板：稳定的可浏览清单（发现机制的核心） ---------- */
@@ -2112,14 +2193,14 @@ function buildDock(){
     items.forEach(o=>{
       const b=document.createElement('button'); b.className='dockItem';
       b.innerHTML=`<i></i><span class="dockQ"></span><span class="dockState"></span>`;
-      b.onclick=e=>{e.stopPropagation();openOrb(o);};
+      b.onclick=e=>{e.stopPropagation();collapseDock();captureOrb(o);};
       g.appendChild(b); o.dockEl=b; syncDockItem(o);
     });
     body.appendChild(g);
   });
   updateDockProgress();
 }
-function openDock(){ if(innerWidth<700) $('#clueDock').classList.add('open'); }
+function openDock(){ $('#clueDock').classList.add('open'); }
 function collapseDock(){ $('#clueDock').classList.remove('open'); }
 function skipOrb(o){
   if(!o||o.done||o._completing) return;
@@ -2135,22 +2216,35 @@ function skipRest(){
   addClue(L('跳过','Skip'),L(`侦探选择略过 ${rest.length} 条线索，以现有证据直接推理`,`${rest.length} clues skipped — deduction proceeds on current evidence`),{});
   updateHUD(true); afterAnswer();
 }
-/* 由背景渲染循环每帧调用：同步装饰光点的屏幕位置（交互全部在线索板） */
+/* 由背景渲染循环每帧调用：光点沿轨道巡游、上下浮动，并按远近强调可捕捉的目标 */
+let _tickT=performance.now(), _nearOrb=null;
 window.stageTick=function(project){
   const on=$('#screen-stage').classList.contains('active');
   $('#orbLayer').style.display=on?'':'none';
   if(!on||!ORBS.length) return;
-  const dpr=window.__dpr||1;
+  const now=performance.now(), dt=Math.min(.05,(now-_tickT)/1000); _tickT=now;
+  const dpr=window.__dpr||1, drift=curOrb?0:1;
+  let best=null,bestD=0;
   ORBS.forEach(o=>{
     if(o===curOrb){o.el.style.opacity='0';return;}
+    if(!o.done&&!o._locking){
+      o.a0+=o.spd*dt*drift; o.bob+=dt*0.9;
+      o.wx=Math.cos(o.a0)*o.r; o.wz=Math.sin(o.a0)*o.r; o.wy=o.wy0+Math.sin(o.bob)*0.07;
+    }
     const p=project(o.wx,o.wy,o.wz);
     const near=Math.max(0,Math.min(1,(p[2]-0.65)/0.7));   // 0 远 · 1 近
     const x=p[0]/dpr, y=p[1]/dpr;
     o.sx=x;o.sy=y;
     o.el.style.left=x+'px';o.el.style.top=y+'px';
-    o.el.style.opacity=(o.done?.14:(0.18+0.72*near)).toFixed(3);
-    o.el.style.transform=`translate(-50%,-50%) scale(${(.6+.6*near).toFixed(3)})`;
+    o.el.style.opacity=(o.done?.14:(0.3+0.7*near)).toFixed(3);
+    if(!o._locking) o.el.style.transform=`scale(${(.62+.55*near).toFixed(3)})`;
+    if(!o.done&&p[2]>bestD){bestD=p[2];best=o;}
   });
+  if(best!==_nearOrb){
+    if(_nearOrb&&_nearOrb.el)_nearOrb.el.classList.remove('near');
+    if(best)best.el.classList.add('near');
+    _nearOrb=best;
+  }
   const filed=ORBS.filter(o=>o.done).length;
   $('#signalFill').style.width=Math.round(filed/Math.max(1,orbTotal)*100)+'%';
 };
@@ -2249,7 +2343,16 @@ function completeOrb(o,record){
   record();
   if(o.customText) addClue(L(CATS[o.cat].zh,CATS[o.cat].en),L('自述补充：','Own note: ')+o.customText,{});
   o.done=true;orbDone++;syncOrbState(o);o.el.classList.add('absorbed');
-  awardXP(o.skipped?3:(10+(o.customText?6:0)+(o._bonus||0)),o.focusX,o.focusY);
+  // 连击：25 秒内连续捕捉（非跳过）叠加奖励
+  const now=performance.now();
+  if(o.skipped){state.streak=0;}
+  else{state.streak=(now-(state.lastCap||0)<25000)?(state.streak||0)+1:1;state.lastCap=now;}
+  const combo=state.streak>=2?Math.min(6,state.streak)*2:0;
+  const tag=$('#streakTag');
+  if(state.streak>=2){tag.querySelector('b').textContent='×'+state.streak;tag.classList.add('show');
+    clearTimeout(tag._t);tag._t=setTimeout(()=>tag.classList.remove('show'),2200);}
+  else tag.classList.remove('show');
+  awardXP(o.skipped?3:(10+(o.customText?6:0)+(o._bonus||0)+combo),o.focusX,o.focusY);
   emitAbsorption(o);$('#qPanel').classList.add('resolving');updateHUD(true);
   setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();},560);
 }
@@ -2344,7 +2447,7 @@ function closePanel(){
 }
 $('#qPanelClose').onclick=closePanel;
 $('#qPanel').addEventListener('click',e=>{if(e.target.id==='qPanel')closePanel();});
-$('#dockHead').onclick=()=>{ if(innerWidth<700) $('#clueDock').classList.toggle('open'); };
+$('#dockHead').onclick=()=>{ $('#clueDock').classList.toggle('open'); };
 $('#btnSkipRest').onclick=e=>{e.stopPropagation();skipRest();};
 $('#turnLeft').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(-.48);};
 $('#locateClue').onclick=e=>{e.stopPropagation();scanClues();};
