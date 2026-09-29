@@ -683,9 +683,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 <body>
 <canvas id="bg"></canvas>
 <div id="figLayer" aria-hidden="true">
-  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
-  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
-  <video class="figGrain" autoplay muted loop playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
+  <video class="figGrain" autoplay muted loop playsinline webkit-playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
+  <video class="figGrain" muted loop playsinline webkit-playsinline preload="none"><source src="reference-figures.mp4" type="video/mp4"></video>
+  <video class="figGrain" muted loop playsinline webkit-playsinline preload="none"><source src="reference-figures.mp4" type="video/mp4"></video>
 </div>
 <div id="vignette"></div>
 <div id="scanlines"></div>
@@ -886,11 +886,26 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   const cv = document.getElementById('bg');
   const ctx = cv.getContext('2d');
   // 中央「颗粒双人」：多层视频 + 网点遮罩，随清晰度散开/聚拢
-  const grains=[...document.querySelectorAll('.figGrain')];
+  // 低端机 / 手机只用 2 层：同一文件的多路解码在安卓上开销极大
+  const LOWP = innerWidth<700 || (navigator.hardwareConcurrency||8)<=4;
+  const allGrains=[...document.querySelectorAll('.figGrain')];
+  allGrains.slice(LOWP?2:3).forEach(v=>v.remove());
+  const grains=allGrains.slice(0,LOWP?2:3);
   const GDIR=[[-1,-0.55],[1,0.42],[0.25,-1]]; GDIR.forEach(d=>{const m=Math.hypot(d[0],d[1])||1;d[0]/=m;d[1]/=m;});
   const GPH=grains.map(()=>Math.random()*6.283), GFX=grains.map(()=>0.5+Math.random()*0.7);
-  // iOS/低电量模式下自动播放可能被拦截：首次触碰时补播
-  function kickGrains(){grains.forEach(v=>{const p=v.play&&v.play();if(p&&p.catch)p.catch(()=>{});});}
+  function playGrain(v){v.dataset.on='1';const p=v.play&&v.play();if(p&&p.catch)p.catch(()=>{});}
+  // 同一文件并发拉 3 份会拖慢手机首屏：首层拿到元数据后再启动其余层，让它们命中缓存
+  let grainsLoaded=false;
+  window.__loadGrains=function(){
+    if(grainsLoaded) return; grainsLoaded=true;
+    const rest=()=>grains.slice(1).forEach(v=>{if(v.dataset.on)return;v.preload='auto';v.load();playGrain(v);});
+    const first=grains[0]; if(!first) return;
+    if(first.readyState>=1) rest();
+    else{ first.addEventListener('loadedmetadata',rest,{once:true}); setTimeout(rest,3000); }
+    playGrain(first);
+  };
+  // iOS/低电量模式下自动播放可能被拦截：首次触碰时补播（只补已启动的层）
+  function kickGrains(){grains.forEach(v=>{if(v.dataset.on)playGrain(v);});}
   addEventListener('touchstart',kickGrains,{once:true,passive:true});
   addEventListener('pointerdown',kickGrains,{once:true});
   // 逸散联动余粒池（自两人身上飞向四周，与中心呼应）
@@ -2109,6 +2124,7 @@ function scanClues(){
 function buildStage(){
   ORBS=[]; orbDone=0; curOrb=null; msShown=0;
   window.__stageFocus=false;
+  if(window.__loadGrains) window.__loadGrains();
   $('#orbLayer').innerHTML='';
   Q_OBSERVE.forEach(g=>ORBS.push({cat:'observe',g}));
   Q_LISTEN.forEach(g=>ORBS.push({cat:'listen',g}));
@@ -2462,7 +2478,7 @@ function markPulseDone(){
 /* ---------- 开场 ---------- */
 state.caseNo = 'MMD-' + Date.now().toString(36).toUpperCase().slice(-6);
 $('#caseNo').textContent = 'FILE · ' + state.caseNo;
-$('#btnStart').onclick=()=>show('screen-intake');
+$('#btnStart').onclick=()=>{ if(window.__loadGrains) window.__loadGrains(); show('screen-intake'); };
 $('#btnHow').onclick=()=>show('screen-how');
 $('#btnHowBack').onclick=()=>show('screen-intro');
 $('#btnLang').onclick=()=>{ LANG = LANG==='zh'?'en':'zh'; applyLang(); };
