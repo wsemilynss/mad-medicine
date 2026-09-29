@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#05070d">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="MAD MEDICINE · 医理探案：以望闻问切为线索的中医医理推理交互剧场，含身体状态侧写、跨学科循证交叉验证与可下载的推理路径图。">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>MAD MEDICINE · 医理探案 —— 中医医理推理交互剧场</title>
 <style>
 /* ============================================================
@@ -408,9 +414,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   #btnLang,#clueToggle{font-size:9px;padding:6px 8px;letter-spacing:.1em}
   body.stage-answering #topbar{opacity:.18;pointer-events:none}
   /* 线索板 → 底部抽屉（常态为一条进度横条，点按展开） */
-  #clueDock{left:0;right:0;top:auto;bottom:0;width:100%;max-height:62px;border-left:0;border-right:0;
+  #clueDock{left:0;right:0;top:auto;bottom:0;width:100%;max-height:76px;border-left:0;border-right:0;
     border-bottom:0;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom)}
-  #clueDock.open{max-height:62dvh}
+  #clueDock.open{max-height:66dvh}
   body.stage-answering #clueDock{opacity:1;transform:translateY(105%);pointer-events:none}
   #dockHead{cursor:pointer;padding:16px 16px 10px}
   #dockHead::before{content:"";position:absolute;top:6px;left:50%;transform:translateX(-50%);
@@ -422,10 +428,15 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   #clueDock.open #btnSkipRest{display:block}
   #hudProg{font-size:12px}
   #signalTrack{width:110px;margin:7px 0 0}
+  #xpRow{margin-top:7px;gap:6px}
+  #xpTrack{max-width:110px}
+  #liveWeights{display:none}
+  #clueDock.open #liveWeights.on{display:flex}
+  .degBadge{right:10px;bottom:6px;font-size:8.5px}
   #clueDock:not(.open) #dockBody{display:none}
   .dockItem{min-height:44px;font-size:12.5px}
   #stageControls{right:14px;top:58px;bottom:auto}#stageControls span,#turnLeft,#turnRight{display:none}
-  #deduceGate{bottom:calc(92px + env(safe-area-inset-bottom))}
+  #deduceGate{bottom:calc(106px + env(safe-area-inset-bottom))}
   /* 答题面板 → 底部抽屉（整行大按钮，题目完整可读） */
   #qPanelInner{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;max-height:76dvh;overflow-y:auto;
     padding:18px 15px calc(22px + env(safe-area-inset-bottom));pointer-events:auto;color:var(--focus-color,var(--gold));
@@ -530,6 +541,10 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .tabBody{padding:14px 14px;font-size:13px}
   .tab{padding:9px 12px}
   .btn{letter-spacing:.2em;padding:15px 30px;font-size:14px}
+  .evItem{padding:11px 12px}
+  .evBody{font-size:12px;line-height:1.85}
+  .rankRow{gap:12px}
+  .rankMeta{font-size:11.5px}
 }
 /* ---------- 超小屏（≤360px）更宽松 ---------- */
 @media(max-width:360px){
@@ -553,6 +568,70 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .lede{margin-top:10px;line-height:1.7}
   .btn{margin-top:16px}
 }
+/* ============================================================
+   v2 · 独立游戏化视觉层：经验值 / 实时权重 / 动态图示 / 路径图
+   ============================================================ */
+#xpRow{display:flex;align-items:center;gap:8px;margin-top:9px}
+#xpTrack{flex:1;height:3px;background:rgba(233,228,214,.12);overflow:hidden}
+#xpFill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--gold-bright));
+  box-shadow:0 0 8px var(--gold);transition:width .45s cubic-bezier(.2,.8,.3,1)}
+#xpVal{font:9px/1 monospace;letter-spacing:.14em;color:var(--gold);flex:0 0 auto}
+#liveWeights{margin-top:9px;display:none;flex-direction:column;gap:4px}
+#liveWeights.on{display:flex}
+.lwRow{display:flex;align-items:center;gap:6px;font:9px/1.2 monospace;letter-spacing:.08em;color:var(--ink-dim)}
+.lwRow .lwN{flex:0 0 52px;font-family:var(--serif);font-size:10.5px;letter-spacing:.1em;color:var(--ink)}
+.lwRow .lwB{flex:1;height:2px;background:rgba(233,228,214,.1);overflow:hidden}
+.lwRow .lwB i{display:block;height:100%;background:linear-gradient(90deg,var(--cinnabar),var(--gold));transition:width .4s}
+.lwHint{font:8.5px/1.5 monospace;letter-spacing:.12em;color:var(--ink-dim);opacity:.65;margin-top:5px}
+.xpFloat{position:fixed;z-index:16;font:13px/1 monospace;letter-spacing:.1em;color:var(--gold-bright);
+  pointer-events:none;text-shadow:0 0 14px rgba(212,175,106,.9);animation:xpRise 1.05s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes xpRise{to{transform:translate(-50%,-58px);opacity:0}}
+/* 动态图示：让「望闻切」的选项可被眼睛直接辨认 */
+.optArt{flex:0 0 auto;width:28px;height:28px;display:block;overflow:visible}
+.optArt .breathe{animation:artBreathe 2.6s ease-in-out infinite;transform-origin:20px 20px}
+@keyframes artBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.optArt .flowLine{stroke-dasharray:3 4;animation:artFlow 1.6s linear infinite}
+@keyframes artFlow{to{stroke-dashoffset:-14}}
+.opt{display:inline-flex;align-items:center;gap:9px}
+.answerNode{position:relative}
+.answerNode .optArt{align-self:center}
+.degBadge{position:absolute;right:7px;bottom:4px;font:8px/1 monospace;letter-spacing:.1em;color:currentColor;opacity:.95}
+.answerNode.lv1{border-left-width:2px}
+.answerNode.lv2{border-left-width:4px}
+.answerNode.lv3{border-left-width:6px}
+/* 自填补充 */
+.customWrap{margin-top:11px;position:relative}
+.customWrap input{width:100%;background:rgba(5,8,15,.78);border:1px solid rgba(233,228,214,.16);
+  border-left:2px solid currentColor;color:var(--ink);padding:10px 11px;font-size:12.5px;
+  font-family:var(--sans);outline:none;border-radius:0}
+.customWrap input::placeholder{color:rgba(154,149,138,.7)}
+.customWrap input:focus{border-color:var(--gold);background:rgba(9,14,24,.9)}
+/* 循证交叉验证 */
+.evItem{border:1px solid rgba(233,228,214,.12);border-left:2px solid var(--teal);border-radius:2px;
+  padding:12px 15px;margin-bottom:10px;background:rgba(5,8,15,.45)}
+.evHead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.evDisc{font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--teal)}
+.evGrade{font:8.5px/1 monospace;letter-spacing:.12em;border:1px solid currentColor;padding:3px 6px;border-radius:2px}
+.evGrade.A{color:var(--gold-bright)}.evGrade.B{color:var(--teal)}.evGrade.C{color:var(--ink-dim)}
+.evBody{font-size:12.5px;line-height:1.95;color:var(--ink)}
+.evRef{font:9.5px/1.7 monospace;letter-spacing:.06em;color:var(--ink-dim);margin-top:6px;opacity:.85}
+.evLegend{font:9.5px/1.8 monospace;letter-spacing:.1em;color:var(--ink-dim);margin-top:4px;
+  padding-top:10px;border-top:1px dashed rgba(233,228,214,.14)}
+/* 推理路径图：窄屏下保留可读字号，改为横向滑动查看 */
+#pathWrap{width:100%;border:1px solid rgba(233,228,214,.12);background:#070a12;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+#pathC{display:block;max-width:none}
+#pathHint{display:none;font:9.5px/1.7 monospace;letter-spacing:.14em;color:var(--ink-dim);
+  margin-top:8px;opacity:.75}
+#pathHint.on{display:block}
+.rankRow{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+.rankBadge{font-family:var(--serif);font-size:38px;letter-spacing:.1em;color:var(--gold-bright);
+  width:72px;height:72px;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--gold);transform:rotate(45deg);box-shadow:0 0 34px rgba(212,175,106,.28)}
+.rankBadge span{transform:rotate(-45deg)}
+.rankMeta{text-align:left;font-size:12px;line-height:1.9;color:var(--ink-dim);letter-spacing:.1em}
+.rankMeta b{display:block;font-family:var(--serif);font-size:16px;letter-spacing:.24em;color:var(--ink)}
+@media(max-width:600px){.rankBadge{width:58px;height:58px;font-size:28px}}
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-thumb{background:rgba(212,175,106,.3);border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -608,9 +687,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <div class="panel">
       <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
       <div style="font-size:13.5px;line-height:2.1;color:var(--ink)"
-        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定；每条证词可标注「偶尔 / 经常 / 持续」三档程度；不确定就选「看不太清」，或点「跳过此线索」。右下角 ◎ 可定位下一条未勘验线索。<br>④ <b style='color:var(--gold)'>阶段侧写</b> —— 回收途中会三次弹出「侧写更新」：初步轮廓、画像渐显、呼之欲出——人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，在寸、关、尺三部辨认速率、深浅、力度与质感。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁身体侧写、调养处方和五幕推理小剧场。"
-        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>The clue board</b> — all clues of Look · Listen · Ask · Pulse are grouped on the left board (on phones, a bottom drawer — tap the bar to expand): <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>.<br>③ <b style='color:var(--gold)'>Answer freely</b> — tap any clue, in any order; mark each testimony as occasional / frequent / constant; choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like. The ◎ button (lower right) locates the next unexamined clue.<br>④ <b style='color:var(--gold)'>Staged profiling</b> — three &quot;profile updates&quot; pop up along the way: first sketch, taking shape, almost there — the figure develops with the evidence.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument for rate, depth, strength and texture.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock the body profile, care prescription and five-act deduction theatre.">
-        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定；每条证词可标注「偶尔 / 经常 / 持续」三档程度；不确定就选「看不太清」，或点「跳过此线索」。右下角 ◎ 可定位下一条未勘验线索。<br>④ <b style='color:var(--gold)'>阶段侧写</b> —— 回收途中会三次弹出「侧写更新」：初步轮廓、画像渐显、呼之欲出——人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，在寸、关、尺三部辨认速率、深浅、力度与质感。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁身体侧写、调养处方和五幕推理小剧场。</div>
+        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定。<b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>，可补充选项没盖到的特殊情况；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>阶段侧写与经验值</b> —— 每归档一条线索都计 XP，线索板上的<b>后台权重条实时公开</b>；回收途中会三次弹出「侧写更新」，人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
+        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>The clue board</b> — all clues of Look · Listen · Ask · Pulse are grouped on the left board (on phones, a bottom drawer — tap the bar to expand): <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>.<br>③ <b style='color:var(--gold)'>Answer freely</b> — tap any clue, in any order. <b>Every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform) so you can simply match what you see. For Ask, <b>tap a clue repeatedly to cycle occasional → frequent → constant → clear</b>. Each question also has a <b>free-text field</b> for anything the options miss. Choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>Staged profiling &amp; XP</b> — every filed clue earns XP, and the <b>live weight engine</b> on the board shows the backend scores in real time; three &quot;profile updates&quot; pop up along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
+        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>浏览线索板</b> —— 望·闻·问·切的全部线索分组列在左侧线索板（手机上在底部抽屉，点按横条展开）：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。<br>③ <b style='color:var(--gold)'>自由作答</b> —— 点击任意线索作答，顺序全由你定。<b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；问诊的每条证词<b>连点可依次标记 偶尔 → 经常 → 持续 → 取消</b>；每道题底部都留有<b>自填栏</b>，可补充选项没盖到的特殊情况；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>阶段侧写与经验值</b> —— 每归档一条线索都计 XP，线索板上的<b>后台权重条实时公开</b>；回收途中会三次弹出「侧写更新」，人物随证据逐步显影。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
     </div>
   </section>
@@ -660,7 +739,9 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
         <div id="hudMode" data-zh="CLUE BOARD · 线索板" data-en="CLUE BOARD">CLUE BOARD · 线索板</div>
         <div id="hudProg">已回收 00 / 00</div>
         <div id="signalTrack"><span id="signalFill"></span></div>
-        <div id="hudHint" data-zh="点击任意线索作答 · 可标程度 / 可跳过" data-en="Tap any clue to answer · degree &amp; skip supported">点击任意线索作答 · 可标程度 / 可跳过</div>
+        <div id="xpRow"><span id="xpTrack"><span id="xpFill"></span></span><span id="xpVal">XP 0</span></div>
+        <div id="liveWeights"></div>
+        <div id="hudHint" data-zh="点击任意线索作答 · 可标程度 / 可自填 / 可跳过" data-en="Tap any clue · degree, own note &amp; skip supported">点击任意线索作答 · 可标程度 / 可自填 / 可跳过</div>
         <button id="btnSkipRest" data-zh="跳过剩余 · 直接推理 →" data-en="Skip the rest · deduce now →">跳过剩余 · 直接推理 →</button>
       </div>
       <div id="dockBody"></div>
@@ -1501,6 +1582,325 @@ for(const k in PATTERNS_EN){ PATTERNS[k].en = PATTERNS_EN[k]; }
 
 <script>
 /* ============================================================
+   跨学科循证库 EVIDENCE
+   d 学科 | s 证据强度(A 高 / B 中 / C 弱或争议) | c 交叉验证结论 | r 证据来源层级
+   说明：中医证型本身不是可被直接验证的诊断实体；此处验证的是
+   「该证型的核心主诉组合」与「其调摄建议」在现代各学科中的对应与支持度。
+   ============================================================ */
+const EV_GRADE={A:['高 · 多项RCT或系统评价一致','High · consistent RCTs & reviews'],
+  B:['中 · 观察性研究或机制证据','Moderate · observational / mechanistic'],
+  C:['弱 · 证据有限或存在争议','Limited · sparse or contested']};
+const EVIDENCE={
+qi:[
+ {d:['内科学','Internal medicine'],s:'A',c:['「乏力·气短·易感冒」并非特异表现：缺铁性贫血、甲状腺功能减退、维生素D缺乏、阻塞性睡眠呼吸暂停都能完整复刻这一组主诉。任何「气虚」侧写成立之前，应先以血常规+铁蛋白、TSH、25(OH)D 与睡眠筛查排除可测量的病因。','Fatigue and breathlessness are non-specific: anemia, hypothyroidism, vitamin-D deficiency and sleep apnea reproduce the same cluster. Exclude measurable causes first.'],r:['证据层级：内科鉴别诊断共识路径','Level: standard differential-diagnosis pathway']},
+ {d:['运动科学','Exercise science'],s:'A',c:['渐进式低强度有氧结合轻阻力训练，对慢性疲劳人群的疲劳量表评分与功能容量有稳定改善——与「气虚宜微动、忌大汗」方向一致。但肌痛性脑脊髓炎(ME/CFS)人群存在运动后不适(PEM)，必须个体化配速，不可套用递增方案。','Graded low-intensity aerobic plus light resistance improves fatigue scores — matching "move gently, never drench". ME/CFS with PEM requires pacing, not progression.'],r:['证据层级：多项RCT与系统评价，附人群限定','Level: RCTs & reviews, with population caveats']},
+ {d:['营养学','Nutrition'],s:'B',c:['每餐 25-30g 优质蛋白（全日约 1.0-1.2 g/kg）可维持肌肉蛋白合成与静息能量输出，这是「健脾益气」饮食建议中被量化验证的部分；而黄芪等药食同源成分的人体疗效证据仍不充分。','25-30g quality protein per meal sustains muscle synthesis — the quantifiable core of the advice. Human evidence for astragalus remains insufficient.'],r:['证据层级：营养干预试验；草药部分仅C级','Level: nutrition trials; herbal component grade C']},
+ {d:['行为心理学','Behavioral psychology'],s:'A',c:['「有意愿却无法启动」对应低动机-低唤醒状态。行为激活(BA)与微目标策略在抑郁与疲劳人群中效果量稳定，优于意志力式自我施压——这为「小胜利重建效能感」提供了心理学落点。','"Willing but unable to start" maps to low arousal. Behavioral activation and micro-goals outperform willpower-based self-pressure.'],r:['证据层级：行为激活的多项RCT与元分析','Level: meta-analyses of behavioral activation']}],
+xue:[
+ {d:['血液学','Hematology'],s:'A',c:['「面色无华·头晕心悸·经量少色淡」与缺铁性贫血高度重合。血清铁蛋白是评估铁储备的首选单项指标；诊断不能依赖对面色与舌色的肉眼判断。','The cluster overlaps strongly with iron-deficiency anemia. Serum ferritin is the first-line marker — not visual inspection.'],r:['证据层级：WHO 贫血诊断标准与血液学指南','Level: WHO anemia criteria & hematology guidelines']},
+ {d:['营养学','Nutrition'],s:'A',c:['血红素铁（红肉、动物血）吸收率显著高于植物性非血红素铁；维生素C可数倍提升非血红素铁吸收，而茶与咖啡中的多酚、钙补充剂会明显抑制——「铁配彩椒、浓茶与正餐相隔一小时」是有量化依据的操作。','Heme iron absorbs far better; vitamin C multiplies non-heme absorption while tea/coffee polyphenols inhibit it. The timing advice is quantitatively grounded.'],r:['证据层级：铁吸收的人体代谢研究','Level: human iron-absorption studies']},
+ {d:['睡眠医学','Sleep medicine'],s:'B',c:['「人卧则血归于肝」的现代对应是：睡眠限制会扰乱与造血相关的内分泌节律，加重日间低灌注感与认知迟缓。固定起床时间比周末补觉更能稳定节律。','Sleep restriction disrupts hematopoietic-related endocrine rhythms. Fixed wake time beats catch-up sleep.'],r:['证据层级：睡眠限制实验与节律研究','Level: sleep-restriction experiments']},
+ {d:['神经病学','Neurology'],s:'B',c:['铁储备不足与不宁腿综合征、注意力维持能力下降相关——这为「血不养神则眠浅多梦」提供了部分生理基础。','Low iron stores correlate with restless legs and impaired sustained attention.'],r:['证据层级：队列与病例对照研究','Level: cohort & case-control studies']}],
+yin:[
+ {d:['内分泌学','Endocrinology'],s:'A',c:['「午后潮热·盗汗·心烦」在围绝经期女性中，可由雌激素波动导致体温调节中枢阈值窄化来解释；同样表现也需排除甲状腺功能亢进与糖尿病（口干多饮伴消瘦）。','Afternoon flushing and night sweats are explained by a narrowed thermoneutral zone in perimenopause; also exclude hyperthyroidism and diabetes.'],r:['证据层级：血管舒缩症状机制研究','Level: vasomotor-symptom mechanism research']},
+ {d:['睡眠医学','Sleep medicine'],s:'A',c:['入睡依赖核心体温下降。「避免高温瑜伽与睡前暴汗、卧室保持 18-22℃」并非玄学，而是直接作用于睡眠开关的温度调控——与「滋阴降火」的方向同构。','Sleep onset depends on core-temperature decline. Cool bedrooms and avoiding late heat load act directly on that switch.'],r:['证据层级：体温-睡眠潜伏期实验','Level: thermoregulation & sleep-latency trials']},
+ {d:['应激生理学','Stress physiology'],s:'B',c:['长期压力下皮质醇昼夜节律趋于扁平，表现为夜间交感张力升高、晨起乏力而入夜亢奋——与「虚热」而非「实火」的描述吻合。','Flattened cortisol rhythms produce night-time sympathetic tone with morning fatigue — matching "empty heat" rather than excess fire.'],r:['证据层级：皮质醇节律观察研究','Level: cortisol-rhythm observational studies']},
+ {d:['心理学','Psychology'],s:'B',c:['「对声音光线耐受度低」对应感觉处理敏感性(SPS)特质，约占人群 15-20%。它是特质而非病理，干预方向是降低环境刺激负荷，而不是改造性格。','Low tolerance for noise and light maps to sensory processing sensitivity (~15-20% of people) — a trait, addressed by lowering stimulus load.'],r:['证据层级：SPS 量表与人群研究','Level: SPS scale population studies']}],
+yang:[
+ {d:['内分泌学','Endocrinology'],s:'A',c:['「畏寒 + 乏力 + 体重增加 + 便溏」是甲状腺功能减退的教科书组合。此侧写出现时，检测 TSH 的优先级高于任何食养调整。','Cold intolerance with fatigue and weight gain is textbook hypothyroidism. Checking TSH outranks any dietary adjustment.'],r:['证据层级：甲状腺疾病诊疗指南','Level: thyroid guidelines']},
+ {d:['运动科学','Exercise science'],s:'A',c:['抗阻训练增加去脂体重，进而提升静息能量消耗与产热能力——「增肌即增火」是可由间接热量测定验证的表述。','Resistance training raises lean mass and resting energy expenditure — verifiable by indirect calorimetry.'],r:['证据层级：抗阻训练代谢RCT','Level: resistance-training metabolic RCTs']},
+ {d:['时间生物学','Chronobiology'],s:'A',c:['晨间明亮光照（>1000 lux，10-30 分钟）可前移昼夜节律相位，并对季节性情绪低落有明确疗效——与「晒背补阳、晨起见光」指向同一生理开关。','Morning bright light advances circadian phase and treats seasonal low mood — the same switch as "sunning the back".'],r:['证据层级：光照疗法RCT与元分析','Level: light-therapy RCTs & meta-analyses']},
+ {d:['营养学','Nutrition'],s:'B',c:['蛋白质的食物热效应（约 20-30%）远高于碳水与脂肪；长期低热量节食会下调静息代谢——这为「阳虚忌盲目节食」提供了量化支撑。','Protein has the highest thermic effect (20-30%); chronic under-eating downregulates resting metabolism.'],r:['证据层级：食物热效应与代谢适应研究','Level: TEF & metabolic-adaptation research']}],
+yu:[
+ {d:['身心医学','Psychosomatic medicine'],s:'A',c:['慢性压力下 HPA 轴持续激活与自主神经失衡，是「胸闷·太息·胁胀·烦躁」最直接的现代解释。躯体化症状不是「想出来的」，而是真实的生理输出。','Chronic HPA activation and autonomic imbalance directly explain the chest-tightness/sighing cluster. Somatic symptoms are real physiological output.'],r:['证据层级：应激生理学机制与队列研究','Level: stress physiology & cohorts']},
+ {d:['消化病学','Gastroenterology'],s:'A',c:['脑-肠轴证据充分：肠易激综合征（罗马IV）与功能性消化不良的症状强度随心理压力波动，心理干预已被写入一线管理方案——与「肝气犯脾」的描述结构一致。','Gut-brain axis evidence is solid: IBS and functional dyspepsia fluctuate with stress, and psychological therapy is first-line management.'],r:['证据层级：罗马IV共识与心理干预RCT','Level: Rome IV consensus & psychotherapy RCTs']},
+ {d:['临床心理学','Clinical psychology'],s:'A',c:['表达性书写与认知行为疗法，对应激相关躯体症状有可复现的中等效果量。「把烦心事写下来」是被反复验证的具体处方，而非安慰式建议。','Expressive writing and CBT show reproducible moderate effects on stress-related somatic symptoms.'],r:['证据层级：表达性书写元分析','Level: expressive-writing meta-analyses']},
+ {d:['自主神经生理','Autonomic physiology'],s:'A',c:['约每分钟 6 次的慢呼吸可显著提升心率变异性、降低交感张力，是见效最快的非药物「疏泄」手段——4-7-8 呼吸即属此类。','Slow breathing near 6 breaths/min raises HRV and lowers sympathetic tone — the fastest non-pharmacological release.'],r:['证据层级：HRV 生物反馈试验','Level: HRV biofeedback trials']}],
+pi:[
+ {d:['代谢医学','Metabolic medicine'],s:'A',c:['「饭后犯困得厉害」可由餐后血糖波动与反应性低血糖解释。餐后 15-20 分钟步行能显著削平血糖峰值——这是「饭后百步走」最硬的循证注脚。','Post-meal drowsiness tracks glycemic excursions; a 15-20 min post-meal walk measurably blunts the peak.'],r:['证据层级：餐后活动血糖RCT','Level: post-meal activity RCTs']},
+ {d:['消化病学','Gastroenterology'],s:'B',c:['「吃一点就腹胀」对应胃排空延迟与内脏高敏感，属功能性消化不良范畴；少量多餐、细嚼慢咽、减少高脂餐是被推荐的行为干预。','Early satiety maps to delayed gastric emptying and visceral hypersensitivity — behavioral measures are recommended.'],r:['证据层级：功能性消化不良管理共识','Level: functional dyspepsia consensus']},
+ {d:['肠道微生态','Gut microbiome'],s:'B',c:['膳食纤维摄入量与菌群多样性、短链脂肪酸产量正相关；低纤维高精制碳水模式与腹胀、便质异常相关——这是「化湿」饮食建议中可测量的维度。','Fiber intake correlates with microbial diversity and SCFA output; low-fiber refined-carb patterns associate with bloating.'],r:['证据层级：微生态观察与干预研究','Level: microbiome observational & interventional']},
+ {d:['认知心理学','Cognitive psychology'],s:'B',c:['「思伤脾」的现代镜像是反刍思维：它既消耗执行资源造成「脑雾」，又与胃肠症状互为因果。行为激活应优先于思维纠正。','Rumination consumes executive resources ("brain fog") and interacts bidirectionally with gut symptoms.'],r:['证据层级：反刍思维与躯体症状研究','Level: rumination-somatic symptom studies']}],
+tan:[
+ {d:['代谢医学','Metabolic medicine'],s:'A',c:['「形体肥胖松软·困重·苔厚腻」在指标层面可被代谢综合征五项直接检验：腰围、甘油三酯、HDL-C、血压、空腹血糖。用腰围与体脂趋势替代体重焦虑，有明确的风险分层依据。','The picture is testable via the five metabolic-syndrome criteria; waist circumference outperforms weight as a risk marker.'],r:['证据层级：代谢综合征国际诊断标准','Level: international MetS criteria']},
+ {d:['睡眠医学','Sleep medicine'],s:'A',c:['「鼾声重·嗜睡」须筛查阻塞性睡眠呼吸暂停。OSA 与肥胖互为因果，未处理的 OSA 会让减脂努力事倍功半——「先睡好再减脂」有明确证据支持。','Snoring with hypersomnolence warrants OSA screening; untreated OSA undermines fat-loss efforts.'],r:['证据层级：STOP-BANG 筛查与OSA指南','Level: STOP-BANG & OSA guidelines']},
+ {d:['运动科学','Exercise science'],s:'A',c:['WHO 推荐每周 150-300 分钟中等强度有氧，加每周 2 次抗阻训练；日常非运动性消耗(NEAT)对全日能量平衡的贡献常被低估——「能站不坐」有实测支持。','WHO recommends 150-300 min moderate aerobic plus twice-weekly resistance; NEAT contributes substantially to daily balance.'],r:['证据层级：WHO 身体活动指南','Level: WHO physical activity guidelines']},
+ {d:['营养流行病学','Nutritional epidemiology'],s:'A',c:['含糖饮料摄入与体重增加、非酒精性脂肪肝风险的关联，在多个大型前瞻队列中结论一致——「戒掉含糖饮料」是本证型性价比最高的单一动作。','Sugar-sweetened beverages consistently associate with weight gain and fatty liver across large cohorts.'],r:['证据层级：大型前瞻队列与元分析','Level: large prospective cohorts']}],
+re:[
+ {d:['肝病学','Hepatology'],s:'A',c:['酒精与高果糖摄入通过肝脏从头脂肪合成与内毒素通路驱动炎症——「戒酒是第一处方」在代谢性肝病领域有最强的一致性。','Alcohol and high fructose drive hepatic lipogenesis and inflammation — abstinence is the highest-consistency recommendation.'],r:['证据层级：脂肪肝与酒精性肝病指南','Level: fatty-liver & alcoholic liver disease guidelines']},
+ {d:['皮肤科','Dermatology'],s:'B',c:['「面油多易长痘」与高血糖负荷饮食、部分乳制品（尤其脱脂奶与乳清蛋白）的关联有一致的观察证据；过度清洁反而破坏皮肤屏障，与「温和清洁」建议一致。','Adult acne associates with high-glycemic-load diets and certain dairy; over-cleansing impairs the barrier.'],r:['证据层级：饮食-痤疮观察与干预研究','Level: diet-acne studies']},
+ {d:['风湿代谢','Rheumatology'],s:'A',c:['酒精（尤其啤酒）与含果糖饮料升高血尿酸并增加痛风发作风险，是「湿热忌酒」中最可量化的一条。','Alcohol (especially beer) and fructose beverages raise urate and gout risk.'],r:['证据层级：痛风管理指南','Level: gout management guidelines']},
+ {d:['免疫学','Immunology'],s:'B',c:['慢性低度炎症可用 hs-CRP 等指标部分刻画，并与高脂高糖饮食、睡眠不足、酒精相关——为「湿热」提供了一个可测量的现代代理指标。','Chronic low-grade inflammation is partly captured by hs-CRP and tracks diet, sleep loss and alcohol.'],r:['证据层级：炎症标志物队列研究','Level: inflammatory-marker cohorts']}],
+yux:[
+ {d:['疼痛医学','Pain medicine'],s:'A',c:['「不通则痛」与现代慢性疼痛管理的核心共识罕见地一致：在无痛范围内温和活动优于完全制动，长期制动会加重中枢敏化与功能退化。','"No flow, then pain" aligns with modern consensus: gentle movement within painless range beats immobilization.'],r:['证据层级：慢性肌骨疼痛管理指南','Level: chronic musculoskeletal pain guidelines']},
+ {d:['血管医学','Vascular medicine'],s:'B',c:['长时间静坐导致下肢静脉回流受阻与内皮功能短时下降；每 30 分钟起身活动数分钟即可逆转这一急性变化——「打破久坐」有直接的生理测量支持。','Prolonged sitting impairs venous return and endothelial function acutely; breaking it every 30 min reverses the change.'],r:['证据层级：久坐中断的内皮功能试验','Level: sitting-interruption endothelial trials']},
+ {d:['妇科学','Gynecology'],s:'B',c:['「痛经伴血块、疼痛进行性加重」须警惕子宫内膜异位症或子宫腺肌症，二者平均确诊延迟长达数年。此侧写应导向专科影像评估，而不是仅靠茶饮调理。','Progressive clotted dysmenorrhea warrants evaluation for endometriosis/adenomyosis — conditions with years of diagnostic delay.'],r:['证据层级：子宫内膜异位症诊疗指南','Level: endometriosis guidelines']},
+ {d:['血液流变学','Hemorheology'],s:'C',c:['Omega-3 对血小板聚集与炎症指标的影响在实验室层面可见，但「活血食材」对临床终点的效果证据薄弱；红酒「活血」的说法已被后续研究推翻，酒精弊大于利。','Omega-3 effects appear in lab markers, but clinical endpoints for "blood-moving foods" remain weak; the red-wine claim has not held up.'],r:['证据层级：以机制研究为主，临床终点证据不足','Level: mechanistic only; clinical endpoints lacking']}],
+huo:[
+ {d:['睡眠医学','Sleep medicine'],s:'A',c:['失眠认知行为疗法(CBT-I)是慢性失眠的一线治疗，长期效果优于安眠药且无依赖风险。「心火亢盛」的失眠侧写应优先导向 CBT-I——这是本报告中证据等级最高的一条建议。','CBT-I is first-line for chronic insomnia, outperforming hypnotics long-term. The highest-evidence recommendation in this report.'],r:['证据层级：多学会临床实践指南一致推荐','Level: multi-society clinical guidelines']},
+ {d:['药理学','Pharmacology'],s:'A',c:['咖啡因半衰期约 5-6 小时且个体差异大（CYP1A2 基因型影响显著）；睡前 6 小时摄入仍会客观缩短总睡眠时间——「下午 2 点后归零」有剂量-时间依据。','Caffeine half-life is 5-6 h with wide genetic variability; intake 6 h before bed still shortens objective sleep.'],r:['证据层级：咖啡因-睡眠剂量时间试验','Level: caffeine dose-timing trials']},
+ {d:['神经科学','Neuroscience'],s:'B',c:['慢性失眠的过度觉醒模型显示全天代谢率与皮质激活升高，故「躺下即开会」是真实的神经状态而非意志问题。据此，刺激控制（睡不着就离开床）比强迫入睡更有效。','The hyperarousal model shows elevated 24-h metabolic and cortical activation — hence stimulus control beats forcing sleep.'],r:['证据层级：过度觉醒模型的影像与代谢研究','Level: hyperarousal imaging & metabolic studies']},
+ {d:['临床心理学','Clinical psychology'],s:'A',c:['「建构性担忧时间」与睡前书写担忧清单可缩短入睡潜伏期，是 CBT-I 的标准组件——「给大脑存档」有操作化的实验支持。','Scheduled worry time and pre-sleep worry lists shorten sleep latency — standard CBT-I components.'],r:['证据层级：CBT-I 组件拆解试验','Level: CBT-I component trials']}]
+};
+const EV_DISCLAIM=['※ 本栏验证的是「主诉组合」与「调摄建议」在各学科中的对应关系，而不是证明中医证型等同于某个西医诊断。证据等级越低，越应把它当作值得探索的假设，而非结论。',
+ '* This section cross-checks symptom clusters and lifestyle advice against other disciplines — it does not claim equivalence between TCM patterns and biomedical diagnoses.'];
+
+/* ============================================================
+   动态图示 ART：把「望·闻·切」的选项画出来，让眼睛直接比对
+   ============================================================ */
+function artSVG(sp){
+  if(!sp) return '';
+  const S='<svg class="optArt" viewBox="0 0 40 40" aria-hidden="true">',E='</svg>';
+  let g='';
+  if(sp.t==='tongue'){
+    g=`<g class="breathe"><path d="M20 5c8 0 12.5 5.5 12.5 12.5C32.5 26 26.5 36 20 36S7.5 26 7.5 17.5C7.5 10.5 12 5 20 5z" fill="${sp.c}" stroke="rgba(0,0,0,.4)" stroke-width="1"/>`;
+    if(sp.coat) g+=`<path d="M20 7.5c6.6 0 10.4 4.6 10.4 10.3 0 7.2-4.7 15.4-10.4 15.4S9.6 25 9.6 17.8C9.6 12.1 13.4 7.5 20 7.5z" fill="${sp.coat}" opacity="${sp.coatA||.55}"/>`;
+    if(sp.peel) g+=`<path d="M14.5 17q5.5-3.5 9.5 1t-3 7.5-8.5-3.5 2-5z" fill="${sp.c}" stroke="rgba(255,255,255,.6)" stroke-width="1"/>`;
+    if(sp.teeth) g+=`<path d="M8.4 13q2.4 2.2 0 4.4t0 4.4M31.6 13q-2.4 2.2 0 4.4t0 4.4" fill="none" stroke="rgba(0,0,0,.42)" stroke-width="1.4"/>`;
+    if(sp.spot) g+=`<circle cx="15" cy="20" r="1.7" fill="#4d1f3d"/><circle cx="24.5" cy="26" r="1.5" fill="#4d1f3d"/><circle cx="23" cy="14.5" r="1.2" fill="#4d1f3d"/>`;
+    if(sp.dry) g+=`<path d="M16 14v12M24 15v10" stroke="rgba(255,255,255,.45)" stroke-width="1" fill="none"/>`;
+    if(sp.wet) g+=`<circle cx="16" cy="16" r="2.2" fill="rgba(255,255,255,.6)"/><circle cx="25" cy="24" r="1.7" fill="rgba(255,255,255,.5)"/>`;
+    return S+g+'</g>'+E;
+  }
+  if(sp.t==='face'){
+    g=`<circle class="breathe" cx="20" cy="20" r="13" fill="${sp.c}" stroke="rgba(0,0,0,.35)"/>`;
+    if(sp.cheek) g+=`<circle cx="13" cy="22" r="4" fill="${sp.cheek}" opacity=".75"/><circle cx="27" cy="22" r="4" fill="${sp.cheek}" opacity=".75"/>`;
+    if(sp.dark) g+=`<path d="M12 20q3 3.4 6 0M22 20q3 3.4 6 0" fill="none" stroke="rgba(20,16,30,.65)" stroke-width="2.6" stroke-linecap="round"/>`;
+    if(sp.oil) g+=`<circle cx="20" cy="13.5" r="2.6" fill="rgba(255,255,255,.55)"/>`;
+    g+=`<circle cx="15.5" cy="17" r="1.3" fill="rgba(10,12,20,.75)"/><circle cx="24.5" cy="17" r="1.3" fill="rgba(10,12,20,.75)"/>`;
+    g+=sp.down?`<path d="M16 26q4-2.6 8 0" fill="none" stroke="rgba(10,12,20,.6)" stroke-width="1.4" stroke-linecap="round"/>`
+              :`<path d="M16 25q4 3 8 0" fill="none" stroke="rgba(10,12,20,.6)" stroke-width="1.4" stroke-linecap="round"/>`;
+    return S+g+E;
+  }
+  if(sp.t==='eye'){
+    g=`<path d="M4 20q16-12 32 0-16 12-32 0z" fill="${sp.c||'#f4f0e6'}" stroke="rgba(233,228,214,.55)"/>`;
+    if(sp.veins) g+=`<path class="flowLine" d="M7 20q5 3 9 1M33 20q-5 3-9 1" fill="none" stroke="#d4706a" stroke-width="1.1"/>`;
+    g+=`<circle class="breathe" cx="20" cy="20" r="5.4" fill="#2b3a4a"/><circle cx="20" cy="20" r="2.2" fill="#080c14"/>`;
+    if(sp.puffy) g+=`<path d="M7 13.5q13-6.5 26 0" fill="none" stroke="rgba(212,175,106,.8)" stroke-width="2.4" stroke-linecap="round"/>`;
+    if(sp.bag) g+=`<path d="M9 27q11 5 22 0" fill="none" stroke="rgba(154,149,138,.85)" stroke-width="1.8" stroke-linecap="round"/>`;
+    if(sp.dry) g+=`<path d="M12 12l-2-3M28 12l2-3M20 9V6" stroke="rgba(212,175,106,.7)" stroke-width="1.2" stroke-linecap="round"/>`;
+    return S+g+E;
+  }
+  if(sp.t==='body'){
+    const w=sp.w||1,c=sp.c||'#9aa7bd';
+    g=`<g class="breathe"><circle cx="20" cy="9" r="4.6" fill="${c}"/>`+
+      `<path d="M${(20-6*w).toFixed(1)} 36q0-14 ${(6*w).toFixed(1)}-19 ${(6*w).toFixed(1)} 5 ${(6*w).toFixed(1)} 19z" fill="${c}"/></g>`;
+    if(sp.tense) g+=`<path d="M8 16h5M27 16h5" stroke="#d4706a" stroke-width="1.6" stroke-linecap="round"/>`;
+    if(sp.puffy) g+=`<circle cx="20" cy="27" r="9" fill="rgba(106,212,200,.22)"/>`;
+    return S+g+E;
+  }
+  if(sp.t==='wave'){
+    const amp=(sp.amp==null?.7:sp.amp)*11,f=sp.freq||2;
+    let d='';
+    for(let x=2;x<=38;x+=1.6){
+      const j=sp.jit?(Math.sin(x*3.7)*0.4+0.75):1;
+      const y=20-Math.sin(x/36*Math.PI*2*f)*amp*j;
+      d+=(x===2?'M':'L')+x.toFixed(1)+' '+y.toFixed(1);
+    }
+    g=`<path class="flowLine" d="${d}" fill="none" stroke="${sp.c||'#6ad4c8'}" stroke-width="${sp.lw||1.9}" stroke-linecap="round"/>`;
+    if(sp.blob) g=`<circle class="breathe" cx="20" cy="20" r="6" fill="${sp.c||'#6ad4c8'}" opacity=".2"/>`+g;
+    return S+g+E;
+  }
+  if(sp.t==='depth'){
+    for(let i=0;i<3;i++){
+      const on=sp.n===i+1;
+      g+=`<rect x="5" y="${11+i*8}" width="30" height="4" rx="2" fill="${on?'#6ad4c8':'rgba(233,228,214,.16)'}"${on?' class="breathe"':''}/>`;
+    }
+    g+=`<path d="M20 2v${6+(sp.n-1)*8}" stroke="#d4af6a" stroke-width="1.6" stroke-linecap="round"/>`;
+    return S+g+E;
+  }
+  if(sp.t==='deg'){
+    for(let i=0;i<3;i++){
+      const on=i<sp.n;
+      g+=`<rect x="${7+i*10}" y="${24-i*5}" width="7" height="${8+i*5}" fill="${on?'currentColor':'rgba(233,228,214,.16)'}"/>`;
+    }
+    return S+g+E;
+  }
+  if(sp.t==='q'){
+    return S+`<circle cx="20" cy="20" r="13" fill="none" stroke="rgba(154,149,138,.5)" stroke-dasharray="3 4"/>`+
+      `<text x="20" y="26" text-anchor="middle" font-size="16" fill="rgba(154,149,138,.85)" font-family="serif">?</text>`+E;
+  }
+  return '';
+}
+const UNK={t:'q'};
+const ART={
+ tongue:[{t:'tongue',c:'#e4bfb4'},{t:'tongue',c:'#d98c86'},{t:'tongue',c:'#cc6b69'},
+   {t:'tongue',c:'#b33f47',dry:1},{t:'tongue',c:'#8e5f7d',spot:1},{t:'tongue',c:'#e0b1a8',teeth:1},UNK],
+ coating:[{t:'tongue',c:'#d98c86',coat:'#f6f2e6',coatA:.42},{t:'tongue',c:'#d98c86',coat:'#f8f6ee',coatA:.85},
+   {t:'tongue',c:'#d98c86',coat:'#d9c268',coatA:.82},{t:'tongue',c:'#cf6f6d',peel:1},
+   {t:'tongue',c:'#d98c86',coat:'#efe7d2',coatA:.95},{t:'tongue',c:'#d98c86',coat:'#e8f3f2',coatA:.6,wet:1},UNK],
+ face:[{t:'face',c:'#e7b79c'},{t:'face',c:'#ecdfd2'},{t:'face',c:'#cdb072'},
+   {t:'face',c:'#8e8272',dark:1,down:1},{t:'face',c:'#e0b6a2',cheek:'#d4706a'},
+   {t:'face',c:'#d4756a',oil:1},UNK],
+ body:[{t:'body',w:1},{t:'body',w:.62},{t:'body',w:1.4},{t:'body',w:.72,tense:1},{t:'body',w:1.3,puffy:1},UNK],
+ eyes:[{t:'eye'},{t:'eye',dry:1},{t:'eye',veins:1},{t:'eye',puffy:1},{t:'eye',bag:1},{t:'eye',c:'#e3d489'},UNK],
+ voice:[{t:'wave',amp:1,freq:2,c:'#6ad4c8'},{t:'wave',amp:.28,freq:2,c:'#9a958a'},
+   {t:'wave',amp:.75,freq:1.2,c:'#9a958a',jit:1},{t:'wave',amp:.85,freq:4.2,c:'#d4706a'},
+   {t:'wave',amp:.7,freq:1.4,c:'#d4af6a',lw:3.2},UNK],
+ breath:[{t:'wave',amp:.8,freq:1.2,c:'#6ad4c8'},{t:'wave',amp:.45,freq:4,c:'#9a958a'},
+   {t:'wave',amp:1,freq:.7,c:'#d4af6a'},{t:'wave',amp:.9,freq:1.6,c:'#d4af6a',jit:1,lw:3},
+   {t:'wave',amp:.3,freq:2.4,c:'#9a958a'},UNK],
+ cough:[{t:'wave',amp:.25,freq:1.4,c:'#6ad4c8'},{t:'wave',amp:.8,freq:1.6,c:'#e8f1ef',blob:1},
+   {t:'wave',amp:.5,freq:5,c:'#cc6b69'},{t:'wave',amp:.8,freq:1.5,c:'#d9c268',blob:1},
+   {t:'wave',amp:.95,freq:.9,c:'#d4af6a',lw:3.2},UNK],
+ mouth:[{t:'face',c:'#e7b79c'},{t:'face',c:'#cdb072',oil:1,down:1},{t:'face',c:'#e3dccd',down:1},
+   {t:'face',c:'#dfa98f',dry:1,down:1},{t:'face',c:'#c9a45f',oil:1,down:1},UNK]
+};
+const DEG_ART=[{t:'deg',n:1},{t:'deg',n:2},{t:'deg',n:3}];
+const PULSE_ART={
+ rate:[{t:'wave',amp:.75,freq:1,c:'#5b8fd4'},{t:'wave',amp:.75,freq:2,c:'#6ad4c8'},{t:'wave',amp:.75,freq:4,c:'#d4706a'}],
+ depth:[{t:'depth',n:1},{t:'depth',n:2},{t:'depth',n:3}],
+ strength:[{t:'wave',amp:.3,freq:2,c:'#9a958a'},{t:'wave',amp:.62,freq:2,c:'#6ad4c8'},{t:'wave',amp:1,freq:2,c:'#d4af6a',lw:3}],
+ shape:[{t:'wave',amp:1,freq:2.4,c:'#4caf7d',lw:1.4},{t:'wave',amp:.8,freq:1.6,c:'#d4af6a',blob:1,lw:3},
+   {t:'wave',amp:.34,freq:2.6,c:'#cfd6dd',lw:1.1},{t:'wave',amp:.7,freq:2.2,c:'#8e5f7d',jit:1},
+   {t:'wave',amp:.7,freq:2,c:'#e9e4d6'}]
+};
+
+/* ============================================================
+   后台推理路径可视化：证词 → 权重 → 证型，算法全程开放
+   ============================================================ */
+const SRC_COLOR=s=>/望|LOOK/.test(s)?[212,175,106]:/闻|LISTEN/.test(s)?[106,212,200]
+  :/问|ASK/.test(s)?[212,112,106]:/切|Palp/.test(s)?[233,228,214]:[140,150,175];
+function pathData(){
+  const pats=PATTERN_KEYS.filter(k=>state.scores[k]>0)
+    .sort((a,b)=>state.scores[b]-state.scores[a]).slice(0,6);
+  const set={};pats.forEach(k=>set[k]=1);
+  const clues=state.clues.filter(c=>Object.keys(c.w||{}).some(k=>set[k])).slice(-20);
+  return {pats,clues};
+}
+function cutTxt(s,n){s=String(s).replace(/<[^>]*>/g,'');return s.length>n?s.slice(0,n)+'…':s;}
+function renderPath(ctx,W,H){
+  const {pats,clues}=pathData(), f=Math.max(.9,W/900), narrow=W<760;
+  ctx.save();ctx.clearRect(0,0,W,H);
+  const bg=ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#080c16');bg.addColorStop(1,'#04060c');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(212,175,106,.055)';ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=W/26){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<=H;y+=W/26){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.textBaseline='middle';ctx.textAlign='left';
+  ctx.fillStyle='rgba(212,175,106,.85)';ctx.font=`${11*f}px monospace`;
+  ctx.fillText('MAD MEDICINE · DEDUCTION PATH · '+state.caseNo,18*f,20*f);
+  ctx.fillStyle='rgba(154,149,138,.7)';
+  ctx.fillText(L('证词 → 加权 → 证型｜连线粗细即贡献权重','TESTIMONY → WEIGHT → PATTERN｜line width = contributed weight'),18*f,36*f);
+  if(!pats.length||!clues.length){
+    ctx.fillStyle='rgba(233,228,214,.5)';ctx.font=`${16*f}px serif`;ctx.textAlign='center';
+    ctx.fillText(L('证词平和，未形成显著权重路径','No significant weighted path — testimony stays balanced'),W/2,H/2);
+    ctx.restore();return;
+  }
+  const top=H*0.14, bot=H*0.93, lx=W*(narrow?0.42:0.455), rx=W*(narrow?0.73:0.775);
+  const cGap=Math.min((bot-top)/Math.max(1,clues.length-1),44*f);
+  const cTop=(top+bot)/2-cGap*(clues.length-1)/2;
+  const cy=i=>clues.length>1?cTop+cGap*i:(top+bot)/2;
+  const pGap=Math.min((bot-top)*0.84/Math.max(1,pats.length-1),96*f);
+  const pTop=(top+bot)/2-pGap*(pats.length-1)/2;
+  const py=j=>pats.length>1?pTop+pGap*j:(top+bot)/2;
+  clues.forEach((c,i)=>{
+    const col=SRC_COLOR(c.src);
+    pats.forEach((k,j)=>{
+      const w=c.w[k];if(!w)return;
+      ctx.strokeStyle=`rgba(${col[0]},${col[1]},${col[2]},${Math.min(.8,.13+w*.17)})`;
+      ctx.lineWidth=Math.max(.8,w*1.15)*f;
+      ctx.beginPath();ctx.moveTo(lx,cy(i));
+      ctx.bezierCurveTo(lx+(rx-lx)*.48,cy(i),rx-(rx-lx)*.48,py(j),rx,py(j));ctx.stroke();
+    });
+  });
+  ctx.font=`${10.5*f}px sans-serif`;ctx.textAlign='right';
+  clues.forEach((c,i)=>{
+    const col=SRC_COLOR(c.src),y=cy(i);
+    ctx.fillStyle=`rgba(${col[0]},${col[1]},${col[2]},.95)`;
+    ctx.save();ctx.translate(lx,y);ctx.rotate(Math.PI/4);
+    ctx.fillRect(-3*f,-3*f,6*f,6*f);ctx.restore();
+    ctx.fillStyle='rgba(233,228,214,.82)';
+    ctx.fillText(cutTxt(c.txt,narrow?14:26),lx-11*f,y);
+  });
+  const max=Math.max.apply(null,pats.map(k=>state.scores[k]))||1;
+  ctx.textAlign='left';
+  pats.forEach((k,j)=>{
+    const y=py(j),s=state.scores[k],r=(5+9*s/max)*f;
+    const gg=ctx.createRadialGradient(rx,y,0,rx,y,r*2.6);
+    gg.addColorStop(0,'rgba(212,175,106,.42)');gg.addColorStop(1,'rgba(212,175,106,0)');
+    ctx.fillStyle=gg;ctx.beginPath();ctx.arc(rx,y,r*2.6,0,7);ctx.fill();
+    ctx.save();ctx.translate(rx,y);ctx.rotate(Math.PI/4);
+    ctx.strokeStyle='#d4af6a';ctx.lineWidth=1.4*f;ctx.fillStyle='rgba(8,12,20,.9)';
+    ctx.fillRect(-r,-r,r*2,r*2);ctx.strokeRect(-r,-r,r*2,r*2);ctx.restore();
+    ctx.fillStyle='#f0cf8e';ctx.font=`${14*f}px serif`;
+    ctx.fillText(pName(k),rx+r+10*f,y-6*f);
+    ctx.fillStyle='rgba(106,212,200,.9)';ctx.font=`${10*f}px monospace`;
+    ctx.fillText(L('权重 ','W ')+s+'  ·  '+EL(ELEMENT_OF[k]),rx+r+10*f,y+9*f);
+  });
+  ctx.textAlign='left';ctx.font=`${9.5*f}px monospace`;
+  [[L('望诊','LOOK'),[212,175,106]],[L('闻诊','LISTEN'),[106,212,200]],
+   [L('问诊','ASK'),[212,112,106]],[L('切诊','PULSE'),[233,228,214]]].forEach((e,i)=>{
+    const x=18*f+i*(narrow?66:78)*f,y=H-16*f;
+    ctx.fillStyle=`rgb(${e[1].join(',')})`;ctx.fillRect(x,y-3*f,7*f,7*f);
+    ctx.fillStyle='rgba(233,228,214,.65)';ctx.fillText(e[0],x+12*f,y);
+  });
+  ctx.restore();
+}
+function sizePath(cv){
+  const avail=cv.parentElement.clientWidth||600;
+  const narrow=avail<560;
+  const w=narrow?560:avail, h=Math.round(w*(narrow?1.05:0.74));
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.style.width=w+'px';cv.style.height=h+'px';
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  renderPath(ctx,w,h);
+  const hint=document.getElementById('pathHint');
+  if(hint) hint.classList.toggle('on',narrow);
+}
+function downloadPath(){
+  const c=document.createElement('canvas');c.width=1700;c.height=1260;
+  renderPath(c.getContext('2d'),1700,1260);
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');
+  a.download=`${L('推理路径图','DeductionPath')}_${state.caseNo}.png`;a.click();
+}
+
+/* ---------- 经验值 · 段位 · 实时权重 ---------- */
+function awardXP(n,x,y){
+  state.xp=(state.xp||0)+n;
+  const fill=document.getElementById('xpFill'),val=document.getElementById('xpVal');
+  const max=Math.max(1,(orbTotal||1)*16);
+  if(fill) fill.style.width=Math.min(100,state.xp/max*100)+'%';
+  if(val) val.textContent='XP '+state.xp;
+  const f=document.createElement('div');f.className='xpFloat';f.textContent='+'+n+' XP';
+  f.style.left=(x||innerWidth/2)+'px';f.style.top=(y||innerHeight*.5)+'px';
+  f.style.transform='translate(-50%,0)';
+  document.body.appendChild(f);setTimeout(()=>f.remove(),1100);
+}
+function updateLive(){
+  const box=document.getElementById('liveWeights');if(!box)return;
+  const top=PATTERN_KEYS.map(k=>[k,state.weights[k]]).filter(a=>a[1]>0)
+    .sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if(!top.length){box.classList.remove('on');return;}
+  box.classList.add('on');
+  const max=top[0][1]||1;
+  box.innerHTML=`<div class="lwHint">${L('后台权重 · 实时开放','LIVE WEIGHT ENGINE')}</div>`+
+    top.map(p=>`<div class="lwRow"><span class="lwN">${pName(p[0])}</span>`+
+      `<span class="lwB"><i style="width:${Math.round(p[1]/max*100)}%"></i></span><span>${p[1]}</span></div>`).join('');
+}
+function rankOf(){
+  const filed=ORBS.filter(o=>o.done&&!o.skipped).length,r=filed/Math.max(1,orbTotal);
+  return r>=1?['S',L('明察秋毫','HAWK-EYED')]:r>=.85?['A',L('老练侦探','SEASONED')]
+    :r>=.6?['B',L('初露锋芒','PROMISING')]:r>=.35?['C',L('见习侦探','APPRENTICE')]
+    :['D',L('走马观花','PASSING GLANCE')];
+}
+/* 循证交叉验证渲染 */
+function evHTML(k){
+  const arr=EVIDENCE[k]||[];
+  if(!arr.length) return '<p>—</p>';
+  const li=LANG==='en'?1:0;
+  return arr.map(e=>`<div class="evItem"><div class="evHead">
+      <span class="evDisc">${e.d[li]}</span>
+      <span class="evGrade ${e.s}">${e.s} · ${EV_GRADE[e.s][li]}</span></div>
+    <div class="evBody">${e.c[li]}</div><div class="evRef">${e.r[li]}</div></div>`).join('')
+    +`<div class="evLegend">${EV_DISCLAIM[li]}</div>`;
+}
+</script>
+
+<script>
+/* ============================================================
    应用引擎：状态 · 导航 · 线索 · 评分
    ============================================================ */
 const $ = s => document.querySelector(s);
@@ -1520,6 +1920,7 @@ function addClue(src, txt, w){
   d.className='clueItem';
   d.innerHTML = txt.replace(/</g,'&lt;') + `<small>〔${src}〕</small>`;
   list.prepend(d);
+  if(typeof updateLive==='function') updateLive();
 }
 $('#clueToggle').onclick=()=>$('#clueBook').classList.toggle('open');
 
@@ -1669,6 +2070,8 @@ function buildStage(){
   });
   buildDock();
   $('#deduceGate').classList.remove('show');
+  state.xp=0; $('#xpFill').style.width='0'; $('#xpVal').textContent='XP 0';
+  updateLive();
   updateHUD();
   showSignal(L('全部线索已列在线索板 · 任选一条开始勘验','All clues are listed on the board · pick any to begin'));
 }
@@ -1779,6 +2182,13 @@ function focusQuestion(o,withAction=false){
   box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusTitle"></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusCount"></span><button class="archiveNode"></button></div>':''}<div class="degreeRow"></div>`;
   box.querySelector('.focusTitle').textContent=orbLabel(o);
   if(lead)box.querySelector('.focusLead').textContent=lead;
+  const cw=document.createElement('div'); cw.className='customWrap';
+  const ci=document.createElement('input'); ci.type='text'; ci.maxLength=80;
+  ci.placeholder=L('以上都不贴切？自行补充这条证词（选填）','None quite fits? Add your own testimony (optional)');
+  ci.value=o.customText||'';
+  ci.oninput=()=>{o.customText=ci.value.trim();};
+  ci.onclick=e=>e.stopPropagation();
+  cw.appendChild(ci); box.appendChild(cw);
   const sk=document.createElement('button'); sk.className='skipOrbBtn';
   sk.textContent=L('跳过此线索 · 不纳入推理','Skip this clue · excluded from deduction');
   sk.onclick=e=>{e.stopPropagation();skipOrb(o);};
@@ -1792,7 +2202,7 @@ function answerPositions(count){
     return {x:Math.cos(angle)*rx,y:Math.sin(angle)*ry};
   });
 }
-function addAnswerNodes(inner,items,onChoose){
+function addAnswerNodes(inner,items,onChoose,art){
   const mobile=innerWidth<700, positions=answerPositions(items.length);
   const fr=inner.getBoundingClientRect();
   items.forEach((item,i)=>{
@@ -1809,7 +2219,8 @@ function addAnswerNodes(inner,items,onChoose){
     inner.appendChild(wire);
     const node=document.createElement('button');node.className='answerNode';
     node.style.setProperty('--answer-x',pos.x+'px');node.style.setProperty('--answer-y',pos.y+'px');node.style.setProperty('--answer-delay',(i*55)+'ms');
-    node.innerHTML=`<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span>`;
+    node.innerHTML=(art&&art[i]?artSVG(art[i]):'')+
+      `<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span>`;
     node.querySelector('.answerText').textContent=optText(item);
     node.onclick=e=>{e.stopPropagation();onChoose(item,node);};
     inner.appendChild(node);
@@ -1835,7 +2246,10 @@ function afterAnswer(){
 }
 function completeOrb(o,record){
   if(o._completing)return;o._completing=true;
-  record();o.done=true;orbDone++;syncOrbState(o);o.el.classList.add('absorbed');
+  record();
+  if(o.customText) addClue(L(CATS[o.cat].zh,CATS[o.cat].en),L('自述补充：','Own note: ')+o.customText,{});
+  o.done=true;orbDone++;syncOrbState(o);o.el.classList.add('absorbed');
+  awardXP(o.skipped?3:(10+(o.customText?6:0)+(o._bonus||0)),o.focusX,o.focusY);
   emitAbsorption(o);$('#qPanel').classList.add('resolving');updateHUD(true);
   setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();},560);
 }
@@ -1867,28 +2281,36 @@ function openOrb(o){
     return;
   }
   if(o.cat==='inquire'){
-    const prompt=focusQuestion(o,true),selected=new Set();inner.appendChild(prompt);
-    let degIdx=1;
+    const prompt=focusQuestion(o,true),marks=new Map();inner.appendChild(prompt);
     const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode');
     const degRow=prompt.querySelector('.degreeRow');
-    degRow.innerHTML=`<span class="degreeLbl">${L('本组程度','DEGREE')}</span>`;
-    DEGREES.forEach((d,di)=>{
-      const c=document.createElement('button');c.className='miniChip'+(di===degIdx?' on':'');
-      c.textContent=L(d[0],d[2]);
-      c.onclick=e=>{e.stopPropagation();degIdx=di;degRow.querySelectorAll('.miniChip').forEach((x,xi)=>x.classList.toggle('on',xi===di));};
-      degRow.appendChild(c);
+    degRow.innerHTML=`<span class="degreeLbl">${L('连点一条证词，依次标记 偶尔 → 经常 → 持续 → 取消','TAP A CLUE REPEATEDLY: OCCASIONAL → FREQUENT → CONSTANT → CLEAR')}</span>`;
+    const refresh=()=>{count.textContent=L(`已标记 ${marks.size} 条（可为 0）`,`MARKED ${marks.size} · ZERO ALLOWED`);archive.textContent=L('封 存 这 组','ARCHIVE SET');};refresh();
+    addAnswerNodes(inner,o.g.items,(item,node)=>{
+      const lv=((marks.get(item)||0)+1)%4;
+      node.classList.remove('lv1','lv2','lv3');
+      let badge=node.querySelector('.degBadge');
+      if(lv===0){marks.delete(item);node.classList.remove('sel');if(badge)badge.remove();}
+      else{
+        marks.set(item,lv);node.classList.add('sel','lv'+lv);
+        if(!badge){badge=document.createElement('span');badge.className='degBadge';node.appendChild(badge);}
+        badge.textContent=L(DEGREES[lv-1][0],DEGREES[lv-1][2]);
+      }
+      refresh();
     });
-    const refresh=()=>{count.textContent=L(`已标记 ${selected.size} 条（可为 0）`,`MARKED ${selected.size} · ZERO ALLOWED`);archive.textContent=L('封 存 这 组','ARCHIVE SET');};refresh();
-    addAnswerNodes(inner,o.g.items,(item,node)=>{selected.has(item)?selected.delete(item):selected.add(item);node.classList.toggle('sel',selected.has(item));refresh();});
-    archive.onclick=e=>{e.stopPropagation();completeOrb(o,()=>{
-      const m=DEGREES[degIdx][1];
-      if(!selected.size)addClue(L(cat.zh,cat.en),L(`${o.g.g} · 未发现反复信号`,`${o.g.ge} · no recurring signals`),{});
-      selected.forEach(item=>addClue(L(cat.zh,cat.en),(LANG==='en'?o.g.ge:o.g.g.split(' ')[0])+' · '+optText(item)+'（'+L(DEGREES[degIdx][0],DEGREES[degIdx][2])+'）',scaleWeights(item[1],m)));
-    });};
+    archive.onclick=e=>{e.stopPropagation();
+      o._bonus=marks.size*3;
+      completeOrb(o,()=>{
+        if(!marks.size)addClue(L(cat.zh,cat.en),L(`${o.g.g} · 未发现反复信号`,`${o.g.ge} · no recurring signals`),{});
+        marks.forEach((lv,item)=>addClue(L(cat.zh,cat.en),
+          (LANG==='en'?o.g.ge:o.g.g.split(' ')[0])+' · '+optText(item)+'（'+L(DEGREES[lv-1][0],DEGREES[lv-1][2])+'）',
+          scaleWeights(item[1],DEGREES[lv-1][1])));
+      });};
     return;
   }
-  // 望 / 闻：单选；非「正常」证词需再标三档程度
+  // 望 / 闻：单选，配动态图示；非「正常」证词需再标三档程度
   inner.appendChild(focusQuestion(o));
+  const artList=ART[o.g.key];
   let picking=false;
   const askDegree=(item)=>{
     inner.innerHTML='';
@@ -1898,8 +2320,9 @@ function openOrb(o){
     note.querySelector('b').textContent=optText(item);
     card.appendChild(note);
     addAnswerNodes(inner,DEGREES,deg=>{
+      o._bonus=(DEGREES.indexOf(deg)+1)*2;
       completeOrb(o,()=>addClue(L(cat.zh,cat.en),(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0])+' — '+optText(item)+'（'+optText(deg)+'）',scaleWeights(item[1],deg[1])));
-    });
+    },DEG_ART);
   };
   addAnswerNodes(inner,o.g.opts,(item,node)=>{
     if(picking||o._completing)return;
@@ -1909,7 +2332,7 @@ function openOrb(o){
     }else{
       setTimeout(()=>{picking=false;askDegree(item);},170);
     }
-  });
+  },artList);
 }
 function closePanel(){
   const panel=$('#qPanel');panel.className='';
@@ -2175,20 +2598,20 @@ function buildPulseQuiz(){
   const keyOf = pair=>pair[li];
   const WHY = (zhMap,enMap)=>({zh:zhMap,en:enMap});
   const quiz=[
-    {q:L('① 速率 —— 一息几至？','① Rate — how many beats per breath?'),opts:R,truth:tRate,
+    {q:L('① 速率 —— 一息几至？','① Rate — how many beats per breath?'),opts:R,truth:tRate,art:PULSE_ART.rate,
      why:WHY(
        {'迟':'迟脉主寒、主阳虚——炉膛火力不足，跳动自然放缓。','平和':'不快不慢，气血调和之象。','数':'数脉主热——无论实火还是阴虚虚热，热迫血行则脉快。'},
        {'迟':'A slow pulse signals cold or yang deficiency — the furnace burns low.','平和':'Neither fast nor slow — qi and blood in harmony.','数':'A rapid pulse signals heat — excess fire or yin-deficient heat hastens the blood.'})},
-    {q:L('② 深浅 —— 几多斤两方得？','② Depth — how hard must you press?'),opts:D,truth:tDepth,
+    {q:L('② 深浅 —— 几多斤两方得？','② Depth — how hard must you press?'),opts:D,truth:tDepth,art:PULSE_ART.depth,
      why:WHY(
        {'浮':'浮脉主表、主虚阳外越——轻轻一触便得。','中':'不浮不沉，胃气充足。','沉':'沉脉主里、主阳虚气陷——要按到筋骨边才清晰。'},
        {'浮':'Floating signals an exterior pattern or yang floating outward.','中':'Neither floating nor deep — healthy stomach qi.','沉':'Deep signals an interior pattern — felt only near the bone.'})},
-    {q:L('③ 力度 —— 应指是否有根？','③ Strength — is there root under the finger?'),opts:S,truth:tStr,
+    {q:L('③ 力度 —— 应指是否有根？','③ Strength — is there root under the finger?'),opts:S,truth:tStr,art:PULSE_ART.strength,
      why:WHY(
        {'无力':'无力为虚——气血阴阳任何一面的不足，都会让脉「没有底气」。','中等':'从容和缓，是为常脉。','有力':'有力为实——体内有热、有滞，脉来充实搏指。'},
        {'无力':'Weak means deficiency — qi, blood, yin or yang running low.','中等':'Calm and steady — the normal pulse.','有力':'Forceful means excess — heat or stagnation pounding the finger.'})},
     {q:L('④ 质感 —— 指下如触何物？','④ Texture — what does it feel like?'),
-     opts:Object.keys(SHAPE_NAME).map(k=>[SHAPE_NAME[k],SHAPE_NAME_EN[k]]),truth:tShape,
+     opts:Object.keys(SHAPE_NAME).map(k=>[SHAPE_NAME[k],SHAPE_NAME_EN[k]]),truth:tShape,art:PULSE_ART.shape,
      why:WHY(
        {'弦':'弦脉主肝郁、主痛——气机绷紧，如按琴弦。','滑':'滑脉主痰湿、食积——气血壅盛而滑利，如珠走盘。','细':'细脉主血虚、阴虚、气虚——脉道不充，细如丝线。','涩':'涩脉主血瘀——血行艰涩，如轻刀刮竹。','平':'脉来和缓，不大不小，是为平脉。'},
        {'弦':'Wiry signals liver-qi constraint or pain — taut like a string.','滑':'Slippery signals phlegm-damp or food stagnation — pearls rolling.','细':'Thready signals blood, yin or qi deficiency — fine as silk.','涩':'Choppy signals blood stasis — rough, like scraping bamboo.','平':'Calm and moderate — the healthy pulse.'})}
@@ -2199,9 +2622,11 @@ function buildPulseQuiz(){
     qb.innerHTML=`<div class="q">${item.q}</div>`;
     const og=document.createElement('div'); og.className='optGroup';
     const fb=document.createElement('div'); fb.style.cssText='font-size:12.5px;line-height:1.9;margin-top:8px;display:none';
-    item.opts.forEach(pair=>{
+    item.opts.forEach((pair,pi)=>{
       const label=keyOf(pair);
-      const o=document.createElement('div'); o.className='opt'; o.textContent=label;
+      const o=document.createElement('div'); o.className='opt';
+      o.innerHTML=(item.art&&item.art[pi]?artSVG(item.art[pi]):'')+'<span></span>';
+      o.querySelector('span').textContent=label;
       o.onclick=()=>{
         if(qb._done) return; qb._done=true;
         og.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
@@ -2404,7 +2829,7 @@ function drawWheel(cv, els, S){
 }
 
 /* ---------- 报告 ---------- */
-function tabHTML(p){
+function tabHTML(p,key){
   const F=(LANG==='en'&&p.en)?Object.assign({},p,p.en):p;
   const li=a=>a.map(x=>`<li>${x}</li>`).join('');
   const teas=(F.tea||[]).map(t=>`<div class="teaF"><div class="teaN">🍵 ${t.n}</div>
@@ -2419,10 +2844,11 @@ function tabHTML(p){
     teas + `<p class="teaNote">${L(TEA_NOTE,TEA_NOTE_EN)}</p>`,
     `<ul>${li(F.move)}</ul>`,
     `<ul>${li(F.habit||[])}</ul>`,
-    `<ul>${li(F.heal||[])}</ul>`
+    `<ul>${li(F.heal||[])}</ul>`,
+    evHTML(key)
   ];
 }
-const TAB_NAMES=[['中医病机','TCM View'],['西医关联','Western'],['心理侧写','Psyche'],['营养处方','Nutrition'],['药茶调理','Herbal Tea'],['运动康复','Movement'],['生活调整','Habits'],['疗养方式','Retreat']];
+const TAB_NAMES=[['中医病机','TCM View'],['西医关联','Western'],['心理侧写','Psyche'],['营养处方','Nutrition'],['药茶调理','Herbal Tea'],['运动康复','Movement'],['生活调整','Habits'],['疗养方式','Retreat'],['循证交叉','Evidence']];
 
 $('#btnReport').onclick=()=>{
   show('screen-report');
@@ -2433,10 +2859,13 @@ $('#btnReport').onclick=()=>{
   const b=bmi();
   const bmiTxt=b<18.5?L('偏瘦','Underweight'):b<24?L('正常','Normal'):b<28?L('超重','Overweight'):L('肥胖','Obese');
   const shown = balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+  const rk=rankOf(), filedN=ORBS.filter(o=>o.done&&!o.skipped).length;
 
   let html=`
   <div class="rewardBanner"><div class="big">${L('案 件 告 破','C A S E   C L O S E D')}</div>
-    <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div></div>
+    <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div>
+    <div class="rankRow"><div class="rankBadge"><span>${rk[0]}</span></div>
+      <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} ${filedN}/${orbTotal} · ${L('经验值','XP')} ${state.xp||0}<br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')}</div></div></div>
   <div class="rCard"><h3>${L('案件档案','Case File')} · ${state.caseNo}</h3>
     <div class="statGrid">
       <div class="stat"><div class="k">${L('代号','Alias')}</div><div class="v">${i.name}</div></div>
@@ -2453,6 +2882,12 @@ $('#btnReport').onclick=()=>{
   <div class="rCard"><h3>${L('维度读数','Dimension Readings')}</h3>
     ${DIMS.map((d,di)=>`<div class="dimRow"><div class="n">${LANG==='en'?DIMS_EN[di][0]:d[0]}</div><div class="bar"><i style="width:${state.dims[di]}%"></i></div><div class="p">${state.dims[di]}</div></div>
       <div style="font-size:11px;color:var(--ink-dim);margin:-6px 0 12px 100px">${LANG==='en'?DIMS_EN[di][1]:d[1]}</div>`).join('')}
+  </div>
+  <div class="rCard"><h3>${L('推理路径图 · 后台权重演算','Deduction Path · Weight Engine')}</h3>
+    <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:13px">${L('左列是你交出的证词，右列是候选证型；连线的粗细与明暗，就是该条证词对该证型的贡献权重。这就是引擎的全部算法 —— 没有黑箱。','Left: your testimony. Right: candidate patterns. Line weight = contributed score. This is the entire algorithm — no black box.')}</div>
+    <div id="pathWrap"><canvas id="pathC"></canvas></div>
+    <div id="pathHint">${L('← 横向滑动可查看完整路径 · 或下载高清图 →','← SWIPE TO SEE THE FULL PATH · OR DOWNLOAD THE HI-RES CHART →')}</div>
+    <div class="btnRow" style="margin-top:14px"><button class="btn ghost" id="btnPathDL">${L('下 载 路 径 图','D O W N L O A D · P A T H')}</button></div>
   </div>`;
 
   if(balanced){
@@ -2493,6 +2928,12 @@ $('#btnReport').onclick=()=>{
     html+=`<div class="rCard"><h3>${L('证型侧写 · 三大主线','Pattern Profile · Top Three')}</h3><div id="patternCards"></div></div>`;
   }
 
+  // 跨学科交叉验证：把判断依据摊开给玩家
+  const evKeys=(shown&&shown.length)?shown.slice(0,2):state.top.slice(0,2);
+  html+=`<div class="rCard"><h3>${L('跨学科交叉验证','Cross-Discipline Verification')}</h3>
+    <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:14px">${L('每一条侧写都应当经得起追问。以下是本案主线在其他学科中的对应证据及其强度分级。','Every profile should survive questioning. Here is how this case’s leads hold up in other disciplines — with graded evidence.')}</div>
+    ${evKeys.map(k=>`<div style="margin-bottom:18px"><div class="patternHead" style="margin-bottom:12px"><span class="name">${pName(k)}</span><span class="conf">${L('权重','weight')} ${state.scores[k]}</span></div>${evHTML(k)}</div>`).join('')}</div>`;
+
   // 人物小传 · 推理小剧场
   SCRIPT=buildScript();
   html+=`<div class="rCard"><h3>${L('人物小传 · 推理小剧场','Profile Story · The Mini-Play')}</h3>
@@ -2527,7 +2968,7 @@ $('#btnReport').onclick=()=>{
           <span class="conf">${L('吻合度','Match')} ${conf}% ｜ ${p.organ}${L('系',' system')} ｜ ${L('五行属','Element: ')}${EL(ELEMENT_OF[k])}</span>
           <span class="oneLine">${LANG==='en'&&p.en?p.en.one:p.one}</span></div>
         <div class="tabs">${TAB_NAMES.map((t,ti)=>`<div class="tab${ti===0?' on':''}" data-t="${ti}">${L(t[0],t[1])}</div>`).join('')}</div>
-        ${tabHTML(p).map((h,ti)=>`<div class="tabBody" data-b="${ti}" style="${ti?'display:none':''}">${h}</div>`).join('')}`;
+        ${tabHTML(p,k).map((h,ti)=>`<div class="tabBody" data-b="${ti}" style="${ti?'display:none':''}">${h}</div>`).join('')}`;
       pc.appendChild(card);
     });
     pc.addEventListener('click',e=>{
@@ -2544,6 +2985,8 @@ $('#btnReport').onclick=()=>{
   drawWheel($('#wheelC'), state.elements, ws);
   radarPNG=$('#radarC').toDataURL('image/png');
   wheelPNG=$('#wheelC').toDataURL('image/png');
+  sizePath($('#pathC'));
+  $('#btnPathDL').onclick=downloadPath;
 };
 
 /* ---------- 导出独立 HTML 报告 ---------- */
@@ -2552,6 +2995,11 @@ $('#btnExport').onclick=()=>{
   const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
   const sec=(t,h)=>`<h2>${t}</h2>${h}`;
   const PF=k=>Object.assign({},PATTERNS[k],(LANG==='en'&&PATTERNS[k].en)||{});
+  const pc=document.createElement('canvas');pc.width=1700;pc.height=1260;
+  renderPath(pc.getContext('2d'),1700,1260);
+  const pathPNG=pc.toDataURL('image/png');
+  const evKeys=(shown&&shown.length)?shown.slice(0,2):state.top.slice(0,2);
+  const evTxt=k=>(EVIDENCE[k]||[]).map(e=>`<li><b>${e.d[LANG==='en'?1:0]}</b>（${L('证据等级','grade')} ${e.s}）：${e.c[LANG==='en'?1:0]} <i>${e.r[LANG==='en'?1:0]}</i></li>`).join('');
   const body=`
   ${sec(L('案件档案','Case File')+' · '+state.caseNo,`<p>${i.name} · ${i.age} · BMI ${bmi().toFixed(1)} · ${L('睡眠','Sleep')} ${i.sleep}h/${L('晚','night')} · ${L('压力','Stress')} ${i.stress}/10 · ${L('周运动','Exercise')} ${i.ex}${L('次','/wk')}</p>`)}
   ${sec(L('状态可视化','Visualization'),`<div class="charts"><img src="${radarPNG}"><img src="${wheelPNG}"></div>
@@ -2568,6 +3016,8 @@ $('#btnExport').onclick=()=>{
       <p><b>${L('疗养方式：','Retreat & healing: ')}</b></p><ul>${(p.heal||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
       <p><b>${L('生活调摄：','Daily regimen: ')}</b></p><ul>${p.life.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;}).join(''))}
   <p class="dis">${L(TEA_NOTE,TEA_NOTE_EN)}</p>
+  ${sec(L('推理路径图 · 权重演算','Deduction Path · Weight Engine'),`<div class="charts"><img src="${pathPNG}" style="width:100%"></div><p style="font-size:12px;color:#666">${L('左列为证词，右列为证型，连线粗细即贡献权重。','Left: testimony. Right: patterns. Line width = contributed weight.')}</p>`)}
+  ${sec(L('跨学科交叉验证','Cross-Discipline Verification'),evKeys.map(k=>`<div class="pat"><h3>${pName(k)}</h3><ul>${evTxt(k)}</ul></div>`).join('')+`<p class="dis">${EV_DISCLAIM[LANG==='en'?1:0]}</p>`)}
   ${sec(L('推理链','Deduction Chain')+' · '+state.clues.length+' '+L('条线索','clues'),`<ol>${state.clues.map(c=>`<li>[${c.src}] ${c.txt.replace(/</g,'&lt;')}</li>`).join('')}</ol>`)}
   <p class="dis">${L('本报告由「MAD MEDICINE · 医理探案」跨学科知识模型生成，仅供健康学习与自我观察，不构成医学诊断。如有持续不适，请及时就医。','Generated by MAD MEDICINE for health education and self-observation only — not a medical diagnosis. Seek professional care for persistent symptoms.')}</p>`;
   const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('身体状态侧写报告','Body Profile Report')} · ${state.caseNo}</title>
@@ -2819,6 +3269,10 @@ ${SCRIPT.map(a=>`<h3>${a.t}</h3>${a.ps.join('')}`).join('')}
 };
 
 /* ---------- 启动 ---------- */
+let _rsT=null;
+addEventListener('resize',()=>{clearTimeout(_rsT);_rsT=setTimeout(()=>{
+  const pc=document.getElementById('pathC'); if(pc) sizePath(pc);
+},260);});
 window.__clarity=0.55; // 开场即半虚粒子态，点明「由虚到实」
 show('screen-intro');
 </script>
