@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -445,11 +445,12 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   letter-spacing:.24em;color:currentColor;margin-bottom:7px}
 .focusTitle{font-family:var(--serif);font-size:17px;font-size:clamp(15px,1.45vw,19px);line-height:1.65;
   letter-spacing:.08em;color:var(--ink);text-wrap:balance}
-.focusLead{font-size:10.5px;line-height:1.65;color:var(--ink-dim);letter-spacing:.04em;margin-top:7px;max-height:3.3em;overflow:hidden}
+.focusLead{font-size:10.5px;line-height:1.65;color:var(--ink-dim);letter-spacing:.04em;margin-top:7px;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}
+.focusLead.full{-webkit-line-clamp:unset;line-clamp:unset}
 .focusActions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:11px}
 .focusCount{font:9px/1 monospace;letter-spacing:.12em;color:var(--ink-dim)}
-.archiveNode{cursor:pointer;border:1px solid currentColor;border-radius:0;background:rgba(5,8,15,.8);color:currentColor;
-  font-family:var(--serif);font-size:11px;letter-spacing:.18em;padding:8px 12px}
+.archiveNode{cursor:pointer;border:1px solid currentColor;border-radius:0;background:currentColor;color:var(--bg);
+  font-family:var(--serif);font-size:11px;font-weight:600;letter-spacing:.16em;padding:9px 14px;box-shadow:0 0 14px color-mix(in srgb,currentColor 18%,transparent)}
 .archiveNode:hover{background:currentColor;color:var(--bg)}
 .answerWire{position:absolute;left:0;top:0;height:1px;transform-origin:0 50%;pointer-events:none;
   background:linear-gradient(90deg,currentColor,rgba(233,228,214,.04));opacity:.28}
@@ -470,7 +471,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .ctxRow .miniChip{font-size:10px;padding:6px 9px}
 .ctxRow .miniChip.on{border-color:var(--teal);color:var(--teal);background:rgba(106,212,200,.12)}
 /* 桌面端：情境标签离开证词卡，停靠在屏幕底部，免得卡片过高被星环覆盖 */
-.ctxDock{position:fixed;left:50%;bottom:max(70px,6vh);transform:translateX(-50%);width:min(780px,92vw);justify-content:center;
+.ctxDock{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);width:min(780px,92vw);justify-content:center;
   margin:0;padding:10px 14px 12px;background:rgba(6,9,16,.88);border-top:1px solid rgba(233,228,214,.18);
   pointer-events:auto;z-index:3;backdrop-filter:blur(6px);color:var(--focus-color,var(--gold))}
 .ctxDock .ctxLbl{text-align:center}
@@ -526,7 +527,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   #clueDock:not(.open) #dockBody{display:none}
   .dockItem{min-height:44px;font-size:12.5px}
   #stageControls{right:14px;top:58px;bottom:auto}#stageControls span,#turnLeft,#turnRight{display:none}
-  #deduceGate{bottom:calc(106px + env(safe-area-inset-bottom))}
+  #deduceGate{bottom:calc(150px + env(safe-area-inset-bottom))}
   /* 答题面板 → 底部抽屉（整行大按钮，题目完整可读）
      注：必须重置基础规则的 height:0，否则内容被 overflow 裁掉 */
   #qPanelInner{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;height:auto;max-height:76vh;max-height:76dvh;
@@ -540,7 +541,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .focusQuestion .degreeNote{order:5}.focusQuestion .customWrap{order:8}.focusQuestion .skipOrbBtn{order:9}
   .focusQuestion::after{display:none}
   .focusTitle{font-size:15.5px}
-  .focusLead{font-size:11px;max-height:none}
+  .focusLead{font-size:11px}
   .focusActions{margin-top:12px}
   .archiveNode{padding:11px 14px;font-size:12px}
   .answerWire{display:none}
@@ -734,6 +735,197 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 ::-webkit-scrollbar{width:8px}
 ::-webkit-scrollbar-thumb{background:rgba(212,175,106,.3);border-radius:4px}
 ::-webkit-scrollbar-track{background:transparent}
+
+/* ============================================================
+   v3 · 关卡化奖励层：图标步骤卡 / 章节徽章 / 显影雷达 / 通关闪光
+   ============================================================ */
+.glyph{display:block;width:100%;height:100%;overflow:visible}
+/* 开场：四步图标卡取代长段说明 */
+.introSteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:min(640px,92vw);margin-top:26px}
+.istep{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px 13px;text-align:center;
+  border:1px solid rgba(233,228,214,.12);background:rgba(7,10,18,.55);backdrop-filter:blur(4px);
+  clip-path:polygon(0 0,100% 0,100% 84%,88% 100%,0 100%);animation:fadeUp .7s ease both}
+.istep:nth-child(2){animation-delay:.08s}.istep:nth-child(3){animation-delay:.16s}.istep:nth-child(4){animation-delay:.24s}
+.istep i{display:block;width:40px;height:40px;color:var(--gold);filter:drop-shadow(0 0 10px rgba(212,175,106,.45))}
+.istep i .glyph *{animation:artBreathe 3s ease-in-out infinite;transform-origin:20px 20px}
+.istep b{font-family:var(--serif);font-size:14px;letter-spacing:.3em;color:var(--ink);font-weight:600}
+.istep span{font:10px/1.5 monospace;letter-spacing:.06em;color:var(--ink-dim)}
+/* 手册：图标网格 */
+.manualGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.mcard{--catc:var(--gold);display:flex;flex-direction:column;gap:6px;padding:14px 14px 12px;border:1px solid rgba(233,228,214,.12);
+  border-top:2px solid var(--catc);background:rgba(5,8,15,.5)}
+.mcard.cat-listen{--catc:var(--teal)}.mcard.cat-inquire{--catc:var(--cinnabar)}.mcard.cat-pulse{--catc:#e9e4d6}
+.mcard i{display:block;width:34px;height:34px;color:var(--catc);filter:drop-shadow(0 0 8px var(--catc))}
+.mcard b{font-family:var(--serif);font-size:13px;letter-spacing:.2em;color:var(--catc)}
+.mcard span{font-size:11.5px;line-height:1.75;color:var(--ink-dim)}
+.manualNote{font-size:12px;line-height:1.9;color:var(--ink-dim);padding:10px 12px;border-left:2px solid var(--gold);background:rgba(212,175,106,.05)}
+.manualNote b{color:var(--gold-bright)}
+/* HUD：章节徽章行 —— 每章一枚，进度环随收集填满，收齐即点亮 */
+#chapterRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 0}
+.chChip{--catc:var(--gold);--p:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px 5px;
+  border:1px solid rgba(233,228,214,.1);border-radius:3px;background:rgba(5,8,15,.5);color:var(--ink-dim);cursor:pointer;transition:.25s}
+.chChip.cat-observe{--catc:var(--gold)}.chChip.cat-listen{--catc:var(--teal)}.chChip.cat-inquire{--catc:var(--cinnabar)}.chChip.cat-pulse{--catc:#e9e4d6}
+.chChip:hover{border-color:var(--catc)}
+.chRing{position:relative;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--catc) calc(var(--p)*1%),rgba(233,228,214,.1) 0);transition:background .4s}
+.chRing::before{content:"";position:absolute;inset:3px;border-radius:50%;background:rgba(7,10,18,.96)}
+.chRing i{position:relative;display:block;width:18px;height:18px;color:var(--catc);opacity:.7}
+.chChip small{font:8.5px/1 monospace;letter-spacing:.1em}
+.chChip.clear{color:var(--catc);border-color:var(--catc);box-shadow:0 0 14px color-mix(in srgb,var(--catc) 35%,transparent)}
+.chChip.clear .chRing i{opacity:1;filter:drop-shadow(0 0 6px var(--catc))}
+.chChip.clear::after{content:"✓";position:absolute;right:4px;top:3px;font:9px/1 monospace;color:var(--catc)}
+.chChip.pop .chRing{animation:chPop .7s ease}
+@keyframes chPop{40%{transform:scale(1.35)}}
+/* HUD：显影雷达 + 经验/徽章 */
+#hudVis{display:flex;gap:12px;align-items:flex-start;margin-top:10px}
+#liveRadarWrap{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px}
+#liveRadar{width:112px;height:112px;display:block}
+#liveRadarWrap span{font:8px/1 monospace;letter-spacing:.2em;color:var(--ink-dim)}
+#hudSide{flex:1;min-width:0;display:flex;flex-direction:column}
+#hudSide #xpRow{margin-top:2px}
+#badgeShelf{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.bSlot{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(233,228,214,.12);
+  border-radius:3px;color:rgba(233,228,214,.18);background:rgba(5,8,15,.5);transition:.3s;position:relative}
+.bSlot i{display:block;width:14px;height:14px}
+.bSlot.on{color:var(--gold-bright);border-color:var(--gold);box-shadow:0 0 10px rgba(212,175,106,.4)}
+.bSlot.on.silver{color:#cfd6dd;border-color:rgba(207,214,221,.6);box-shadow:0 0 8px rgba(207,214,221,.25)}
+.bSlot.pop{animation:chPop .7s ease}
+.bSlot[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:50%;top:-26px;transform:translateX(-50%);white-space:nowrap;
+  font:9px/1 monospace;letter-spacing:.1em;color:var(--ink);background:rgba(5,8,15,.95);border:1px solid var(--line);padding:5px 7px;z-index:2}
+/* 徽章解锁 Toast */
+#badgeToast{position:fixed;right:24px;top:118px;z-index:16;display:flex;align-items:center;gap:12px;padding:10px 14px 10px 12px;
+  background:rgba(7,10,18,.94);border:1px solid var(--gold);border-left-width:3px;color:var(--ink);
+  transform:translateX(120%);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s;pointer-events:none;
+  box-shadow:0 10px 34px rgba(0,0,0,.5),0 0 22px rgba(212,175,106,.2)}
+#badgeToast.show{transform:none;opacity:1}
+#badgeToast>i{display:block;width:34px;height:34px;color:var(--gold-bright);filter:drop-shadow(0 0 8px rgba(212,175,106,.7));animation:chPop .7s ease}
+#badgeToast small{display:block;font:8.5px/1.4 monospace;letter-spacing:.24em;color:var(--teal)}
+#badgeToast b{display:block;font-family:var(--serif);font-size:14px;letter-spacing:.2em;color:var(--gold-bright)}
+/* 章节通关闪光：全屏一闪 → 徽章放大 → 收回弹窗 */
+#clearFlash{position:fixed;inset:0;z-index:14;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  pointer-events:none;opacity:0;--catc:var(--gold)}
+#clearFlash.show{animation:cfIn 1.15s ease forwards}
+#clearFlash::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,color-mix(in srgb,var(--catc) 30%,transparent),transparent 62%);
+  animation:cfGlow 1.15s ease forwards}
+.cfEmblem{position:relative;width:120px;height:120px;color:var(--catc);filter:drop-shadow(0 0 26px var(--catc));animation:cfEmblem 1.15s cubic-bezier(.2,.9,.3,1) forwards}
+.cfText{position:relative;font:12px/1 monospace;letter-spacing:.6em;color:var(--ink);text-shadow:0 0 18px var(--catc)}
+@keyframes cfIn{0%{opacity:0}12%{opacity:1}80%{opacity:1}100%{opacity:0}}
+@keyframes cfGlow{0%{transform:scale(.2);opacity:0}30%{opacity:1}100%{transform:scale(1.6);opacity:0}}
+@keyframes cfEmblem{0%{transform:scale(.2) rotate(-40deg);opacity:0}35%{transform:scale(1.25) rotate(0);opacity:1}100%{transform:scale(1);opacity:1}}
+/* 奖励弹窗：徽章 + 雷达快照，文字压缩为一句洞见 */
+.msVisual{display:flex;align-items:center;justify-content:center;gap:18px;margin:4px 0 12px}
+.msEmblem{--catc:var(--gold);width:84px;height:84px;color:var(--catc);filter:drop-shadow(0 0 16px var(--catc));animation:cfEmblem .9s cubic-bezier(.2,.9,.3,1) both}
+.msEmblem.silver{--catc:#cfd6dd}
+.msRadar{width:150px;height:150px;display:block}
+.msStage{display:flex;justify-content:center;gap:6px;margin-bottom:10px}
+.msStage i{width:26px;height:3px;background:rgba(233,228,214,.14)}
+.msStage i.on{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.msLine{font-size:13px;line-height:1.9;color:var(--ink);text-align:center}
+.msLine b{color:var(--gold-bright);font-family:var(--serif)}
+.msBonus{display:flex;justify-content:center;gap:14px;margin-top:10px;font:10px/1 monospace;letter-spacing:.16em;color:var(--teal)}
+.msBonus span{padding:6px 10px;border:1px solid rgba(106,212,200,.35)}
+/* 答题面板：图示放大、辅助文字折叠 */
+.answerNode .optArt{width:44px;height:44px}
+.answerNode .answerText{align-self:center;font-size:12.5px}
+.focusIcon{width:30px;height:30px;color:currentColor;flex:0 0 auto;opacity:.9}
+.focusHead{display:flex;align-items:center;gap:10px}
+.focusHead .focusTitle{flex:1;min-width:0}
+.ctxRow:not(.open) .miniChip{display:none}
+.ctxRow .ctxLbl{cursor:pointer;user-select:none}
+.ctxRow .ctxLbl:hover{color:var(--gold-bright)}
+.ctxRow.open .ctxLbl{color:var(--teal)}
+.ctxDock:not(.open){padding:8px 14px;width:auto;border-top:0;background:rgba(6,9,16,.72)}
+.customWrap:not(.open) input{display:none}
+.customToggle{background:none;border:0;border-bottom:1px dashed rgba(154,149,138,.5);color:var(--ink-dim);
+  font:10.5px/1 var(--sans);letter-spacing:.12em;padding:4px 2px;cursor:pointer}
+.customToggle:hover{color:var(--gold-bright);border-color:var(--gold)}
+.customWrap.open .customToggle{display:none}
+.focusFoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:11px}
+.focusFoot .skipOrbBtn{margin:0}
+.focusActions .archiveNode:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.confirmDock{position:fixed;left:50%;bottom:22px;z-index:4;display:flex;align-items:center;gap:18px;width:min(560px,calc(100vw - 40px));pointer-events:auto;
+  transform:translateX(-50%);padding:10px 12px 10px 16px;background:rgba(6,9,16,.94);border:1px solid var(--focus-color,var(--gold));
+  box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--focus-color,var(--gold)) 18%,transparent);backdrop-filter:blur(8px)}
+.confirmDock::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--focus-color,var(--gold));box-shadow:0 0 12px var(--focus-color,var(--gold))}
+.confirmDock .focusActions{flex:1;margin:0;align-items:center;gap:10px}
+.confirmDock .focusPick{display:flex;gap:4px;min-height:34px;align-items:center;flex:0 0 auto;max-width:150px;overflow:hidden}
+.confirmDock .focusPick .optArt{width:32px;height:32px;flex:0 0 auto;animation:pickIn .35s ease both}
+.confirmDock .focusPick:not(.on)::before{content:"";width:32px;height:32px;border:1px dashed rgba(233,228,214,.25);border-radius:4px}
+@keyframes pickIn{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+.confirmDock .focusCount{flex:1;font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;color:var(--ink-dim);text-align:center}
+.confirmDock .archiveNode{flex:0 0 auto;min-width:132px;white-space:nowrap;font-size:15px;letter-spacing:.32em;padding:14px 18px 14px 22px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-bright));color:var(--bg);border:0;box-shadow:0 6px 20px rgba(212,175,106,.28)}
+.confirmDock .archiveNode::before{content:"✓ ";font-family:monospace;letter-spacing:0}
+.confirmDock .archiveNode:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(212,175,106,.45)}
+.confirmDock .archiveNode.ready{animation:gateGlow 1.6s infinite}
+/* 问诊象形图的小动画 */
+.picto.shiver{animation:pShiver 1.4s ease-in-out infinite}
+@keyframes pShiver{0%,100%{transform:translateX(0)}25%{transform:translateX(-1.2px)}75%{transform:translateX(1.2px)}}
+.picto.flicker{animation:pFlicker 1.8s ease-in-out infinite}
+@keyframes pFlicker{0%,100%{filter:brightness(1)}50%{filter:brightness(1.7)}}
+.picto.rise .ray{animation:pRise 1.6s ease-in-out infinite}
+@keyframes pRise{0%{transform:translateY(3px);opacity:.2}60%{opacity:1}100%{transform:translateY(-4px);opacity:0}}
+.picto.drip .drop{animation:pDrip 1.5s ease-in infinite;transform-origin:50% 0}
+.picto.drip .d2{animation-delay:.5s}
+@keyframes pDrip{0%{transform:translateY(-3px);opacity:0}30%{opacity:1}100%{transform:translateY(5px);opacity:0}}
+.picto.swap{animation:pSwap 2.4s ease-in-out infinite}
+@keyframes pSwap{0%,45%{filter:hue-rotate(0)}55%,100%{filter:hue-rotate(160deg)}}
+.picto.spin .ring{animation:pSpin 4s linear infinite;transform-origin:20px 20px}
+@keyframes pSpin{to{transform:rotate(360deg)}}
+.picto.sink .lid,.picto.sink .ray,.picto.sink .sun{animation:pSink 1.8s ease-in-out infinite}
+@keyframes pSink{0%,100%{transform:translateY(-2px)}50%{transform:translateY(2px)}}
+.picto.wave .ray{animation:pWave 1.2s ease-in-out infinite}
+@keyframes pWave{0%,100%{opacity:.3}50%{opacity:1}}
+.picto.beat{animation:pBeat 1.1s ease-in-out infinite;transform-origin:20px 22px}
+@keyframes pBeat{0%,100%{transform:scale(1)}15%{transform:scale(1.12)}30%{transform:scale(1)}45%{transform:scale(1.08)}}
+.picto.breathe2{animation:artBreathe 2.2s ease-in-out infinite;transform-origin:20px 22px}
+.picto.zz .z{animation:pZ 1.8s ease-in-out infinite}
+.picto.zz .z2{animation-delay:.6s}
+@keyframes pZ{0%{opacity:0;transform:translateY(3px)}40%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}
+.picto.blink .pupil{animation:pBlink 2.6s ease-in-out infinite}
+@keyframes pBlink{0%,88%,100%{transform:scaleY(1)}94%{transform:scaleY(.1)}}
+.picto .bolt{animation:pFlicker 1s ease-in-out infinite}
+.picto .dot{animation:pFlicker 1.2s ease-in-out infinite}
+.picto .bar{animation:pBar 2.4s ease-in-out infinite;transform-origin:8px 20px}
+@keyframes pBar{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.3)}}
+/* 题头图标也动起来，副标变小 */
+.focusIcon .glyph{animation:artBreathe 2.8s ease-in-out infinite;transform-origin:20px 20px}
+.focusSub{font:10.5px/1.5 var(--sans);color:var(--ink-dim);letter-spacing:.04em;margin-top:3px}
+/* 报告：徽章墙 */
+.badgeWall{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px}
+.badgeWall .bw{display:flex;flex-direction:column;align-items:center;gap:5px;width:78px;padding:10px 4px 8px;border:1px solid rgba(233,228,214,.12);
+  color:rgba(233,228,214,.2);background:rgba(5,8,15,.5)}
+.badgeWall .bw i{display:block;width:26px;height:26px}
+.badgeWall .bw span{font:8.5px/1.3 monospace;letter-spacing:.08em;text-align:center}
+.badgeWall .bw.on{color:var(--gold-bright);border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,106,.3)}
+.badgeWall .bw.on.silver{color:#cfd6dd;border-color:rgba(207,214,221,.6);box-shadow:none}
+@media(max-width:700px){
+  .introSteps{grid-template-columns:repeat(2,1fr);gap:8px;margin-top:18px}
+  .istep{padding:12px 6px 10px}.istep i{width:32px;height:32px}.istep b{font-size:12.5px}
+  .manualGrid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .mcard{padding:11px 10px 9px}.mcard span{font-size:11px;line-height:1.6}
+  #clueDock{max-height:128px}
+  #chapterRow{margin-top:8px;gap:6px}
+  .chChip{flex-direction:row;justify-content:center;gap:6px;padding:4px 2px}
+  .chRing{width:26px;height:26px}.chRing i{width:14px;height:14px}
+  .chChip.clear::after{display:none}
+  #hudVis{display:none}
+  #clueDock.open #hudVis{display:flex}
+  #badgeToast{right:10px;left:10px;top:auto;bottom:calc(128px + env(safe-area-inset-bottom));transform:translateY(120%)}
+  #badgeToast.show{transform:none}
+  .cfEmblem{width:92px;height:92px}
+  .msVisual{gap:12px}.msEmblem{width:70px;height:70px}.msRadar{width:130px;height:130px}
+  .answerNode .optArt{width:40px;height:40px}
+  .focusFoot{flex-wrap:wrap}
+  #qPanelInner{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+  .confirmDock{position:fixed;left:0;right:0;bottom:0;transform:none;width:100%;margin:0;padding:11px 15px calc(11px + env(safe-area-inset-bottom));
+    border-left:0;border-right:0;border-bottom:0;gap:8px}
+  .confirmDock .focusActions{width:100%;gap:8px}
+  .confirmDock .focusPick{max-width:96px}
+  .confirmDock .focusPick .optArt{width:28px;height:28px}
+  .confirmDock .focusCount{font-size:10.5px;line-height:1.35;text-align:left}
+  .confirmDock .archiveNode{flex:0 0 auto;min-width:118px;font-size:14px;letter-spacing:.26em;padding:13px 14px 13px 18px}
+}
 </style>
 </head>
 <body>
@@ -771,9 +963,15 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     </h1>
     <div class="divider"></div>
     <p class="lede"
-      data-zh="你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每道题可<b>多选并存</b>，每条证词有<b>五档程度条</b>，还可标记「何时加重」做交叉印证，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。"
-      data-en="You are the body's detective. The two silhouettes ahead are mirrored halves of one body — grey, blurred, scattered into grain.<br>Spend 30 seconds on a basic file (or skip it). Then the clues of Look · Listen · Ask · Pulse become <b>orbs drifting around the figures</b> — <b>tap an orb to lock on and capture it</b>, then give your testimony. <b>Select several signs at once</b>, set a <b>five-step degree bar</b> for each, tag when it is worse for cross-checking, add your own words, or skip.<br>Every capture lifts a veil: the world turns from grey to colour, the figures sharpen, confetti lights up, holo-screens wake — until the case is solved and the report, path chart and theatre unlock.">
-      你是一名「身体侦探」。对面的两个人影，是身体互为镜像的两半——轮廓尚未完成，灰淡、模糊、颗粒散乱。<br>先花 30 秒建立基础档案（赶时间可跳过）；随后，望·闻·问·切的线索会化作<b>光点在两人周围漂浮巡游</b>——<b>点按光点就能锁定捕捉</b>，答出证词。每道题可<b>多选并存</b>，每条证词有<b>五档程度条</b>，还可标记「何时加重」做交叉印证，可自填，可跳过。<br>每捕捉一条，世界便从灰调往彩色退去一层雾：人影聚拢、彩屑亮起、全息屏点亮——直至水落石出，解锁报告、推理路径图与推理小剧场。</p>
+      data-zh="你是「身体侦探」。捕捉漂浮的线索光点，让灰雾中的两个人影逐层显形——<b>每收齐一章，解锁一枚徽章与一次侧写更新</b>。"
+      data-en="You are the body's detective. Capture the drifting clue-orbs and let the two grey figures develop layer by layer — <b>every chapter cleared unlocks a badge and a profile update</b>.">
+      你是「身体侦探」。捕捉漂浮的线索光点，让灰雾中的两个人影逐层显形——<b>每收齐一章，解锁一枚徽章与一次侧写更新</b>。</p>
+    <div class="introSteps">
+      <div class="istep"><i data-glyph="file"></i><b data-zh="建 档" data-en="INTAKE">建 档</b><span data-zh="30 秒 · 可跳过" data-en="30 s · skippable">30 秒 · 可跳过</span></div>
+      <div class="istep"><i data-glyph="orb"></i><b data-zh="捕 捉" data-en="CAPTURE">捕 捉</b><span data-zh="点按光点 · 照图作答" data-en="tap orbs · match the pictures">点按光点 · 照图作答</span></div>
+      <div class="istep"><i data-glyph="badge"></i><b data-zh="通 关" data-en="CLEAR">通 关</b><span data-zh="望闻问切 · 四章四徽章" data-en="4 chapters · 4 badges">望闻问切 · 四章四徽章</span></div>
+      <div class="istep"><i data-glyph="gift"></i><b data-zh="奖 励" data-en="REWARD">奖 励</b><span data-zh="侧写报告 · 路径图 · 小剧场" data-en="report · path chart · theatre">侧写报告 · 路径图 · 小剧场</span></div>
+    </div>
     <div class="btnRow">
       <button class="btn" id="btnStart" data-zh="进 入 双 生 诊 室" data-en="E N T E R · T H E  C H A M B E R">进 入 双 生 诊 室</button>
       <button class="btn ghost" id="btnHow" data-zh="侦 查 手 册" data-en="M A N U A L">侦 查 手 册</button>
@@ -785,10 +983,15 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   <section class="screen" id="screen-how">
     <div class="panel">
       <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
-      <div style="font-size:13.5px;line-height:2.1;color:var(--ink)"
-        data-zh="① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；每道题<b>可多选并存</b>（如「淡白」与「齿痕」同时成立），选中后拖动<b>五档程度条</b>标记轻重，再勾选「何时更明显」做<b>情境交叉印证</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，先看<b>掌心朝上的寸关尺定位图</b>与轻/中/重按压示意，再上手；辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。"
-        data-en="① <b style='color:var(--gold)'>Intake</b> — 30 seconds of basics (alias / rhythm / diet) for an instant first sketch; skip it entirely if in a hurry.<br>② <b style='color:var(--gold)'>Capture the orbs</b> — the clues of Look · Listen · Ask · Pulse drift on three orbits around the figures: <b style='color:var(--gold)'>gold = Look</b>, <b style='color:var(--teal)'>teal = Listen</b>, <b style='color:var(--cinnabar)'>cinnabar = Ask</b>, <b style='color:#e9e4d6'>moon-white = Pulse</b>. The one nearest the camera enlarges and shows its tag; <b>tap an orb → reticle locks → testimony opens</b>. Drag to orbit the camera; the ◎ button turns the camera to the nearest uncaptured orb; the top-left “LIST” opens a plain checklist.<br>③ <b style='color:var(--gold)'>Answer</b> — <b>every Look and Listen option carries an animated diagram</b> (tongue colour, coating, complexion, voice waveform); <b>select several signs at once</b> (e.g. pale AND teeth-marked), drag each <b>five-step degree bar</b>, then tag <b>when it is worse</b> for cross-checking; each question has a <b>free-text field</b>; choose &quot;not sure&quot; or &quot;skip this clue&quot; whenever you like.<br>④ <b style='color:var(--gold)'>The world develops &amp; XP</b> — every capture sharpens the figures, refines the grain, turns confetti from grey to colour and wakes the holo-screens; consecutive captures within 25 s trigger a <b>COMBO</b> bonus; the <b>live weight engine</b> on the board shows backend scores in real time, with three profile updates along the way.<br>⑤ <b style='color:var(--gold)'>Pulse</b> — the moon-white clue opens the pulse instrument with a <b>palm-up Cun/Guan/Chi map</b> and light/mid/deep pressure guide; each answer in the four pulse questions has its own animated waveform.<br>⑥ <b style='color:var(--gold)'>Reward</b> — recover everything (or skip the rest) to unlock your detective rank, the body profile, a <b>downloadable deduction-path chart</b>, <b>graded cross-discipline verification</b>, the care prescription and the five-act theatre.">
-        ① <b style='color:var(--gold)'>建立档案</b> —— 30 秒基础信息（称呼 / 作息 / 饮食），即刻生成「初步侧写」；赶时间可整页跳过。<br>② <b style='color:var(--gold)'>捕捉光点</b> —— 望·闻·问·切的线索化作光点在两人周围三条轨道上巡游：<b style='color:var(--gold)'>金色=望诊</b>、<b style='color:var(--teal)'>青色=闻诊</b>、<b style='color:var(--cinnabar)'>朱色=问诊</b>、<b style='color:#e9e4d6'>月白=切诊</b>。离镜头最近的那颗会放大并显示名牌；<b>点按光点 → 准星锁定 → 证词展开</b>。拖动画面可环绕镜头，右下角 ◎ 会把镜头转向最近的未捕捉目标；也可点开左上「LIST」清单直选。<br>③ <b style='color:var(--gold)'>作答</b> —— <b>望诊与闻诊的每个选项都配有动态图示</b>（舌色、苔质、面色、声波），照着图比对即可；每道题<b>可多选并存</b>（如「淡白」与「齿痕」同时成立），选中后拖动<b>五档程度条</b>标记轻重，再勾选「何时更明显」做<b>情境交叉印证</b>；每道题底部都留有<b>自填栏</b>；不确定就选「看不太清」，或点「跳过此线索」。<br>④ <b style='color:var(--gold)'>世界显影与经验值</b> —— 每捕捉一条，人影聚拢、颗粒变细、彩屑从灰调转彩、全息屏与数据雨逐步点亮；25 秒内连续捕捉会触发 <b>COMBO</b> 连击加分；线索板上的<b>后台权重条实时公开</b>，途中三次弹出「侧写更新」。<br>⑤ <b style='color:var(--gold)'>切诊</b> —— 月白线索会打开把脉工具，先看<b>掌心朝上的寸关尺定位图</b>与轻/中/重按压示意，再上手；辨脉四问的每个选项同样配有动态波形，指下所感与图形对应。<br>⑥ <b style='color:var(--gold)'>通关奖励</b> —— 全部收齐（或主动跳过剩余）后解锁侦探段位、身体侧写、<b>可下载的推理路径图</b>、<b>跨学科交叉验证（含证据强度分级）</b>、调养处方和五幕推理小剧场。</div>
+      <div class="manualGrid">
+        <div class="mcard cat-observe"><i data-emblem="observe"></i><b data-zh="望 · 金色" data-en="LOOK · gold">望 · 金色</b><span data-zh="对镜看舌、面、眼、形——照着动态图示比对即可" data-en="Tongue, face, eyes, build — match the animated pictures">对镜看舌、面、眼、形——照着动态图示比对即可</span></div>
+        <div class="mcard cat-listen"><i data-emblem="listen"></i><b data-zh="闻 · 青色" data-en="LISTEN · teal">闻 · 青色</b><span data-zh="声音、呼吸、咳痰、口气——每个选项都有波形图" data-en="Voice, breath, cough, mouth — each option has a waveform">声音、呼吸、咳痰、口气——每个选项都有波形图</span></div>
+        <div class="mcard cat-inquire"><i data-emblem="inquire"></i><b data-zh="问 · 朱色" data-en="ASK · cinnabar">问 · 朱色</b><span data-zh="近一个月反复出现的信号，勾选即可，可为 0" data-en="Signals that repeated this month — tick any, zero is fine">近一个月反复出现的信号，勾选即可，可为 0</span></div>
+        <div class="mcard cat-pulse"><i data-emblem="pulse"></i><b data-zh="切 · 月白" data-en="PULSE · moon">切 · 月白</b><span data-zh="寸关尺定位 → 轻中重按压 → 辨脉四问 → 自测心率" data-en="Locate Cun/Guan/Chi → press → 4 pulse questions → real pulse">寸关尺定位 → 轻中重按压 → 辨脉四问 → 自测心率</span></div>
+        <div class="mcard"><i data-glyph="combo3"></i><b data-zh="连击 · 徽章" data-en="COMBO · BADGES">连击 · 徽章</b><span data-zh="25 秒内连续捕捉叠加 COMBO；每收齐一章，解锁徽章与侧写更新" data-en="Captures within 25 s stack COMBO; each chapter cleared unlocks a badge and a profile update">25 秒内连续捕捉叠加 COMBO；每收齐一章，解锁徽章与侧写更新</span></div>
+        <div class="mcard"><i data-glyph="gift"></i><b data-zh="通关奖励" data-en="REWARD">通关奖励</b><span data-zh="侦探段位、六维雷达、可下载的推理路径图、循证交叉、五幕小剧场" data-en="Detective rank, radar, downloadable path chart, graded evidence, 5-act play">侦探段位、六维雷达、可下载的推理路径图、循证交叉、五幕小剧场</span></div>
+      </div>
+      <div class="manualNote" data-zh="每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。" data-en="Each question: <b>multi-select</b>, drag the <b>degree bar</b>, tap “+ when is it worse” to cross-check, add a note or skip; pick “not sure” when unsure. Drag to orbit, ◎ turns to the nearest orb, LIST picks directly.">每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
     </div>
   </section>
@@ -839,9 +1042,16 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
         <div id="hudMode" data-zh="CLUE BOARD · 线索板" data-en="CLUE BOARD">CLUE BOARD · 线索板</div>
         <div id="hudProg">已回收 00 / 00</div>
         <div id="signalTrack"><span id="signalFill"></span></div>
-        <div id="xpRow"><span id="xpTrack"><span id="xpFill"></span></span><span id="xpVal">XP 0</span></div>
-        <div id="liveWeights"></div>
-        <div id="hudHint" data-zh="点按两人周围漂浮的光点捕捉线索 · 或展开此清单直选" data-en="Tap the floating orbs around the figures to capture clues · or expand this list">点按两人周围漂浮的光点捕捉线索 · 或展开此清单直选</div>
+        <div id="chapterRow"></div>
+        <div id="hudVis">
+          <div id="liveRadarWrap"><canvas id="liveRadar" width="124" height="124"></canvas><span data-zh="显影雷达" data-en="LIVE RADAR">显影雷达</span></div>
+          <div id="hudSide">
+            <div id="xpRow"><span id="xpTrack"><span id="xpFill"></span></span><span id="xpVal">XP 0</span></div>
+            <div id="badgeShelf"></div>
+            <div id="liveWeights"></div>
+          </div>
+        </div>
+        <div id="hudHint" data-zh="点按光点捕捉 · 收齐一章解锁徽章" data-en="Tap an orb to capture · clear a chapter to unlock a badge">点按光点捕捉 · 收齐一章解锁徽章</div>
         <button id="btnSkipRest" data-zh="跳过剩余 · 直接推理 →" data-en="Skip the rest · deduce now →">跳过剩余 · 直接推理 →</button>
       </div>
       <div id="dockBody"></div>
@@ -934,6 +1144,8 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <button class="btn" id="msClose">继 续 探 案</button>
   </div>
 </div>
+<div id="clearFlash"><div class="cfEmblem"></div><div class="cfText">CHAPTER CLEAR</div></div>
+<div id="badgeToast"><i></i><div><small>BADGE UNLOCKED</small><b></b></div></div>
 
 <div id="progress"><div class="inner" id="progressInner"></div></div>
 
@@ -1875,6 +2087,7 @@ const EV_DISCLAIM=['※ 本栏验证的是「主诉组合」与「调摄建议�
    ============================================================ */
 function artSVG(sp){
   if(!sp) return '';
+  if(sp.t==='picto') return sp.svg;
   const S='<svg class="optArt" viewBox="0 0 40 40" aria-hidden="true">',E='</svg>';
   let g='';
   if(sp.t==='tongue'){
@@ -2098,14 +2311,14 @@ function awardXP(n,x,y){
   document.body.appendChild(f);setTimeout(()=>f.remove(),1100);
 }
 function updateLive(){
+  if(typeof updateLiveRadar==='function') updateLiveRadar();
   const box=document.getElementById('liveWeights');if(!box)return;
   const top=PATTERN_KEYS.map(k=>[k,state.weights[k]]).filter(a=>a[1]>0)
     .sort((a,b)=>b[1]-a[1]).slice(0,3);
   if(!top.length){box.classList.remove('on');return;}
   box.classList.add('on');
   const max=top[0][1]||1;
-  box.innerHTML=`<div class="lwHint">${L('后台权重 · 实时开放','LIVE WEIGHT ENGINE')}</div>`+
-    top.map(p=>`<div class="lwRow"><span class="lwN">${pName(p[0])}</span>`+
+  box.innerHTML=top.map(p=>`<div class="lwRow"><span class="lwN">${pName(p[0])}</span>`+
       `<span class="lwB"><i style="width:${Math.round(p[1]/max*100)}%"></i></span><span>${p[1]}</span></div>`).join('');
 }
 function rankOf(){
@@ -2163,7 +2376,7 @@ function applyLang(){
   });
   document.documentElement.lang = LANG==='en'?'en':'zh-CN';
   $('#btnLang').textContent = LANG==='en'?'中文':'EN';
-  if(ORBS.length){ buildDock(); ORBS.forEach(o=>{const em=o.el&&o.el.querySelector('em'); if(em) em.textContent=L(CATS[o.cat].zh,CATS[o.cat].en)+' '+String(o.order+1).padStart(2,'0');}); }
+  if(ORBS.length){ buildDock(); renderChapters(); renderBadges(); ORBS.forEach(o=>{const em=o.el&&o.el.querySelector('em'); if(em) em.textContent=L(CATS[o.cat].zh,CATS[o.cat].en)+' '+String(o.order+1).padStart(2,'0');}); }
   if(orbTotal) updateHUD();
   closePanel();
 }
@@ -2245,9 +2458,15 @@ let inquireGroups = Q_INQUIRE.slice();
 let toastTimer=null;
 
 function orbLabel(o){
-  if(o.cat==='pulse') return L('伸出手腕：你能辨认指下的脉象吗？','Offer your wrist: can you identify the pulse beneath your fingers?');
-  if(o.cat==='inquire') return (LANG==='en'?o.g.ge:o.g.g)+L('：近一个月，哪些信号反复出现？',': which signals have repeated in the past month?');
-  return LANG==='en'?(o.g.qe||o.g.q):o.g.q;
+  if(o.cat==='pulse') return L('伸出手腕 · 辨脉','Offer your wrist · read the pulse');
+  if(o.cat==='inquire') return LANG==='en'?o.g.ge:o.g.g.split(' ')[0];
+  return LANG==='en'?(o.g.qe||o.g.q).split(' (')[0]:o.g.q.split('（')[0];
+}
+/* 题干副标：括号里的操作提示或问诊的时间范围，比题干小一号 */
+function orbSub(o){
+  if(o.cat==='inquire') return L('近一月反复出现的，都点亮','Tap all that repeated this month');
+  const q=LANG==='en'?(o.g.qe||o.g.q):o.g.q, m=q.match(/（(.+)）|\((.+)\)/);
+  return m?(m[1]||m[2]):'';
 }
 function syncOrbState(o){
   o.el.classList.toggle('done',o.done);
@@ -2275,7 +2494,8 @@ function scanClues(){
   showSignal(L(`尚有 ${rest.length} 条线索漂浮中 · 镜头已转向最近一条`,`${rest.length} clues adrift · camera turned to the nearest`));
 }
 function buildStage(){
-  ORBS=[]; orbDone=0; curOrb=null; msShown=0;
+  ORBS=[]; orbDone=0; curOrb=null;
+  state.cleared={}; state.badges={}; state.pulseRight=0; _liveVals=null;
   window.__stageFocus=false;
   if(window.__loadGrains) window.__loadGrains();
   $('#orbLayer').innerHTML='';
@@ -2302,13 +2522,13 @@ function buildStage(){
     o.el=d;
     syncOrbState(o);
   });
-  buildDock();
+  buildDock(); renderChapters(); renderBadges();
   $('#deduceGate').classList.remove('show');
   state.xp=0; state.streak=0; state.lastCap=0;
   $('#xpFill').style.width='0'; $('#xpVal').textContent='XP 0';
   updateLive();
   updateHUD();
-  showSignal(L('线索正漂浮在两人周围 · 点按光点捕捉','Clues drift around the figures · tap an orb to capture'));
+  showSignal(L('线索漂浮在两人周围 · 点按光点捕捉 · 收齐一章解锁徽章','Clues drift around the figures · tap to capture · clear a chapter for a badge'));
 }
 /* 捕捉：锁定动画 → 十字准星飞向目标 → 打开证词 */
 function captureOrb(o){
@@ -2382,6 +2602,8 @@ function skipRest(){
   if(!confirm(L(`确定跳过剩余 ${rest.length} 条线索，以现有证据直接推理吗？`,`Skip the remaining ${rest.length} clues and deduce with the evidence at hand?`))) return;
   closePanel();
   rest.forEach(o=>{o.skipped=true;o.done=true;orbDone++;syncOrbState(o);});
+  CHAPTERS.forEach(c=>{ if(chapterItems(c).every(o=>o.done)) state.cleared[c]=true; });   // 跳过收尾的章节不颁奖
+  syncChapters();
   addClue(L('跳过','Skip'),L(`侦探选择略过 ${rest.length} 条线索，以现有证据直接推理`,`${rest.length} clues skipped — deduction proceeds on current evidence`),{});
   updateHUD(true); afterAnswer();
 }
@@ -2427,11 +2649,14 @@ function updateHUD(animate=false){
     ? `RECOVERED ${String(orbDone).padStart(2,'0')} / ${orbTotal} · MATERIAL ${Math.round(clarity*100)}%`
     : `已回收 ${String(orbDone).padStart(2,'0')} / ${orbTotal} · 显形 ${Math.round(clarity*100)}%`;
   updateDockProgress();
+  syncChapters();
   if(orbTotal && orbDone>=orbTotal) $('#deduceGate').classList.add('show');
 }
 function placeFocus(o){
   const mobile=innerWidth<700;
-  const x=mobile?innerWidth*.5:Math.max(innerWidth*.29,Math.min(innerWidth*.71,o.sx||innerWidth*.5));
+  // 桌面端：焦点横向留出整圈星环的位置，避免边缘节点被推回来压住证词卡
+  const margin=Math.min(390,innerWidth*.34)+130;
+  const x=mobile?innerWidth*.5:(margin*2>innerWidth?innerWidth*.5:Math.max(margin,Math.min(innerWidth-margin,o.sx||innerWidth*.5)));
   const y=mobile?innerHeight*.43:Math.max(innerHeight*.31,Math.min(innerHeight*.67,o.sy||innerHeight*.48));
   const panel=$('#qPanel');
   panel.style.setProperty('--focus-x',x+'px');panel.style.setProperty('--focus-y',y+'px');
@@ -2442,31 +2667,40 @@ function focusQuestion(o,withAction=false){
   const cat=CATS[o.cat],box=document.createElement('div');
   box.className='focusQuestion';
   const lead=o.cat==='inquire'&&Q_LEAD[o.g.g]?Q_LEAD[o.g.g][LANG==='en'?1:0]:'';
-  box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusTitle"></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusCount"></span><button class="archiveNode"></button></div>':''}<div class="degreeRow"></div>`;
+  const glyph=o.cat==='inquire'?groupGlyph(o.g.g):GLYPH[o.cat], sub=orbSub(o);
+  box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusHead"><i class="focusIcon">${glyph}</i><div><div class="focusTitle"></div>${sub?'<div class="focusSub"></div>':''}</div></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusPick"></span><span class="focusCount"></span><button class="archiveNode"></button></div>':''}<div class="degreeRow"></div>`;
   box.querySelector('.focusTitle').textContent=orbLabel(o);
-  if(lead)box.querySelector('.focusLead').textContent=lead;
-  // 情境交叉：何时加重（可多选），只在选中了异常证词时计入权重
+  if(sub)box.querySelector('.focusSub').textContent=sub;
+  if(lead){const ld=box.querySelector('.focusLead');ld.textContent=lead;ld.onclick=e=>{e.stopPropagation();ld.classList.toggle('full');};}
+  // 情境交叉：何时加重（可多选），默认折叠为一行，点开才展示标签；只在选中了异常证词时计入权重
   o.ctx=o.ctx||new Set();
-  const cr=document.createElement('div'); cr.className='ctxRow';
-  cr.innerHTML=`<span class="ctxLbl">${L('何时更明显？（可多选 · 用于交叉印证）','WHEN IS IT WORSE? (MULTI · CROSS-CHECK)')}</span>`;
+  const cr=document.createElement('div'); cr.className='ctxRow'+(o.ctx.size?' open':'');
+  const lbl=document.createElement('span'); lbl.className='ctxLbl';
+  const paintLbl=()=>{lbl.textContent=(cr.classList.contains('open')?'− ':'＋ ')+L('何时更明显？交叉印证','WHEN IS IT WORSE? CROSS-CHECK')+(o.ctx.size?` · ${o.ctx.size}`:'');};
+  lbl.onclick=e=>{e.stopPropagation();cr.classList.toggle('open');paintLbl();};
+  paintLbl(); cr.appendChild(lbl);
   CONTEXTS.forEach(c=>{
     const chip=document.createElement('span'); chip.className='miniChip'+(o.ctx.has(c)?' on':''); chip.textContent=L(c[0],c[2]);
-    chip.onclick=e=>{e.stopPropagation();o.ctx.has(c)?o.ctx.delete(c):o.ctx.add(c);chip.classList.toggle('on',o.ctx.has(c));};
+    chip.onclick=e=>{e.stopPropagation();o.ctx.has(c)?o.ctx.delete(c):o.ctx.add(c);chip.classList.toggle('on',o.ctx.has(c));paintLbl();};
     cr.appendChild(chip);
   });
   if(innerWidth<700) cr.classList.add('ctxAfter'); else cr.classList.add('ctxDock');
   box._ctxRow=cr;
-  const cw=document.createElement('div'); cw.className='customWrap';
+  // 自述补充 + 跳过：同一行，输入框默认收起
+  const foot=document.createElement('div'); foot.className='focusFoot';
+  const cw=document.createElement('div'); cw.className='customWrap'+(o.customText?' open':'');
+  const ct=document.createElement('button'); ct.className='customToggle'; ct.textContent=L('＋ 自述补充','+ OWN NOTE');
   const ci=document.createElement('input'); ci.type='text'; ci.maxLength=80;
-  ci.placeholder=L('以上都不贴切？自行补充这条证词（选填）','None quite fits? Add your own testimony (optional)');
+  ci.placeholder=L('以上都不贴切？自行补充这条证词','None quite fits? Add your own testimony');
   ci.value=o.customText||'';
   ci.oninput=()=>{o.customText=ci.value.trim();};
   ci.onclick=e=>e.stopPropagation();
-  cw.appendChild(ci); box.appendChild(cw);
+  ct.onclick=e=>{e.stopPropagation();cw.classList.add('open');ci.focus();};
+  cw.appendChild(ct); cw.appendChild(ci);
   const sk=document.createElement('button'); sk.className='skipOrbBtn';
-  sk.textContent=L('跳过此线索 · 不纳入推理','Skip this clue · excluded from deduction');
+  sk.textContent=L('跳过此线索','Skip this clue');
   sk.onclick=e=>{e.stopPropagation();skipOrb(o);};
-  box.appendChild(sk);
+  foot.appendChild(cw); foot.appendChild(sk); box.appendChild(foot);
   return box;
 }
 function answerPositions(count,ry){
@@ -2484,10 +2718,10 @@ function addAnswerNodes(inner,items,onChoose,art){
   const fr=inner.getBoundingClientRect();
   items.forEach((item,i)=>{
     let pos=positions[i];
-    if(!mobile){ // 桌面星环：把节点收进视口边界内（底部留出情境停靠条）
+    if(!mobile){ // 桌面星环：把节点收进视口边界内（顶部避开顶栏，底部留出确认栏与情境条）
       const hw=118,hh=52;
       const ax=Math.max(hw+10,Math.min(innerWidth-hw-10,fr.left+pos.x));
-      const ay=Math.max(hh+10,Math.min(innerHeight-hh-125,fr.top+pos.y));
+      const ay=Math.max(hh+72,Math.min(innerHeight-hh-215,fr.top+pos.y));
       pos={x:ax-fr.left,y:ay-fr.top};
     }
     const dist=Math.hypot(pos.x,pos.y);
@@ -2526,7 +2760,16 @@ function afterAnswer(){
   showSignal(left>0
     ?L(`已归档 ${orbDone} 条 · 还剩 ${left} 条线索`,`${orbDone} filed · ${left} clues remain`)
     :L('全部线索归档 · 可以开始推理','All clues filed · ready to deduce'));
-  checkMilestone();
+  if(left===0&&ORBS.every(o=>!o.skipped)) awardBadge('flawless');
+  checkChapters();
+}
+/* 自动接力：归档后镜头转向同章下一条未捕捉的光点，保持节奏 */
+function focusNext(o){
+  const nxt=ORBS.find(x=>x.cat===o.cat&&!x.done)||ORBS.find(x=>!x.done);
+  if(!nxt||curOrb) return;
+  if(window.stageFocusWorld) window.stageFocusWorld(nxt.wx,nxt.wz);
+  nxt.el.classList.remove('locating');void nxt.el.offsetWidth;nxt.el.classList.add('locating');
+  setTimeout(()=>nxt.el.classList.remove('locating'),1500);
 }
 function completeOrb(o,record){
   if(o._completing)return;o._completing=true;
@@ -2543,8 +2786,13 @@ function completeOrb(o,record){
     clearTimeout(tag._t);tag._t=setTimeout(()=>tag.classList.remove('show'),2200);}
   else tag.classList.remove('show');
   awardXP(o.skipped?3:(10+(o.customText?6:0)+(o._bonus||0)+combo),o.focusX,o.focusY);
+  if(!o.skipped){
+    awardBadge('first');
+    if(state.streak>=3) awardBadge('combo3');
+    if(o.customText||(o.ctx&&o.ctx.size)||o._degTouched) awardBadge('detail');
+  }
   emitAbsorption(o);$('#qPanel').classList.add('resolving');updateHUD(true);
-  setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();},560);
+  setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();focusNext(o);},560);
 }
 function openOrb(o){
   if(o===curOrb)return;
@@ -2564,7 +2812,7 @@ function openOrb(o){
     const pm=$('#pulseModule');
     field.appendChild(pm);inner.appendChild(field);pm.style.display='block';
     const psk=document.createElement('button'); psk.className='skipOrbBtn';
-    psk.textContent=L('跳过切诊 · 不纳入推理','Skip palpation · excluded from deduction');
+    psk.textContent=L('跳过切诊','Skip palpation');
     psk.onclick=e=>{e.stopPropagation();skipOrb(o);};
     field.appendChild(psk);
     $('#pulseIntro').style.display=''; $('#pulseGame').style.display='none'; $('#pulseReal').style.display='none';
@@ -2576,33 +2824,43 @@ function openOrb(o){
   }
   // 望 / 闻 / 问 统一流程：可多选并存的证词，每条独立程度条，外加情境交叉标签
   const isAsk=o.cat==='inquire';
-  const items=isAsk?o.g.items:o.g.opts, artList=isAsk?null:ART[o.g.key];
+  const items=isAsk?o.g.items:o.g.opts, artList=isAsk?inquireArt(items):ART[o.g.key];
   const qTitle=isAsk?(LANG==='en'?o.g.ge:o.g.g.split(' ')[0]):(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0]);
-  const prompt=focusQuestion(o,true),marks=new Map();inner.appendChild(prompt);
-  const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode');
-  prompt.querySelector('.degreeRow').innerHTML=`<span class="degreeLbl">${L('点选证词可多选并存 · 拖动每条的程度条标记轻重','TAP TO SELECT (MULTIPLE ALLOWED) · DRAG EACH DEGREE BAR')}</span>`;
+  const prompt=focusQuestion(o,true),marks=new Map();let normalPick=null;inner.appendChild(prompt);
+  const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode'),pick=prompt.querySelector('.focusPick');
+  prompt.querySelector('.degreeRow').innerHTML=`<span class="degreeLbl">${L('可多选 · 拖动程度','MULTI · DRAG DEGREE')}</span>`;
   const refresh=()=>{
-    count.textContent=L(`已选 ${marks.size} 条（可为 0）`,`SELECTED ${marks.size} · ZERO ALLOWED`);
-    archive.textContent=marks.size?L('封 存 这 组','ARCHIVE SET'):L(isAsk?'无异常 · 封存':'未见异常 · 封存',isAsk?'NONE · ARCHIVE':'NORMAL · ARCHIVE');
+    // 确认栏：已选项的图标缩略 + 极短状态 + 大按钮；有选择时按钮呼吸发光
+    pick.innerHTML=normalPick?artSVG(artList[items.indexOf(normalPick)]):[...marks.keys()].map(it=>artSVG(artList[items.indexOf(it)])).join('');
+    pick.classList.toggle('on',!!(normalPick||marks.size));
+    count.textContent=normalPick?L('正常 · 可改','NORMAL · EDITABLE'):marks.size?L(`已选 ${marks.size} · 可改`,`${marks.size} PICKED · EDITABLE`):L('未选 = 无异常','NONE = NORMAL');
+    archive.textContent=normalPick?L('确 认','CONFIRM'):marks.size?L('确 认','CONFIRM'):L('无 异 常','NORMAL');
+    archive.classList.toggle('ready',!!(normalPick||marks.size));
   };refresh();
   addAnswerNodes(inner,items,(item,node)=>{
     if(o._completing)return;
-    if(!hasWeights(item[1])){ // 「正常 / 不确定」：不与异常证词并存
-      if(marks.size){showSignal(L('已选异常证词 · 请先取消再选「正常/不确定」','Clear the selected signs before choosing normal / unsure'));return;}
-      node.classList.add('sel');
-      completeOrb(o,()=>addClue(L(cat.zh,cat.en),qTitle+' — '+optText(item),{}));
+    if(!hasWeights(item[1])){ // 「正常 / 不确定」先进入待确认状态，不再点击即归档
+      marks.clear(); normalPick=item;
+      inner.querySelectorAll('.answerNode').forEach(x=>x.classList.remove('sel'));
+      node.classList.add('sel'); refresh();
       return;
     }
+    normalPick=null;
     if(marks.has(item)){marks.delete(item);node.classList.remove('sel');}
     else{marks.set(item,+node.querySelector('input').value);node.classList.add('sel');}
     refresh();
   },artList);
+  const action=prompt.querySelector('.focusActions');
+  const confirmDock=document.createElement('div'); confirmDock.className='confirmDock';
+  if(action) confirmDock.appendChild(action);
   if(prompt._ctxRow) (innerWidth<700?inner:panel).appendChild(prompt._ctxRow);
-  inner.querySelectorAll('.answerNode').forEach((node,i)=>node.addEventListener('degree',e=>{if(marks.has(items[i]))marks.set(items[i],e.detail);}));
+  inner.appendChild(confirmDock);
+  inner.querySelectorAll('.answerNode').forEach((node,i)=>node.addEventListener('degree',e=>{o._degTouched=true;if(marks.has(items[i]))marks.set(items[i],e.detail);}));
   archive.onclick=e=>{e.stopPropagation();
     const ctx=marks.size?[...o.ctx]:[];
     o._bonus=marks.size*3+ctx.length*2;
     completeOrb(o,()=>{
+      if(normalPick){addClue(L(cat.zh,cat.en),qTitle+' — '+optText(normalPick),{});return;}
       if(!marks.size){addClue(L(cat.zh,cat.en),qTitle+L(isAsk?' · 未发现反复信号':' — 未见异常',' · no recurring signals'),{});return;}
       marks.forEach((d,item)=>addClue(L(cat.zh,cat.en),
         qTitle+(isAsk?' · ':' — ')+optText(item)+'（'+L(DEG5[d][0],DEG5[d][2])+'）',scaleWeights(item[1],DEG5[d][1])));
@@ -2632,6 +2890,7 @@ $('#btnDeduce').onclick=()=>{ closePanel(); startDeduce(); };
 /* 切诊光圈完成（由把脉模块末尾调用） */
 function markPulseDone(){
   const orb=ORBS.find(o=>o.cat==='pulse');
+  if(state.pulseRight>=4) awardBadge('pulseAce');
   if(orb&&!orb.done)completeOrb(orb,()=>{});
 }
 
@@ -2685,9 +2944,7 @@ function applyIntakeWeights(){
   if(parts.length) addClue(L('建档推演','Intake analysis'),L('生活档案指向：','Lifestyle points to: ')+parts.join('、'),{});
 }
 
-/* ---------- 阶段侧写奖励：初步建档 → 中段显影 → 收齐揭晓 ---------- */
-const MILESTONES=[.4,.75,1];   // 回收比例触发点：初步轮廓 / 画像渐显 / 呼之欲出
-let msShown=0;
+/* ---------- 阶段侧写奖励：建档后的首幅侧写；之后的更新由章节通关（checkChapters）驱动 ---------- */
 function topPatterns(n){
   return PATTERN_KEYS.map(k=>[k,state.weights[k]]).filter(a=>a[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,n);
 }
@@ -2707,58 +2964,304 @@ function openMilestone(kicker,title,bodyHTML,btnText,onBtn){
 function closeMilestone(){ $('#milestoneModal').classList.remove('show'); }
 $('#milestoneModal').addEventListener('click',e=>{ if(e.target.id==='milestoneModal') closeMilestone(); });
 
-/* 初步阶段：建档后的第一幅侧写 */
+/* 初步阶段：建档后的第一幅侧写 —— 一幅雷达 + 一句话 */
 function showIntakeProfile(){
   const i=state.intake, tops=topPatterns(2);
-  let body;
+  let line;
   if(tops.length){
-    body=L(`「${i.name}」的生活档案已归档。仅凭作息与习惯，<b>${PATTERNS[tops[0][0]].name}</b>的影子最先浮现${tops[1]?`，<b>${PATTERNS[tops[1][0]].name}</b>若隐若现`:''}——但轮廓尚模糊，随时可能被舞台上的证词改写。`,
-           `${i.name}'s lifestyle file is on record. From habits alone, <b>${pName(tops[0][0])}</b> surfaces first${tops[1]?`, with <b>${pName(tops[1][0])}</b> faintly behind`:''} — still a blur the testimony on stage may well rewrite.`);
-    body+=msPatternLine(tops[0][0]);
-  }else{
-    body=L(`「${i.name}」的生活档案已归档——作息习惯未见明显偏颇，是好底子。真正的证词，在舞台上。`,
-           `${i.name}'s lifestyle file shows no clear bias — a good baseline. The real testimony awaits on stage.`);
-  }
-  body+=`<div class="msHint">${L('▼ 侧写将随回收进度分阶段更新','▼ The profile updates in stages as clues return')}</div>`;
+    line=L(`仅凭作息与习惯，<b>${PATTERNS[tops[0][0]].name}</b>的影子最先浮现${tops[1]?`，${PATTERNS[tops[1][0]].name}若隐若现`:''}。`,
+           `From habits alone, <b>${pName(tops[0][0])}</b> surfaces first${tops[1]?`, ${pName(tops[1][0])} faintly behind`:''}.`);
+    line+=msPatternLine(tops[0][0]);
+  }else line=L('作息习惯未见明显偏颇，是好底子。真正的证词，在舞台上。','No clear bias in your habits — a good baseline. The real testimony awaits on stage.');
+  const body=stageBarsHTML(0)+
+    `<div class="msVisual"><div class="msEmblem">${GLYPH.file}</div><canvas class="msRadar" id="msRadar" width="150" height="150"></canvas></div>`+
+    `<div class="msLine">${line}</div>`+
+    `<div class="msBonus"><span>${L('档案','FILE')} · ${i.name}</span><span>${L('四章待通关','4 CHAPTERS AHEAD')}</span></div>`;
   openMilestone(L('PROFILE SYNC · 初步侧写','PROFILE SYNC · FIRST SKETCH'),
     L('档 案 开 启','F I L E · O P E N E D'), body,
     L('走 上 舞 台 · 开 始 收 证','T O · T H E · S T A G E'), null);
+  paintRadar(document.getElementById('msRadar'),liveDims(),150,true);
   addClue(L('侧写快照','Snapshot'),tops.length
     ?L(`初步侧写：${PATTERNS[tops[0][0]].name} 之象初现`,`First sketch: ${pName(tops[0][0])} emerges`)
     :L('初步侧写：未见明显偏颇','First sketch: no clear bias'),{});
 }
-/* 中间 / 最后阶段：回收里程碑 */
-function checkMilestone(){
-  if(!orbTotal) return;
-  const ratio=orbDone/orbTotal;
-  let due=-1;
-  while(msShown<MILESTONES.length && ratio>=MILESTONES[msShown]-1e-9){due=msShown;msShown++;}
-  if(due>=0) fireMilestone(due);
+</script>
+
+<script>
+/* ============================================================
+   v3 · 关卡化奖励层
+   图标库 GLYPH / 章节徽章 CHAPTERS / 成就 BADGES / 显影雷达
+   ============================================================ */
+const ico=inner=>`<svg class="glyph" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const GLYPH={
+  observe:ico('<path d="M4 20q16-14 32 0-16 14-32 0z"/><circle cx="20" cy="20" r="5.5"/><circle cx="20" cy="20" r="2" fill="currentColor"/>'),
+  listen:ico('<circle cx="12" cy="20" r="2.4" fill="currentColor"/><path d="M19 13a9 9 0 0 1 0 14M24.5 8.5a15 15 0 0 1 0 23M30 4a21 21 0 0 1 0 32"/>'),
+  inquire:ico('<path d="M6 8h28v18H20l-8 7v-7H6z"/><circle cx="14" cy="17" r="1.6" fill="currentColor"/><circle cx="20" cy="17" r="1.6" fill="currentColor"/><circle cx="26" cy="17" r="1.6" fill="currentColor"/>'),
+  pulse:ico('<path d="M3 22h8l3-9 5 18 4-14 3 5h11" stroke-width="1.9"/>'),
+  file:ico('<path d="M9 4h15l7 7v25H9z"/><path d="M24 4v7h7M14 20h12M14 26h12M14 32h8"/>'),
+  orb:ico('<path d="M20 6l14 14-14 14L6 20z"/><path d="M20 13l7 7-7 7-7-7z" fill="currentColor" opacity=".7"/><circle cx="20" cy="20" r="17" stroke-dasharray="3 4" opacity=".5"/>'),
+  badge:ico('<path d="M20 3l5 5h7v7l5 5-5 5v7h-7l-5 5-5-5H8v-7l-5-5 5-5V8h7z"/><path d="M14 20l4 4 8-9"/>'),
+  gift:ico('<rect x="6" y="14" width="28" height="20" rx="1.5"/><path d="M6 21h28M20 14v20"/><path d="M20 14c-6 0-10-2-9-6s7-2 9 6c2-8 8-10 9-6s-3 6-9 6z"/>'),
+  first:ico('<circle cx="20" cy="20" r="13"/><circle cx="20" cy="20" r="5"/><path d="M20 2v7M20 31v7M2 20h7M31 20h7"/>'),
+  combo3:ico('<path d="M22 3L9 23h10l-2 14 14-20H21z" fill="currentColor" fill-opacity=".25"/>'),
+  detail:ico('<circle cx="17" cy="17" r="10"/><path d="M25 25l10 10M12 17a5 5 0 0 1 5-5"/>'),
+  pulseAce:ico('<path d="M20 4l3.5 8 8.5.8-6.5 5.7 2 8.5L20 22.6 12.5 27l2-8.5L8 12.8l8.5-.8z" fill="currentColor" fill-opacity=".25"/><path d="M4 34h8l2-4 3 7 3-6 2 3h14"/>'),
+  flawless:ico('<path d="M8 15l6-8h12l6 8-12 18z"/><path d="M8 15h24M14 7l6 26 6-26"/>')
+};
+/* 问诊分组图标：按分组名首词匹配 */
+const GROUP_GLYPH=[
+  ['寒热',ico('<path d="M17 6a3 3 0 0 1 6 0v16a6 6 0 1 1-6 0z"/><circle cx="20" cy="27" r="2.6" fill="currentColor"/><path d="M27 10h6M27 15h4"/>')],
+  ['头面',ico('<circle cx="20" cy="15" r="9"/><path d="M10 34q10-7 20 0M16 14h2M22 14h2"/>')],
+  ['胸腹',ico('<path d="M20 34s-13-8-13-17a7 7 0 0 1 13-3 7 7 0 0 1 13 3c0 9-13 17-13 17z"/><path d="M11 20h5l2-4 3 8 2-4h6"/>')],
+  ['饮食',ico('<path d="M5 18h30a15 15 0 0 1-30 0z"/><path d="M13 12l2-5M20 11l1-5M27 12l-2-5"/>')],
+  ['二便',ico('<path d="M20 4q11 14 11 21a11 11 0 0 1-22 0q0-7 11-21z"/>')],
+  ['睡眠',ico('<path d="M26 5a14 14 0 1 0 9 24 12 12 0 0 1-9-24z"/><path d="M8 8h5l-5 5h5" stroke-width="1.3"/>')],
+  ['精力',ico('<rect x="5" y="12" width="26" height="16" rx="2"/><path d="M31 17h4v6h-4"/><path d="M9 16h6v8H9z" fill="currentColor"/><path d="M17 16h4v8h-4z" fill="currentColor" opacity=".5"/>')],
+  ['心神',ico('<path d="M20 10a10 10 0 1 1-10 10 7 7 0 1 1 7-7 4 4 0 1 1-4 4"/><path d="M20 30v6"/>')],
+  ['经期',ico('<rect x="6" y="9" width="28" height="25" rx="2"/><path d="M6 16h28M13 5v8M27 5v8"/><circle cx="20" cy="25" r="3" fill="currentColor"/>')]
+];
+function groupGlyph(name){const hit=GROUP_GLYPH.find(g=>String(name).indexOf(g[0])===0);return hit?hit[1]:GLYPH.inquire;}
+
+/* ---------- 问诊选项象形图：按关键词匹配，带小动画，让题意不靠文字 ---------- */
+const P=(cls,inner)=>`<svg class="optArt picto ${cls}" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const PICTO={
+  cold:P('shiver','<path d="M20 5v30M7 12l26 16M7 28l26-16" stroke="#8fc6ff"/><path d="M20 5l-3 4M20 5l3 4M20 35l-3-4M20 35l3-4" stroke="#8fc6ff"/>'),
+  heat:P('flicker','<path d="M20 35c-7 0-11-5-11-10 0-6 5-8 5-13 3 2 5 5 5 8 2-2 3-5 3-9 5 4 9 9 9 14 0 5-4 10-11 10z" fill="#d4706a" fill-opacity=".3" stroke="#d4706a"/>'),
+  palmHeat:P('rise','<path d="M13 22V12a2 2 0 0 1 4 0v8V9a2 2 0 0 1 4 0v11V11a2 2 0 0 1 4 0v10l3-4a2 2 0 0 1 3 2l-5 9a7 7 0 0 1-6 3h-2a7 7 0 0 1-7-7v-3"/><path class="ray" d="M8 8q2-2 0-4M30 8q2-2 0-4M19 6q2-2 0-4" stroke="#d4706a"/>'),
+  sweat:P('drip','<path d="M26 5a12 12 0 1 0 8 20 10 10 0 0 1-8-20z"/><path class="drop" d="M12 22q4 6 0 9t-4-4z" fill="#8fc6ff" stroke="#8fc6ff"/><path class="drop d2" d="M20 26q3 5 0 7t-3-3z" fill="#8fc6ff" stroke="#8fc6ff"/>'),
+  alt:P('swap','<path d="M20 4v32"/><path d="M6 12l8 8-8 8M13 20h-9" stroke="#8fc6ff"/><path d="M34 12l-8 8 8 8M27 20h9" stroke="#d4706a"/>'),
+  dizzy:P('spin','<path class="ring" d="M20 20m-12 0a12 12 0 1 1 24 0a8 8 0 1 1-16 0a4 4 0 1 1 8 0"/>'),
+  heavyHead:P('sink','<circle cx="20" cy="22" r="10"/><path class="lid" d="M9 15h22v6H9z" fill="currentColor" fill-opacity=".35"/><path d="M15 27q5 3 10 0"/>'),
+  temple:P('flicker','<circle cx="20" cy="20" r="11"/><path class="bolt" d="M32 8l-4 6h5l-5 7" stroke="#d4706a" stroke-width="2"/>'),
+  stab:P('flicker','<circle cx="20" cy="22" r="9"/><path d="M27 6l-7 12M20 18l4 1M20 18l-1 4" stroke="#d4706a" stroke-width="2"/>'),
+  ear:P('wave','<path d="M14 30V16a7 7 0 0 1 14 0c0 5-4 6-4 10a4 4 0 0 1-8 0"/><path class="ray" d="M30 14q4 6 0 12M34 11q6 9 0 18" stroke="#6ad4c8"/>'),
+  sigh:P('sink','<path d="M12 8h16v12a8 8 0 0 1-16 0z"/><path class="ray" d="M20 26v9M16 31l4 4 4-4" stroke="#6ad4c8"/>'),
+  ribs:P('flicker','<path d="M20 6v28M20 12q-8 0-10 4M20 12q8 0 10 4M20 19q-8 0-10 4M20 19q8 0 10 4M20 26q-6 0-8 3M20 26q6 0 8 3"/><circle class="dot" cx="9" cy="24" r="2.5" fill="#d4706a" stroke="none"/>'),
+  heartbeat:P('beat','<path d="M20 34s-13-8-13-17a7 7 0 0 1 13-3 7 7 0 0 1 13 3c0 9-13 17-13 17z" fill="#d4706a" fill-opacity=".2" stroke="#d4706a"/><path d="M9 20h5l2-5 3 9 2-6 2 2h8" stroke="#f6e7e5"/>'),
+  angry:P('shiver','<circle cx="20" cy="21" r="12"/><path d="M13 15l5 3M27 15l-5 3M15 28q5-4 10 0"/><path class="ray" d="M6 8l4 3M34 8l-4 3" stroke="#d4706a"/>'),
+  thoughts:P('spin','<path d="M20 9a10 10 0 1 1-10 10 7 7 0 1 1 7-7"/><circle class="ring" cx="24" cy="18" r="5" stroke-dasharray="4 3"/><path d="M20 30v5"/>'),
+  lowMood:P('drip','<path d="M12 18a7 7 0 0 1 13-3 5 5 0 0 1 3 10H12a4 4 0 0 1 0-7z"/><path class="drop" d="M15 29v5M21 29v5M27 29v5" stroke="#8fc6ff"/>'),
+  anxious:P('shiver','<circle cx="20" cy="21" r="12"/><circle cx="15.5" cy="18" r="1.5" fill="currentColor"/><circle cx="24.5" cy="18" r="1.5" fill="currentColor"/><path d="M14 27q3-3 6 0t6 0"/>'),
+  noAppetite:P('sink','<path d="M6 20h28a14 14 0 0 1-28 0z"/><path d="M14 10l12 8M26 10l-12 8" stroke="#d4706a"/>'),
+  bloat:P('breathe2','<ellipse cx="20" cy="24" rx="12" ry="10" fill="currentColor" fill-opacity=".15"/><path d="M14 8q6-3 12 0"/><path class="ray" d="M4 24h3M33 24h3M20 6v2" stroke="#d4af6a"/>'),
+  reflux:P('rise','<path d="M12 34V14a8 8 0 0 1 16 0v20"/><path class="ray" d="M20 26V14M16 18l4-4 4 4" stroke="#d4706a"/>'),
+  iceDrink:P('shiver','<path d="M11 8h18l-2 26H13z"/><path d="M14 16h13" opacity=".5"/><rect x="16" y="20" width="8" height="8" fill="#8fc6ff" fill-opacity=".5" stroke="#8fc6ff"/>'),
+  sleepyMeal:P('zz','<path d="M6 22h20a10 10 0 0 1-20 0z"/><path d="M13 22V14M19 22V12"/><text class="z" x="27" y="14" font-size="9" fill="#6ad4c8" stroke="none">z</text><text class="z z2" x="32" y="8" font-size="7" fill="#6ad4c8" stroke="none">z</text>'),
+  sticky:P('drip','<path d="M10 12h20v8H10z"/><path class="drop" d="M14 20v6M20 20v9M26 20v5" stroke="#d4af6a" stroke-width="3"/>'),
+  loose:P('drip','<path d="M10 10h20v6H10z"/><path class="drop" d="M14 18q2 5 0 8M20 18q3 6 0 10M26 18q2 5 0 8" stroke="#8fc6ff"/>'),
+  hardStool:P('shiver','<rect x="10" y="12" width="20" height="16" rx="2"/><path d="M14 18h12M14 22h8" opacity=".5"/><path d="M6 32h28" stroke="#d4706a" stroke-dasharray="3 3"/>'),
+  nightUrine:P('drip','<path d="M24 5a11 11 0 1 0 8 18 9 9 0 0 1-8-18z"/><path class="drop" d="M11 20q4 7 0 10t-4-5z" fill="#f0cf8e" stroke="#f0cf8e"/>'),
+  darkUrine:P('flicker','<path d="M20 8q9 12 9 18a9 9 0 0 1-18 0q0-6 9-18z" fill="#c9a32b" fill-opacity=".55" stroke="#d4af6a"/>'),
+  insomnia:P('blink','<path d="M5 30V20h30v10M5 26h30M9 20v-6h10v6"/><path d="M22 13q5-4 10 0-5 4-10 0z"/><circle class="pupil" cx="27" cy="13" r="1.6" fill="currentColor"/>'),
+  dreamy:P('rise','<path d="M5 30V22h30v8M5 27h30"/><circle class="ray" cx="14" cy="14" r="3" stroke="#6ad4c8"/><circle class="ray" cx="24" cy="10" r="4" stroke="#6ad4c8"/><circle cx="32" cy="14" r="2" stroke="#6ad4c8"/>'),
+  earlyWake:P('flicker','<circle cx="20" cy="21" r="12"/><path d="M20 21V13M20 21h-6" stroke="#d4af6a" stroke-width="2"/><path class="ray" d="M6 6l3 3M34 6l-3 3" stroke="#d4af6a"/>'),
+  sleepy:P('zz','<path d="M8 28h24"/><path d="M12 28V18h16v10"/><text class="z" x="26" y="14" font-size="10" fill="#6ad4c8" stroke="none">z</text><text class="z z2" x="32" y="8" font-size="7" fill="#6ad4c8" stroke="none">z</text>'),
+  battery:P('flicker','<rect x="5" y="13" width="26" height="14" rx="2"/><path d="M31 17h4v6h-4"/><rect class="bar" x="8" y="16" width="6" height="8" fill="#d4706a" stroke="none"/>'),
+  afternoon:P('sink','<path d="M4 30h32"/><circle class="sun" cx="20" cy="24" r="7" fill="#d4af6a" fill-opacity=".4" stroke="#d4af6a"/><text class="z" x="29" y="16" font-size="9" fill="#6ad4c8" stroke="none">z</text>'),
+  crash:P('flicker','<path d="M4 30h32"/><path class="bolt" d="M6 26l6-6 5 3 5-15 4 10 4-3 5 11" stroke="#d4706a"/>'),
+  heavyBody:P('sink','<circle cx="20" cy="9" r="4"/><path d="M14 34q0-12 6-16 6 4 6 16z"/><path class="lid" d="M10 14h20" stroke="#d4af6a" stroke-width="3"/>'),
+  backKnee:P('shiver','<path d="M16 6v14l-6 14M16 20l8 4 2 10"/><circle class="dot" cx="16" cy="20" r="3" fill="#d4706a" stroke="none"/><circle class="dot" cx="24" cy="24" r="2.5" fill="#d4706a" stroke="none"/>'),
+  stiffNeck:P('shiver','<circle cx="20" cy="9" r="5"/><path d="M20 14v8M8 30q12-10 24 0"/><path class="bolt" d="M28 10l3-3M30 14l4-1" stroke="#d4706a"/>'),
+  noInterest:P('sink','<path d="M20 34s-13-8-13-17a7 7 0 0 1 13-3 7 7 0 0 1 13 3c0 9-13 17-13 17z" stroke-dasharray="4 4" opacity=".6"/>'),
+  tense:P('shiver','<path d="M8 10h24M8 30h24"/><path d="M12 14q8 4 16 0M12 18q8 4 16 0M12 22q8 4 16 0M12 26q8 4 16 0" stroke="#d4706a"/>'),
+  fog:P('drip','<path d="M20 8a9 9 0 1 1-9 9 6 6 0 1 1 6-6"/><path class="ray" d="M6 26h28M10 31h20" stroke="#9a958a" stroke-dasharray="3 3"/>'),
+  perfect:P('spin','<circle class="ring" cx="20" cy="20" r="13"/><circle cx="20" cy="20" r="8"/><circle cx="20" cy="20" r="3" fill="#d4706a" stroke="none"/>'),
+  gutStress:P('beat','<ellipse cx="20" cy="24" rx="11" ry="9"/><path class="bolt" d="M22 6l-5 8h6l-5 8" stroke="#d4706a" stroke-width="2"/>'),
+  swings:P('wave','<path class="flowLine" d="M4 20q4-12 8 0t8 0 8 0 8 0" stroke="#d4706a"/>'),
+  sensitive:P('flicker','<path d="M4 20q16-12 32 0-16 12-32 0z"/><circle cx="20" cy="20" r="4"/><path class="ray" d="M20 4v4M8 8l3 3M32 8l-3 3" stroke="#d4af6a"/>'),
+  lonely:P('sink','<circle cx="20" cy="12" r="4"/><path d="M14 34q0-10 6-14 6 4 6 14z"/><circle cx="6" cy="16" r="3" opacity=".25"/><circle cx="34" cy="16" r="3" opacity=".25"/>'),
+  cramps:P('beat','<path d="M8 12q12 6 24 0v6q0 14-12 18Q8 32 8 18z"/><path class="bolt" d="M22 16l-5 7h6l-5 7" stroke="#d4706a" stroke-width="2"/>'),
+  scanty:P('drip','<path class="drop" d="M20 10q5 8 5 12a5 5 0 0 1-10 0q0-4 5-12z" fill="#e0b1a8" fill-opacity=".5" stroke="#e0b1a8"/>'),
+  breast:P('breathe2','<circle cx="13" cy="22" r="7"/><circle cx="27" cy="22" r="7"/><path class="ray" d="M13 8v3M27 8v3" stroke="#d4706a"/>'),
+  irregular:P('spin','<rect x="6" y="9" width="28" height="25" rx="2"/><path d="M6 16h28M13 5v8M27 5v8"/><path class="ring" d="M15 26q5-6 10 0" stroke="#d4706a" stroke-dasharray="3 3"/>')
+};
+const INQ_MAP=[
+  [/怕冷|冰凉/,'cold'],[/怕热/,'heat'],[/手足心热|潮热/,'palmHeat'],[/盗汗/,'sweat'],[/忽冷忽热/,'alt'],
+  [/头晕/,'dizzy'],[/头重/,'heavyHead'],[/偏头痛|太阳穴/,'temple'],[/刺痛/,'stab'],[/耳鸣/,'ear'],
+  [/胸闷|叹气/,'sigh'],[/胁肋/,'ribs'],[/心悸|心慌/,'heartbeat'],[/易怒/,'angry'],[/思虑|停不下来/,'thoughts'],[/低落|兴趣/,'lowMood'],[/焦虑/,'anxious'],
+  [/食欲/,'noAppetite'],[/腹胀/,'bloat'],[/反酸|烧心/,'reflux'],[/生冷|冰饮/,'iceDrink'],[/饭后犯困/,'sleepyMeal'],
+  [/黏腻|粘马桶/,'sticky'],[/稀溏|不成形/,'loose'],[/便秘|干结/,'hardStool'],[/夜尿/,'nightUrine'],[/小便黄|黄赤/,'darkUrine'],
+  [/入睡困难/,'insomnia'],[/多梦|易醒/,'dreamy'],[/早醒/,'earlyWake'],[/嗜睡/,'sleepy'],
+  [/疲劳|懒得动/,'battery'],[/下午.*犯困/,'afternoon'],[/亢奋|透支/,'crash'],[/困重|四肢沉/,'heavyBody'],[/腰膝/,'backKnee'],[/肩颈/,'stiffNeck'],
+  [/难以放松|紧绷/,'tense'],[/涣散|脑雾/,'fog'],[/要求高/,'perfect'],[/胃肠反应/,'gutStress'],[/起伏|易哭/,'swings'],[/声光|敏感/,'sensitive'],[/孤独|支持/,'lonely'],
+  [/痛经|血块/,'cramps'],[/经量少/,'scanty'],[/乳房/,'breast'],[/周期紊乱/,'irregular']
+];
+function inquireArt(items){
+  return items.map(it=>{const hit=INQ_MAP.find(m=>m[0].test(it[0]));return hit?{t:'picto',svg:PICTO[hit[1]]}:UNK;});
 }
-function fireMilestone(idx){
-  const tops=topPatterns(2), last=idx===MILESTONES.length-1;
-  const TITLES=[L('初 步 轮 廓','F I R S T · S K E T C H'),L('画 像 渐 显','T A K I N G · S H A P E'),L('呼 之 欲 出','A L M O S T · T H E R E')];
-  let body;
+document.querySelectorAll('[data-glyph]').forEach(e=>e.innerHTML=GLYPH[e.dataset.glyph]||'');
+document.querySelectorAll('[data-emblem]').forEach(e=>e.innerHTML=GLYPH[e.dataset.emblem]||'');
+
+/* ---------- 章节（关卡）：望 → 闻 → 问 → 切，顺序自由，收齐一章即通关 ---------- */
+const CHAPTERS=['observe','listen','inquire','pulse'];
+function chapterItems(cat){return ORBS.filter(o=>o.cat===cat);}
+function renderChapters(){
+  const row=document.getElementById('chapterRow'); if(!row) return;
+  row.innerHTML='';
+  CHAPTERS.forEach(cat=>{
+    const items=chapterItems(cat); if(!items.length) return;
+    const d=document.createElement('div'); d.className='chChip cat-'+cat; d.dataset.cat=cat;
+    d.innerHTML=`<div class="chRing"><i>${GLYPH[cat]}</i></div><small></small>`;
+    d.title=L(CATS[cat].zh,CATS[cat].en);
+    d.onclick=e=>{e.stopPropagation();const nxt=items.find(o=>!o.done);
+      if(nxt){collapseDock();if(window.stageFocusWorld)window.stageFocusWorld(nxt.wx,nxt.wz);captureOrb(nxt);}
+      else showSignal(L(CATS[cat].zh+' · 本章已收齐',CATS[cat].en+' · chapter cleared'));};
+    row.appendChild(d);
+  });
+  syncChapters();
+}
+function syncChapters(){
+  document.querySelectorAll('.chChip').forEach(d=>{
+    const items=chapterItems(d.dataset.cat), done=items.filter(o=>o.done).length;
+    d.style.setProperty('--p',Math.round(done/Math.max(1,items.length)*100));
+    d.querySelector('small').textContent=done+'/'+items.length;
+    d.classList.toggle('clear',!!(state.cleared&&state.cleared[d.dataset.cat]));
+  });
+}
+/* 通关检查：由 afterAnswer 调用；每章只奏一次 */
+function checkChapters(){
+  if(!orbTotal) return;
+  state.cleared=state.cleared||{};
+  const due=CHAPTERS.find(cat=>!state.cleared[cat]&&chapterItems(cat).length&&chapterItems(cat).every(o=>o.done));
+  if(!due) return;
+  state.cleared[due]=true;
+  const clean=chapterItems(due).every(o=>!o.skipped);
+  fireChapterClear(due,clean);
+}
+function clearedCount(){return CHAPTERS.filter(c=>state.cleared&&state.cleared[c]&&chapterItems(c).length).length;}
+function fireChapterClear(cat,clean){
+  const col=CATS[cat].col, allDone=orbDone>=orbTotal;
+  awardXP(clean?25:10,innerWidth*.5,innerHeight*.42);
+  awardBadge(cat,clean?'':'silver');
+  const chip=document.querySelector('.chChip.cat-'+cat);
+  if(chip){chip.classList.remove('pop');void chip.offsetWidth;chip.classList.add('pop');}
+  syncChapters();
+  burst(innerWidth*.5,innerHeight*.45,col,34);
+  const fl=document.getElementById('clearFlash');
+  fl.style.setProperty('--catc',col);
+  fl.querySelector('.cfEmblem').innerHTML=GLYPH[cat];
+  fl.querySelector('.cfText').textContent=allDone?L('全 案 收 齐','ALL CHAPTERS CLEAR'):(L(CATS[cat].zh,CATS[cat].en)+' · '+L('本章通关','CHAPTER CLEAR'));
+  fl.classList.remove('show');void fl.offsetWidth;fl.classList.add('show');
+  window.__bloom=Math.max(window.__bloom||0,.6);
+  setTimeout(()=>{fl.classList.remove('show');openChapterModal(cat,clean,allDone);},900);
+}
+function stageBarsHTML(n){return `<div class="msStage">${CHAPTERS.map((c,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;}
+function openChapterModal(cat,clean,allDone){
+  const n=clearedCount(), tops=topPatterns(2);
+  const STAGE=[L('初 步 轮 廓','F I R S T · S K E T C H'),L('画 像 渐 显','T A K I N G · S H A P E'),L('呼 之 欲 出','A L M O S T · T H E R E'),L('水 落 石 出','C A S E · R E V E A L E D')];
+  let line;
   if(tops.length){
-    const main=L(PATTERNS[tops[0][0]].name,pName(tops[0][0]));
-    if(idx===0) body=L(`已回收 ${orbDone}/${orbTotal} 条线索。证词最先指向 <b>${main}</b> —— 轮廓尚模糊，随时可能改判。`,
-      `${orbDone}/${orbTotal} clues filed. Testimony first points to <b>${main}</b> — still a blur; the verdict may yet shift.`);
-    else if(idx===1) body=L(`已回收 ${orbDone}/${orbTotal} 条线索。<b>${main}</b> 之象渐稳${tops[1]?`，<b>${L(PATTERNS[tops[1][0]].name,pName(tops[1][0]))}</b> 作为辅线浮动`:''}——人物开始有了脾气。`,
-      `${orbDone}/${orbTotal} filed. <b>${main}</b> stabilizes${tops[1]?`, with <b>${L(PATTERNS[tops[1][0]].name,pName(tops[1][0]))}</b> as a secondary thread`:''} — the figure is gaining temperament.`);
-    else body=L(`${orbDone}/${orbTotal} 条线索全部归档。<b>${main}</b> 已呼之欲出——最后一层雾，由推理来拨开。`,
-      `All ${orbDone}/${orbTotal} clues filed. <b>${main}</b> is almost here — the last veil lifts in deduction.`);
-    body+=msPatternLine(tops[0][0]);
-  }else{
-    body=L(`已回收 ${orbDone}/${orbTotal} 条线索，但证词清淡——至今未见明显偏颇。若这不是大量跳过的结果，「平和质」正在浮出水面。`,
-      `${orbDone}/${orbTotal} clues filed, yet testimony stays mild — no clear bias so far. Unless heavily skipped, a balanced constitution is surfacing.`);
+    const main=`<b>${L(PATTERNS[tops[0][0]].name,pName(tops[0][0]))}</b>`;
+    const sub=tops[1]?L(`，${PATTERNS[tops[1][0]].name}为辅线`,`, ${pName(tops[1][0])} secondary`):'';
+    line=[L(`证词最先指向 ${main} —— 轮廓尚模糊，随时可能改判。`,`Testimony first points to ${main} — still a blur.`),
+          L(`${main} 之象渐稳${sub} —— 人物开始有了脾气。`,`${main} stabilises${sub} — the figure gains temperament.`),
+          L(`${main} 已呼之欲出${sub} —— 最后一层雾由推理拨开。`,`${main} is almost here${sub} — deduction lifts the last veil.`),
+          L(`${main} 水落石出 —— 现在，去看完整侧写。`,`${main} revealed — now read the full profile.`)][Math.min(3,n-1)];
+    line+=`<div class="msQuote">${LANG==='en'&&PATTERNS[tops[0][0]].en?PATTERNS[tops[0][0]].en.one:PATTERNS[tops[0][0]].one}</div>`;
+  }else line=L('证词清淡，至今未见明显偏颇 —— <b>平和质</b>正在浮出水面。','Testimony stays mild — a <b>balanced constitution</b> is surfacing.');
+  const body=stageBarsHTML(n)+
+    `<div class="msVisual"><div class="msEmblem ${clean?'':'silver'}" style="--catc:${CATS[cat].col}">${GLYPH[cat]}</div><canvas class="msRadar" id="msRadar" width="150" height="150"></canvas></div>`+
+    `<div class="msLine">${line}</div>`+
+    `<div class="msBonus"><span>+${clean?25:10} XP</span><span>${L('徽章','BADGE')} · ${L(CATS[cat].zh,CATS[cat].en)}${clean?'':L('（银）',' (silver)')}</span><span>${L('章节','CHAPTER')} ${n}/${CHAPTERS.length}</span></div>`;
+  openMilestone(`CHAPTER ${n}/${CHAPTERS.length} · `+L(CATS[cat].zh+'通关',CATS[cat].en+' CLEARED'),
+    STAGE[Math.min(3,n-1)], body,
+    allDone?L('揭 晓 全 案 · 开 始 推 理','R E V E A L · D E D U C E'):L('继 续 探 案','K E E P · G O I N G'),
+    allDone?()=>{closePanel();startDeduce();}:null);
+  paintRadar(document.getElementById('msRadar'),liveDims(),150,true);
+  addClue(L('侧写快照','Snapshot')+` · ${n}/${CHAPTERS.length}`,
+    tops.length?L(`${CATS[cat].zh}收齐 → 主线：${PATTERNS[tops[0][0]].name}（权重 ${state.weights[tops[0][0]]}）`,`${CATS[cat].en} cleared → lead: ${pName(tops[0][0])} (weight ${state.weights[tops[0][0]]})`)
+      :L(`${CATS[cat].zh}收齐 → 无明显主线`,`${CATS[cat].en} cleared → no clear lead`),{});
+}
+/* 粒子爆发：通关 / 徽章解锁时从中心向外散开 */
+function burst(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const m=document.createElement('i');m.className='dataMote';
+    const a=Math.random()*6.283,r=90+Math.random()*220;
+    m.style.setProperty('--mote-x',x+'px');m.style.setProperty('--mote-y',y+'px');
+    m.style.setProperty('--mote-tx',Math.cos(a)*r+'px');m.style.setProperty('--mote-ty',Math.sin(a)*r+'px');
+    m.style.setProperty('--mote-color',color);m.style.setProperty('--mote-delay',(Math.random()*.2)+'s');
+    m.style.width=m.style.height=(2+Math.random()*3)+'px';
+    document.body.appendChild(m);setTimeout(()=>m.remove(),1100);
   }
-  openMilestone(`PROFILE SYNC · ${idx+1}/${MILESTONES.length} · `+L('侧写更新','PROFILE UPDATE'),
-    TITLES[idx], body,
-    last?L('揭 晓 全 案 · 开 始 推 理','R E V E A L · D E D U C E'):L('继 续 探 案','K E E P · G O I N G'),
-    last?()=>{closePanel();startDeduce();}:null);
-  addClue(L('侧写快照','Snapshot')+L(` · 其${['一','二','三'][idx]}`,` ${idx+1}`),
-    tops.length?L(`当前主线：${PATTERNS[tops[0][0]].name}（权重 ${state.weights[tops[0][0]]}）`,`Current lead: ${pName(tops[0][0])} (weight ${state.weights[tops[0][0]]})`)
-      :L('当前无明显主线','No clear lead yet'),{});
+}
+
+/* ---------- 成就徽章 ---------- */
+const BADGES=[
+  {id:'first',zh:'初次锁定',en:'FIRST LOCK'},
+  {id:'observe',zh:'望诊全收',en:'LOOK CLEARED'},
+  {id:'listen',zh:'闻诊全收',en:'LISTEN CLEARED'},
+  {id:'inquire',zh:'问诊全收',en:'ASK CLEARED'},
+  {id:'pulse',zh:'切诊全收',en:'PULSE CLEARED'},
+  {id:'combo3',zh:'连击 ×3',en:'COMBO ×3'},
+  {id:'detail',zh:'细察入微',en:'FINE DETAIL'},
+  {id:'pulseAce',zh:'指下有神',en:'PULSE ACE'},
+  {id:'flawless',zh:'明察秋毫',en:'FLAWLESS'}
+];
+const badgeName=b=>L(b.zh,b.en);
+function renderBadges(){
+  const shelf=document.getElementById('badgeShelf'); if(!shelf) return;
+  shelf.innerHTML='';
+  BADGES.forEach(b=>{
+    const s=document.createElement('span'); s.className='bSlot'; s.dataset.id=b.id; s.dataset.tip=badgeName(b);
+    s.innerHTML=`<i>${GLYPH[b.id]}</i>`;
+    const got=state.badges&&state.badges[b.id];
+    if(got){s.classList.add('on');if(got==='silver')s.classList.add('silver');}
+    shelf.appendChild(s);
+  });
+}
+let _toastQ=[],_toastBusy=false;
+function awardBadge(id,tier){
+  state.badges=state.badges||{};
+  if(state.badges[id]) return;
+  state.badges[id]=tier||'gold';
+  const slot=document.querySelector(`.bSlot[data-id="${id}"]`);
+  if(slot){slot.classList.add('on');if(tier==='silver')slot.classList.add('silver');slot.classList.remove('pop');void slot.offsetWidth;slot.classList.add('pop');}
+  awardXP(15,innerWidth*.5,innerHeight*.38);
+  _toastQ.push(id); pumpToast();
+}
+function pumpToast(){
+  if(_toastBusy||!_toastQ.length) return;
+  _toastBusy=true;
+  const id=_toastQ.shift(), b=BADGES.find(x=>x.id===id), t=document.getElementById('badgeToast');
+  t.querySelector('i').innerHTML=GLYPH[id]; t.querySelector('b').textContent=badgeName(b);
+  t.querySelector('small').textContent=L('徽章解锁','BADGE UNLOCKED');
+  t.classList.add('show');
+  burst(innerWidth-70,140,'#f0cf8e',12);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>{_toastBusy=false;pumpToast();},350);},2100);
+}
+
+/* ---------- 显影雷达：六维由当前权重实时推算，随每条证词缓动生长 ---------- */
+function dimsFrom(s,i){
+  return [
+    clampD(92-(s.qi+s.xue)*5 + i.ex*2 + (i.sleep>=7?4:-8)),
+    clampD(92-(s.pi+s.tan)*5 + (i.diet==='light'?4:-6)),
+    clampD(92-(s.yu+s.huo)*5 -(i.stress-5)*3),
+    clampD(92-(s.huo+s.yin)*4 -(7-Math.min(i.sleep,7))*9),
+    clampD(92-(s.tan+s.re)*5 + (i.stim==='none'?4:-6)),
+    clampD(92-(s.yux+s.yu*0.5)*5 + i.ex*4 + (i.job==='sit'?-8:3))
+  ];
+}
+function liveDims(){ return state.intake&&state.intake.h?dimsFrom(state.weights,state.intake):[92,92,92,92,92,92]; }
+function paintRadar(cv,vals,S,mini){
+  if(!cv) return;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.round(S*dpr);cv.height=Math.round(S*dpr);cv.style.width=S+'px';cv.style.height=S+'px';
+  cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
+  drawRadar(cv,vals,S,mini);
+}
+let _liveVals=null,_liveAnim=null;
+function updateLiveRadar(){
+  const cv=document.getElementById('liveRadar'); if(!cv) return;
+  const target=liveDims();
+  if(!_liveVals){_liveVals=target.slice();paintRadar(cv,_liveVals,112,true);return;}
+  const from=_liveVals.slice(),t0=performance.now();
+  if(_liveAnim)cancelAnimationFrame(_liveAnim);
+  (function step(now){
+    const k=Math.min(1,(now-t0)/480),e=1-Math.pow(1-k,3);
+    _liveVals=from.map((v,i)=>v+(target[i]-v)*e);
+    paintRadar(cv,_liveVals,112,true);
+    if(k<1)_liveAnim=requestAnimationFrame(step);else _liveAnim=null;
+  })(t0);
 }
 </script>
 
@@ -2975,6 +3478,7 @@ function buildPulseQuiz(){
         og.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
         o.classList.add('sel');
         const right = label===keyOf(item.truth);
+        if(right) state.pulseRight=(state.pulseRight||0)+1;
         const whyMap = item.why[LANG==='en'?'en':'zh'];
         const tag = label.replace(/（.*?）|\(.*?\)/g,'').trim().slice(0,2);
         let whyTxt = whyMap[tag] || whyMap[label] || '';
@@ -3060,14 +3564,7 @@ function computeResults(){
   state.top = PATTERN_KEYS.slice().sort((a,b)=>state.scores[b]-state.scores[a]);
   // 六维
   const i=state.intake,s=state.scores;
-  state.dims=[
-    clampD(92-(s.qi+s.xue)*5 + i.ex*2 + (i.sleep>=7?4:-8)),
-    clampD(92-(s.pi+s.tan)*5 + (i.diet==='light'?4:-6)),
-    clampD(92-(s.yu+s.huo)*5 -(i.stress-5)*3),
-    clampD(92-(s.huo+s.yin)*4 -(7-Math.min(i.sleep,7))*9),
-    clampD(92-(s.tan+s.re)*5 + (i.stim==='none'?4:-6)),
-    clampD(92-(s.yux+s.yu*0.5)*5 + i.ex*4 + (i.job==='sit'?-8:3))
-  ];
+  state.dims=dimsFrom(s,i);
   state.psy=[
     clampD(18+(s.yu+s.huo)*6+(i.stress-5)*6),
     clampD(88-(s.qi+s.yang+s.xue)*5+i.ex*2),
@@ -3126,8 +3623,8 @@ function fitChart(cv){ // 按容器实际宽度设置像素尺寸，避免手机
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
   return w;
 }
-function drawRadar(cv, vals, S){
-  const ctx=cv.getContext('2d'), cx=S/2, cy=S/2, R=S*0.34;
+function drawRadar(cv, vals, S, mini){
+  const ctx=cv.getContext('2d'), cx=S/2, cy=S/2, R=S*(mini?0.42:0.34);
   ctx.clearRect(0,0,S,S);
   const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3; return [cx+Math.cos(a)*r, cy+Math.sin(a)*r];};
   for(let ring=1;ring<=4;ring++){
@@ -3138,6 +3635,7 @@ function drawRadar(cv, vals, S){
   for(let i=0;i<6;i++){
     const p=pt(i,R); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p[0],p[1]);
     ctx.strokeStyle='rgba(233,228,214,.1)'; ctx.stroke();
+    if(mini) continue;
     const lp=pt(i,R+S*0.082); ctx.fillStyle='rgba(233,228,214,.8)';
     ctx.font=(S<260?'11px':'13px')+' serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(LANG==='en'?DIMS_EN[i]:DIMS[i][0], lp[0], lp[1]);
@@ -3230,7 +3728,8 @@ $('#btnReport').onclick=()=>{
   <div class="rewardBanner"><div class="big">${L('案 件 告 破','C A S E   C L O S E D')}</div>
     <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div>
     <div class="rankRow"><div class="rankBadge"><span>${rk[0]}</span></div>
-      <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} ${filedN}/${orbTotal} · ${L('经验值','XP')} ${state.xp||0}<br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')}</div></div></div>
+      <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} ${filedN}/${orbTotal} · ${L('经验值','XP')} ${state.xp||0}<br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')} · ${L('徽章','Badges')} ${Object.keys(state.badges||{}).length}/${BADGES.length}</div></div>
+    <div class="badgeWall">${BADGES.map(b=>{const got=(state.badges||{})[b.id];return `<div class="bw ${got?'on':''} ${got==='silver'?'silver':''}"><i>${GLYPH[b.id]}</i><span>${badgeName(b)}</span></div>`;}).join('')}</div></div>
   <div class="rCard"><h3>${L('案件档案','Case File')} · ${state.caseNo}</h3>
     <div class="statGrid">
       <div class="stat"><div class="k">${L('代号','Alias')}</div><div class="v">${i.name}</div></div>
