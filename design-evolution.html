@@ -171,6 +171,9 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
 .dl button:hover{transform:translateY(-2px)}
 .dl button:active{transform:scale(.96)}
+.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:lubdub var(--beat) ease-in-out infinite}
+#recHint{width:100%;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;margin:2px 0 0;line-height:1.8}
+#recPrev{display:none;width:min(560px,100%);margin:6px auto 0;border:1px solid var(--line);border-radius:12px;background:#000}
 footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
 @media(max-width:720px){.cmp,.radarWrap{grid-template-columns:1fr}.timeline{grid-template-columns:1fr;gap:4px}.timeline::before,.timeline::after{display:none}.tl{padding-top:8px;text-align:left;padding-left:26px}.tl i{left:0;top:12px;margin:0}main{padding:40px 14px 60px}.chips{grid-template-columns:repeat(4,1fr)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
@@ -313,8 +316,16 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
 
   <h2>六 · 下载本说明<em>EXPORT</em></h2>
-  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图。</div>
-  <div class="dl"><button id="dlHtml">下 载 说 明 (HTML)</button><button class="ghost" id="dlPng">下 载 评 估 雷 达 (PNG)</button><button class="ghost" id="dlPrint">打 印 / 存 为 PDF</button></div>
+  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成 WebM 视频。</div>
+  <div class="dl">
+    <button id="dlRec">录 制 动 态 演 示 (WebM)</button>
+    <button class="ghost" id="dlVideo" style="display:none">下 载 演 示 录 像</button>
+    <button class="ghost" id="dlHtml">下 载 说 明 (HTML)</button>
+    <button class="ghost" id="dlPng">下 载 评 估 雷 达 (PNG)</button>
+    <button class="ghost" id="dlPrint">打 印 / 存 为 PDF</button>
+    <p id="recHint">录制采用浏览器标签页捕获：建议用电脑版 Chrome / Edge 打开本页；手机浏览器暂不支持页面捕获，可直接使用系统自带录屏。</p>
+    <video id="recPrev" controls playsinline muted loop></video>
+  </div>
   <footer>MAD MEDICINE · 医理探案 · 设计演进对比说明 · <span id="dateStamp"></span><br>本文档为设计过程说明，所有评分为设计自评；应用内容仅供健康学习参考，不构成医学诊断。</footer>
 </main>
 
@@ -473,6 +484,40 @@ document.getElementById('dlPng').onclick=()=>{
   ctx.fillStyle='rgba(212,175,106,.9)';ctx.font='24px monospace';ctx.textAlign='left';ctx.fillText('MAD MEDICINE · DESIGN ASSESSMENT · 生命感 × 游戏性 · 0-10 self-rated',60,1150);
   const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MAD-MEDICINE_评估雷达.png';a.click();};
 document.getElementById('dlPrint').onclick=()=>window.print();
+
+/* ---------- 动态演示录制（标签页捕获 → WebM） ---------- */
+(function(){
+  const recBtn=document.getElementById('dlRec'),dlVideo=document.getElementById('dlVideo'),
+        recPrev=document.getElementById('recPrev'),recHint=document.getElementById('recHint');
+  const HINT_DEFAULT=recHint.textContent;
+  let rec=null,chunks=[],stream=null,timer=null,t0=0,url=null;
+  recBtn.onclick=async()=>{
+    if(rec){rec.stop();return;}
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia||typeof MediaRecorder==='undefined'){
+      recHint.textContent='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页录制，或直接使用系统自带录屏。';return;}
+    recHint.textContent='在弹窗中选择「此标签页 / This Tab」，即开始录制整页动态演示……';
+    try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,preferCurrentTab:true});}
+    catch(e){recHint.textContent=HINT_DEFAULT;return;}
+    const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+    chunks=[];rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000}:undefined);
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+    rec.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());clearInterval(timer);rec=null;
+      const blob=new Blob(chunks,{type:'video/webm'});
+      if(url)URL.revokeObjectURL(url);
+      url=URL.createObjectURL(blob);
+      recPrev.src=url;recPrev.style.display='block';recPrev.play().catch(()=>{});
+      dlVideo.style.display='';
+      recBtn.classList.remove('rec');recBtn.textContent='录 制 动 态 演 示 (WebM)';
+      recHint.textContent='录制完成 · '+(blob.size/1048576).toFixed(1)+' MB · 下方可预览，点「下载演示录像」保存 WebM 文件。';};
+    stream.getVideoTracks()[0].onended=()=>{if(rec)rec.stop();};
+    rec.start(250);
+    t0=Date.now();recBtn.classList.add('rec');recBtn.textContent='● 停 止 并 保 存';
+    timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
+      recHint.textContent='录制中 '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' —— 可上下滚动，完整展示各组动态对照。';},500);};
+  dlVideo.onclick=()=>{if(!url)return;const a=document.createElement('a');a.href=url;
+    a.download='MAD-MEDICINE_设计演进动态演示.webm';a.click();};
+})();
 </script>
 </body>
 </html>
