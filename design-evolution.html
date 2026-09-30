@@ -316,9 +316,9 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
 
   <h2>六 · 下载本说明<em>EXPORT</em></h2>
-  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成 WebM 视频——手动录制自由滚动，自动巡页则由页面带你逐节走一遍。</div>
+  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成视频——优先 MP4（H.264，全平台可播），不支持的浏览器自动回退 WebM；手动录制自由滚动，自动巡页则由页面带你逐节走一遍、结束后自动下载。</div>
   <div class="dl">
-    <button id="dlRec">录 制 动 态 演 示 (WebM)</button>
+    <button id="dlRec">录 制 动 态 演 示</button>
     <button class="ghost" id="dlTour">自 动 巡 页 录 制</button>
     <button class="ghost" id="dlVideo" style="display:none">下 载 演 示 录 像</button>
     <button class="ghost" id="dlHtml">下 载 说 明 (HTML)</button>
@@ -486,7 +486,7 @@ document.getElementById('dlPng').onclick=()=>{
   const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MAD-MEDICINE_评估雷达.png';a.click();};
 document.getElementById('dlPrint').onclick=()=>window.print();
 
-/* ---------- 动态演示录制（标签页捕获 → WebM，手动 / 自动巡页两种模式） ---------- */
+/* ---------- 动态演示录制（标签页捕获 → MP4 优先 / WebM 回退，手动 / 自动巡页两种模式） ---------- */
 (function(){
   const recBtn=document.getElementById('dlRec'),tourBtn=document.getElementById('dlTour'),
         dlVideo=document.getElementById('dlVideo'),
@@ -495,7 +495,10 @@ document.getElementById('dlPrint').onclick=()=>window.print();
   const UNSUPPORTED='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页录制，或直接使用系统自带录屏。';
   let rec=null,chunks=[],stream=null,timer=null,t0=0,url=null;
   let touring=false,tourStep='';
+  let ext='webm';
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  function doDownload(){if(!url)return;const a=document.createElement('a');a.href=url;
+    a.download='MAD-MEDICINE_设计演进动态演示.'+ext;a.click();}
   function tickHint(){
     const s=Math.floor((Date.now()-t0)/1000),mm=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
     recHint.textContent=touring
@@ -507,19 +510,27 @@ document.getElementById('dlPrint').onclick=()=>window.print();
     recHint.textContent='在弹窗中选择「此标签页 / This Tab」，即开始录制整页动态演示……';
     try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,preferCurrentTab:true});}
     catch(e){recHint.textContent=HINT_DEFAULT;return false;}
-    const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+    /* 优先 H.264/MP4（全平台播放器兼容，避免 WebM 只解出首帧），不支持时回退 WebM */
+    const mime=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.42E01E','video/mp4',
+                'video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
+      .find(m=>MediaRecorder.isTypeSupported(m));
+    ext=mime&&mime.indexOf('mp4')>0?'mp4':'webm';
     chunks=[];rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000}:undefined);
     rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
     rec.onstop=()=>{
       stream.getTracks().forEach(t=>t.stop());clearInterval(timer);rec=null;
+      const wasTour=touring;
       touring=false;tourStep='';tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';
-      const blob=new Blob(chunks,{type:'video/webm'});
+      const blob=new Blob(chunks,{type:ext==='mp4'?'video/mp4':'video/webm'});
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);
       recPrev.src=url;recPrev.style.display='block';recPrev.play().catch(()=>{});
-      dlVideo.style.display='';
-      recBtn.classList.remove('rec');recBtn.textContent='录 制 动 态 演 示 (WebM)';
-      recHint.textContent='录制完成 · '+(blob.size/1048576).toFixed(1)+' MB · 下方可预览，点「下载演示录像」保存 WebM 文件。';};
+      dlVideo.style.display='';dlVideo.textContent='下 载 演 示 录 像 ('+ext.toUpperCase()+')';
+      recBtn.classList.remove('rec');recBtn.textContent='录 制 动 态 演 示';
+      recHint.textContent='录制完成 · '+(blob.size/1048576).toFixed(1)+' MB · '+(wasTour
+        ?'已自动开始下载（文件保存在浏览器默认下载目录）。'
+        :'下方可预览，点「下载演示录像」保存 '+ext.toUpperCase()+' 文件。');
+      if(wasTour)setTimeout(doDownload,400);};
     stream.getVideoTracks()[0].onended=()=>{if(rec)rec.stop();};
     rec.start(250);
     t0=Date.now();recBtn.classList.add('rec');recBtn.textContent='● 停 止 并 保 存';
@@ -545,8 +556,7 @@ document.getElementById('dlPrint').onclick=()=>window.print();
     if(touring){tourStep='片尾';tickHint();
       window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'});await wait(1800);}
     if(rec)rec.stop();};
-  dlVideo.onclick=()=>{if(!url)return;const a=document.createElement('a');a.href=url;
-    a.download='MAD-MEDICINE_设计演进动态演示.webm';a.click();};
+  dlVideo.onclick=doDownload;
 })();
 </script>
 </body>
