@@ -175,7 +175,64 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 #recHint{width:100%;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;margin:2px 0 0;line-height:1.8}
 #recPrev{display:none;width:min(560px,100%);margin:6px auto 0;border:1px solid var(--line);border-radius:12px;background:#000}
 footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
-@media(max-width:720px){.cmp,.radarWrap{grid-template-columns:1fr}.timeline{grid-template-columns:1fr;gap:4px}.timeline::before,.timeline::after{display:none}.tl{padding-top:8px;text-align:left;padding-left:26px}.tl i{left:0;top:12px;margin:0}main{padding:40px 14px 60px}.chips{grid-template-columns:repeat(4,1fr)}}
+.tblScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:720px){
+  main{padding:36px 12px 56px}
+  body{line-height:1.7;overflow-x:clip}
+  .kicker{letter-spacing:.3em;font-size:9px}
+  h1{letter-spacing:.1em}
+  h1 small{letter-spacing:.26em;font-size:10px;margin-top:6px}
+  .hero{gap:10px;margin-top:22px}
+  .lede{font-size:13px}
+  .bpmRow{flex-wrap:wrap;justify-content:center;gap:8px 10px}
+  .bpmRow input{flex:1 1 150px;min-width:130px;width:auto}
+  .bpmRow b{min-width:54px;font-size:17px}
+  h2{font-size:19px;letter-spacing:.2em;margin:48px 0 6px}
+  .sub{font-size:12.5px;margin-bottom:16px}
+  .card{padding:15px 13px;border-radius:14px}
+  .cmp,.radarWrap{grid-template-columns:1fr;gap:12px}
+  .pane{padding:12px 11px 10px;min-height:0}
+  .pane .note{font-size:11px}
+  .gain{gap:7px}
+  .gain span{font-size:10.5px;padding:4px 9px}
+  /* 时间线：竖排左对齐 */
+  .timeline{grid-template-columns:1fr;gap:4px}
+  .timeline::before,.timeline::after{display:none}
+  .tl{padding:8px 0 8px 26px;text-align:left}
+  .tl i{left:0;top:12px;margin:0}
+  /* Demo B：章节进度环收紧 */
+  .chips{grid-template-columns:repeat(4,1fr);gap:5px}
+  .chip .ring{width:26px;height:26px}
+  .chip .ring svg{width:13px;height:13px}
+  .chip small{font-size:8px}
+  .gRow b{font-size:17px}
+  .toast{right:10px;bottom:64px}
+  /* Demo D：四枚图标卡收紧 */
+  .icoRow{gap:6px}
+  .ico{padding:10px 4px 8px;gap:5px}
+  .ico svg{width:26px;height:26px}
+  .ico b{font-size:11px;letter-spacing:.18em}
+  .ico small{font-size:8px}
+  /* Demo E：心跳同步演示允许换行 */
+  .organs,.still{flex-wrap:wrap;gap:18px 26px;height:auto;padding:16px 4px;justify-content:center}
+  .rank{width:40px;height:40px;font-size:20px}
+  .miniVital{width:96px}
+  /* Demo F：按钮内边距收紧 */
+  .btnOld,.btnNew{padding:11px 24px;font-size:12px}
+  /* 评估表格：窄屏横向滑动 */
+  .scoreTbl{min-width:540px;font-size:11px}
+  .scoreTbl th,.scoreTbl td{padding:6px 7px}
+  .scoreTbl td i{width:calc(var(--v)*4.5px)}
+  /* 指标 / 原则 / 下载 */
+  .stats{grid-template-columns:repeat(2,1fr);gap:9px}
+  .stat{padding:10px 11px}
+  .stat .v{font-size:19px}
+  .rules{grid-template-columns:1fr}
+  .rule{font-size:12px}
+  .dl{flex-direction:column;align-items:stretch;gap:11px}
+  .dl button{width:100%;padding:14px 12px;font-size:13px;letter-spacing:.2em}
+  footer{font-size:10.5px;padding:0 6px}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -292,7 +349,7 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   <div class="sub">六个维度上对五个版本的设计自评（0–10）。评分依据为各版本在代码中可验证的机制数量与反馈回路长度，非用户量表数据。点击图例可隐藏 / 显示某一版本。</div>
   <div class="card">
     <div class="radarWrap"><canvas id="verRadar" width="440" height="440"></canvas><div class="legend" id="legend"></div></div>
-    <table class="scoreTbl" id="scoreTbl"></table>
+    <div class="tblScroll"><table class="scoreTbl" id="scoreTbl"></table></div>
   </div>
 
   <h2>四 · 当前系统规模<em>METRICS · v4</em></h2>
