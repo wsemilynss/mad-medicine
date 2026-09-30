@@ -316,9 +316,10 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
 
   <h2>六 · 下载本说明<em>EXPORT</em></h2>
-  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成 WebM 视频。</div>
+  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成 WebM 视频——手动录制自由滚动，自动巡页则由页面带你逐节走一遍。</div>
   <div class="dl">
     <button id="dlRec">录 制 动 态 演 示 (WebM)</button>
+    <button class="ghost" id="dlTour">自 动 巡 页 录 制</button>
     <button class="ghost" id="dlVideo" style="display:none">下 载 演 示 录 像</button>
     <button class="ghost" id="dlHtml">下 载 说 明 (HTML)</button>
     <button class="ghost" id="dlPng">下 载 评 估 雷 达 (PNG)</button>
@@ -485,24 +486,33 @@ document.getElementById('dlPng').onclick=()=>{
   const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MAD-MEDICINE_评估雷达.png';a.click();};
 document.getElementById('dlPrint').onclick=()=>window.print();
 
-/* ---------- 动态演示录制（标签页捕获 → WebM） ---------- */
+/* ---------- 动态演示录制（标签页捕获 → WebM，手动 / 自动巡页两种模式） ---------- */
 (function(){
-  const recBtn=document.getElementById('dlRec'),dlVideo=document.getElementById('dlVideo'),
+  const recBtn=document.getElementById('dlRec'),tourBtn=document.getElementById('dlTour'),
+        dlVideo=document.getElementById('dlVideo'),
         recPrev=document.getElementById('recPrev'),recHint=document.getElementById('recHint');
   const HINT_DEFAULT=recHint.textContent;
+  const UNSUPPORTED='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页录制，或直接使用系统自带录屏。';
   let rec=null,chunks=[],stream=null,timer=null,t0=0,url=null;
-  recBtn.onclick=async()=>{
-    if(rec){rec.stop();return;}
+  let touring=false,tourStep='';
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  function tickHint(){
+    const s=Math.floor((Date.now()-t0)/1000),mm=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+    recHint.textContent=touring
+      ?('自动巡页录制中 '+mm+' · '+tourStep+' —— 无需操作，再次点击「自动巡页」可中途取消。')
+      :('录制中 '+mm+' —— 可上下滚动，完整展示各组动态对照。');}
+  async function startRec(){
     if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia||typeof MediaRecorder==='undefined'){
-      recHint.textContent='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页录制，或直接使用系统自带录屏。';return;}
+      recHint.textContent=UNSUPPORTED;return false;}
     recHint.textContent='在弹窗中选择「此标签页 / This Tab」，即开始录制整页动态演示……';
     try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,preferCurrentTab:true});}
-    catch(e){recHint.textContent=HINT_DEFAULT;return;}
+    catch(e){recHint.textContent=HINT_DEFAULT;return false;}
     const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
     chunks=[];rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000}:undefined);
     rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
     rec.onstop=()=>{
       stream.getTracks().forEach(t=>t.stop());clearInterval(timer);rec=null;
+      touring=false;tourStep='';tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';
       const blob=new Blob(chunks,{type:'video/webm'});
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);
@@ -513,8 +523,28 @@ document.getElementById('dlPrint').onclick=()=>window.print();
     stream.getVideoTracks()[0].onended=()=>{if(rec)rec.stop();};
     rec.start(250);
     t0=Date.now();recBtn.classList.add('rec');recBtn.textContent='● 停 止 并 保 存';
-    timer=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);
-      recHint.textContent='录制中 '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' —— 可上下滚动，完整展示各组动态对照。';},500);};
+    timer=setInterval(tickHint,500);
+    return true;}
+  recBtn.onclick=()=>{if(rec){rec.stop();return;}startRec();};
+  /* 自动巡页：从页首出发，逐节停留展示，到页尾自动停止 */
+  tourBtn.onclick=async()=>{
+    if(touring){touring=false;if(rec)rec.stop();return;}
+    touring=true;tourStep='准备中';
+    tourBtn.classList.add('rec');tourBtn.textContent='■ 取 消 巡 页';
+    if(!rec){if(!await startRec()){touring=false;tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';return;}}
+    tickHint();
+    await wait(800);
+    window.scrollTo({top:0,behavior:'auto'});await wait(1200);
+    const stops=[...document.querySelectorAll('h2,.card,.stats,.rules,.dl')];
+    for(let i=0;i<stops.length;i++){
+      if(!touring)return;
+      tourStep=(i+1)+' / '+stops.length+' '+(stops[i].textContent.trim().split(/\s{2,}|\n/)[0]||'').slice(0,14);
+      tickHint();
+      stops[i].scrollIntoView({behavior:'smooth',block:'start'});
+      await wait(stops[i].matches('h2')?1500:stops[i].matches('.stats,.rules,.dl')?2600:3600);}
+    if(touring){tourStep='片尾';tickHint();
+      window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'});await wait(1800);}
+    if(rec)rec.stop();};
   dlVideo.onclick=()=>{if(!url)return;const a=document.createElement('a');a.href=url;
     a.download='MAD-MEDICINE_设计演进动态演示.webm';a.click();};
 })();
