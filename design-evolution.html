@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAD MEDICINE · 设计演进对比说明 —— 生命感与游戏性的五次跃迁</title>
+<style>
+:root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--line:rgba(212,175,106,.28);
+  --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  --bpm:72;--beat:calc(60s / var(--bpm))}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased}
+main{max-width:1040px;margin:0 auto;padding:60px 22px 80px}
+h1{font-family:var(--serif);font-size:clamp(28px,4.6vw,44px);letter-spacing:.18em;font-weight:600;text-align:center;text-shadow:0 0 40px rgba(212,175,106,.25)}
+h1 small{display:block;font:300 12px/2 var(--sans);letter-spacing:.6em;color:var(--gold);margin-top:8px}
+h2{font-family:var(--serif);font-size:22px;letter-spacing:.26em;color:var(--gold);margin:64px 0 6px;display:flex;align-items:center;gap:12px}
+h2::before{content:"";width:8px;height:8px;background:var(--teal);transform:rotate(45deg);box-shadow:0 0 10px var(--teal)}
+h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:normal;margin-left:auto}
+.sub{color:var(--dim);font-size:13px;letter-spacing:.04em;margin-bottom:20px}
+.kicker{text-align:center;font:10px/2 monospace;letter-spacing:.5em;color:var(--teal);margin-bottom:8px}
+.lede{max-width:720px;margin:14px auto 0;text-align:center;color:var(--dim);font-size:14px}
+.card{background:rgba(14,20,34,.82);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(6px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+/* 心跳节拍 */
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes lubdubGlow{0%,100%{opacity:.22}10%{opacity:.85}20%{opacity:.3}32%{opacity:.6}46%{opacity:.22}}
+@keyframes ringOut{from{transform:scale(1);opacity:.55}to{transform:scale(1.5);opacity:0}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.beat{animation:lubdub var(--beat) ease-in-out infinite}
+/* ECG 生命线 */
+.vital{display:block;width:100%;height:100%;overflow:visible}
+.vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.vital .vTrack{opacity:.14}
+.vital .vRun{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
+.heroVital{width:min(420px,80vw);height:44px;color:var(--teal)}
+.bpmRow{display:flex;align-items:center;gap:14px;font:11px/1 monospace;letter-spacing:.2em;color:var(--dim)}
+.bpmRow b{font-size:22px;color:var(--goldb);letter-spacing:.04em;min-width:64px;text-align:right}
+.bpmRow input{width:220px;accent-color:var(--gold)}
+.heart{width:22px;height:22px;color:var(--cin);filter:drop-shadow(0 0 8px var(--cin))}
+/* 时间线 */
+.timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px}
+.timeline::before{content:"";position:absolute;left:8%;right:8%;top:22px;height:1px;background:rgba(233,228,214,.14)}
+.timeline::after{content:"";position:absolute;left:8%;top:22px;height:1px;width:0;background:linear-gradient(90deg,var(--cin),var(--gold),var(--teal));box-shadow:0 0 10px var(--gold);animation:tlFill 2.6s cubic-bezier(.2,.8,.2,1) .4s forwards}
+@keyframes tlFill{to{width:84%}}
+.tl{position:relative;text-align:center;padding-top:44px;opacity:0;animation:fadeUp .7s ease forwards}
+.tl:nth-child(1){animation-delay:.3s}.tl:nth-child(2){animation-delay:.8s}.tl:nth-child(3){animation-delay:1.3s}.tl:nth-child(4){animation-delay:1.8s}.tl:nth-child(5){animation-delay:2.3s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tl i{position:absolute;left:50%;top:14px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg);border:1px solid var(--gold);background:#0a0f1c;z-index:1}
+.tl:last-child i{background:var(--gold);box-shadow:0 0 16px var(--gold);animation:lubdub var(--beat) ease-in-out infinite}
+.tl b{display:block;font-family:var(--serif);letter-spacing:.2em;font-size:15px;color:var(--goldb)}
+.tl small{display:block;font:9.5px/1.6 monospace;letter-spacing:.12em;color:var(--teal)}
+.tl span{display:block;font-size:11.5px;color:var(--dim);line-height:1.7;margin-top:6px}
+/* 对照实验 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.pane{position:relative;border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px 16px 14px;background:rgba(5,8,15,.55);min-height:230px;display:flex;flex-direction:column;overflow:hidden}
+.pane.after{border-color:rgba(106,212,200,.35);box-shadow:inset 0 0 40px rgba(106,212,200,.05)}
+.pane .tag{font:9px/1 monospace;letter-spacing:.26em;color:var(--dim);margin-bottom:10px;display:flex;justify-content:space-between}
+.pane.after .tag{color:var(--teal)}
+.pane .tag i{font-style:normal;color:var(--gold)}
+.pane .note{margin-top:auto;padding-top:10px;font-size:11.5px;color:var(--dim);line-height:1.7;border-top:1px dashed rgba(233,228,214,.12)}
+.gain{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.gain span{font-size:11px;letter-spacing:.06em;padding:5px 11px;border-radius:999px;border:1px solid rgba(106,212,200,.35);color:var(--teal)}
+.gain span.g{border-color:var(--line);color:var(--gold)}
+/* Demo A 问卷 vs 舞台 */
+.form{display:flex;flex-direction:column;gap:8px}
+.form .q{font-size:12px;color:var(--ink);letter-spacing:.04em}
+.form .row{display:flex;gap:6px;flex-wrap:wrap}
+.form .row span{font-size:10.5px;padding:5px 9px;border:1px solid rgba(233,228,214,.18);color:var(--dim)}
+.form .row span.on{border-color:var(--gold);color:var(--goldb)}
+.form .next{align-self:flex-end;font-size:10px;letter-spacing:.2em;padding:6px 14px;border:1px solid var(--line);color:var(--gold);margin-top:4px}
+canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:#070a12}
+/* Demo B 文本反馈 vs 仪表 */
+.oldHud{font-family:var(--serif);font-size:13px;letter-spacing:.1em;color:var(--ink)}
+.oldHud .bar{height:2px;background:rgba(233,228,214,.12);margin:10px 0}
+.oldHud .bar i{display:block;width:17%;height:100%;background:var(--gold)}
+.oldHud .lst{font-size:11px;color:var(--dim);line-height:2}
+.hud{display:flex;flex-direction:column;gap:10px}
+.gRow{display:flex;align-items:center;gap:10px}
+.gauge{width:40px;height:40px;transform:rotate(-90deg);flex:0 0 auto}
+.gauge circle{fill:none;stroke-width:3}
+.gauge .t{stroke:rgba(233,228,214,.1)}
+.gauge .f{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:94.2;stroke-dashoffset:94.2;transition:stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px var(--gold))}
+.gRow b{font:20px/1 monospace;color:var(--goldb)}
+.gRow small{font:10px monospace;color:var(--dim)}
+.gRow .pct{margin-left:auto;font:9px monospace;letter-spacing:.14em;color:var(--teal)}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.chip{--c:var(--gold);--p:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:1px solid rgba(233,228,214,.1);border-radius:8px;color:var(--dim);transition:.3s}
+.chip .ring{position:relative;width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(233,228,214,.1) 0);display:flex;align-items:center;justify-content:center;transition:background .4s}
+.chip .ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:#0a0f1c}
+.chip .ring svg{position:relative;width:15px;height:15px;color:var(--c);opacity:.75}
+.chip small{font:8.5px/1 monospace}
+.chip.clear{color:var(--c);border-color:var(--c);box-shadow:0 0 12px color-mix(in srgb,var(--c) 35%,transparent)}
+.chip.clear .ring{animation:lubdub var(--beat) ease-in-out infinite}
+.xp{display:flex;align-items:center;gap:8px;font:9px monospace;letter-spacing:.14em;color:var(--gold)}
+.xp i{flex:1;height:3px;background:rgba(233,228,214,.12);overflow:hidden;display:block}
+.xp i b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--goldb));box-shadow:0 0 8px var(--gold);transition:width .45s cubic-bezier(.2,.8,.3,1)}
+.toast{position:absolute;right:14px;bottom:78px;display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(7,10,18,.95);border:1px solid var(--gold);border-left-width:3px;transform:translateX(120%);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s;pointer-events:none;z-index:2}
+.toast.show{transform:none;opacity:1}
+.toast svg{width:22px;height:22px;color:var(--goldb);filter:drop-shadow(0 0 6px var(--gold))}
+.toast small{display:block;font:8px/1.3 monospace;letter-spacing:.2em;color:var(--teal)}
+.toast b{display:block;font-family:var(--serif);font-size:12px;letter-spacing:.18em;color:var(--goldb)}
+.xpFloat{position:absolute;font:12px monospace;color:var(--goldb);text-shadow:0 0 12px var(--gold);animation:xpRise 1s cubic-bezier(.2,.7,.3,1) forwards;pointer-events:none}
+@keyframes xpRise{to{transform:translateY(-40px);opacity:0}}
+/* Demo D 文字 vs 图标 */
+.txtList{display:flex;flex-direction:column;gap:7px}
+.txtList div{font-size:12px;color:var(--ink)}
+.txtList div span{font-family:var(--serif);color:var(--teal);letter-spacing:.2em;font-size:11px;margin-right:8px}
+.icoRow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ico{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px 10px;border:1px solid rgba(233,228,214,.12);border-radius:12px;background:rgba(7,10,18,.55);clip-path:polygon(0 0,100% 0,100% 84%,88% 100%,0 100%)}
+.ico svg{width:34px;height:34px;color:var(--gold);filter:drop-shadow(0 0 10px rgba(212,175,106,.45))}
+.ico svg *{animation:breathe 3s ease-in-out infinite;transform-origin:20px 20px}
+.ico:nth-child(2) svg *{animation-delay:.4s}.ico:nth-child(3) svg *{animation-delay:.8s}.ico:nth-child(4) svg *{animation-delay:1.2s}
+.ico b{font-family:var(--serif);letter-spacing:.3em;font-size:12px}
+.ico small{font:9px monospace;color:var(--dim)}
+/* Demo E 同一颗心脏 */
+.organs{display:flex;align-items:center;justify-content:space-around;height:150px}
+.orb{position:relative;width:20px;height:20px;color:var(--gold)}
+.orb i{position:absolute;inset:3px;transform:rotate(45deg);border:1px solid currentColor;background:rgba(5,8,15,.8);box-shadow:0 0 16px currentColor}
+.orb::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,currentColor,transparent 70%);animation:lubdubGlow var(--beat) ease-in-out infinite}
+.orb.teal{color:var(--teal)}.orb.cin{color:var(--cin)}
+.rank{position:relative;width:48px;height:48px;border:1px solid var(--gold);transform:rotate(45deg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;color:var(--goldb)}
+.rank span{transform:rotate(-45deg)}
+.rank::after{content:"";position:absolute;inset:-6px;border:1px solid var(--gold);animation:ringOut var(--beat) ease-out infinite}
+.miniVital{width:120px;height:30px;color:var(--teal)}
+.still{display:flex;align-items:center;justify-content:space-around;height:150px;opacity:.75}
+.still .orb::before{display:none}
+.still .rank::after{display:none}
+/* Demo F 触感 */
+.btnOld{font-family:var(--serif);letter-spacing:.3em;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));padding:13px 34px;border-radius:2px;display:inline-block}
+.btnNew{font-family:var(--serif);letter-spacing:.3em;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));padding:13px 34px;border-radius:999px;display:inline-block;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;box-shadow:0 8px 26px rgba(212,175,106,.28);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btnNew:active,.btnNew.press{transform:scale(.95);filter:brightness(.92)}
+.btnNew:hover{transform:translateY(-2px)}
+.optOld{font-size:12px;padding:8px 14px;border:1px solid rgba(233,228,214,.2);color:var(--ink);display:inline-block}
+.optNew{font-size:12px;padding:8px 14px;border:1px solid rgba(233,228,214,.2);color:var(--ink);display:inline-flex;gap:8px;align-items:center;border-radius:12px;transition:transform .2s,border-color .2s;cursor:pointer}
+.optNew:hover{border-color:var(--gold);color:var(--goldb)}
+.optNew:active{transform:scale(.96)}
+.optNew svg{width:22px;height:22px}
+.demoF{display:flex;flex-direction:column;gap:14px;align-items:flex-start;justify-content:center;flex:1}
+/* 雷达 */
+.radarWrap{display:grid;grid-template-columns:minmax(260px,1fr) minmax(240px,.9fr);gap:22px;align-items:center;margin-top:16px}
+#verRadar{display:block;width:100%;max-width:440px;margin:0 auto}
+.legend{display:flex;flex-direction:column;gap:8px}
+.legend button{display:flex;align-items:center;gap:10px;background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.12);border-radius:10px;padding:8px 12px;color:var(--ink);cursor:pointer;text-align:left;font-family:var(--sans);transition:.2s}
+.legend button i{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:0 0 auto}
+.legend button b{font-family:var(--serif);letter-spacing:.14em;font-size:13px;color:var(--c)}
+.legend button small{font-size:10.5px;color:var(--dim);margin-left:auto;font-family:monospace}
+.legend button.off{opacity:.35}
+.scoreTbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:18px}
+.scoreTbl th,.scoreTbl td{padding:8px 10px;border-bottom:1px solid rgba(233,228,214,.1);text-align:center}
+.scoreTbl th{font-family:var(--serif);letter-spacing:.12em;color:var(--gold);font-weight:600}
+.scoreTbl td:first-child,.scoreTbl th:first-child{text-align:left}
+.scoreTbl td i{display:inline-block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--teal),var(--gold));vertical-align:middle;margin-right:6px;width:calc(var(--v)*7px);animation:barGrow 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barGrow{from{width:0}}
+.scoreTbl td b{font-family:monospace;color:var(--goldb)}
+/* 指标 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.stat{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5)}
+.stat .k{font-size:10.5px;letter-spacing:.2em;color:var(--dim);font-family:var(--serif)}
+.stat .v{font:22px/1.4 monospace;color:var(--goldb);margin-top:4px}
+.stat .v small{font:10px var(--sans);color:var(--dim)}
+/* 原则 */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+.rule{border-left:2px solid var(--gold);padding:10px 14px;background:rgba(212,175,106,.05);font-size:12.5px;line-height:1.8}
+.rule b{display:block;font-family:var(--serif);letter-spacing:.16em;color:var(--goldb);margin-bottom:3px}
+/* 下载 */
+.dl{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.dl button{cursor:pointer;font-family:var(--serif);letter-spacing:.3em;font-size:14px;border:0;border-radius:999px;padding:15px 36px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));transition:transform .25s,box-shadow .25s;box-shadow:0 8px 26px rgba(212,175,106,.25)}
+.dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
+.dl button:hover{transform:translateY(-2px)}
+.dl button:active{transform:scale(.96)}
+footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
+@media(max-width:720px){.cmp,.radarWrap{grid-template-columns:1fr}.timeline{grid-template-columns:1fr;gap:4px}.timeline::before,.timeline::after{display:none}.tl{padding-top:8px;text-align:left;padding-left:26px}.tl i{left:0;top:12px;margin:0}main{padding:40px 14px 60px}.chips{grid-template-columns:repeat(4,1fr)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">DESIGN EVOLUTION · v0 → v4</div>
+  <h1>生 命 感 × 游 戏 性<small>MAD MEDICINE · 医理探案 · 五次设计跃迁对比说明</small></h1>
+  <div class="hero">
+    <div class="heroVital" data-vital></div>
+    <div class="bpmRow"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
+      <span>拖动 · 本页所有节拍随之改变</span><input type="range" id="bpm" min="48" max="120" value="72"><b id="bpmV">72 bpm</b></div>
+    <p class="lede">这份说明本身就是用 v4 的「生命感」语言写成的：页面上一切会动的东西，都跟随同一颗心脏。下面逐项对照每一次修改前后的差别，并给出提升分析。所有演示均为可运行的动态对照，而非静态截图。</p>
+  </div>
+
+  <h2>一 · 演进时间线<em>TIMELINE</em></h2>
+  <div class="sub">五个阶段对应五次主要修改；每一阶段都保留了上一阶段的全部专业内容（知识库、权重算法、循证库一字未减），只改变「呈现」与「体验」。</div>
+  <div class="timeline">
+    <div class="tl"><i></i><b>v0 · 问卷</b><small>ORIGIN</small><span>一页页表单式四诊问答，静态报告。专业度完整，但体验像填表。</span></div>
+    <div class="tl"><i></i><b>v1 · 舞台</b><small>08-23 · STAGE</small><span>双人对坐点云背景、环绕镜头、颗粒视频三层遮罩；线索环绕两人，答题让人影「由虚到实」；手机自适应与发布。</span></div>
+    <div class="tl"><i></i><b>v2 · 系统</b><small>09-29 · SYSTEM</small><span>捕捉式光点玩法、XP 与段位、实时权重公开、动态图示选项、推理路径图、循证交叉；多选 + 五档程度条 + 情境交叉；把脉教学图。</span></div>
+    <div class="tl"><i></i><b>v3 · 关卡</b><small>09-29 · LEVELS</small><span>望闻问切四章关卡制、章节徽章进度环、9 枚成就徽章、显影雷达、通关闪光与侧写弹窗；图标卡替代长文；先选后确认。</span></div>
+    <div class="tl"><i></i><b>v4 · 生命</b><small>09-30 · ALIVE</small><span>全局心跳节拍、ECG 生命线、环形仪表、图标进度、呼吸式图表与计数、把脉波头光核；苹果式圆角与按压触感。</span></div>
+  </div>
+
+  <h2>二 · 六组前后对照<em>BEFORE / AFTER</em></h2>
+  <div class="sub">左列为修改前形态，右列为修改后的实时演示。每组下方标注该项提升主要发生在哪一版。</div>
+
+  <!-- A -->
+  <div class="card">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v0</span><i>问卷翻页</i></div>
+        <div class="form"><div class="q">Q3 · 舌质颜色与形态</div><div class="row"><span>淡白</span><span class="on">淡红如常</span><span>偏红</span><span>紫暗</span></div>
+          <div class="q">Q4 · 舌苔</div><div class="row"><span>薄白</span><span>白腻</span><span>黄腻</span></div><div class="next">下一页 →</div></div>
+        <div class="note">问题按固定顺序排列，答完翻页；玩家没有空间感、没有选择权，背景与作答无关。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v1→v2</span><i>环绕捕捉 · 由虚到实</i></div>
+        <canvas class="demo" id="demoA"></canvas>
+        <div class="note">17 条线索化为光点在两人周围轨道巡游，任意顺序点按捕捉；每归档一条，中央人影显影度上升、色彩回归——答题本身成为让世界「活过来」的动作。</div></div>
+    </div>
+    <div class="gain"><span class="g">v1 空间化</span><span class="g">v2 自由捕捉</span><span>游戏性：问卷 → 寻宝</span><span>生命感：背景随作答显形</span></div>
+  </div>
+
+  <!-- B -->
+  <div class="card" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v1</span><i>文字进度</i></div>
+        <div class="oldHud">已回收 03 / 18 · 显形 52%<div class="bar"><i></i></div>
+          <div class="lst">· 望诊 — 舌质 — 已归档<br>· 望诊 — 舌苔 — 待勘验<br>· 闻诊 — 声音 — 待勘验</div></div>
+        <div class="note">进度只是一行数字与一条细线；没有阶段目标，中途缺乏「再来一条」的理由。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v3→v4</span><i>仪表 · 章节 · XP · 徽章</i></div>
+        <div class="hud">
+          <div class="gRow"><svg class="gauge" viewBox="0 0 36 36"><circle class="t" cx="18" cy="18" r="15"/><circle class="f" id="gF" cx="18" cy="18" r="15"/></svg><b id="gN">00</b><small>/ 18</small><span class="pct" id="gP">◐ 42%</span></div>
+          <div class="chips" id="chips"></div>
+          <div class="xp">XP<i><b id="xpB"></b></i><span id="xpV">0</span></div>
+        </div>
+        <div class="toast" id="toast"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 3l5 5h7v7l5 5-5 5v7h-7l-5 5-5-5H8v-7l-5-5 5-5V8h7z"/><path d="M14 20l4 4 8-9"/></svg><div><small>BADGE UNLOCKED</small><b id="toastB">望诊全收</b></div></div>
+        <div class="note">环形仪表随心跳搏动，四章进度环逐格点亮，收齐一章即闪光颁徽、XP 飞出——奖励密度从「结案一次」提升到「每条 + 每章 + 成就」。</div></div>
+    </div>
+    <div class="gain"><span class="g">v2 XP/段位</span><span class="g">v3 四章徽章</span><span class="g">v4 环形仪表</span><span>游戏性：奖励回路缩短至 30 秒内</span></div>
+  </div>
+
+  <!-- C -->
+  <div class="card" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v0–v3</span><i>静态雷达</i></div>
+        <canvas class="demo" id="demoC0"></canvas>
+        <div class="note">报告里的六维雷达一次画完就不再变化；能读，但不「活」。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v4</span><i>呼吸式雷达</i></div>
+        <canvas class="demo" id="demoC1"></canvas>
+        <div class="note">从零生长 → 顶点持续微幅呼吸 → 涟漪向外扩散、渐变填充与发光；五行轮同样加入弧形展开、金点巡行与呼吸光核。中央文字被「生命核」取代。</div></div>
+    </div>
+    <div class="gain"><span class="g">v3 显影雷达（实时变形）</span><span class="g">v4 呼吸与涟漪</span><span>生命感：数据有了脉搏</span></div>
+  </div>
+
+  <!-- D -->
+  <div class="card" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v0–v2</span><i>文字说明</i></div>
+        <div class="txtList"><div><span>〔建档〕</span>30 秒填写称呼、作息与饮食，可跳过</div><div><span>〔捕捉〕</span>在两人周围寻找并点按线索光点作答</div><div><span>〔通关〕</span>望闻问切各为一章，收齐即通关</div><div><span>〔奖励〕</span>侧写报告、路径图与推理小剧场</div></div>
+        <div class="note">开场、手册、推理链与进度全部依赖文字标签，阅读负担重，在手机上尤甚。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v3→v4</span><i>图标 · 象形 · 动效</i></div>
+        <div class="icoRow" id="icoRow"></div>
+        <div class="note">开场四步卡、手册六卡、题头分组图标、49 枚问诊象形图（怕冷会抖、盗汗会滴、失眠会眨眼）、推理链标签、底部进度全部图形化，文字退到 title 与副标。</div></div>
+    </div>
+    <div class="gain"><span class="g">v2 选项动态图示</span><span class="g">v3 图标卡 + 象形图</span><span class="g">v4 进度/推理链图标化</span><span>精简：读图代替读字</span></div>
+  </div>
+
+  <!-- E -->
+  <div class="card" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v3</span><i>各自为政的动效</i></div>
+        <div class="still"><div class="orb"><i></i></div><div class="orb teal"><i></i></div><div class="rank"><span>A</span></div><div class="orb cin"><i></i></div></div>
+        <div class="note">光点、徽章、雷达都有动画，但周期与相位互不相关，整体像一堆各自闪烁的部件。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v4</span><i>同一颗心脏 · --bpm</i></div>
+        <div class="organs"><div class="orb"><i></i></div><div class="orb teal"><i></i></div><div class="rank"><span>A</span></div><div class="orb cin"><i></i></div><div class="miniVital" data-vital></div></div>
+        <div class="note">全站只有一个节拍源 <code>--beat = 60s / --bpm</code>：光晕、章节环、仪表、雷达、段位徽章、ECG 生命线全部按「lub-dub」双峰同步搏动。进入把脉时同步为模拟脉率，玩家自测心率后整个界面改随<b>自己的心跳</b>——拖动页首滑杆即可体验。</div></div>
+    </div>
+    <div class="gain"><span class="g">v4 独有</span><span>生命感：系统被感知为一个有机体</span><span>专业性：与切诊数据打通</span></div>
+  </div>
+
+  <!-- F -->
+  <div class="card" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · v0–v3</span><i>锐角 · 无按压反馈</i></div>
+        <div class="demoF"><span class="btnOld">开 始 推 理</span><span class="optOld">淡白</span><span style="font-size:11px;color:var(--dim)">切屏：直接切换或简单上浮</span></div>
+        <div class="note">2px 直角、hover 仅位移、按下无反馈；屏幕之间硬切。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · v4</span><i>胶囊 · 按压 · 由虚到实</i></div>
+        <div class="demoF"><span class="btnNew" id="btnDemo">开 始 推 理</span><span class="optNew"><svg viewBox="0 0 40 40"><path d="M20 5c8 0 12.5 5.5 12.5 12.5C32.5 26 26.5 36 20 36S7.5 26 7.5 17.5C7.5 10.5 12 5 20 5z" fill="#e4bfb4" stroke="rgba(0,0,0,.4)"/></svg>淡白 · 点我试试</span><span style="font-size:11px;color:var(--dim)">切屏：模糊 + 上浮 + 缩放显影；卡片错落进场；数字滚动计数</span></div>
+        <div class="note">参考苹果系统：统一的软圆角层级（胶囊按钮 / 12px 选项 / 18px 卡片）、按压缩放、去除点击高亮、尊重「减少动态效果」系统设置。</div></div>
+    </div>
+    <div class="gain"><span class="g">v4</span><span>触感：每次点击都有物理回应</span><span>精简：形态语言统一</span></div>
+  </div>
+
+  <h2>三 · 生命感 × 游戏性 评估雷达<em>ASSESSMENT</em></h2>
+  <div class="sub">六个维度上对五个版本的设计自评（0–10）。评分依据为各版本在代码中可验证的机制数量与反馈回路长度，非用户量表数据。点击图例可隐藏 / 显示某一版本。</div>
+  <div class="card">
+    <div class="radarWrap"><canvas id="verRadar" width="440" height="440"></canvas><div class="legend" id="legend"></div></div>
+    <table class="scoreTbl" id="scoreTbl"></table>
+  </div>
+
+  <h2>四 · 当前系统规模<em>METRICS · v4</em></h2>
+  <div class="stats">
+    <div class="stat"><div class="k">CSS 动画</div><div class="v"><span data-count="45">0</span> <small>组 @keyframes</small></div></div>
+    <div class="stat"><div class="k">心跳同步元素</div><div class="v"><span data-count="8">0</span> <small>类 · 1 个节拍源</small></div></div>
+    <div class="stat"><div class="k">图形符号</div><div class="v"><span data-count="62">0</span> <small>13 图标 + 49 象形</small></div></div>
+    <div class="stat"><div class="k">奖励节点</div><div class="v"><span data-count="13">0</span> <small>4 章 + 9 徽章</small></div></div>
+    <div class="stat"><div class="k">实时画布</div><div class="v"><span data-count="9">0</span> <small>处 Canvas 渲染</small></div></div>
+    <div class="stat"><div class="k">单文件体积</div><div class="v"><span data-count="300">0</span> <small>KB · 零依赖</small></div></div>
+  </div>
+
+  <h2>五 · 设计原则沉淀<em>PRINCIPLES</em></h2>
+  <div class="rules">
+    <div class="rule"><b>一个节拍源</b>所有动效共享 <code>--beat</code>，让系统被感知为一个生命体，而不是一堆动画。</div>
+    <div class="rule"><b>数据要有脉搏</b>图表先生长再呼吸：从零到值的过程，就是「结论浮现」的叙事。</div>
+    <div class="rule"><b>缩短奖励回路</b>每条线索 → XP；每章 → 徽章与侧写；结案 → 段位。30 秒内必有一次正反馈。</div>
+    <div class="rule"><b>读图代替读字</b>能画出来的不写字：舌象、脉波、症状象形、进度图标；文字退到 title 与副标。</div>
+    <div class="rule"><b>由虚到实</b>背景显影、屏幕进场、雷达生长、数字计数，全部沿用同一个「凝实」隐喻。</div>
+    <div class="rule"><b>专业不减</b>五个版本的知识库、权重算法、循证分级完全保留，改变的只是呈现与体验层。</div>
+  </div>
+
+  <h2>六 · 下载本说明<em>EXPORT</em></h2>
+  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图。</div>
+  <div class="dl"><button id="dlHtml">下 载 说 明 (HTML)</button><button class="ghost" id="dlPng">下 载 评 估 雷 达 (PNG)</button><button class="ghost" id="dlPrint">打 印 / 存 为 PDF</button></div>
+  <footer>MAD MEDICINE · 医理探案 · 设计演进对比说明 · <span id="dateStamp"></span><br>本文档为设计过程说明，所有评分为设计自评；应用内容仅供健康学习参考，不构成医学诊断。</footer>
+</main>
+
+<script>
+/* ---------- 通用：ECG 生命线 / 心跳滑杆 / 计数 ---------- */
+const VITAL_D='M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105';
+document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="${VITAL_D}"/><path class="vRun" d="${VITAL_D}"/></svg>`);
+const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV');
+bpm.oninput=()=>{document.documentElement.style.setProperty('--bpm',bpm.value);bpmV.textContent=bpm.value+' bpm';};
+document.getElementById('dateStamp').textContent=new Date().toLocaleDateString('zh-CN');
+function countUp(){document.querySelectorAll('[data-count]').forEach(el=>{const end=+el.dataset.count,t0=performance.now();
+  (function s(n){const k=Math.max(0,Math.min(1,(n-t0)/1200)),e=1-Math.pow(1-k,3);el.textContent=Math.round(end*e);if(k<1)requestAnimationFrame(s);})(t0);});}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){countUp();io.disconnect();}}));io.observe(document.querySelector('.stats'));
+function fit(cv,h){const dpr=Math.min(2,devicePixelRatio||1),w=cv.clientWidth||300;cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);return [w,h];}
+
+/* ---------- 图标库（与主程序一致的 glyph 子集） ---------- */
+const ico=inner=>`<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+const GLYPH={
+  file:ico('<path d="M9 4h15l7 7v25H9z"/><path d="M24 4v7h7M14 20h12M14 26h12M14 32h8"/>'),
+  orb:ico('<path d="M20 6l14 14-14 14L6 20z"/><path d="M20 13l7 7-7 7-7-7z" fill="currentColor" opacity=".7"/><circle cx="20" cy="20" r="17" stroke-dasharray="3 4" opacity=".5"/>'),
+  badge:ico('<path d="M20 3l5 5h7v7l5 5-5 5v7h-7l-5 5-5-5H8v-7l-5-5 5-5V8h7z"/><path d="M14 20l4 4 8-9"/>'),
+  gift:ico('<rect x="6" y="14" width="28" height="20" rx="1.5"/><path d="M6 21h28M20 14v20"/><path d="M20 14c-6 0-10-2-9-6s7-2 9 6c2-8 8-10 9-6s-3 6-9 6z"/>'),
+  observe:ico('<path d="M4 20q16-14 32 0-16 14-32 0z"/><circle cx="20" cy="20" r="5.5"/><circle cx="20" cy="20" r="2" fill="currentColor"/>'),
+  listen:ico('<circle cx="12" cy="20" r="2.4" fill="currentColor"/><path d="M19 13a9 9 0 0 1 0 14M24.5 8.5a15 15 0 0 1 0 23M30 4a21 21 0 0 1 0 32"/>'),
+  inquire:ico('<path d="M6 8h28v18H20l-8 7v-7H6z"/><circle cx="14" cy="17" r="1.6" fill="currentColor"/><circle cx="20" cy="17" r="1.6" fill="currentColor"/><circle cx="26" cy="17" r="1.6" fill="currentColor"/>'),
+  pulse:ico('<path d="M3 22h8l3-9 5 18 4-14 3 5h11" stroke-width="1.9"/>')
+};
+document.getElementById('icoRow').innerHTML=[['file','建 档','30 s · skippable'],['orb','捕 捉','tap orbs'],['badge','通 关','4 chapters'],['gift','奖 励','report · play']]
+  .map(a=>`<div class="ico">${GLYPH[a[0]]}<b>${a[1]}</b><small>${a[2]}</small></div>`).join('');
+
+/* ---------- Demo A：环绕捕捉 · 由虚到实 ---------- */
+(function(){
+  const cv=document.getElementById('demoA'),ctx=cv.getContext('2d');let [W,H]=fit(cv,190);
+  addEventListener('resize',()=>{[W,H]=fit(cv,190);});
+  const N=9,orbs=[];const COL=['212,175,106','106,212,200','212,112,106','233,228,214'];
+  for(let i=0;i<N;i++)orbs.push({a:i/N*6.283,r:.62+(i%3)*.16,sp:(.25+Math.random()*.2)*(i%2?1:-1),c:COL[i%4],alive:1});
+  let clarity=.2,cap=-1,capT=0,t0=performance.now();
+  function frame(now){
+    const t=(now-t0)/1000,dt=1/60;ctx.clearRect(0,0,W,H);
+    const cx=W/2,cy=H*.5,R=Math.min(W*.42,H*.44);
+    // 中央双人：两团点云，随 clarity 变实、变彩
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*.55);g.addColorStop(0,`rgba(212,190,150,${.06+.14*clarity})`);g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    for(let s=-1;s<=1;s+=2){for(let k=0;k<70;k++){const seed=Math.sin(k*12.9898+s*78.233)*43758.5453,f=seed-Math.floor(seed),f2=(f*97)%1;
+      const scat=(1-clarity)*18;const px=cx+s*R*.22+(f-.5)*22+Math.sin(t*1.3+k)*scat,py=cy-16+(f2-.5)*60+Math.cos(t*1.1+k*.7)*scat;
+      const col=s<0?[233,228,214]:[70,90,120];const gr=(col[0]*.3+col[1]*.59+col[2]*.11);
+      ctx.fillStyle=`rgba(${Math.round(gr+(col[0]-gr)*clarity)},${Math.round(gr+(col[1]-gr)*clarity)},${Math.round(gr+(col[2]-gr)*clarity)},${.25+.6*clarity})`;
+      ctx.fillRect(px,py,1.6,1.6);}}
+    // 额首相接光核
+    const pg=ctx.createRadialGradient(cx,cy-24,0,cx,cy-24,10+6*Math.sin(t*2.4));pg.addColorStop(0,'rgba(235,240,255,.45)');pg.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=pg;ctx.beginPath();ctx.arc(cx,cy-24,18,0,7);ctx.fill();
+    // 光点巡游
+    orbs.forEach((o,i)=>{if(!o.alive&&i!==cap)return;o.a+=o.sp*dt;const depth=(Math.sin(o.a)+1)/2;
+      let x=cx+Math.cos(o.a)*R*o.r*1.25,y=cy+Math.sin(o.a)*R*o.r*.36+Math.sin(t*1.4+i)*4;
+      let sc=.6+.6*depth;
+      if(i===cap){const k=Math.min(1,(t-capT)/.6);x+=(cx-x)*k;y+=(cy-y)*k;sc*=(1-k);if(k>=1){o.alive=0;cap=-1;clarity=Math.min(1,clarity+.09);}}
+      ctx.save();ctx.translate(x,y);ctx.rotate(Math.PI/4);ctx.fillStyle=`rgba(${o.c},${.35+.6*depth})`;ctx.shadowColor=`rgb(${o.c})`;ctx.shadowBlur=10*depth;
+      const s=5*sc;ctx.fillRect(-s,-s,s*2,s*2);ctx.restore();
+      if(depth>.75&&i!==cap){ctx.strokeStyle=`rgba(${o.c},.35)`;ctx.setLineDash([2,3]);ctx.beginPath();ctx.arc(x,y,12+2*Math.sin(t*3),0,7);ctx.stroke();ctx.setLineDash([]);}});
+    // 每 1.6 秒自动捕捉一枚最近光点；全部捕获后重置
+    if(cap<0&&Math.floor(t/1.6)!==Math.floor((t-dt)/1.6)){let best=-1,bd=-1;orbs.forEach((o,i)=>{if(!o.alive)return;const d=(Math.sin(o.a)+1)/2;if(d>bd){bd=d;best=i;}});
+      if(best<0){orbs.forEach(o=>o.alive=1);clarity=.2;}else{cap=best;capT=t;}}
+    ctx.fillStyle='rgba(233,228,214,.55)';ctx.font='9px monospace';ctx.fillText('显形 '+Math.round(clarity*100)+'%',10,H-10);
+    requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+})();
+
+/* ---------- Demo B：仪表 · 章节 · XP · 徽章 ---------- */
+(function(){
+  const CH=[['observe','望',5,'var(--gold)'],['listen','闻',4,'var(--teal)'],['inquire','问',8,'var(--cin)'],['pulse','切',1,'#e9e4d6']];
+  const chips=document.getElementById('chips');chips.innerHTML=CH.map(c=>`<div class="chip" style="--c:${c[3]}"><div class="ring">${GLYPH[c[0]]}</div><small>0/${c[2]}</small></div>`).join('');
+  const els=[...chips.children],gF=document.getElementById('gF'),gN=document.getElementById('gN'),gP=document.getElementById('gP'),xpB=document.getElementById('xpB'),xpV=document.getElementById('xpV'),toast=document.getElementById('toast'),toastB=document.getElementById('toastB');
+  let n=0,xp=0,done=[0,0,0,0],ch=0,pane=toast.parentElement;
+  function tick(){
+    if(n>=18){n=0;xp=0;done=[0,0,0,0];ch=0;els.forEach((e,i)=>{e.classList.remove('clear');e.style.setProperty('--p',0);e.querySelector('small').textContent='0/'+CH[i][2];});}
+    while(done[ch]>=CH[ch][2])ch++;
+    done[ch]++;n++;xp+=10+(n%3?0:6);
+    gF.style.strokeDashoffset=(94.2*(1-n/18)).toFixed(1);gN.textContent=String(n).padStart(2,'0');gP.textContent='◐ '+Math.round(42+58*n/18)+'%';
+    els[ch].style.setProperty('--p',Math.round(done[ch]/CH[ch][2]*100));els[ch].querySelector('small').textContent=done[ch]+'/'+CH[ch][2];
+    xpB.style.width=Math.min(100,xp/300*100)+'%';xpV.textContent=xp;
+    const f=document.createElement('span');f.className='xpFloat';f.textContent='+'+(10+(n%3?0:6))+' XP';f.style.left=(60+Math.random()*120)+'px';f.style.top='60px';pane.appendChild(f);setTimeout(()=>f.remove(),1000);
+    if(done[ch]>=CH[ch][2]){els[ch].classList.add('clear');toastB.textContent=CH[ch][1]+'诊全收';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1500);}
+    setTimeout(tick,900);}
+  setTimeout(tick,800);
+})();
+
+/* ---------- Demo C：静态雷达 vs 呼吸雷达 ---------- */
+const DIMS6=['气血能量','脾胃运化','情志平衡','睡眠修复','代谢清净','筋骨活络'],VALS=[78,62,54,66,71,58];
+function radar(ctx,S,H,vals,k,t,alive){
+  const cx=S/2,cy=H/2,R=Math.min(S,H)*.34;ctx.clearRect(0,0,S,H);
+  const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
+  const live=vals.map((v,i)=>v*k*(alive?1+.02*Math.sin(t*1.7+i*1.05):1));
+  for(let ring=1;ring<=4;ring++){ctx.beginPath();for(let i=0;i<6;i++){const p=pt(i,R*ring/4);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.closePath();ctx.strokeStyle='rgba(233,228,214,.12)';ctx.stroke();}
+  for(let i=0;i<6;i++){const p=pt(i,R);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p[0],p[1]);ctx.strokeStyle='rgba(233,228,214,.1)';ctx.stroke();
+    const lp=pt(i,R+22);ctx.fillStyle=`rgba(233,228,214,${.8*k})`;ctx.font='10px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(DIMS6[i],lp[0],lp[1]);}
+  if(alive){const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.05);g.addColorStop(0,`rgba(106,212,200,${(.1+.05*Math.sin(t*2))*k})`);g.addColorStop(1,'rgba(106,212,200,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R*1.05,0,7);ctx.fill();}
+  ctx.beginPath();live.forEach((v,i)=>{const p=pt(i,R*v/100);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.closePath();
+  if(alive){const fg=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);fg.addColorStop(0,'rgba(106,212,200,.34)');fg.addColorStop(1,'rgba(212,175,106,.22)');ctx.fillStyle=fg;}else ctx.fillStyle='rgba(106,212,200,.22)';
+  ctx.fill();ctx.strokeStyle='rgba(106,212,200,.9)';ctx.lineWidth=2;ctx.stroke();
+  live.forEach((v,i)=>{const p=pt(i,R*v/100);if(alive){const rr=(t*.8+i*.17)%1;ctx.beginPath();ctx.arc(p[0],p[1],3+rr*13,0,7);ctx.strokeStyle=`rgba(212,175,106,${(1-rr)*.5})`;ctx.lineWidth=1;ctx.stroke();}
+    ctx.beginPath();ctx.arc(p[0],p[1],3.5,0,7);ctx.fillStyle='#d4af6a';if(alive){ctx.shadowColor='#d4af6a';ctx.shadowBlur=8;}ctx.fill();ctx.shadowBlur=0;});
+}
+(function(){
+  const c0=document.getElementById('demoC0'),c1=document.getElementById('demoC1');let a=fit(c0,190),b=fit(c1,190);
+  radar(c0.getContext('2d'),a[0],a[1],VALS,1,0,false);
+  const t0=performance.now();let restart=t0;
+  (function f(now){const t=(now-restart)/1000;const k=1-Math.pow(1-Math.min(1,t/1.4),3);radar(c1.getContext('2d'),b[0],b[1],VALS,k,(now-t0)/1000,true);if(t>7)restart=now;requestAnimationFrame(f);})(t0);
+  addEventListener('resize',()=>{a=fit(c0,190);b=fit(c1,190);radar(c0.getContext('2d'),a[0],a[1],VALS,1,0,false);});
+})();
+
+/* ---------- Demo F：按压自动演示 ---------- */
+(function(){const b=document.getElementById('btnDemo');setInterval(()=>{b.classList.add('press');setTimeout(()=>b.classList.remove('press'),180);},2600);})();
+
+/* ---------- 版本评估雷达 ---------- */
+const VDIMS=['动态反馈','节律 / 生命感','奖励密度','图像替代文字','自由度 / 可玩性','触感与精简'];
+const VERS=[
+  {n:'v0 问卷',c:'#6f7887',s:[1,0,0,1,1,2],on:true},
+  {n:'v1 舞台',c:'#5b8fd4',s:[4,2,1,3,4,3],on:true},
+  {n:'v2 系统',c:'#6ad4c8',s:[6,3,4,5,6,4],on:true},
+  {n:'v3 关卡',c:'#d4706a',s:[7,4,8,7,7,5],on:true},
+  {n:'v4 生命',c:'#f0cf8e',s:[9,9,8,8,7,9],on:true}];
+const vr=document.getElementById('verRadar');
+function drawVer(k,t){
+  const ctx=vr.getContext('2d'),S=vr.clientWidth||440,dpr=Math.min(2,devicePixelRatio||1);vr.width=S*dpr;vr.height=S*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cx=S/2,cy=S/2,R=S*.34;ctx.clearRect(0,0,S,S);
+  const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
+  for(let ring=1;ring<=5;ring++){ctx.beginPath();for(let i=0;i<6;i++){const p=pt(i,R*ring/5);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.closePath();ctx.strokeStyle='rgba(233,228,214,.1)';ctx.stroke();}
+  for(let i=0;i<6;i++){const p=pt(i,R);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p[0],p[1]);ctx.strokeStyle='rgba(233,228,214,.1)';ctx.stroke();
+    const lp=pt(i,R+28);ctx.fillStyle='rgba(233,228,214,.85)';ctx.font=(S<360?'10px':'12px')+' serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(VDIMS[i],lp[0],lp[1]);}
+  VERS.forEach((v,vi)=>{if(!v.on)return;const kk=Math.max(0,Math.min(1,k*5-vi*.8)),e=1-Math.pow(1-kk,3);if(e<=0)return;
+    ctx.beginPath();v.s.forEach((s,i)=>{const w=s/10*e*(vi===4?1+.015*Math.sin(t*1.7+i):1);const p=pt(i,R*w);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.closePath();
+    ctx.fillStyle=v.c+(vi===4?'44':'22');ctx.fill();ctx.strokeStyle=v.c;ctx.lineWidth=vi===4?2.2:1.2;if(vi===4){ctx.shadowColor=v.c;ctx.shadowBlur=12;}ctx.stroke();ctx.shadowBlur=0;
+    v.s.forEach((s,i)=>{const p=pt(i,R*s/10*e);ctx.beginPath();ctx.arc(p[0],p[1],vi===4?3.5:2.2,0,7);ctx.fillStyle=v.c;ctx.fill();});});
+  ctx.fillStyle='rgba(154,149,138,.7)';ctx.font='9px monospace';ctx.textAlign='left';ctx.fillText('MAD MEDICINE · DESIGN ASSESSMENT · 0-10 · self-rated',12,S-12);
+}
+(function(){const t0=performance.now();let start=null;const io2=new IntersectionObserver(es=>{if(es[0].isIntersecting&&start===null)start=performance.now();});io2.observe(vr);
+  (function f(now){const k=start===null?0:Math.min(1,(now-start)/3000);drawVer(k,(now-t0)/1000);requestAnimationFrame(f);})(t0);})();
+const legend=document.getElementById('legend');
+legend.innerHTML=VERS.map((v,i)=>`<button style="--c:${v.c}" data-i="${i}"><i></i><b>${v.n}</b><small>Σ ${v.s.reduce((a,b)=>a+b,0)} / 60</small></button>`).join('');
+legend.onclick=e=>{const b=e.target.closest('button');if(!b)return;const v=VERS[+b.dataset.i];v.on=!v.on;b.classList.toggle('off',!v.on);};
+document.getElementById('scoreTbl').innerHTML=`<tr><th>维度</th>${VERS.map(v=>`<th style="color:${v.c}">${v.n}</th>`).join('')}<th>Δ v0→v4</th></tr>`+
+  VDIMS.map((d,i)=>`<tr><td>${d}</td>${VERS.map(v=>`<td><i style="--v:${v.s[i]}"></i><b>${v.s[i]}</b></td>`).join('')}<td><b style="color:var(--teal)">+${VERS[4].s[i]-VERS[0].s[i]}</b></td></tr>`).join('')+
+  `<tr><td><b>合计</b></td>${VERS.map(v=>`<td><b>${v.s.reduce((a,b)=>a+b,0)}</b></td>`).join('')}<td><b style="color:var(--teal)">+${VERS[4].s.reduce((a,b)=>a+b,0)-VERS[0].s.reduce((a,b)=>a+b,0)}</b></td></tr>`;
+
+/* ---------- 下载 ---------- */
+document.getElementById('dlHtml').onclick=()=>{
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));a.download='MAD-MEDICINE_设计演进对比说明.html';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);};
+document.getElementById('dlPng').onclick=()=>{
+  const c=document.createElement('canvas');c.width=c.height=1200;const ctx=c.getContext('2d');ctx.fillStyle='#070a12';ctx.fillRect(0,0,1200,1200);
+  const save=vr.width,saveH=vr.height;const tmp=document.createElement('canvas');tmp.width=tmp.height=1200;
+  const S=1200,cx=600,cy=600,R=400;const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
+  for(let ring=1;ring<=5;ring++){ctx.beginPath();for(let i=0;i<6;i++){const p=pt(i,R*ring/5);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.closePath();ctx.strokeStyle='rgba(233,228,214,.12)';ctx.lineWidth=2;ctx.stroke();}
+  for(let i=0;i<6;i++){const p=pt(i,R);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p[0],p[1]);ctx.strokeStyle='rgba(233,228,214,.1)';ctx.stroke();const lp=pt(i,R+64);ctx.fillStyle='rgba(233,228,214,.9)';ctx.font='30px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(VDIMS[i],lp[0],lp[1]);}
+  VERS.forEach((v,vi)=>{if(!v.on)return;ctx.beginPath();v.s.forEach((s,i)=>{const p=pt(i,R*s/10);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.closePath();ctx.fillStyle=v.c+(vi===4?'44':'22');ctx.fill();ctx.strokeStyle=v.c;ctx.lineWidth=vi===4?5:2.5;ctx.stroke();
+    ctx.fillStyle=v.c;ctx.font='26px serif';ctx.textAlign='left';ctx.fillRect(60,60+vi*44,22,22);ctx.fillText(v.n+'  Σ'+v.s.reduce((a,b)=>a+b,0),96,72+vi*44);});
+  ctx.fillStyle='rgba(212,175,106,.9)';ctx.font='24px monospace';ctx.textAlign='left';ctx.fillText('MAD MEDICINE · DESIGN ASSESSMENT · 生命感 × 游戏性 · 0-10 self-rated',60,1150);
+  const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MAD-MEDICINE_评估雷达.png';a.click();};
+document.getElementById('dlPrint').onclick=()=>window.print();
+</script>
+</body>
+</html>

@@ -926,6 +926,112 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .confirmDock .focusCount{font-size:10.5px;line-height:1.35;text-align:left}
   .confirmDock .archiveNode{flex:0 0 auto;min-width:118px;font-size:14px;letter-spacing:.26em;padding:13px 14px 13px 18px}
 }
+
+/* ============================================================
+   v4 · 生命感层：全局心跳节拍 / 生命线 / 呼吸式图表 / 苹果式圆角与触感
+   --bpm 由切诊或自测心率写入，整个界面随同一颗心脏搏动
+   ============================================================ */
+body{--bpm:72;--beat:calc(60s / var(--bpm))}
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes lubdubGlow{0%,100%{opacity:.22}10%{opacity:.85}20%{opacity:.3}32%{opacity:.6}46%{opacity:.22}}
+@keyframes ringOut{from{transform:scale(1);opacity:.55}to{transform:scale(1.4);opacity:0}}
+/* 生命线（ECG）：一段亮脉冲沿轨迹奔跑，一拍一程 */
+.vital{display:block;width:100%;height:100%;overflow:visible}
+.vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.vital .vTrack{opacity:.14}
+.vital .vRun{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+.vitalLine{width:min(300px,68vw);height:34px;color:var(--teal);margin:10px auto 20px;opacity:.9}
+#hudMode{width:150px;height:16px;color:var(--teal);margin-bottom:8px;opacity:.85}
+/* HUD：环形显影仪表取代文字进度 */
+#hudProg{display:flex;align-items:center;gap:9px}
+.gauge{width:34px;height:34px;flex:0 0 auto;transform:rotate(-90deg)}
+.gauge circle{fill:none;stroke-width:3}
+.gauge .gTrack{stroke:rgba(233,228,214,.1)}
+.gauge .gFill{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:94.2;stroke-dashoffset:94.2;
+  transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 4px var(--gold))}
+#hudProg b{font:18px/1 monospace;color:var(--gold-bright);letter-spacing:.04em}
+#hudProg small{font:10px/1 monospace;color:var(--ink-dim)}
+#hudProg .gPct{margin-left:auto;font:9px/1 monospace;letter-spacing:.14em;color:var(--teal)}
+#hudProg.pop .gauge{animation:lubdub .6s ease}
+/* 底部进度：四枚图标取代圆点与文字 */
+#progress .inner{gap:16px;padding:9px 18px;border-radius:999px}
+#progress .step{width:20px;height:20px;border-radius:0;background:none!important;color:rgba(233,228,214,.22);transform:none;box-shadow:none;display:flex}
+#progress .step .glyph{width:100%;height:100%}
+#progress .step.done{color:var(--gold)}
+#progress .step.now{color:var(--teal);filter:drop-shadow(0 0 6px var(--teal));animation:lubdub var(--beat) ease-in-out infinite}
+/* 线索光点：随心跳呼吸的光晕 */
+.orb::before{content:"";position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;
+  background:radial-gradient(circle,currentColor 0%,transparent 70%);opacity:.3;pointer-events:none;
+  animation:lubdubGlow var(--beat) ease-in-out infinite}
+.orb:nth-child(3n+2)::before{animation-delay:calc(var(--beat) * -.33)}
+.orb:nth-child(3n)::before{animation-delay:calc(var(--beat) * -.66)}
+.orb.done::before{display:none}
+.chChip.clear .chRing{animation:lubdub var(--beat) ease-in-out infinite}
+#liveRadar{animation:lubdub var(--beat) ease-in-out infinite}
+.rankBadge{position:relative}
+.rankBadge::after{content:"";position:absolute;inset:-6px;border:1px solid var(--gold);animation:ringOut var(--beat) ease-out infinite}
+.stamp{animation:stampIn .7s cubic-bezier(.2,.9,.3,1.3) both}
+@keyframes stampIn{from{transform:rotate(-4deg) scale(1.7);opacity:0}}
+.rewardBanner .big{animation:glowText 3s ease-in-out infinite}
+@keyframes glowText{0%,100%{text-shadow:0 0 12px rgba(212,175,106,.25)}50%{text-shadow:0 0 30px rgba(240,207,142,.7)}}
+/* 屏幕与卡片：由虚到实的进场 */
+.screen.active:not(#screen-stage){animation:screenIn .75s cubic-bezier(.2,.8,.2,1)}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+h1.title{animation:titleIn 1.5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes titleIn{from{opacity:0;letter-spacing:.5em;filter:blur(12px)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.98)}}
+.reportWrap>*{animation:cardIn .7s cubic-bezier(.2,.8,.2,1) both}
+.reportWrap>:nth-child(2){animation-delay:.08s}.reportWrap>:nth-child(3){animation-delay:.16s}.reportWrap>:nth-child(4){animation-delay:.24s}
+.reportWrap>:nth-child(5){animation-delay:.32s}.reportWrap>:nth-child(6){animation-delay:.4s}.reportWrap>:nth-child(n+7){animation-delay:.48s}
+.statGrid .stat{animation:cardIn .6s cubic-bezier(.2,.8,.2,1) both}
+.statGrid .stat:nth-child(2){animation-delay:.06s}.statGrid .stat:nth-child(3){animation-delay:.12s}
+.statGrid .stat:nth-child(4){animation-delay:.18s}.statGrid .stat:nth-child(5){animation-delay:.24s}.statGrid .stat:nth-child(6){animation-delay:.3s}
+/* 维度条：从零生长 + 流光 */
+.dimRow .bar i{position:relative;overflow:hidden;animation:barGrow 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barGrow{from{width:0}}
+.dimRow .bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:translateX(-100%);animation:shimmer 3s ease-in-out 1.2s infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+/* 推理链：图标替代文字标签 */
+.dl{display:flex;gap:11px;align-items:flex-start}
+.dlIco{flex:0 0 20px;width:20px;height:20px;margin-top:7px;color:var(--teal);filter:drop-shadow(0 0 5px currentColor)}
+.dlIco .glyph *{animation:artBreathe 3s ease-in-out infinite;transform-origin:20px 20px}
+.dl.gold .dlIco{color:var(--gold)}.dl.verdict .dlIco{color:var(--cinnabar)}
+.dlTxt{flex:1;min-width:0}
+/* 苹果式：柔和圆角 + 按压触感 */
+.btn,.opt,.answerNode,.dockItem,.archiveNode,.miniChip,.chChip,.tab,.pulsePos,.pressureStep,button{-webkit-tap-highlight-color:transparent}
+.btn{border-radius:999px;transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,filter .25s}
+.btn:active{transform:scale(.96)!important;filter:brightness(.92)}
+.opt{border-radius:12px;transition:transform .2s cubic-bezier(.2,.8,.2,1),border-color .2s,background .2s,color .2s}
+.opt:active{transform:scale(.97)}
+.answerMain{transition:transform .15s}
+.answerNode:active .answerMain{transform:scale(.97)}
+.dockItem{border-radius:10px}.dockItem:active{transform:scale(.98)}
+.miniChip,.evGrade{border-radius:999px}
+.panel,.rCard,.msCard{border-radius:18px}
+.stat,.patternCard,.evItem,.teaF,.istep,.mcard{border-radius:12px}
+.field input[type=text],.field input[type=number],.field select{border-radius:10px}
+.customWrap input{border-radius:10px}
+#pathWrap,.pulseMapWrap,.pressureSteps,.pulsePos,.pressureStep{border-radius:10px}
+#pulseCanvas{border-radius:12px}
+input[type=range]{accent-color:var(--gold)}
+#clueToggle,#btnLang,#dockToggle{border-radius:999px}
+@media(min-width:701px){#clueDock{border-radius:16px}}
+@media(max-width:700px){
+  /* 收起态只有 128px：仪表与生命线收紧，避免章节徽章被裁掉 */
+  .gauge{width:27px;height:27px}
+  #hudProg{gap:7px}#hudProg b{font-size:16px}
+  .vitalLine{height:26px;margin:6px auto 14px}
+  /* 低端机去模糊：filter:blur 在移动端合成开销大，保留位移与淡入 */
+  .screen.active:not(#screen-stage){animation-name:screenInLite}
+  @keyframes screenInLite{from{opacity:0;transform:translateY(14px) scale(.99)}to{opacity:1;transform:none}}
+  h1.title{animation-name:titleInLite}
+  @keyframes titleInLite{from{opacity:0;letter-spacing:.4em}}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
@@ -961,7 +1067,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <h1 class="title"><span data-zh="医 理 探 案" data-en="BODY PROFILER">医 理 探 案</span>
       <span class="en">MAD MEDICINE · 医理探案</span>
     </h1>
-    <div class="divider"></div>
+    <div class="vitalLine" data-vital></div>
     <p class="lede"
       data-zh="你是「身体侦探」。捕捉漂浮的线索光点，让灰雾中的两个人影逐层显形——<b>每收齐一章，解锁一枚徽章与一次侧写更新</b>。"
       data-en="You are the body's detective. Capture the drifting clue-orbs and let the two grey figures develop layer by layer — <b>every chapter cleared unlocks a badge and a profile update</b>.">
@@ -1039,8 +1145,8 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
     <aside id="clueDock">
       <div id="dockHead">
         <span id="dockToggle">LIST</span>
-        <div id="hudMode" data-zh="CLUE BOARD · 线索板" data-en="CLUE BOARD">CLUE BOARD · 线索板</div>
-        <div id="hudProg">已回收 00 / 00</div>
+        <div id="hudMode" data-vital></div>
+        <div id="hudProg"></div>
         <div id="signalTrack"><span id="signalFill"></span></div>
         <div id="chapterRow"></div>
         <div id="hudVis">
@@ -1114,7 +1220,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   <section class="screen" id="screen-deduce">
     <div class="kicker" data-zh="FINAL · 演绎推理" data-en="FINAL · DEDUCTION">FINAL · 演绎推理</div>
     <h2 data-zh="线 索 汇 流 · 病 机 浮 现" data-en="C L U E S · C O N V E R G E">线 索 汇 流 · 病 机 浮 现</h2>
-    <div class="divider"></div>
+    <div class="vitalLine" data-vital></div>
     <div id="deduceLog"></div>
     <div style="text-align:center"><button class="btn" id="btnReport" style="display:none" data-zh="领 取 奖 励 · 身 体 侧 写 报 告" data-en="C L A I M · T H E  R E W A R D">领 取 奖 励 · 身 体 侧 写 报 告</button></div>
   </section>
@@ -2389,21 +2495,22 @@ function show(id){
   $('#'+id).classList.add('active');
   document.body.classList.toggle('stage-live',id==='screen-stage');
   window.scrollTo({top:0});
+  if(window.stopCharts) stopCharts();
   renderProgress(id);
 }
+const STEP_ICON={'screen-intake':'file','screen-stage':'orb','screen-deduce':'detail','screen-report':'gift'};
 function renderProgress(id){
   const inner=$('#progressInner'); inner.innerHTML='';
   const steps=Object.keys(STEP_LABEL);
   const idx=FLOW.indexOf(id);
-  steps.forEach((sid,i)=>{
+  steps.forEach(sid=>{
     const d=document.createElement('div');
     const si=FLOW.indexOf(sid);
     d.className='step'+(si<idx?' done':si===idx?' now':'');
+    d.innerHTML=typeof GLYPH!=='undefined'?(GLYPH[STEP_ICON[sid]]||''):'';
+    d.title=L(STEP_LABEL[sid][0],STEP_LABEL[sid][1]);
     inner.appendChild(d);
   });
-  const l=document.createElement('div'); l.className='lbl';
-  l.textContent = STEP_LABEL[id]? L(`第 ${idx} 步 · ${STEP_LABEL[id][0]}`, `STEP ${idx} · ${STEP_LABEL[id][1]}`) : L('医理探案','Body Profiler');
-  inner.appendChild(l);
 }
 
 /* ---------- 题目渲染（中英双语） ---------- */
@@ -2645,9 +2752,14 @@ function updateHUD(animate=false){
     window.__clarity=clarity;window.__bloom=.12;
     setTimeout(()=>{if(window.__bloom<=.12)window.__bloom=0;},320);
   }else window.__clarity=clarity;
-  $('#hudProg').textContent = LANG==='en'
-    ? `RECOVERED ${String(orbDone).padStart(2,'0')} / ${orbTotal} · MATERIAL ${Math.round(clarity*100)}%`
-    : `已回收 ${String(orbDone).padStart(2,'0')} / ${orbTotal} · 显形 ${Math.round(clarity*100)}%`;
+  const g=$('#hudProg');
+  if(!g.querySelector('.gauge')) g.innerHTML='<svg class="gauge" viewBox="0 0 36 36" aria-hidden="true"><circle class="gTrack" cx="18" cy="18" r="15"/><circle class="gFill" cx="18" cy="18" r="15"/></svg><b></b><small></small><span class="gPct"></span>';
+  g.querySelector('.gFill').style.strokeDashoffset=(94.2*(1-orbDone/Math.max(1,orbTotal))).toFixed(1);
+  g.querySelector('b').textContent=String(orbDone).padStart(2,'0');
+  g.querySelector('small').textContent='/ '+orbTotal;
+  g.querySelector('.gPct').textContent='◐ '+Math.round(clarity*100)+'%';
+  g.title=L(`已回收 ${orbDone}/${orbTotal} · 显形 ${Math.round(clarity*100)}%`,`Recovered ${orbDone}/${orbTotal} · material ${Math.round(clarity*100)}%`);
+  if(animate){g.classList.remove('pop');void g.offsetWidth;g.classList.add('pop');}
   updateDockProgress();
   syncChapters();
   if(orbTotal && orbDone>=orbTotal) $('#deduceGate').classList.add('show');
@@ -2961,7 +3073,7 @@ function openMilestone(kicker,title,bodyHTML,btnText,onBtn){
   $('#milestoneModal').classList.add('show');
   window.__bloom=Math.max(window.__bloom||0,.4);
 }
-function closeMilestone(){ $('#milestoneModal').classList.remove('show'); }
+function closeMilestone(){ $('#milestoneModal').classList.remove('show'); if(window.stopCharts) stopCharts(); }
 $('#milestoneModal').addEventListener('click',e=>{ if(e.target.id==='milestoneModal') closeMilestone(); });
 
 /* 初步阶段：建档后的第一幅侧写 —— 一幅雷达 + 一句话 */
@@ -2980,7 +3092,7 @@ function showIntakeProfile(){
   openMilestone(L('PROFILE SYNC · 初步侧写','PROFILE SYNC · FIRST SKETCH'),
     L('档 案 开 启','F I L E · O P E N E D'), body,
     L('走 上 舞 台 · 开 始 收 证','T O · T H E · S T A G E'), null);
-  paintRadar(document.getElementById('msRadar'),liveDims(),150,true);
+  paintRadar(document.getElementById('msRadar'),liveDims(),150,true,true);
   addClue(L('侧写快照','Snapshot'),tops.length
     ?L(`初步侧写：${PATTERNS[tops[0][0]].name} 之象初现`,`First sketch: ${pName(tops[0][0])} emerges`)
     :L('初步侧写：未见明显偏颇','First sketch: no clear bias'),{});
@@ -3091,6 +3203,11 @@ function inquireArt(items){
 }
 document.querySelectorAll('[data-glyph]').forEach(e=>e.innerHTML=GLYPH[e.dataset.glyph]||'');
 document.querySelectorAll('[data-emblem]').forEach(e=>e.innerHTML=GLYPH[e.dataset.emblem]||'');
+/* 生命线：随 --bpm 奔跑的心电轨迹（轨道 + 亮脉冲两层） */
+const VITAL_D='M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105';
+const VITAL=`<svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="${VITAL_D}"/><path class="vRun" d="${VITAL_D}"/></svg>`;
+document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=VITAL);
+window.setBPM=bpm=>document.body.style.setProperty('--bpm',Math.max(40,Math.min(140,Math.round(bpm))));
 
 /* ---------- 章节（关卡）：望 → 闻 → 问 → 切，顺序自由，收齐一章即通关 ---------- */
 const CHAPTERS=['observe','listen','inquire','pulse'];
@@ -3167,7 +3284,7 @@ function openChapterModal(cat,clean,allDone){
     STAGE[Math.min(3,n-1)], body,
     allDone?L('揭 晓 全 案 · 开 始 推 理','R E V E A L · D E D U C E'):L('继 续 探 案','K E E P · G O I N G'),
     allDone?()=>{closePanel();startDeduce();}:null);
-  paintRadar(document.getElementById('msRadar'),liveDims(),150,true);
+  paintRadar(document.getElementById('msRadar'),liveDims(),150,true,true);
   addClue(L('侧写快照','Snapshot')+` · ${n}/${CHAPTERS.length}`,
     tops.length?L(`${CATS[cat].zh}收齐 → 主线：${PATTERNS[tops[0][0]].name}（权重 ${state.weights[tops[0][0]]}）`,`${CATS[cat].en} cleared → lead: ${pName(tops[0][0])} (weight ${state.weights[tops[0][0]]})`)
       :L(`${CATS[cat].zh}收齐 → 无明显主线`,`${CATS[cat].en} cleared → no clear lead`),{});
@@ -3242,12 +3359,13 @@ function dimsFrom(s,i){
   ];
 }
 function liveDims(){ return state.intake&&state.intake.h?dimsFrom(state.weights,state.intake):[92,92,92,92,92,92]; }
-function paintRadar(cv,vals,S,mini){
+function paintRadar(cv,vals,S,mini,loop){
   if(!cv) return;
   const dpr=Math.min(2,window.devicePixelRatio||1);
   cv.width=Math.round(S*dpr);cv.height=Math.round(S*dpr);cv.style.width=S+'px';cv.style.height=S+'px';
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
-  drawRadar(cv,vals,S,mini);
+  if(loop&&typeof loopChart==='function'){stopCharts();loopChart(cv,(k,t)=>drawRadar(cv,vals,S,mini,k,t),900);}
+  else drawRadar(cv,vals,S,mini);
 }
 let _liveVals=null,_liveAnim=null;
 function updateLiveRadar(){
@@ -3365,6 +3483,7 @@ $('#btnPulseStart').onclick=()=>{
 
 function initPulseGame(){
   pulseParams=state.pulseTruth; pulseShape=pulseParams.shape; pulsePos=0;
+  if(window.setBPM) setBPM(pulseParams.rate);   // 整个界面随模拟脉搏同拍
   // 三部按钮
   const row=$('#pulsePosRow'); row.innerHTML='';
   POS_NAMES.forEach((n,i)=>{
@@ -3411,20 +3530,28 @@ function startPulseAnim(){
     if(pulseShape==='se' && Math.floor(t*pulseParams.rate/60)!==Math.floor((t-0.05)*pulseParams.rate/60))
       beatJitter=(Math.random()-.5)*0.35;
     const bps=pulseParams.rate/60;
-    const base=H*0.62;
+    const base=H*0.62, xEnd=W-18, felt=amp>0.12;
+    const yAt=x=>{const tt=t-(xEnd-x)/W*3.2;const ph=((tt*bps)+beatJitter)%1;
+      return base-waveAt(ph<0?ph+1:ph,pulseShape)*amp*H*0.42-Math.sin(tt*2.2)*2;};
+    // 轨迹：越靠近波头越亮，尾部渐隐成余晖
+    const grad=ctx.createLinearGradient(0,0,xEnd,0);
+    grad.addColorStop(0,'rgba(106,212,200,0)');grad.addColorStop(.35,`rgba(106,212,200,${felt?.55:.2})`);grad.addColorStop(1,`rgba(106,212,200,${felt?.98:.45})`);
     ctx.beginPath();
-    for(let x=0;x<=W;x+=3){
-      const tt=t-(W-x)/W*3.2; // 3.2 秒窗口向右滚动
-      const ph=((tt*bps)+beatJitter)%1;
-      const y=base - waveAt(ph<0?ph+1:ph, pulseShape)*amp*H*0.42
-                   - Math.sin(tt*2.2)*2; // 轻微呼吸漂移
-      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    }
-    ctx.strokeStyle= amp>0.12?'rgba(106,212,200,.95)':'rgba(106,212,200,.4)';
-    ctx.lineWidth=2; ctx.stroke();
-    // 指感强度提示
-    ctx.fillStyle='rgba(212,175,106,.8)';ctx.font='13px monospace';
-    ctx.fillText(L('指下脉感：','Felt pulse: ')+'●'.repeat(Math.max(1,Math.round(amp*5)))+'○'.repeat(Math.max(0,5-Math.round(amp*5))),12,H-14);
+    for(let x=0;x<=xEnd;x+=3){const y=yAt(x);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle=grad;ctx.lineWidth=2;ctx.shadowColor='rgba(106,212,200,.8)';ctx.shadowBlur=felt?10:0;ctx.stroke();ctx.shadowBlur=0;
+    // 波头光核：随搏动胀缩
+    const hy=yAt(xEnd), lift=Math.max(0,base-hy)/(H*0.42);
+    const gl=ctx.createRadialGradient(xEnd,hy,0,xEnd,hy,8+lift*26);
+    gl.addColorStop(0,'rgba(240,207,142,.95)');gl.addColorStop(1,'rgba(240,207,142,0)');
+    ctx.fillStyle=gl;ctx.beginPath();ctx.arc(xEnd,hy,8+lift*26,0,7);ctx.fill();
+    ctx.fillStyle='#fff7e6';ctx.beginPath();ctx.arc(xEnd,hy,2.4,0,7);ctx.fill();
+    // 心形随脉搏起伏 + 五格指感，取代文字提示
+    const hs=(1+lift*0.45)*(felt?1:.8);
+    ctx.save();ctx.translate(26,H-24);ctx.scale(hs,hs);
+    ctx.beginPath();ctx.moveTo(0,8);ctx.bezierCurveTo(-14,-2,-8,-14,0,-5);ctx.bezierCurveTo(8,-14,14,-2,0,8);ctx.closePath();
+    ctx.fillStyle=`rgba(212,112,106,${.4+lift*.6})`;ctx.shadowColor='#d4706a';ctx.shadowBlur=8+lift*14;ctx.fill();ctx.restore();
+    const n=Math.max(1,Math.round(amp*5));
+    for(let i=0;i<5;i++){ctx.fillStyle=i<n?'rgba(212,175,106,.9)':'rgba(233,228,214,.14)';ctx.fillRect(46+i*11,H-31,7,12);}
     pulseAnim=requestAnimationFrame(draw);
   }
   pulseAnim=requestAnimationFrame(draw);
@@ -3530,6 +3657,7 @@ $('#btnBeatsDone').onclick=()=>{
   addClue(L('切诊','Palpation'),
     L('自测静息脉搏：'+bpm+' 次/分'+(bpm>90?'（偏数）':bpm<60?'（偏迟）':'（平和）'),
       'Resting pulse: '+bpm+' bpm'+(bpm>90?' (rapid)':bpm<60?' (slow)':' (moderate)')), w);
+  if(window.setBPM) setBPM(bpm);   // 之后整个界面跟随玩家自己的心跳
   markPulseDone();
 };
 </script>
@@ -3580,7 +3708,7 @@ function startDeduce(){
   const log=$('#deduceLog'); log.innerHTML='';
   const lines=[];
   const topS=state.scores[state.top[0]];
-  lines.push({tag:L('汇总','SUM'), text:L(`四诊共收录线索 <b>${state.clues.length}</b> 条，加权演绎开始……`,`<b>${state.clues.length}</b> clues on file. Weighted deduction begins…`), cls:''});
+  lines.push({tag:L('汇总','SUM'), ico:'file', text:L(`四诊共收录线索 <b>${state.clues.length}</b> 条，加权演绎开始……`,`<b>${state.clues.length}</b> clues on file. Weighted deduction begins…`), cls:''});
   if(topS<3){
     lines.push({tag:L('辨证','PATTERN'), text:L('诸证权重皆轻 —— 十问九平，脉象和缓。','All pattern weights stay light — a calm pulse and even answers.'), cls:'gold'});
     lines.push({tag:L('结论','VERDICT'), text:L('侧写结论：<b>平和质</b> —— 身体大系统运转均衡。报告将给出「保养式」跨学科处方。','Verdict: <b>Balanced constitution</b> — the system runs in equilibrium. The report prescribes maintenance, cross-discipline style.'), cls:'verdict'});
@@ -3600,13 +3728,14 @@ function startDeduce(){
       lines.push({tag:L('结论','VERDICT'), text:L(`侧写结论 ${i+1}：<b>${PATTERNS[k].name}</b>（${PATTERNS[k].eng}） —— 吻合度 ${conf}%`,`Verdict ${i+1}: <b>${pName(k)}</b> — match ${conf}%`), cls:'verdict'});
     });
   }
-  lines.push({tag:L('备忘','NOTE'), text:L('以下为学习性推理，非医学诊断。真凶是否落网，仍需时间与专业检查验证。','This is educational reasoning, not a medical diagnosis. Time and proper tests make the final call.'), cls:''});
-  // 逐行上演
+  lines.push({tag:L('备忘','NOTE'), ico:'inquire', text:L('以下为学习性推理，非医学诊断。真凶是否落网，仍需时间与专业检查验证。','This is educational reasoning, not a medical diagnosis. Time and proper tests make the final call.'), cls:''});
+  // 逐行上演（标签以图标呈现，文字留在 title 里）
   lines.forEach((l,i)=>{
     setTimeout(()=>{
       const d=document.createElement('div');
       d.className='dl '+l.cls;
-      d.innerHTML=`<span class="tag">〔${l.tag}〕</span>${l.text}`;
+      const ico=l.ico||(l.cls==='verdict'?'badge':l.cls==='gold'?'orb':'detail');
+      d.innerHTML=`<i class="dlIco" title="${l.tag}">${GLYPH[ico]}</i><div class="dlTxt">${l.text}</div>`;
       log.appendChild(d);
       requestAnimationFrame(()=>d.classList.add('show'));
       if(i===lines.length-1) setTimeout(()=>{$('#btnReport').style.display='inline-block';},600);
@@ -3623,10 +3752,34 @@ function fitChart(cv){ // 按容器实际宽度设置像素尺寸，避免手机
   cv.getContext('2d').setTransform(dpr,0,0,dpr,0,0);
   return w;
 }
-function drawRadar(cv, vals, S, mini){
+/* 图表生命循环：先由零生长（k 0→1），随后持续呼吸（t 秒）；切屏时统一停止 */
+const CHART_LOOPS=[];
+function stopCharts(){ while(CHART_LOOPS.length) cancelAnimationFrame(CHART_LOOPS.pop().id); }
+function loopChart(cv,fn,dur){
+  const h={id:0}, t0=performance.now(); CHART_LOOPS.push(h);
+  const step=now=>{
+    if(!cv.isConnected) return;
+    const k=Math.max(0,Math.min(1,(now-t0)/dur));   // rAF 时间戳可能早于 t0，需下限截断
+    fn(1-Math.pow(1-k,3),Math.max(0,(now-t0)/1000));
+    h.id=requestAnimationFrame(step);
+  };
+  h.id=requestAnimationFrame(step);
+}
+function countUp(root){
+  root.querySelectorAll('[data-count]').forEach(el=>{
+    const end=+el.dataset.count, dec=+(el.dataset.dec||0), t0=performance.now();
+    (function step(now){
+      const k=Math.max(0,Math.min(1,(now-t0)/1100)), e=1-Math.pow(1-k,3);
+      el.textContent=(end*e).toFixed(dec);
+      if(k<1) requestAnimationFrame(step);
+    })(t0);
+  });
+}
+function drawRadar(cv, vals, S, mini, k=1, t=0){
   const ctx=cv.getContext('2d'), cx=S/2, cy=S/2, R=S*(mini?0.42:0.34);
   ctx.clearRect(0,0,S,S);
   const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3; return [cx+Math.cos(a)*r, cy+Math.sin(a)*r];};
+  const live=vals.map((v,i)=>v*k*(t>0?1+0.018*Math.sin(t*1.7+i*1.05):1));
   for(let ring=1;ring<=4;ring++){
     ctx.beginPath();
     for(let i=0;i<6;i++){const p=pt(i,R*ring/4); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}
@@ -3636,43 +3789,73 @@ function drawRadar(cv, vals, S, mini){
     const p=pt(i,R); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p[0],p[1]);
     ctx.strokeStyle='rgba(233,228,214,.1)'; ctx.stroke();
     if(mini) continue;
-    const lp=pt(i,R+S*0.082); ctx.fillStyle='rgba(233,228,214,.8)';
+    const lp=pt(i,R+S*0.082); ctx.fillStyle=`rgba(233,228,214,${.8*k})`;
     ctx.font=(S<260?'11px':'13px')+' serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(LANG==='en'?DIMS_EN[i]:DIMS[i][0], lp[0], lp[1]);
+    ctx.fillText(LANG==='en'?DIMS_EN[i][0]:DIMS[i][0], lp[0], lp[1]);
+  }
+  if(!mini){ // 呼吸光晕
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.05);
+    g.addColorStop(0,`rgba(106,212,200,${(.1+.05*Math.sin(t*2))*k})`); g.addColorStop(1,'rgba(106,212,200,0)');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R*1.05,0,7); ctx.fill();
   }
   ctx.beginPath();
-  vals.forEach((v,i)=>{const p=pt(i,R*v/100); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});
+  live.forEach((v,i)=>{const p=pt(i,R*v/100); i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});
   ctx.closePath();
-  ctx.fillStyle='rgba(106,212,200,.22)'; ctx.fill();
+  const fg=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);
+  fg.addColorStop(0,'rgba(106,212,200,.34)'); fg.addColorStop(1,'rgba(212,175,106,.22)');
+  ctx.fillStyle=fg; ctx.fill();
   ctx.strokeStyle='rgba(106,212,200,.9)'; ctx.lineWidth=2; ctx.stroke();
-  vals.forEach((v,i)=>{
+  live.forEach((v,i)=>{
     const p=pt(i,R*v/100);
+    if(t>0){ // 顶点向外扩散的涟漪
+      const rr=(t*0.8+i*0.17)%1;
+      ctx.beginPath(); ctx.arc(p[0],p[1],3+rr*(mini?7:13),0,7);
+      ctx.strokeStyle=`rgba(212,175,106,${(1-rr)*.5})`; ctx.lineWidth=1; ctx.stroke();
+    }
     ctx.beginPath(); ctx.arc(p[0],p[1],3.5,0,7);
-    ctx.fillStyle='#d4af6a'; ctx.fill();
+    ctx.fillStyle='#d4af6a'; ctx.shadowColor='#d4af6a'; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
   });
 }
-function drawWheel(cv, els, S){
+function drawWheel(cv, els, S, k=1, t=0){
   const ctx=cv.getContext('2d'), cx=S/2, cy=S/2;
   const COL={'木':'#4caf7d','火':'#d4706a','土':'#d4af6a','金':'#cfd6dd','水':'#5b8fd4'};
   const ORG={'木':['肝','Liver'],'火':['心','Heart'],'土':['脾','Spleen'],'金':['肺','Lung'],'水':['肾','Kidney']};
   const EN={'木':'Wood','火':'Fire','土':'Earth','金':'Metal','水':'Water'};
+  const KEYS=['木','火','土','金','水'];
   const max=Math.max(1,...Object.values(els));
   ctx.clearRect(0,0,S,S);
-  ['木','火','土','金','水'].forEach((e,i)=>{
-    const a0=-Math.PI/2+i*Math.PI*2/5, a1=a0+Math.PI*2/5-0.09;
-    const r=S*0.16+S*0.24*(els[e]/max);
+  // 外圈刻度缓慢自转
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(t*0.08);
+  ctx.strokeStyle='rgba(233,228,214,.14)'; ctx.lineWidth=1; ctx.setLineDash([2,6]);
+  ctx.beginPath(); ctx.arc(0,0,S*0.47,0,7); ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+  KEYS.forEach((e,i)=>{
+    const span=Math.PI*2/5-0.09, a0=-Math.PI/2+i*Math.PI*2/5, a1=a0+span*k;
+    const r=S*0.16+S*0.24*(els[e]/max)*(t>0?1+0.012*Math.sin(t*1.9+i):1);
     ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1);
-    ctx.strokeStyle=COL[e]; ctx.lineWidth=S*0.075; ctx.globalAlpha=0.85; ctx.stroke();
+    ctx.strokeStyle=COL[e]; ctx.lineWidth=S*0.075; ctx.globalAlpha=0.85;
+    ctx.shadowColor=COL[e]; ctx.shadowBlur=10; ctx.stroke(); ctx.shadowBlur=0;
     ctx.globalAlpha=1;
-    const am=(a0+a1)/2, lr=S*0.44;
-    ctx.fillStyle='rgba(233,228,214,.85)'; ctx.font=(S<260?'12px':'14px')+' serif';
+    const am=(a0+a0+span)/2, lr=S*0.44;
+    ctx.fillStyle=`rgba(233,228,214,${.85*k})`; ctx.font=(S<260?'12px':'14px')+' serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(LANG==='en'?`${EN[e]}·${ORG[e][1]}`:`${e}·${ORG[e][0]}`, cx+Math.cos(am)*lr, cy+Math.sin(am)*lr);
-    ctx.fillStyle=COL[e]; ctx.font='11px monospace';
-    ctx.fillText(els[e]+L('点',''), cx+Math.cos(am)*lr, cy+Math.sin(am)*lr+17);
+    ctx.fillStyle=COL[e]; ctx.globalAlpha=k; ctx.font='11px monospace';
+    ctx.fillText(String(els[e]), cx+Math.cos(am)*lr, cy+Math.sin(am)*lr+17); ctx.globalAlpha=1;
   });
-  ctx.fillStyle='rgba(233,228,214,.5)'; ctx.font='12px serif';
-  ctx.textAlign='center'; ctx.fillText(L('五行能量分布','Five Elements'), cx, cy);
+  // 相生之流：一点金光沿内环巡行
+  if(t>0){
+    const a=-Math.PI/2+t*0.55, r=S*0.12;
+    for(let j=0;j<6;j++){
+      const aa=a-j*0.12, al=(1-j/6)*.9;
+      ctx.fillStyle=`rgba(240,207,142,${al})`;
+      ctx.beginPath(); ctx.arc(cx+Math.cos(aa)*r,cy+Math.sin(aa)*r,2.4-j*.3,0,7); ctx.fill();
+    }
+  }
+  // 中心生命核：随呼吸胀缩
+  const cr=Math.max(.1,S*0.055*(1+0.1*Math.sin(t*2.4))*k);
+  const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,cr*2.2);
+  cg.addColorStop(0,'rgba(240,207,142,.9)'); cg.addColorStop(.45,'rgba(212,175,106,.35)'); cg.addColorStop(1,'rgba(212,175,106,0)');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(cx,cy,cr*2.2,0,7); ctx.fill();
 }
 
 /* ---------- 报告 ---------- */
@@ -3728,16 +3911,16 @@ $('#btnReport').onclick=()=>{
   <div class="rewardBanner"><div class="big">${L('案 件 告 破','C A S E   C L O S E D')}</div>
     <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div>
     <div class="rankRow"><div class="rankBadge"><span>${rk[0]}</span></div>
-      <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} ${filedN}/${orbTotal} · ${L('经验值','XP')} ${state.xp||0}<br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')} · ${L('徽章','Badges')} ${Object.keys(state.badges||{}).length}/${BADGES.length}</div></div>
+      <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} <span data-count="${filedN}">0</span>/${orbTotal} · ${L('经验值','XP')} <span data-count="${state.xp||0}">0</span><br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')} · ${L('徽章','Badges')} ${Object.keys(state.badges||{}).length}/${BADGES.length}</div></div>
     <div class="badgeWall">${BADGES.map(b=>{const got=(state.badges||{})[b.id];return `<div class="bw ${got?'on':''} ${got==='silver'?'silver':''}"><i>${GLYPH[b.id]}</i><span>${badgeName(b)}</span></div>`;}).join('')}</div></div>
   <div class="rCard"><h3>${L('案件档案','Case File')} · ${state.caseNo}</h3>
     <div class="statGrid">
       <div class="stat"><div class="k">${L('代号','Alias')}</div><div class="v">${i.name}</div></div>
       <div class="stat"><div class="k">${L('年龄段','Age')}</div><div class="v">${i.age}</div></div>
-      <div class="stat"><div class="k">BMI</div><div class="v">${b.toFixed(1)} <small>${bmiTxt}</small></div></div>
-      <div class="stat"><div class="k">${L('睡眠','Sleep')}</div><div class="v">${i.sleep}<small> ${L('h/晚','h/night')}</small></div></div>
-      <div class="stat"><div class="k">${L('压力指数','Stress')}</div><div class="v">${i.stress}<small> /10</small></div></div>
-      <div class="stat"><div class="k">${L('周运动','Exercise')}</div><div class="v">${i.ex}<small> ${L('次','/wk')}</small></div></div>
+      <div class="stat"><div class="k">BMI</div><div class="v"><span data-count="${b.toFixed(1)}" data-dec="1">0</span> <small>${bmiTxt}</small></div></div>
+      <div class="stat"><div class="k">${L('睡眠','Sleep')}</div><div class="v"><span data-count="${i.sleep}" data-dec="${Number.isInteger(i.sleep)?0:1}">0</span><small> ${L('h/晚','h/night')}</small></div></div>
+      <div class="stat"><div class="k">${L('压力指数','Stress')}</div><div class="v"><span data-count="${i.stress}">0</span><small> /10</small></div></div>
+      <div class="stat"><div class="k">${L('周运动','Exercise')}</div><div class="v"><span data-count="${i.ex}">0</span><small> ${L('次','/wk')}</small></div></div>
     </div></div>
   <div class="chartsRow">
     <div class="rCard"><h3>${L('六维状态雷达','Six-Dimension Radar')}</h3><div class="chartBox"><canvas class="chart" id="radarC" width="320" height="320"></canvas></div></div>
@@ -3848,8 +4031,12 @@ $('#btnReport').onclick=()=>{
   const rs=fitChart($('#radarC')), ws=fitChart($('#wheelC'));
   drawRadar($('#radarC'), state.dims, rs);
   drawWheel($('#wheelC'), state.elements, ws);
-  radarPNG=$('#radarC').toDataURL('image/png');
+  radarPNG=$('#radarC').toDataURL('image/png');   // 导出用静态帧
   wheelPNG=$('#wheelC').toDataURL('image/png');
+  stopCharts();
+  loopChart($('#radarC'),(k,t)=>drawRadar($('#radarC'),state.dims,rs,false,k,t),1400);
+  loopChart($('#wheelC'),(k,t)=>drawWheel($('#wheelC'),state.elements,ws,k,t),1400);
+  countUp(wrap);
   sizePath($('#pathC'));
   $('#btnPathDL').onclick=downloadPath;
 };
