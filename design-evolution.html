@@ -117,7 +117,8 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .chip{--c:var(--gold);--p:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:1px solid rgba(233,228,214,.1);border-radius:8px;color:var(--dim);transition:.3s}
 .chip .ring{position:relative;width:30px;height:30px;border-radius:50%;background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(233,228,214,.1) 0);display:flex;align-items:center;justify-content:center;transition:background .4s}
 .chip .ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:#0a0f1c}
-.chip .ring svg{position:relative;width:15px;height:15px;color:var(--c);opacity:.75}
+.chip .ring svg{position:relative;width:15px;height:15px;color:var(--c);opacity:.85;
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.4)) drop-shadow(0 0 5px color-mix(in srgb,var(--c) 70%,transparent))}
 .chip small{font:8.5px/1 monospace}
 .chip.clear{color:var(--c);border-color:var(--c);box-shadow:0 0 12px color-mix(in srgb,var(--c) 35%,transparent)}
 .chip.clear .ring{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
