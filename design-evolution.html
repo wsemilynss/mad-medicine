@@ -557,8 +557,9 @@ function setMode(m){mode=m;
 bpm.oninput=()=>{if(mode==='heart')applyMode();};
 brpm.oninput=()=>{if(mode==='breath')applyMode();};
 pGrid.onclick=e=>{const b=e.target.closest('button');if(!b)return;pIdx=+b.dataset.i;paintGrid();if(mode==='pulse')applyMode();};
+bGrid.onclick=e=>{const b=e.target.closest('button');if(!b)return;bIdx=+b.dataset.i;brpm.value=BREATHS[bIdx].rate;paintBGrid();if(mode==='breath')applyMode();};
 modeTabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.m);});
-paintGrid();setMode('heart');
+paintGrid();paintBGrid();setMode('heart');
 document.getElementById('dateStamp').textContent=new Date().toLocaleDateString('zh-CN');
 function countUp(){document.querySelectorAll('[data-count]').forEach(el=>{const end=+el.dataset.count,t0=performance.now();
   (function s(n){const k=Math.max(0,Math.min(1,(n-t0)/1200)),e=1-Math.pow(1-k,3);el.textContent=Math.round(end*e);if(k<1)requestAnimationFrame(s);})(t0);});}
