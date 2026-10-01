@@ -582,7 +582,7 @@ function applyMode(){
     rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aGlow','lubdubGlow');rs.setProperty('--aRim','lubdubRim');rs.setProperty('--aTf','ease-in-out');
     bpmV.textContent=bpm.value+' bpm';setVital(VITAL_D);return;}
   if(mode==='breath'){const b=BREATHS[bIdx],r=+brpm.value,cy=buildBreath(b,r),kf=genKF(cy.wave,cy.C);
-    rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
+    rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aRim',kf[2]);rs.setProperty('--aTf','linear');
     brpmV.textContent=r+' 次/分';
     breathDesc.innerHTML='<b>'+b.full+'</b>'+b.hint+' · '+b.zhu+' · '+b.meta;
     setVital(pathFromWave(cy.wave,cy.C));return;}
