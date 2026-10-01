@@ -479,10 +479,23 @@ const PULSES=[
  {n:'结',hint:'缓中一止',zhu:'阴盛气结 · 寒痰血瘀',meta:'止无定数 · 约54次/分',rate:54,amp:1,skip:{c:8,s:[3,6]},sh:{}},
  {n:'代',hint:'止有定数',zhu:'脏气衰微 · 痛证',meta:'动而中止 · 约66次/分',rate:66,amp:1,skip:{c:4,s:[3]},sh:{}},
  {n:'疾',hint:'脉流薄疾',zhu:'阳极阴竭 · 元气将脱',meta:'一息七至 · 约134次/分',rate:134,amp:.9,sh:{decay:.3}}];
-let mode='heart',pIdx=0,kc=0;
+/* 呼吸九态参数化：rate=频率(次/分)，amp=气息之势，inh=吸相占比(决定呼气长短)，rough=气息粗糙不匀，sigh=太息(周期末一记深息) */
+const BREATHS=[
+ {n:'平',full:'平气',hint:'从容和缓 · 节律均匀',zhu:'见于常人',meta:'约16次/分',rate:16,amp:1,inh:.42},
+ {n:'深',full:'深息',hint:'深缓绵长 · 腹式调息',zhu:'调息养生之用',meta:'约8次/分',rate:8,amp:1.26,inh:.46},
+ {n:'浅',full:'浅息',hint:'呼吸表浅 · 起伏甚微',zhu:'主肺脾气虚',meta:'约22次/分',rate:22,amp:.5,inh:.4},
+ {n:'粗',full:'气粗',hint:'声高息涌 · 按之有力',zhu:'主实证热证',meta:'约20次/分',rate:20,amp:1.18,inh:.38},
+ {n:'微',full:'少气',hint:'声低息微 · 气少不足以息',zhu:'主气血大虚',meta:'约12次/分',rate:12,amp:.3,inh:.42},
+ {n:'喘',full:'喘促',hint:'短促急迫 · 张口抬肩',zhu:'主肺失宣降、肾不纳气',meta:'约28次/分',rate:28,amp:.85,inh:.32,rough:.22},
+ {n:'哮',full:'哮鸣',hint:'呼气延长 · 喉间哮鸣',zhu:'主痰饮伏肺',meta:'约20次/分',rate:20,amp:.8,inh:.22},
+ {n:'短',full:'短气',hint:'气急而短 · 数不能续',zhu:'主气虚气滞',meta:'约32次/分',rate:32,amp:.55,inh:.3},
+ {n:'叹',full:'太息',hint:'胸闷善叹 · 叹后觉舒',zhu:'主肝气郁结',meta:'约14次/分 · 四息一叹',rate:14,amp:.95,inh:.4,sigh:{amp:1.7,len:1.45}}];
+let mode='heart',pIdx=0,bIdx=0,kc=0;
 const dynKF=document.createElement('style');document.head.appendChild(dynKF);
 pGrid.innerHTML=PULSES.map((p,i)=>`<button data-i="${i}" title="${p.n}脉 · ${p.hint} · 主${p.zhu}">${p.n}</button>`).join('');
 function paintGrid(){[...pGrid.children].forEach((b,i)=>b.classList.toggle('on',i===pIdx));}
+bGrid.innerHTML=BREATHS.map((b,i)=>`<button data-i="${i}" title="${b.full} · ${b.hint} · ${b.zhu}">${b.n}</button>`).join('');
+function paintBGrid(){[...bGrid.children].forEach((x,i)=>x.classList.toggle('on',i===bIdx));}
 function shapeAt(x,sh){sh=sh||{};
   const rise=sh.rise||.11,sus=sh.sustain||0,dec=sh.decay||.5;let v=0;
   if(x<rise){const u=x/rise;v=sh.round?u*u*(3-2*u):Math.pow(u,.65);}
