@@ -518,6 +518,16 @@ function buildCycle(p){
   else for(let i=0;i<4;i++)ev.push({t:i*D,a:p.amp});
   const C=(p.skip?p.skip.c:4)*D;
   return {C:C,wave:function(tm){let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,p.sh);}return v;}};}
+function buildBreath(b,rate){
+  const D=60/rate,ev=[],amps=b.sigh?[1,1,1,b.sigh.amp]:[1,1,1,1],lens=b.sigh?[1,1,1,b.sigh.len]:[1,1,1,1];
+  let t=0;for(let i=0;i<amps.length;i++){ev.push({t:t,d:D*lens[i],a:b.amp*amps[i]});t+=D*lens[i];}
+  const C=t;
+  return {C:C,wave:function(tm){let v=0;
+    for(const e of ev){const x=(tm-e.t)/e.d;
+      if(x>=0&&x<1){const p=b.inh||.4;let s=x<p?Math.sin(x/p*Math.PI/2):Math.cos((x-p)/(1-p)*Math.PI/2);
+        if(b.rough)s*=1-b.rough/2+b.rough*Math.abs(Math.sin(x*26));
+        v+=e.a*s;}}
+    return v;}};}
 function genKF(wave,C){const tag='dyn'+(++kc),M=44;let kb='',kg='';
   for(let k=0;k<=M;k++){const a=Math.min(1.35,Math.max(0,wave(k/M*C))),pc=(k/M*100).toFixed(2)+'%';
     kb+=pc+'{transform:scale('+(1+.13*a).toFixed(4)+')}';
