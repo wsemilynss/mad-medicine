@@ -8,7 +8,7 @@
 <style>
 :root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--line:rgba(212,175,106,.28);
   --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
-  --bpm:72;--beat:calc(60s / var(--bpm))}
+  --bpm:72;--beat:calc(60s / var(--bpm));--aBeat:lubdub;--aGlow:lubdubGlow;--aTf:ease-in-out}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased}
 main{max-width:1040px;margin:0 auto;padding:60px 22px 80px}
@@ -26,7 +26,7 @@ h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:no
 @keyframes lubdubGlow{0%,100%{opacity:.22}10%{opacity:.85}20%{opacity:.3}32%{opacity:.6}46%{opacity:.22}}
 @keyframes ringOut{from{transform:scale(1);opacity:.55}to{transform:scale(1.5);opacity:0}}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-.beat{animation:lubdub var(--beat) ease-in-out infinite}
+.beat{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 /* ECG 生命线 */
 .vital{display:block;width:100%;height:100%;overflow:visible}
 .vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
@@ -36,9 +36,24 @@ h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:no
 .hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
 .heroVital{width:min(420px,80vw);height:44px;color:var(--teal)}
 .bpmRow{display:flex;align-items:center;gap:14px;font:11px/1 monospace;letter-spacing:.2em;color:var(--dim)}
+.bpmRow[hidden]{display:none}
 .bpmRow b{font-size:22px;color:var(--goldb);letter-spacing:.04em;min-width:64px;text-align:right}
 .bpmRow input{width:220px;accent-color:var(--gold)}
 .heart{width:22px;height:22px;color:var(--cin);filter:drop-shadow(0 0 8px var(--cin))}
+/* 节拍源切换（心跳 / 呼吸 / 脉象） */
+.modeTabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.modeTabs .mtLabel{font:9px/1 monospace;letter-spacing:.3em;color:var(--dim);margin-right:2px}
+.modeTabs button{background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.15);color:var(--dim);padding:6px 16px;border-radius:999px;font-family:var(--serif);font-size:12px;letter-spacing:.2em;cursor:pointer;transition:.25s}
+.modeTabs button:hover{border-color:var(--gold);color:var(--goldb)}
+.modeTabs button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.1);box-shadow:0 0 14px rgba(212,175,106,.22)}
+.pulseRow{flex-direction:column;align-items:stretch;gap:10px;max-width:560px}
+.pulseRow .pHead{display:flex;align-items:center;gap:12px}
+.pGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;width:100%}
+.pGrid button{background:rgba(5,8,15,.55);border:1px solid rgba(233,228,214,.14);color:var(--dim);border-radius:9px;padding:7px 0;font-family:var(--serif);font-size:14px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent}
+.pGrid button:hover{border-color:var(--gold);color:var(--goldb)}
+.pGrid button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.12);box-shadow:0 0 12px rgba(212,175,106,.25)}
+.pDesc{font-size:11.5px;color:var(--dim);letter-spacing:.03em;line-height:1.7;font-family:var(--sans)}
+.pDesc b{color:var(--goldb);font-family:var(--serif);letter-spacing:.18em;margin-right:8px}
 /* 时间线 */
 .timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px}
 .timeline::before{content:"";position:absolute;left:8%;right:8%;top:22px;height:1px;background:rgba(233,228,214,.14)}
@@ -48,7 +63,7 @@ h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:no
 .tl:nth-child(1){animation-delay:.3s}.tl:nth-child(2){animation-delay:.8s}.tl:nth-child(3){animation-delay:1.3s}.tl:nth-child(4){animation-delay:1.8s}.tl:nth-child(5){animation-delay:2.3s}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .tl i{position:absolute;left:50%;top:14px;width:16px;height:16px;margin-left:-8px;transform:rotate(45deg);border:1px solid var(--gold);background:#0a0f1c;z-index:1}
-.tl:last-child i{background:var(--gold);box-shadow:0 0 16px var(--gold);animation:lubdub var(--beat) ease-in-out infinite}
+.tl:last-child i{background:var(--gold);box-shadow:0 0 16px var(--gold);animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .tl b{display:block;font-family:var(--serif);letter-spacing:.2em;font-size:15px;color:var(--goldb)}
 .tl small{display:block;font:9.5px/1.6 monospace;letter-spacing:.12em;color:var(--teal)}
 .tl span{display:block;font-size:11.5px;color:var(--dim);line-height:1.7;margin-top:6px}
@@ -92,7 +107,7 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .chip .ring svg{position:relative;width:15px;height:15px;color:var(--c);opacity:.75}
 .chip small{font:8.5px/1 monospace}
 .chip.clear{color:var(--c);border-color:var(--c);box-shadow:0 0 12px color-mix(in srgb,var(--c) 35%,transparent)}
-.chip.clear .ring{animation:lubdub var(--beat) ease-in-out infinite}
+.chip.clear .ring{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .xp{display:flex;align-items:center;gap:8px;font:9px monospace;letter-spacing:.14em;color:var(--gold)}
 .xp i{flex:1;height:3px;background:rgba(233,228,214,.12);overflow:hidden;display:block}
 .xp i b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--goldb));box-shadow:0 0 8px var(--gold);transition:width .45s cubic-bezier(.2,.8,.3,1)}
@@ -118,7 +133,7 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .organs{display:flex;align-items:center;justify-content:space-around;height:150px}
 .orb{position:relative;width:20px;height:20px;color:var(--gold)}
 .orb i{position:absolute;inset:3px;transform:rotate(45deg);border:1px solid currentColor;background:rgba(5,8,15,.8);box-shadow:0 0 16px currentColor}
-.orb::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,currentColor,transparent 70%);animation:lubdubGlow var(--beat) ease-in-out infinite}
+.orb::before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,currentColor,transparent 70%);animation:var(--aGlow) var(--beat) var(--aTf) infinite}
 .orb.teal{color:var(--teal)}.orb.cin{color:var(--cin)}
 .rank{position:relative;width:48px;height:48px;border:1px solid var(--gold);transform:rotate(45deg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;color:var(--goldb)}
 .rank span{transform:rotate(-45deg)}
@@ -171,7 +186,7 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
 .dl button:hover{transform:translateY(-2px)}
 .dl button:active{transform:scale(.96)}
-.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:lubdub var(--beat) ease-in-out infinite}
+.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 #recHint{width:100%;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;margin:2px 0 0;line-height:1.8}
 #recPrev{display:none;width:min(560px,100%);margin:6px auto 0;border:1px solid var(--line);border-radius:12px;background:#000}
 footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
@@ -242,9 +257,17 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   <h1>生 命 感 × 游 戏 性<small>MAD MEDICINE · 医理探案 · 五次设计跃迁对比说明</small></h1>
   <div class="hero">
     <div class="heroVital" data-vital></div>
-    <div class="bpmRow"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
+    <div class="modeTabs" id="modeTabs"><span class="mtLabel">节拍源</span><button data-m="heart" class="on">心 跳</button><button data-m="breath">呼 吸</button><button data-m="pulse">脉 象</button></div>
+    <div class="bpmRow" id="rowHeart"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
       <span>拖动 · 本页所有节拍随之改变</span><input type="range" id="bpm" min="48" max="120" value="72"><b id="bpmV">72 bpm</b></div>
-    <p class="lede">这份说明本身就是用 v4 的「生命感」语言写成的：页面上一切会动的东西，都跟随同一颗心脏。下面逐项对照每一次修改前后的差别，并给出提升分析。所有演示均为可运行的动态对照，而非静态截图。</p>
+    <div class="bpmRow" id="rowBreath" hidden><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--teal);filter:drop-shadow(0 0 8px var(--teal))"><path d="M4 15h17a4 4 0 1 0-4-4M4 21h24a4 4 0 1 1-4 4M4 27h13a3.5 3.5 0 1 1-3.5 3.5"/></svg>
+      <span>拖动 · 全页随一呼一吸起伏</span><input type="range" id="brpm" min="6" max="24" value="14"><b id="brpmV">14 次/分</b></div>
+    <div class="bpmRow pulseRow" id="rowPulse" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);filter:drop-shadow(0 0 8px var(--gold))"><path d="M3 22h8l3-9 5 18 4-14 3 5h11"/></svg>
+      <span>择脉 · 二十八脉位、数、形、势各异 —— 点按以候其气，全页节拍随脉势改变</span></span>
+      <div class="pGrid" id="pGrid"></div>
+      <div class="pDesc" id="pulseDesc"></div></div>
+    <p class="lede">这份说明本身就是用 v4 的「生命感」语言写成的：页面上一切会动的东西，都跟随同一颗心脏——页首可将节拍源切换为「心跳 · 呼吸 · 二十八脉象」，比较三种生命节律下整页气质的差异。下面逐项对照每一次修改前后的差别，并给出提升分析。所有演示均为可运行的动态对照，而非静态截图。</p>
   </div>
 
   <h2>一 · 演进时间线<em>TIMELINE</em></h2>
@@ -327,7 +350,7 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
         <div class="note">光点、徽章、雷达都有动画，但周期与相位互不相关，整体像一堆各自闪烁的部件。</div></div>
       <div class="pane after"><div class="tag"><span>AFTER · v4</span><i>同一颗心脏 · --bpm</i></div>
         <div class="organs"><div class="orb"><i></i></div><div class="orb teal"><i></i></div><div class="rank"><span>A</span></div><div class="orb cin"><i></i></div><div class="miniVital" data-vital></div></div>
-        <div class="note">全站只有一个节拍源 <code>--beat = 60s / --bpm</code>：光晕、章节环、仪表、雷达、段位徽章、ECG 生命线全部按「lub-dub」双峰同步搏动。进入把脉时同步为模拟脉率，玩家自测心率后整个界面改随<b>自己的心跳</b>——拖动页首滑杆即可体验。</div></div>
+        <div class="note">全站只有一个节拍源 <code>--beat = 60s / --bpm</code>：光晕、章节环、仪表、雷达、段位徽章、ECG 生命线全部按「lub-dub」双峰同步搏动。进入把脉时同步为模拟脉率，玩家自测心率后整个界面改随<b>自己的心跳</b>——拖动页首滑杆即可体验；页首亦可把节拍源切换为「呼吸」或「二十八脉象」，对比三种生命节律下整页气质的差异。</div></div>
     </div>
     <div class="gain"><span class="g">v4 独有</span><span>生命感：系统被感知为一个有机体</span><span>专业性：与切诊数据打通</span></div>
   </div>
@@ -391,8 +414,97 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
 /* ---------- 通用：ECG 生命线 / 心跳滑杆 / 计数 ---------- */
 const VITAL_D='M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105';
 document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="${VITAL_D}"/><path class="vRun" d="${VITAL_D}"/></svg>`);
-const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV');
-bpm.oninput=()=>{document.documentElement.style.setProperty('--bpm',bpm.value);bpmV.textContent=bpm.value+' bpm';};
+const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV'),
+      brpm=document.getElementById('brpm'),brpmV=document.getElementById('brpmV'),
+      rowHeart=document.getElementById('rowHeart'),rowBreath=document.getElementById('rowBreath'),rowPulse=document.getElementById('rowPulse'),
+      pGrid=document.getElementById('pGrid'),pulseDesc=document.getElementById('pulseDesc'),modeTabs=document.getElementById('modeTabs');
+/* ---------- 节拍源：心跳 / 呼吸 / 二十八脉象 ----------
+   脉象参数化：rate=至数(次/分)，amp=指下之势，sh=波形(rise 升支/sustain 持续/decay 降支/round 圆软/hollow 中空/tremor 震颤/rough 艰涩)，skip=歇止，scat=散漫 */
+const PULSES=[
+ {n:'浮',hint:'如水漂木',zhu:'表证',meta:'至数如常 · 约72次/分',rate:72,amp:1.12,sh:{rise:.07,decay:.42}},
+ {n:'沉',hint:'如石投水',zhu:'里证',meta:'至数如常 · 约70次/分',rate:70,amp:.5,sh:{rise:.16,decay:.55}},
+ {n:'迟',hint:'一息三至',zhu:'寒证',meta:'不足四至 · 约46次/分',rate:46,amp:1,sh:{}},
+ {n:'数',hint:'一息六至',zhu:'热证',meta:'往来急促 · 约108次/分',rate:108,amp:.95,sh:{decay:.4}},
+ {n:'滑',hint:'如珠走盘',zhu:'痰饮 · 食滞 · 实热',meta:'往来流利 · 约80次/分',rate:80,amp:1.05,sh:{rise:.13,round:1}},
+ {n:'涩',hint:'轻刀刮竹',zhu:'精伤血少 · 气滞血瘀',meta:'往来艰涩 · 约62次/分',rate:62,amp:.8,sh:{rough:.45,decay:.45}},
+ {n:'虚',hint:'豁然而空',zhu:'气血两虚',meta:'举按无力 · 约68次/分',rate:68,amp:.38,sh:{round:1}},
+ {n:'实',hint:'充实满指',zhu:'实证',meta:'举按有力 · 约78次/分',rate:78,amp:1.25,sh:{sustain:.08}},
+ {n:'长',hint:'过于本位',zhu:'阳证 · 热证',meta:'首尾端长 · 约64次/分',rate:64,amp:1.05,sh:{decay:.82}},
+ {n:'短',hint:'不及本位',zhu:'气郁 · 气虚',meta:'首尾俱短 · 约76次/分',rate:76,amp:.9,sh:{rise:.09,decay:.26}},
+ {n:'洪',hint:'波涛汹涌',zhu:'气分热盛',meta:'来盛去衰 · 约88次/分',rate:88,amp:1.35,sh:{rise:.06,decay:.38}},
+ {n:'微',hint:'似有似无',zhu:'气血大虚 · 阳气衰微',meta:'极细极软 · 约60次/分',rate:60,amp:.2,sh:{}},
+ {n:'紧',hint:'如转绳索',zhu:'寒 · 痛 · 宿食',meta:'绷急弹指 · 约84次/分',rate:84,amp:1.05,sh:{sustain:.1,tremor:.38,decay:.35}},
+ {n:'缓',hint:'从容和缓',zhu:'湿证 · 脾虚',meta:'一息四至 · 约58次/分',rate:58,amp:.95,sh:{round:1}},
+ {n:'芤',hint:'如按葱管',zhu:'失血 · 伤阴',meta:'浮大中空 · 约74次/分',rate:74,amp:1.1,sh:{hollow:1}},
+ {n:'弦',hint:'如按琴弦',zhu:'肝胆病 · 痛 · 痰饮',meta:'端直以长 · 约76次/分',rate:76,amp:1.1,sh:{rise:.1,sustain:.16,decay:.32}},
+ {n:'革',hint:'如按鼓皮',zhu:'亡血 · 失精',meta:'弦大中空 · 约72次/分',rate:72,amp:1,sh:{hollow:1,sustain:.08}},
+ {n:'牢',hint:'坚牢不移',zhu:'阴寒内实 · 疝气癥瘕',meta:'沉而实大 · 约66次/分',rate:66,amp:1.15,sh:{rise:.18,decay:.6,sustain:.06}},
+ {n:'濡',hint:'如帛浮水',zhu:'虚证 · 湿证',meta:'浮细而软 · 约70次/分',rate:70,amp:.5,sh:{rise:.13,round:1}},
+ {n:'弱',hint:'无力应指',zhu:'气血不足',meta:'沉细而软 · 约64次/分',rate:64,amp:.32,sh:{rise:.15}},
+ {n:'散',hint:'杨花散漫',zhu:'元气离散',meta:'至数不齐 · 快慢无序',rate:68,amp:.8,scat:1,sh:{}},
+ {n:'细',hint:'细如丝线',zhu:'气血两虚 · 诸虚劳损 · 湿证',meta:'应指显然 · 约72次/分',rate:72,amp:.45,sh:{decay:.32}},
+ {n:'伏',hint:'推筋着骨',zhu:'邪闭 · 厥证 · 痛极',meta:'重按乃得 · 约58次/分',rate:58,amp:.12,sh:{}},
+ {n:'动',hint:'如豆动摇',zhu:'痛证 · 惊证',meta:'厥厥滑数 · 约96次/分',rate:96,amp:1,sh:{rise:.1,decay:.28,round:1}},
+ {n:'促',hint:'数中一止',zhu:'阳盛实热 · 气血痰食停滞',meta:'止无定数 · 约106次/分',rate:106,amp:1,skip:{c:8,s:[3,6]},sh:{}},
+ {n:'结',hint:'缓中一止',zhu:'阴盛气结 · 寒痰血瘀',meta:'止无定数 · 约54次/分',rate:54,amp:1,skip:{c:8,s:[3,6]},sh:{}},
+ {n:'代',hint:'止有定数',zhu:'脏气衰微 · 痛证',meta:'动而中止 · 约66次/分',rate:66,amp:1,skip:{c:4,s:[3]},sh:{}},
+ {n:'疾',hint:'脉流薄疾',zhu:'阳极阴竭 · 元气将脱',meta:'一息七至 · 约134次/分',rate:134,amp:.9,sh:{decay:.3}}];
+let mode='heart',pIdx=0,kc=0;
+const dynKF=document.createElement('style');document.head.appendChild(dynKF);
+pGrid.innerHTML=PULSES.map((p,i)=>`<button data-i="${i}" title="${p.n}脉 · ${p.hint} · 主${p.zhu}">${p.n}</button>`).join('');
+function paintGrid(){[...pGrid.children].forEach((b,i)=>b.classList.toggle('on',i===pIdx));}
+function shapeAt(x,sh){sh=sh||{};
+  const rise=sh.rise||.11,sus=sh.sustain||0,dec=sh.decay||.5;let v=0;
+  if(x<rise){const u=x/rise;v=sh.round?u*u*(3-2*u):Math.pow(u,.65);}
+  else if(x<rise+sus)v=1;
+  else{const u=(x-rise-sus)/dec;
+    if(u>=0&&u<1){v=1-u;
+      if(sh.hollow)v*=1-.8*Math.exp(-Math.pow((u-.3)/.13,2));
+      else v+=.15*Math.exp(-Math.pow((u-.42)/.15,2));
+      if(v<0)v=0;}}
+  if(sh.tremor)v*=1-sh.tremor/2+sh.tremor*Math.abs(Math.sin(x*44));
+  if(sh.rough)v*=Math.max(.3,1+sh.rough*.6*(Math.sin(x*29)*.6+Math.sin(x*53+1.3)*.4));
+  return v;}
+function buildCycle(p){
+  const D=60/p.rate,ev=[];
+  if(p.scat){const jit=[0,.35,-.2,.5,-.3,.25,-.15],amps=[.7,.3,.9,.2,.55,.35,.18];let t=0;
+    for(let i=0;i<7;i++){ev.push({t:t,a:p.amp*amps[i]});t+=D*(1+jit[i]);}
+    const C=t+D*.5;
+    return {C:C,wave:function(tm){let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,p.sh);}return v;}};}
+  if(p.skip){for(let i=0;i<p.skip.c;i++)if(p.skip.s.indexOf(i)<0)ev.push({t:i*D,a:p.amp});}
+  else for(let i=0;i<4;i++)ev.push({t:i*D,a:p.amp});
+  const C=(p.skip?p.skip.c:4)*D;
+  return {C:C,wave:function(tm){let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,p.sh);}return v;}};}
+function genKF(wave,C){const tag='dyn'+(++kc),M=44;let kb='',kg='';
+  for(let k=0;k<=M;k++){const a=Math.min(1.35,Math.max(0,wave(k/M*C))),pc=(k/M*100).toFixed(2)+'%';
+    kb+=pc+'{transform:scale('+(1+.13*a).toFixed(4)+')}';
+    kg+=pc+'{opacity:'+Math.min(.95,.2+.62*a).toFixed(3)+'}';}
+  dynKF.textContent='@keyframes '+tag+'B{'+kb+'}@keyframes '+tag+'G{'+kg+'}';
+  return [tag+'B',tag+'G'];}
+function pathFromWave(wave,C){const N=140;let d='M0 20';for(let i=1;i<=N;i++){const v=Math.min(1.35,Math.max(0,wave(i/N*C)));d+='L'+(i/N*240).toFixed(1)+' '+(20-v*14).toFixed(1);}return d;}
+function setVital(d){document.querySelectorAll('[data-vital] path').forEach(p=>p.setAttribute('d',d));}
+function applyMode(){
+  const rs=document.documentElement.style;
+  if(mode==='heart'){dynKF.textContent='';
+    rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aGlow','lubdubGlow');rs.setProperty('--aTf','ease-in-out');
+    bpmV.textContent=bpm.value+' bpm';setVital(VITAL_D);return;}
+  if(mode==='breath'){const r=+brpm.value,C=60/r,w=t=>{const x=(t/C)%1;return x<.4?Math.sin(x/.4*Math.PI/2):Math.cos((x-.4)/.6*Math.PI/2);};
+    const kf=genKF(w,C);
+    rs.setProperty('--bpm',r);rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
+    brpmV.textContent=r+' 次/分';setVital(pathFromWave(w,C));return;}
+  const p=PULSES[pIdx],cy=buildCycle(p),kf=genKF(cy.wave,cy.C);
+  rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
+  pulseDesc.innerHTML='<b>'+p.n+'脉</b>'+p.hint+' · 主'+p.zhu+' · '+p.meta;
+  setVital(pathFromWave(cy.wave,cy.C));}
+function setMode(m){mode=m;
+  [...modeTabs.querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x.dataset.m===m));
+  rowHeart.hidden=m!=='heart';rowBreath.hidden=m!=='breath';rowPulse.hidden=m!=='pulse';
+  applyMode();}
+bpm.oninput=()=>{if(mode==='heart')applyMode();};
+brpm.oninput=()=>{if(mode==='breath')applyMode();};
+pGrid.onclick=e=>{const b=e.target.closest('button');if(!b)return;pIdx=+b.dataset.i;paintGrid();if(mode==='pulse')applyMode();};
+modeTabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.m);});
+paintGrid();setMode('heart');
 document.getElementById('dateStamp').textContent=new Date().toLocaleDateString('zh-CN');
 function countUp(){document.querySelectorAll('[data-count]').forEach(el=>{const end=+el.dataset.count,t0=performance.now();
   (function s(n){const k=Math.max(0,Math.min(1,(n-t0)/1200)),e=1-Math.pow(1-k,3);el.textContent=Math.round(end*e);if(k<1)requestAnimationFrame(s);})(t0);});}
