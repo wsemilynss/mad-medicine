@@ -580,6 +580,9 @@ const GLYPH={
 };
 document.getElementById('icoRow').innerHTML=[['file','建 档','30 s · skippable'],['orb','捕 捉','tap orbs'],['badge','通 关','4 chapters'],['gift','奖 励','report · play']]
   .map(a=>`<div class="ico">${GLYPH[a[0]]}<b>${a[1]}</b><small>${a[2]}</small></div>`).join('');
+document.getElementById('beatDemo').insertAdjacentHTML('beforeend',
+  [['observe','望诊','var(--gold)'],['listen','闻诊','var(--teal)'],['inquire','问诊','var(--cin)'],['pulse','切诊','#e9e4d6'],['orb','捕捉','var(--goldb)'],['badge','徽章','var(--teal)']]
+  .map(a=>`<span class="bdIco" style="color:${a[2]}" title="${a[1]} · 随当前节拍搏动">${GLYPH[a[0]]}</span>`).join(''));
 
 /* ---------- Demo A：环绕捕捉 · 由虚到实 ---------- */
 (function(){
