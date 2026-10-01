@@ -579,7 +579,7 @@ function setVital(d){document.querySelectorAll('[data-vital] path').forEach(p=>p
 function applyMode(){
   const rs=document.documentElement.style;
   if(mode==='heart'){dynKF.textContent='';
-    rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aGlow','lubdubGlow');rs.setProperty('--aTf','ease-in-out');
+    rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aGlow','lubdubGlow');rs.setProperty('--aRim','lubdubRim');rs.setProperty('--aTf','ease-in-out');
     bpmV.textContent=bpm.value+' bpm';setVital(VITAL_D);return;}
   if(mode==='breath'){const b=BREATHS[bIdx],r=+brpm.value,cy=buildBreath(b,r),kf=genKF(cy.wave,cy.C);
     rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
