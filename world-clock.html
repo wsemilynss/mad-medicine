@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>World Clock · MAD MEDICINE</title>
+<style>
+  :root {
+    color-scheme: dark;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    background: #070c15;
+    color: #f3f0e8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 85% 0%, #18353c 0%, transparent 48%), #070c15; }
+  a { color: #e7c487; }
+  a:focus-visible, button:focus-visible, select:focus-visible { outline: 3px solid #85e4d7; outline-offset: 3px; }
+  main { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 5rem; }
+  .back { display: inline-block; padding: .4rem 0; text-decoration: none; }
+  .eyebrow { margin: 3rem 0 .7rem; color: #e7c487; font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; }
+  h1 { margin: 0; font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 600; letter-spacing: -.055em; line-height: 1.1; }
+  .intro { max-width: 60ch; color: #c5cbd0; line-height: 1.65; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin: 2.5rem 0 1rem; }
+  .field { display: grid; gap: .5rem; flex: 1 1 260px; max-width: 480px; }
+  label { color: #d9e4e3; font-weight: 600; }
+  select, button { min-height: 3rem; border-radius: .7rem; font: inherit; }
+  select { width: 100%; padding: .6rem .8rem; border: 1px solid #79918f; color: #fff; background: #15232d; }
+  button { padding: .6rem 1.2rem; border: 1px solid #e7c487; color: #101a20; background: #e7c487; font-weight: 700; cursor: pointer; }
+  button:hover { background: #f6dba8; }
+  #message { min-height: 1.6em; margin: .4rem 0 1.5rem; color: #b9ded9; }
+  .clocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 310px), 1fr)); gap: 1rem; padding: 0; margin: 0; list-style: none; }
+  .card { height: 100%; padding: 1.5rem; border: 1px solid #40565a; border-radius: 1.15rem; background: #111d28; box-shadow: 0 14px 36px #0004; }
+  .card.local { border-color: #af9464; background: #202525; }
+  .card-head { display: flex; align-items: start; justify-content: space-between; gap: .5rem; }
+  h2 { margin: 0; font-size: 1.35rem; }
+  .zone { margin: .4rem 0 0; color: #b7c6ca; font-size: .86rem; overflow-wrap: anywhere; }
+  .time { display: block; margin: 1.8rem 0 .75rem; font-size: clamp(2.1rem, 5vw, 3.2rem); font-weight: 600; letter-spacing: -.045em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .date { color: #e1e6e2; }
+  .day { display: inline-block; margin: .85rem 0 0; padding: .3rem .55rem; border-radius: .4rem; color: #172022; background: #91dacf; font-size: .8rem; font-weight: 700; }
+  .day[hidden] { display: none; }
+  .remove { min-height: 2.5rem; padding: .35rem .65rem; border-color: #718b8b; color: #e1eeeb; background: transparent; font-size: .85rem; }
+  .remove:hover { background: #294247; }
+  @media (max-width: 500px) {
+    main { padding-top: 1rem; }
+    .eyebrow { margin-top: 2rem; }
+    .toolbar button { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./index.html">← MAD MEDICINE</a>
+  <p class="eyebrow">Across the day</p>
+  <h1>World clock</h1>
+  <p class="intro">A clear view of the time wherever you need it. Dates and day changes follow each location’s own time zone, including daylight saving time.</p>
+  <form id="add-clock" class="toolbar">
+    <div class="field">
+      <label for="timezone">Add a time zone</label>
+      <select id="timezone" required>
+        <option value="">Choose a time zone</option>
+      </select>
+    </div>
+    <button type="submit">Add clock</button>
+  </form>
+  <p id="message" role="status" aria-live="polite"></p>
+  <ul id="clocks" class="clocks" aria-label="World clocks"></ul>
+  <noscript><p>Enable JavaScript to show live clocks.</p></noscript>
+</main>
+<script>
+(() => {
+  const defaults = [
+    { name: 'New York', zone: 'America/New_York' },
+    { name: 'London', zone: 'Europe/London' },
+    { name: 'Tokyo', zone: 'Asia/Tokyo' },
+    { name: 'Sydney', zone: 'Australia/Sydney' }
+  ];
+  const fallbackZones = [
+    'America/Los_Angeles', 'America/Chicago', 'America/New_York',
+    'America/Toronto', 'America/Sao_Paulo', 'Europe/London',
+    'Europe/Paris', 'Europe/Berlin', 'Africa/Johannesburg',
+    'Asia/Dubai', 'Asia/Kolkata', 'Asia/Singapore', 'Asia/Shanghai',
+    'Asia/Tokyo', 'Australia/Sydney', 'Pacific/Auckland', 'UTC'
+  ];
+  const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const select = document.getElementById('timezone');
+  const list = document.getElementById('clocks');
+  const message = document.getElementById('message');
+  const clocks = [];
+  let timer;
+
+  let zones = fallbackZones;
+  if (typeof Intl.supportedValuesOf === 'function') {
+    try { zones = Intl.supportedValuesOf('timeZone'); } catch { zones = fallbackZones; }
+  }
+  for (const zone of [...new Set([...zones, localZone, ...defaults.map(city => city.zone)])].sort()) {
+    const option = document.createElement('option');
+    option.value = zone;
+    option.textContent = zone.replaceAll('_', ' ').replace('/', ' / ');
+    select.append(option);
+  }
+
+  function calendarDay(formatter, now) {
+    const parts = Object.fromEntries(formatter.formatToParts(now).map(part => [part.type, part.value]));
+    return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day));
+  }
+
+  function addClock(name, zone, removable = false, local = false) {
+    const entry = {
+      zone, removable,
+      timeFormat: new Intl.DateTimeFormat(undefined, { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }),
+      dateFormat: new Intl.DateTimeFormat(undefined, { timeZone: zone, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      dayFormat: new Intl.DateTimeFormat('en-US', { timeZone: zone, year: 'numeric', month: 'numeric', day: 'numeric' })
+    };
+    const item = document.createElement('li');
+    item.className = 'card' + (local ? ' local' : '');
+    const head = document.createElement('div');
+    head.className = 'card-head';
+    const heading = document.createElement('div');
+    const title = document.createElement('h2');
+    title.textContent = name;
+    const label = document.createElement('p');
+    label.className = 'zone';
+    label.textContent = zone;
+    heading.append(title, label);
+    head.append(heading);
+    if (removable) {
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'remove';
+      remove.textContent = 'Remove';
+      remove.setAttribute('aria-label', 'Remove ' + name + ' clock');
+      remove.addEventListener('click', () => {
+        clocks.splice(clocks.indexOf(entry), 1);
+        item.remove();
+        message.textContent = name + ' clock removed.';
+        select.focus();
+      });
+      head.append(remove);
+    }
+    const time = document.createElement('time');
+    time.className = 'time';
+    const date = document.createElement('div');
+    date.className = 'date';
+    const day = document.createElement('span');
+    day.className = 'day';
+    day.hidden = true;
+    item.append(head, time, date, day);
+    list.append(item);
+    Object.assign(entry, { time, date, day });
+    clocks.push(entry);
+  }
+
+  function update() {
+    const now = new Date();
+    const localDay = calendarDay(clocks[0].dayFormat, now);
+    for (const clock of clocks) {
+      clock.time.textContent = clock.timeFormat.format(now);
+      clock.date.textContent = clock.dateFormat.format(now);
+      const delta = Math.round((calendarDay(clock.dayFormat, now) - localDay) / 86400000);
+      clock.day.hidden = delta === 0;
+      clock.day.textContent = delta === 1 ? 'Tomorrow relative to you' : delta === -1 ? 'Yesterday relative to you' : (delta > 0 ? '+' : '') + delta + ' days relative to you';
+    }
+  }
+
+  function tick() {
+    update();
+    timer = setTimeout(tick, 1000 - Date.now() % 1000);
+  }
+
+  addClock('Your local time', localZone, false, true);
+  for (const city of defaults) addClock(city.name, city.zone);
+  tick();
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      clearTimeout(timer);
+      tick();
+    }
+  });
+  document.getElementById('add-clock').addEventListener('submit', event => {
+    event.preventDefault();
+    const zone = select.value;
+    if (!zone) { message.textContent = 'Choose a time zone first.'; return; }
+    if (clocks.some(clock => clock.zone === zone)) {
+      message.textContent = zone + ' is already displayed.';
+      return;
+    }
+    try {
+      addClock(zone.split('/').pop().replaceAll('_', ' '), zone, true);
+    } catch (error) {
+      if (!(error instanceof RangeError)) throw error;
+      message.textContent = 'This time zone is not available in your browser.';
+      return;
+    }
+    update();
+    message.textContent = zone + ' clock added.';
+    select.value = '';
+  });
+})();
+</script>
+</body>
+</html>
