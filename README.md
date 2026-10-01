@@ -37,6 +37,10 @@ https://<你的用户名>.github.io/<仓库名>/
 
 直接用浏览器打开 `index.html` 即可（视频需与 `index.html` 放在同一目录）。
 
+## 自动同步发布
+
+双击 `启动自动同步.bat`（或运行 `node auto-sync.js`）后保持窗口开启：每次保存 `index.html` / `design-evolution.html` 等待发布文件，脚本会自动提交并推送到 GitHub，GitHub Pages 随即重新发布，网页端与手机端共用同一网址、约 1 分钟后同时看到最新版本。按 `Ctrl+C` 停止。
+
 ## 文件说明
 
 | 文件 | 作用 |
