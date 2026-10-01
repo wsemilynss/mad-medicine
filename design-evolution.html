@@ -446,7 +446,8 @@ document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vi
 const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV'),
       brpm=document.getElementById('brpm'),brpmV=document.getElementById('brpmV'),
       rowHeart=document.getElementById('rowHeart'),rowBreath=document.getElementById('rowBreath'),rowPulse=document.getElementById('rowPulse'),
-      pGrid=document.getElementById('pGrid'),pulseDesc=document.getElementById('pulseDesc'),modeTabs=document.getElementById('modeTabs');
+      pGrid=document.getElementById('pGrid'),pulseDesc=document.getElementById('pulseDesc'),modeTabs=document.getElementById('modeTabs'),
+      bGrid=document.getElementById('bGrid'),breathDesc=document.getElementById('breathDesc');
 /* ---------- 节拍源：心跳 / 呼吸 / 二十八脉象 ----------
    脉象参数化：rate=至数(次/分)，amp=指下之势，sh=波形(rise 升支/sustain 持续/decay 降支/round 圆软/hollow 中空/tremor 震颤/rough 艰涩)，skip=歇止，scat=散漫 */
 const PULSES=[
