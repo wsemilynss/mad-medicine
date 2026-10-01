@@ -541,10 +541,11 @@ function applyMode(){
   if(mode==='heart'){dynKF.textContent='';
     rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aGlow','lubdubGlow');rs.setProperty('--aTf','ease-in-out');
     bpmV.textContent=bpm.value+' bpm';setVital(VITAL_D);return;}
-  if(mode==='breath'){const r=+brpm.value,C=60/r,w=t=>{const x=(t/C)%1;return x<.4?Math.sin(x/.4*Math.PI/2):Math.cos((x-.4)/.6*Math.PI/2);};
-    const kf=genKF(w,C);
-    rs.setProperty('--bpm',r);rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
-    brpmV.textContent=r+' 次/分';setVital(pathFromWave(w,C));return;}
+  if(mode==='breath'){const b=BREATHS[bIdx],r=+brpm.value,cy=buildBreath(b,r),kf=genKF(cy.wave,cy.C);
+    rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
+    brpmV.textContent=r+' 次/分';
+    breathDesc.innerHTML='<b>'+b.full+'</b>'+b.hint+' · '+b.zhu+' · '+b.meta;
+    setVital(pathFromWave(cy.wave,cy.C));return;}
   const p=PULSES[pIdx],cy=buildCycle(p),kf=genKF(cy.wave,cy.C);
   rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aGlow',kf[1]);rs.setProperty('--aTf','linear');
   pulseDesc.innerHTML='<b>'+p.n+'脉</b>'+p.hint+' · 主'+p.zhu+' · '+p.meta;
