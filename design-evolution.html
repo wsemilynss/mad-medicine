@@ -58,16 +58,27 @@ h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:no
 /* 页首节拍演示：一列随当前节拍源搏动的图标 */
 .beatDemo{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
 .bdLabel{font:9px/1 monospace;letter-spacing:.3em;color:var(--dim)}
-.bdIco{position:relative;width:46px;height:46px;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:13px;
-  background:radial-gradient(140% 140% at 50% 0%,#141b29,#05070e 52%,#010204) padding-box,
-    conic-gradient(from 210deg,#eef3fb,#79839a 20%,#e9eff9 40%,#454e61 58%,#d8e1ef 74%,#94a0b6 88%,#eef3fb) border-box;
-  box-shadow:inset 0 1px 2px rgba(255,255,255,.10),inset 0 -3px 8px rgba(0,0,0,.7),inset 0 0 14px rgba(0,0,0,.5),0 5px 18px rgba(0,0,0,.5),0 0 22px rgba(190,205,230,.08)}
-.bdIco::before{content:"";position:absolute;inset:-9px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,rgba(232,239,252,.95) 72%,currentColor),transparent 68%);filter:blur(5px);animation:var(--aGlow) var(--beat) var(--aTf) infinite}
+.bdIco{position:relative;width:46px;height:46px;display:flex;align-items:center;justify-content:center;border:0;border-radius:13px;
+  background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.06),transparent 55%),
+    linear-gradient(255deg,rgba(110,140,190,.05),transparent 45%),
+    radial-gradient(140% 140% at 50% 0%,#151c2a,#05070e 52%,#010204);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.08),inset 0 -3px 8px rgba(0,0,0,.72),inset 0 0 14px rgba(0,0,0,.5),0 5px 16px rgba(0,0,0,.5)}
+.bdIco::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.3px;pointer-events:none;
+  background:conic-gradient(from 0deg,
+    color-mix(in srgb,#eef3f9 86%,currentColor),color-mix(in srgb,#cfd8e6 90%,currentColor) 32deg,
+    #79839a 58deg,#454e63 92deg,#5c6579 122deg,
+    color-mix(in srgb,#c2cbda 90%,currentColor) 152deg,color-mix(in srgb,#dfe6f0 87%,currentColor) 180deg,
+    color-mix(in srgb,#b3bdce 90%,currentColor) 208deg,#68718a 244deg,#59617a 272deg,
+    color-mix(in srgb,#a9b3c6 90%,currentColor) 302deg,color-mix(in srgb,#e6ecf5 86%,currentColor) 334deg,
+    color-mix(in srgb,#eef3f9 86%,currentColor));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  animation:var(--aRim) var(--beat) var(--aTf) infinite}
 .bdIco::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:linear-gradient(118deg,rgba(255,255,255,.14),rgba(255,255,255,.03) 34%,transparent 55%),
-    radial-gradient(90% 60% at 50% 0%,rgba(255,255,255,.09),transparent 70%)}
+  background:linear-gradient(118deg,rgba(255,255,255,.09),rgba(255,255,255,.02) 34%,transparent 55%),
+    radial-gradient(80% 46% at 50% 0%,rgba(255,255,255,.06),transparent 70%)}
 .bdIco svg{position:relative;width:24px;height:24px;animation:var(--aBeat) var(--beat) var(--aTf) infinite;
-  filter:drop-shadow(0 0 1px rgba(255,255,255,.8)) drop-shadow(0 0 5px rgba(216,227,246,.55)) drop-shadow(0 0 15px color-mix(in srgb,currentColor 38%,transparent))}
+  filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 5px color-mix(in srgb,currentColor 80%,#fff)) drop-shadow(0 0 15px color-mix(in srgb,currentColor 55%,transparent))}
 .brFreq{justify-content:center}
 .brFreq .brLabel{font:9px/1 monospace;letter-spacing:.3em;color:var(--dim);white-space:nowrap}
 /* 时间线 */
