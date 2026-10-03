@@ -245,6 +245,10 @@ canvas.demo{display:block;width:100%;height:190px;border-radius:10px;background:
 .goBtn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,175,106,.45)}
 .goBtn:active{transform:scale(.96)}
 .goUrl{margin-top:10px;font:10px monospace;letter-spacing:.14em;color:var(--dim)}
+.goBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.goBtns .goBtn{margin-top:0}
+.goBtn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none;animation:none}
+.goBtn.ghost:hover{border-color:var(--gold);box-shadow:0 8px 26px rgba(212,175,106,.18)}
 footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
 .tblScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media(max-width:720px){
@@ -482,7 +486,10 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
   <div class="goWrap">
     <div class="goLabel">READ IT ALIVE · 亲自体验这套设计语言</div>
-    <a class="goBtn" href="https://wsemilynss.github.io/mad-medicine/" target="_blank" rel="noopener">进 入 医 理 探 案</a>
+    <div class="goBtns">
+      <a class="goBtn ghost" href="system-analysis.html">系 统 架 构 分 析</a>
+      <a class="goBtn" href="https://wsemilynss.github.io/mad-medicine/" target="_blank" rel="noopener">进 入 医 理 探 案</a>
+    </div>
     <div class="goUrl">https://wsemilynss.github.io/mad-medicine/</div>
   </div>
   <footer>MAD MEDICINE · 医理探案 · 设计演进对比说明 · <span id="dateStamp"></span><br>本文档为设计过程说明，所有评分为设计自评；应用内容仅供健康学习参考，不构成医学诊断。</footer>
