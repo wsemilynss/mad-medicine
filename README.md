@@ -30,6 +30,7 @@ https://<你的用户名>.github.io/<仓库名>/
 
 - 主程序（四诊探案）：https://wsemilynss.github.io/mad-medicine/
 - 设计演进对比说明（含动态演示录制与下载、医理探案自动巡夜录制）：https://wsemilynss.github.io/mad-medicine/design-evolution.html
+- 系统架构分析（架构图 · 推理管线 · 交叉学科矩阵 · 生命感建议）：https://wsemilynss.github.io/mad-medicine/system-analysis.html
 
 把链接发给别人，用电脑或手机浏览器打开即可使用。录制动态演示视频需用电脑版 Chrome / Edge；手机端浏览与观看演示不受影响。
 
