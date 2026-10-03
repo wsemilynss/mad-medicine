@@ -4330,5 +4330,76 @@ addEventListener('resize',()=>{clearTimeout(_rsT);_rsT=setTimeout(()=>{
 window.__clarity=0.55; // 开场即半虚粒子态，点明「由虚到实」
 show('screen-intro');
 </script>
+
+<script>
+/* ============================================================
+   巡夜模式（?patrol / #patrol）：配合 design-evolution.html 的「自动巡夜录制」
+   本页被新开为录制目标时，自行演示 开场→手册→建档→舞台→推理→报告 全流程，
+   全程无需操作；普通访问不带该参数，零影响。
+   ============================================================ */
+(function(){
+  if(!/patrol/i.test(location.search+location.hash))return;
+  const chip=document.createElement('button');
+  chip.type='button';
+  chip.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:99;padding:10px 20px;border:1px solid var(--gold);border-radius:999px;background:rgba(7,10,18,.94);color:var(--gold-bright);font:11px/1 monospace;letter-spacing:.24em;cursor:pointer;box-shadow:0 0 18px rgba(212,175,106,.3)';
+  chip.textContent='巡夜待命 · 等待录制信号（或点我开演）';
+  document.body.appendChild(chip);
+  document.title='巡夜 · '+document.title;   /* 让共享选择器里更容易认出本页 */
+  let started=false,blurred=false,timer=null;
+  /* 重放开场显影动画，让录像从第一帧演起 */
+  function replayIntro(){
+    show('screen-intro');
+    const scr=document.getElementById('screen-intro');
+    [scr,scr.querySelector('h1.title'),...scr.querySelectorAll('.istep')].forEach(el=>{
+      if(!el)return;const a=el.style.animation;el.style.animation='none';void el.offsetWidth;el.style.animation=a;});
+    window.scrollTo(0,0);}
+  function run(){
+    const $=id=>document.getElementById(id);
+    const click=id=>()=>{const el=$(id);if(el)el.click();};
+    const q=sel=>()=>{const el=document.querySelector(sel);if(el)el.click();};
+    const scrollK=k=>()=>{scrollTo({top:document.documentElement.scrollHeight*k,behavior:'smooth'});};
+    const tryReport=()=>{const b=$('btnReport');if(b&&b.style.display!=='none')b.click();};
+    const steps=[
+      {at:0,    label:'开场 · 双生诊室',fn:replayIntro},
+      {at:4800, label:'侦查手册',fn:click('btnHow')},
+      {at:9200, label:'返回开场',fn:click('btnHowBack')},
+      {at:10500,label:'基础建档',fn:click('btnStart')},
+      {at:15000,label:'走上舞台',fn:click('btnSkipIntake')},
+      {at:19600,label:'环绕镜头',fn:click('turnLeft')},
+      {at:20900,label:'环绕镜头',fn:click('turnRight')},
+      {at:22200,label:'定位线索',fn:click('locateClue')},
+      {at:24400,label:'展开线索板',fn:click('dockHead')},
+      {at:26400,label:'锁定一条线索',fn:q('#dockBody .dockItem')},
+      {at:31000,label:'照图作答 · 归档',fn:q('#qPanel .archiveNode')},
+      {at:35400,label:'镜头接力下一条',fn:function(){}},
+      {at:37000,label:'查验线索板',fn:click('dockHead')},
+      {at:39200,label:'跳过剩余 · 直接推理',fn:()=>{window.confirm=()=>true;click('btnSkipRest')();}},
+      {at:41200,label:'演绎推理',fn:click('btnDeduce')},
+      {at:47600,label:'侧写报告',fn:tryReport},
+      {at:49000,label:'侧写报告',fn:tryReport},
+      {at:50600,label:'通读报告',fn:scrollK(.35)},
+      {at:54400,label:'通读报告',fn:scrollK(.7)},
+      {at:58000,label:'报告页尾',fn:scrollK(1)},
+      {at:60200,label:'片尾 · 回到页首',fn:()=>scrollTo({top:0,behavior:'smooth'})},
+      {at:62200,label:'巡夜完成',fn:()=>{}}];
+    const t0=Date.now();
+    chip.style.pointerEvents='none';
+    timer=setInterval(()=>{
+      const el=Date.now()-t0;
+      while(steps.length&&steps[0].at<=el){const st=steps.shift();try{st.fn();}catch(e){}chip.textContent='巡夜中 · '+st.label;}
+      if(!steps.length){clearInterval(timer);timer=null;chip.textContent='巡夜完成 · 可回到说明页取回录像';}
+    },250);}
+  function begin(){
+    if(started)return;started=true;
+    chip.textContent='巡夜开演';
+    setTimeout(run,1200);}   /* 给录制 1.2 秒稳定画面 */
+  /* 信号链：新开标签页先聚焦（弹出）→ 失焦（说明页弹出共享选择器）→ 再聚焦（选定本页开始共享）即开演；也可点角标手动开演，40 秒兜底 */
+  addEventListener('blur',()=>{blurred=true;});
+  addEventListener('focus',()=>{if(blurred)begin();});
+  document.addEventListener('visibilitychange',()=>{if(blurred&&!document.hidden)begin();});
+  chip.addEventListener('click',e=>{e.stopPropagation();begin();});
+  setTimeout(begin,40000);
+})();
+</script>
 </body>
 </html>
