@@ -853,7 +853,7 @@ document.getElementById('dlPrint').onclick=()=>window.print();
   const btn=document.getElementById('dlPatrol'),hint=document.getElementById('patrolHint'),prev=document.getElementById('patrolPrev');
   const HINT_DEFAULT=hint.innerHTML;
   const UNSUPPORTED='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页。';
-  const DURATION=66000;
+  const DURATION=70000;   /* 目标页巡夜全长约 63.4 秒，留 6 秒余量容错开演信号延迟 */
   /* 进度提示用的阶段表（与医理探案页内巡夜时间轴同步，仅作文字提示，不参与控制） */
   const PHASES=[[0,'待命 · 开场'],[6,'侦查手册'],[11,'基础建档'],[16,'探案舞台 · 环绕巡游'],[25,'展开线索板'],[27.5,'锁定线索'],[32,'照图归档'],[36,'镜头接力'],[40.5,'跳过剩余 · 直接推理'],[43,'演绎推理'],[49,'侧写报告'],[52,'通读报告'],[61,'片尾收官']];
   let rec=null,chunks=[],stream=null,url=null,ext='webm';
