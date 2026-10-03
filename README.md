@@ -35,7 +35,7 @@ https://<你的用户名>.github.io/<仓库名>/
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 即可（视频需与 `index.html` 放在同一目录）。
+直接用浏览器打开 `index.html` 即可（视频需与 `index.html` 放在同一目录）。在本地打开 `design-evolution.html` 时，「自动巡夜录制」对应的是同目录的 `index.html`；线上打开时则对应主程序网址。
 
 ## 自动同步发布
 

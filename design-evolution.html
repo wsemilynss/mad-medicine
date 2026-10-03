@@ -474,10 +474,10 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
 
   <h2>七 · 巡夜医理探案<em>NIGHT PATROL</em></h2>
-  <div class="sub">把镜头交给夜班巡逻员：一键新开「医理探案」标签页，由脚本遥控它从开场、侦查手册、建档一路巡到探案舞台、演绎推理与侧写报告——全程录制该标签页，巡完自动下载成片。</div>
+  <div class="sub">把镜头交给夜班巡逻员：一键新开「医理探案」标签页——本地打开本说明时录制的是同目录的 index.html，线上打开时则是主程序网址——页面进入巡夜模式，自行演示 开场→手册→建档→舞台→推理→报告 全流程，录制该标签页，巡完自动下载成片。</div>
   <div class="dl">
     <button id="dlPatrol">自 动 巡 夜 · 医 理 探 案</button>
-    <p id="patrolHint">巡夜需用电脑版 Chrome / Edge 打开<b>本页的线上版</b>（与医理探案同域才能遥控它）：点击后会新开「医理探案」标签页，请在分享弹窗中选择该标签页。全程约一分钟，无需任何操作；再点一次按钮可中途取消。</p>
+    <p id="patrolHint">巡夜需用电脑版 Chrome / Edge：点击后会新开「医理探案」标签页（顶部出现「巡夜待命」角标），在分享弹窗中选择该标签页即自动开演；全程约一分钟、无需操作，若未开演可点一下那个角标。再点本按钮可中途取消。</p>
     <video id="patrolPrev" controls playsinline muted loop></video>
   </div>
   <div class="goWrap">
@@ -771,7 +771,7 @@ document.getElementById('dlPrint').onclick=()=>window.print();
   const HINT_DEFAULT=recHint.textContent;
   const UNSUPPORTED='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页录制，或直接使用系统自带录屏。';
   let rec=null,chunks=[],stream=null,timer=null,t0=0,url=null;
-  let touring=false,tourStep='';
+  let touring=false,tourStep='',starting=false,cancelled=false;
   let ext='webm';
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   function doDownload(){if(!url)return;const a=document.createElement('a');a.href=url;
@@ -782,11 +782,15 @@ document.getElementById('dlPrint').onclick=()=>window.print();
       ?('自动巡页录制中 '+mm+' · '+tourStep+' —— 无需操作，再次点击「自动巡页」可中途取消。')
       :('录制中 '+mm+' —— 可上下滚动，完整展示各组动态对照。');}
   async function startRec(){
+    if(starting)return false;   /* 连点防护：共享选择器弹出期间不允许第二次发起 */
     if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia||typeof MediaRecorder==='undefined'){
       recHint.textContent=UNSUPPORTED;return false;}
+    starting=true;
     recHint.textContent='在弹窗中选择「此标签页 / This Tab」，即开始录制整页动态演示……';
     try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,preferCurrentTab:true});}
-    catch(e){recHint.textContent=HINT_DEFAULT;return false;}
+    catch(e){starting=false;recHint.textContent=HINT_DEFAULT;return false;}
+    starting=false;
+    if(cancelled){stream.getTracks().forEach(t=>t.stop());stream=null;recHint.textContent=HINT_DEFAULT;return false;}
     /* 优先 H.264/MP4（全平台播放器兼容，避免 WebM 只解出首帧），不支持时回退 WebM */
     const mime=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.42E01E','video/mp4',
                 'video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
@@ -797,7 +801,7 @@ document.getElementById('dlPrint').onclick=()=>window.print();
     rec.onstop=()=>{
       stream.getTracks().forEach(t=>t.stop());clearInterval(timer);rec=null;
       const wasTour=touring;
-      touring=false;tourStep='';tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';
+      touring=false;cancelled=false;tourStep='';tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';
       const blob=new Blob(chunks,{type:ext==='mp4'?'video/mp4':'video/webm'});
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);
@@ -813,11 +817,17 @@ document.getElementById('dlPrint').onclick=()=>window.print();
     t0=Date.now();recBtn.classList.add('rec');recBtn.textContent='● 停 止 并 保 存';
     timer=setInterval(tickHint,500);
     return true;}
-  recBtn.onclick=()=>{if(rec){rec.stop();return;}startRec();};
+  recBtn.onclick=()=>{
+    if(rec){rec.stop();return;}
+    if(starting)return;
+    if(document.getElementById('dlPatrol').classList.contains('rec')){recHint.textContent='「巡夜医理探案」录制正在进行——请先结束或取消它，再开始本页录制。';return;}
+    cancelled=false;startRec();};
   /* 自动巡页：从页首出发，逐节停留展示，到页尾自动停止 */
   tourBtn.onclick=async()=>{
-    if(touring){touring=false;if(rec)rec.stop();return;}
-    touring=true;tourStep='准备中';
+    if(touring){touring=false;cancelled=true;if(rec)rec.stop();return;}
+    if(starting)return;
+    if(document.getElementById('dlPatrol').classList.contains('rec')){recHint.textContent='「巡夜医理探案」录制正在进行——请先结束或取消它，再开始巡页。';return;}
+    touring=true;cancelled=false;tourStep='准备中';
     tourBtn.classList.add('rec');tourBtn.textContent='■ 取 消 巡 页';
     if(!rec){if(!await startRec()){touring=false;tourBtn.classList.remove('rec');tourBtn.textContent='自 动 巡 页 录 制';return;}}
     tickHint();
@@ -836,75 +846,35 @@ document.getElementById('dlPrint').onclick=()=>window.print();
   dlVideo.onclick=doDownload;
 })();
 
-/* ---------- 自动巡夜 · 医理探案：新开主程序标签页，同源遥控它走完 开场→手册→建档→舞台→推理→报告，全程录屏、结束自动下载 ---------- */
+/* ---------- 自动巡夜 · 医理探案：新开主程序标签页（本地为同目录 index.html，线上为主程序网址），
+   页面进入巡夜模式自行演示全流程；本页只负责录制该标签页，66 秒到点收尾、自动下载 ---------- */
 (function(){
-  const TARGET='https://wsemilynss.github.io/mad-medicine/';
   const BTN_IDLE='自 动 巡 夜 · 医 理 探 案',BTN_CANCEL='■ 取 消 巡 夜';
   const btn=document.getElementById('dlPatrol'),hint=document.getElementById('patrolHint'),prev=document.getElementById('patrolPrev');
   const HINT_DEFAULT=hint.innerHTML;
   const UNSUPPORTED='当前浏览器不支持页面录制（手机浏览器普遍不支持）——请用电脑版 Chrome / Edge 打开本页。';
-  const XORIGIN='本地打开的说明页遥控不了另一个网站（浏览器跨域限制）——请改用线上版说明页 wsemilynss.github.io/mad-medicine/design-evolution.html 再启动巡夜。（已打开的「医理探案」标签页可正常游玩）';
+  const DURATION=66000;
+  /* 进度提示用的阶段表（与医理探案页内巡夜时间轴同步，仅作文字提示，不参与控制） */
+  const PHASES=[[0,'待命 · 开场'],[6,'侦查手册'],[11,'基础建档'],[16,'探案舞台 · 环绕巡游'],[25,'展开线索板'],[27.5,'锁定线索'],[32,'照图归档'],[36,'镜头接力'],[40.5,'跳过剩余 · 直接推理'],[43,'演绎推理'],[49,'侧写报告'],[52,'通读报告'],[61,'片尾收官']];
   let rec=null,chunks=[],stream=null,url=null,ext='webm';
-  let patrolling=false,cancelled=false,W=null,ticker=null,t0=0,steps=[];
-  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  let patrolling=false,cancelled=false,starting=false,W=null,ticker=null,t0=0;
   function setBtn(on){btn.classList.toggle('rec',on);btn.textContent=on?BTN_CANCEL:BTN_IDLE;}
   function doDownload(){if(!url)return;const a=document.createElement('a');a.href=url;a.download='MAD-MEDICINE_医理探案巡夜.'+ext;a.click();}
   function tickHint(){
-    const el=Date.now()-t0,s=Math.floor(el/1000),mm=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-    let cur='';for(const st of steps)if(st.at<=el)cur=st.label;
+    const el=(Date.now()-t0)/1000,mm=Math.floor(el/60)+':'+String(Math.floor(el%60)).padStart(2,'0');
+    let cur='';for(const p of PHASES)if(p[0]<=el)cur=p[1];
     hint.textContent='巡夜录制中 '+mm+(cur?' · '+cur:'')+' —— 「医理探案」标签页正在自动演示，再点一次本按钮可中途取消。';}
-  async function waitReady(){
-    const t=Date.now();
-    while(Date.now()-t<15000){
-      if(cancelled)return 'cancelled';
-      if(!W||W.closed)return 'closed';
-      try{if(W.document&&W.document.readyState==='complete'&&W.document.getElementById('btnStart'))return 'ok';}
-      catch(e){return 'xorigin';}
-      await wait(300);}
-    return 'timeout';}
-  /* 巡夜路线：全部用真实界面点击驱动主程序，时间轴按录制起点计 */
-  function buildSteps(){
-    const D=()=>W.document;
-    const click=id=>()=>{const el=D().getElementById(id);if(el)el.click();};
-    const q=sel=>()=>{const el=D().querySelector(sel);if(el)el.click();};
-    const scrollK=k=>()=>{W.scrollTo({top:D().documentElement.scrollHeight*k,behavior:'smooth'});};
-    const tryReport=()=>{const b=D().getElementById('btnReport');if(b&&b.style.display!=='none')b.click();};
-    return [
-      {at:600,  label:'开场 · 双生诊室',fn:()=>W.scrollTo(0,0)},
-      {at:5400, label:'侦查手册',fn:click('btnHow')},
-      {at:9800, label:'返回开场',fn:click('btnHowBack')},
-      {at:11100,label:'基础建档',fn:click('btnStart')},
-      {at:15600,label:'走上舞台',fn:click('btnSkipIntake')},
-      {at:20200,label:'环绕镜头',fn:click('turnLeft')},
-      {at:21500,label:'环绕镜头',fn:click('turnRight')},
-      {at:22800,label:'定位线索',fn:click('locateClue')},
-      {at:25000,label:'展开线索板',fn:click('dockHead')},
-      {at:27000,label:'锁定一条线索',fn:q('#dockBody .dockItem')},
-      {at:31600,label:'照图作答 · 归档',fn:q('#qPanel .archiveNode')},
-      {at:36000,label:'镜头接力下一条',fn:()=>{}},
-      {at:37600,label:'查验线索板',fn:click('dockHead')},
-      {at:39800,label:'跳过剩余 · 直接推理',fn:()=>{try{W.confirm=()=>true;}catch(e){}click('btnSkipRest')();}},
-      {at:41800,label:'演绎推理',fn:click('btnDeduce')},
-      {at:48200,label:'侧写报告',fn:tryReport},
-      {at:49600,label:'侧写报告',fn:tryReport},
-      {at:51200,label:'通读报告',fn:scrollK(.35)},
-      {at:55000,label:'通读报告',fn:scrollK(.7)},
-      {at:58600,label:'报告页尾',fn:scrollK(1)},
-      {at:60800,label:'片尾',fn:()=>W.scrollTo({top:0,behavior:'smooth'})},
-      {at:62800,label:'收官',fn:()=>{}}];}
-  function startTicker(){
-    t0=Date.now();
-    ticker=setInterval(()=>{
-      const el=Date.now()-t0;
-      while(steps.length&&steps[0].at<=el){const st=steps.shift();try{st.fn();}catch(e){}}
-      tickHint();
-      if(!steps.length){clearInterval(ticker);ticker=null;if(rec)rec.stop();}
-    },300);}
+  function closeTarget(){if(W&&!W.closed){try{W.close();}catch(e){}}W=null;}
   async function startRec(){
-    hint.textContent='在弹窗中选择「医理探案」标签页（不要选本页），选定后巡夜即刻开始……';
+    if(starting)return false;   /* 连点防护：共享选择器弹出期间不允许第二次发起 */
+    starting=true;
+    hint.textContent='在弹窗中选择「巡夜 · 医理探案」标签页（不要选本页），选定后巡夜即刻开演……';
+    let ok=true;
     try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false,displaySurface:'browser',selfBrowserSurface:'exclude'});}
-    catch(e){hint.innerHTML=HINT_DEFAULT;return false;}
-    if(cancelled||!patrolling){stream.getTracks().forEach(t=>t.stop());stream=null;return false;}
+    catch(e){ok=false;}
+    starting=false;
+    if(!ok){hint.innerHTML=HINT_DEFAULT;return false;}
+    if(cancelled){stream.getTracks().forEach(t=>t.stop());stream=null;hint.innerHTML=HINT_DEFAULT;return false;}
     /* 与录本页相同：优先 H.264/MP4（全平台可播），不支持时回退 WebM */
     const mime=['video/mp4;codecs=avc1.640028','video/mp4;codecs=avc1.42E01E','video/mp4',
                 'video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm']
@@ -922,36 +892,33 @@ document.getElementById('dlPrint').onclick=()=>window.print();
       if(url)URL.revokeObjectURL(url);
       url=URL.createObjectURL(blob);
       prev.src=url;prev.style.display='block';prev.play().catch(()=>{});
-      hint.textContent='巡夜完成 · '+(blob.size/1048576).toFixed(1)+' MB · 已自动开始下载（文件保存在浏览器默认下载目录），上方可回放；「医理探案」标签页已保留，可接着亲自探案。';
+      hint.textContent='巡夜结束 · '+(blob.size/1048576).toFixed(1)+' MB · 已自动开始下载（文件保存在浏览器默认下载目录），上方可回放；「医理探案」标签页已保留，可接着亲自探案。';
       setTimeout(doDownload,400);};
-    stream.getVideoTracks()[0].onended=()=>{if(rec)rec.stop();};   /* 用户从浏览器共享条上停止 → 收尾并下载已录片段 */
+    stream.getVideoTracks()[0].onended=()=>{if(rec)rec.stop();};   /* 用户从浏览器共享条上停止 / 目标页被关闭 → 收尾并下载已录片段 */
     rec.start(250);
     return true;}
   btn.onclick=async()=>{
     if(patrolling){cancelled=true;patrolling=false;
       if(ticker){clearInterval(ticker);ticker=null;}
       if(rec)rec.stop();else{setBtn(false);hint.innerHTML=HINT_DEFAULT;}
+      closeTarget();
       return;}
     if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia||typeof MediaRecorder==='undefined'){hint.textContent=UNSUPPORTED;return;}
+    if(starting)return;
+    if(document.getElementById('dlRec').classList.contains('rec')||document.getElementById('dlTour').classList.contains('rec')){hint.textContent='本页已有录制正在进行——请先停止它，再启动巡夜。';return;}
     patrolling=true;cancelled=false;setBtn(true);
     const fail=msg=>{patrolling=false;cancelled=false;setBtn(false);hint.innerHTML=msg;};
-    W=window.open(TARGET,'madMedPatrol');
+    W=window.open('index.html?patrol=1&t='+Date.now()+'#patrol','madMedPatrol');   /* 相对路径：本地 file 与线上同域皆可用；时间戳强制全新加载，重复巡夜状态归零 */
     if(!W)return fail('浏览器拦截了新标签页——请允许本站弹出窗口后重试。');
-    hint.textContent='「医理探案」标签页已打开，正在待命……';
-    let st=await waitReady();
-    if(cancelled)return;
-    if(st==='xorigin')return fail(XORIGIN);
-    if(st!=='ok')return fail('目标页面未能就绪——请检查网络后重试。');
-    if(!await startRec()){if(!cancelled)fail(HINT_DEFAULT);return;}
-    /* 录制已开始：刷新目标页，让开场动画从第一帧演起；刷新失败则用当前页面继续，不中断巡夜 */
-    hint.textContent='录制已开始 · 正在让「医理探案」从开场第一帧演起……';
-    try{W.location.reload();}catch(e){}
-    await wait(400);
-    st=await waitReady();
-    if(cancelled)return;
-    try{W.confirm=()=>true;W.alert=()=>true;}catch(e){}
-    steps=buildSteps();
-    startTicker();tickHint();
+    hint.textContent='「医理探案」标签页已打开（巡夜待命）……';
+    if(!await startRec()){closeTarget();if(!cancelled)fail(HINT_DEFAULT);return;}
+    /* 不遥控：巡夜由目标页自行演示；这里只计时，到点收尾 */
+    t0=Date.now();
+    ticker=setInterval(()=>{
+      tickHint();
+      if(Date.now()-t0>=DURATION){clearInterval(ticker);ticker=null;if(rec)rec.stop();}
+    },300);
+    tickHint();
   };
 })();
 </script>
