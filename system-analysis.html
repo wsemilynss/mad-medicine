@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>鸿蒙交互中的生命感 · 多学科分析与可视化</title>
+<style>
+:root{--bg:#071019;--panel:#101d29;--panel2:#142432;--ink:#edf4ef;--muted:#a6b7b4;--line:#31464a;--mint:#78e0c1;--gold:#f0c77d;--blue:#8fc8ed;--rose:#ee9b91;--radius:20px;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#183344 0,transparent 55%),var(--bg);color:var(--ink);line-height:1.7}
+a{color:var(--mint)}
+button,input{font:inherit}
+button{color:inherit}
+.wrap{width:min(1100px,calc(100% - 36px));margin:auto;padding:28px 0 64px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:12px;letter-spacing:.12em}
+.top a{text-decoration:none}
+.eyebrow{color:var(--mint);font:11px/1.5 ui-monospace,monospace;letter-spacing:.2em}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(34px,6vw,66px);line-height:1.15;letter-spacing:.06em;margin:18px 0}
+h1 span{display:block;color:var(--mint)}
+.lead{max-width:760px;color:var(--muted);font-size:17px}
+.hero{padding:72px 0 42px}
+.thesis{max-width:840px;padding:18px 22px;border-left:3px solid var(--gold);background:#ffffff08;color:#dce8df}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 10px}
+.btn{border:1px solid #49636a;border-radius:999px;background:#12232b;padding:10px 16px;cursor:pointer;transition:.2s}
+.btn:hover,.btn:focus-visible{border-color:var(--mint);background:#19332f;outline:2px solid transparent}
+.btn.primary{background:var(--mint);border-color:var(--mint);color:#06221d;font-weight:700}
+.hint{font-size:12px;color:var(--muted)}
+.section{margin-top:58px}
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px}
+h2{font-size:clamp(23px,3vw,32px);margin:0;letter-spacing:.04em}
+.index{color:var(--mint);font:12px ui-monospace,monospace;letter-spacing:.12em}
+.card{background:linear-gradient(145deg,#12212c,#0d1922);border:1px solid var(--line);border-radius:var(--radius);padding:22px}
+.diagram{overflow:hidden}
+.loop{display:block;width:100%;height:auto;min-height:260px}
+.loop text{font-family:"PingFang SC","Microsoft YaHei",sans-serif;fill:var(--ink)}
+.loop .small{fill:var(--muted);font-size:13px}
+.loop .node{fill:#122a34;stroke:#78e0c1;stroke-width:2}
+.loop .node.warm{stroke:#f0c77d}
+.loop .node.rose{stroke:#ee9b91}
+.loop .route{fill:none;stroke:#759494;stroke-width:2;stroke-dasharray:7 9;animation:flow 3s linear infinite}
+.loop .feedback{fill:none;stroke:#f0c77d;stroke-width:2;stroke-dasharray:4 8;animation:flow 2.4s linear infinite reverse}
+.loop .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-in-out infinite}
+.loop .pulse:nth-of-type(2){animation-delay:.4s}.loop .pulse:nth-of-type(3){animation-delay:.8s}.loop .pulse:nth-of-type(4){animation-delay:1.2s}
+@keyframes flow{to{stroke-dashoffset:-32}}
+@keyframes pulse{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+.legend-row{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;color:var(--muted);font-size:12px}
+.legend-row span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mint);margin-right:7px}
+.legend-row span:nth-child(2)::before{background:var(--gold)}.legend-row span:nth-child(3)::before{background:var(--rose)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.discipline{min-height:170px;position:relative;overflow:hidden}
+.discipline::after{content:attr(data-no);position:absolute;right:12px;bottom:-28px;font:bold 100px/1 ui-monospace,monospace;color:#ffffff08}
+.discipline h3{font-size:18px;color:var(--mint);margin-bottom:6px}
+.discipline p{color:var(--muted);font-size:14px;margin-bottom:12px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{border:1px solid #38515a;border-radius:999px;padding:3px 9px;font-size:11px;color:#c8d8d2}
+.model{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center}
+.radar-box{display:flex;justify-content:center;align-items:center;min-height:350px}
+#radar{width:min(100%,430px);height:auto}
+.score-list{display:grid;gap:10px}
+.score-row{display:grid;grid-template-columns:minmax(110px,1fr) 1.4fr 34px;gap:10px;align-items:center;font-size:13px}
+.score-row label{color:#dce8df}
+.score-row input{width:100%;accent-color:var(--mint)}
+.score-row output{text-align:right;color:var(--gold);font-family:ui-monospace,monospace}
+.state{padding:12px 14px;border:1px dashed #50666a;border-radius:12px;color:var(--muted);font-size:12px;margin-top:14px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:690px;font-size:13px}
+th,td{text-align:left;vertical-align:top;padding:12px;border-bottom:1px solid var(--line)}
+th{color:var(--mint);font-weight:600}
+td{color:#d0ddd7}
+td:nth-child(2){color:var(--muted)}
+.evidence{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:stage}
+.evidence article{background:#12212c;border:1px solid var(--line);border-radius:14px;padding:15px;counter-increment:stage}
+.evidence article::before{content:"0" counter(stage);display:block;color:var(--gold);font:12px ui-monospace,monospace;margin-bottom:8px}
+.evidence h3{font-size:15px;margin-bottom:5px}
+.evidence p{font-size:12px;color:var(--muted);margin:0}
+.matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.matrix article{padding:18px;border-radius:14px;background:#14232b;border-top:2px solid var(--rose)}
+.matrix article:nth-child(2){border-color:var(--gold)}.matrix article:nth-child(3){border-color:var(--mint)}
+.matrix b{display:block;margin-bottom:7px}
+.matrix p{font-size:13px;color:var(--muted);margin:0}
+.formula{margin-top:16px;text-align:center;padding:18px;background:#0b171e;border-radius:14px;color:var(--gold);font-size:clamp(15px,2vw,21px);letter-spacing:.05em}
+.foot{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.foot p{margin:4px 0}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:700px){.hero{padding-top:50px}.grid,.model{grid-template-columns:1fr}.evidence{grid-template-columns:repeat(2,1fr)}.matrix{grid-template-columns:1fr}.card{padding:16px}.radar-box{min-height:290px}.score-row{grid-template-columns:112px 1fr 30px;gap:7px}.top{align-items:flex-start}.loop{min-height:180px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media print{ :root{color-scheme:light;--bg:#fff;--panel:#fff;--panel2:#fff;--ink:#152229;--muted:#43565d;--line:#cad5d5}
+body{background:#fff;color:#152229}.wrap{width:100%;padding:0}.top,.toolbar,.hint{display:none!important}.hero{padding:20px 0}.card,.discipline,.evidence article,.matrix article{background:#fff!important;box-shadow:none;break-inside:avoid}.section{margin-top:30px}.loop text{fill:#152229}.loop .small{fill:#43565d}.loop .node{fill:#f0faf7}.formula{background:#f4f6f4}.tag{color:#263b3e}.foot{color:#43565d}a{color:#17604d}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <nav class="top" aria-label="页面导航"><a href="design-evolution.html">← 设计演进</a><span class="eyebrow">HARMONY · LIFE-SENSE FIELD GUIDE</span><a href="index.html">医理探案 →</a></nav>
+  <header class="hero">
+    <div class="eyebrow">MULTIDISCIPLINARY · INTERACTION · CULTURE · COGNITION</div>
+    <h1>让系统<span>接住人的意图</span></h1>
+    <p class="lead">以鸿蒙为研究案例，从数字媒体、交互、文化在地性、行为认知与跨感官体验出发，梳理设备与使用者之间“生命感”的观察框架、研究方法和设计切入点。</p>
+    <p class="thesis"><b>核心认知：</b>生命感不是把界面拟人化，而是用户在持续互动中感知到系统能恰当地回应、保持任务连续、解释自身行为，并让用户始终拥有选择和控制。</p>
+    <div class="toolbar" aria-label="下载与展示">
+      <button class="btn primary" id="downloadPng">下载总览图 PNG</button>
+      <button class="btn" id="downloadSvg">下载交互流程 SVG</button>
+      <button class="btn" id="downloadCsv">下载评估记录 CSV</button>
+      <button class="btn" id="downloadHtml">下载离线 HTML</button>
+      <button class="btn" id="printPage">打印 / 存为 PDF</button>
+    </div>
+    <p class="hint">图表初始为空白，分数由研究者根据真实观察填写；本页没有鸿蒙用户实测数据。PNG 为当前评估雷达，流程图可另存为 SVG，整页可打印为 PDF。</p>
+  </header>
+
+  <section class="section" aria-labelledby="loopTitle">
+    <div class="section-head"><h2 id="loopTitle">生命感发生在交互循环中</h2><span class="index">01 / INTERACTION LOOP</span></div>
+    <div class="card diagram">
+      <svg class="loop" id="interactionLoop" viewBox="0 0 960 360" role="img" aria-labelledby="loopSvgTitle loopSvgDesc">
+        <title id="loopSvgTitle">用户与系统的生命感交互循环</title>
+        <desc id="loopSvgDesc">从用户意图开始，系统感知并判断，作出多感官反馈，用户理解结果后继续、调整或撤销；失败时通过解释与恢复回到循环。</desc>
+        <defs><marker id="arrowMint" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#78e0c1"/></marker><marker id="arrowGold" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#f0c77d"/></marker></defs>
+        <path class="route" d="M205 105H330" marker-end="url(#arrowMint)"/><path class="route" d="M440 105H565" marker-end="url(#arrowMint)"/><path class="route" d="M675 105H800" marker-end="url(#arrowMint)"/>
+        <path class="feedback" d="M850 160C850 290 480 315 480 174" marker-end="url(#arrowGold)"/>
+        <path class="feedback" d="M620 170C620 240 250 250 250 170" marker-end="url(#arrowGold)"/>
+        <g class="pulse"><circle cx="260" cy="105" r="5" fill="#78e0c1"/></g><g class="pulse"><circle cx="500" cy="105" r="5" fill="#78e0c1"/></g><g class="pulse"><circle cx="740" cy="105" r="5" fill="#78e0c1"/></g>
+        <g><rect class="node" x="65" y="65" width="140" height="80" rx="22"/><text x="135" y="99" text-anchor="middle" font-size="18">人的意图</text><text class="small" x="135" y="124" text-anchor="middle">目标 · 情境 · 选择</text></g>
+        <g><rect class="node warm" x="330" y="65" width="140" height="80" rx="22"/><text x="400" y="99" text-anchor="middle" font-size="18">系统感知与判断</text><text class="small" x="400" y="124" text-anchor="middle">状态 · 权限 · 边界</text></g>
+        <g><rect class="node" x="565" y="65" width="140" height="80" rx="22"/><text x="635" y="99" text-anchor="middle" font-size="18">多感官回应</text><text class="small" x="635" y="124" text-anchor="middle">视觉 · 声音 · 触觉</text></g>
+        <g><rect class="node rose" x="800" y="65" width="120" height="80" rx="22"/><text x="860" y="99" text-anchor="middle" font-size="18">理解结果</text><text class="small" x="860" y="124" text-anchor="middle">继续 · 调整 · 撤销</text></g>
+        <text x="480" y="218" text-anchor="middle" fill="#f0c77d" font-size="14">状态可见 · 解释清楚 · 失败可恢复</text>
+        <text class="small" x="480" y="245" text-anchor="middle">反馈回到用户，下一步仍由用户决定</text>
+        <text class="small" x="260" y="270" text-anchor="middle">能力判断错误 / 任务中断 → 说明原因并保留可恢复状态</text>
+      </svg>
+      <div class="legend-row"><span>意图、反馈与连续性</span><span>解释、控制与恢复</span><span>情境判断及用户边界</span></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="discTitle">
+    <div class="section-head"><h2 id="discTitle">五个学科切面，汇入同一体验</h2><span class="index">02 / LENSES</span></div>
+    <div class="grid">
+      <article class="card discipline" data-no="01"><h3>数字媒体设计</h3><p>研究动态视觉、声音与时间如何表达状态。重点不是动效数量，而是反馈是否有意义、层级是否清晰、节奏是否合时。</p><div class="tags"><span class="tag">状态可视化</span><span class="tag">动态叙事</span><span class="tag">表达节奏</span></div></article>
+      <article class="card discipline" data-no="02"><h3>交互设计</h3><p>从用户目标出发检视操作、反馈、任务接续和错误恢复。设备可以互联，不代表任务上下文真的连续。</p><div class="tags"><span class="tag">任务流</span><span class="tag">可撤销</span><span class="tag">恢复路径</span></div></article>
+      <article class="card discipline" data-no="03"><h3>文化在地性</h3><p>从生活实践理解用户如何安排时间、共享设备、处理提醒与隐私。避免把文化简化成界面符号或单一默认生活方式。</p><div class="tags"><span class="tag">情境访谈</span><span class="tag">生活实践</span><span class="tag">差异化默认</span></div></article>
+      <article class="card discipline" data-no="04"><h3>行为与认知心理</h3><p>关注注意力、记忆负担、心理模型、不确定性和能动性。系统行为越稳定可预测，用户越容易建立信任。</p><div class="tags"><span class="tag">认知负荷</span><span class="tag">可预测性</span><span class="tag">掌控感</span></div></article>
+      <article class="card discipline" data-no="05"><h3>跨感官体验</h3><p>让视觉、声音、触觉互相补充而非重复轰炸；重要信息不能只依赖单一感官，反馈强度应可调节。</p><div class="tags"><span class="tag">多通道编码</span><span class="tag">无障碍</span><span class="tag">感官负荷</span></div></article>
+      <article class="card discipline" data-no="06"><h3>隐私与负责任设计</h3><p>情境适应与主动服务必须说明依据、权限和数据流向。尊重边界本身就是关系体验的一部分。</p><div class="tags"><span class="tag">知情选择</span><span class="tag">最小化</span><span class="tag">用户控制</span></div></article>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="assessTitle">
+    <div class="section-head"><h2 id="assessTitle">八维评估：把判断转成证据</h2><span class="index">03 / SELF-ASSESSMENT</span></div>
+    <div class="card model">
+      <div class="radar-box"><canvas id="radar" width="440" height="440" aria-label="生命感八维自评雷达图"></canvas></div>
+      <div><p>先用真实任务观察，再给每项打 1–5 分。0 表示尚未评估，不会绘制进雷达图。分数用于团队诊断，不代表客观或跨版本排名。</p><div class="score-list" id="scoreList"></div><div class="state" id="scoreState" aria-live="polite">尚无评估分数。请为已观察的维度评分，并在 CSV 中补充证据与情境。</div></div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="evidenceTitle">
+    <div class="section-head"><h2 id="evidenceTitle">从观察到改进：研究证据链</h2><span class="index">04 / METHOD</span></div>
+    <div class="evidence">
+      <article><h3>界定任务与配置</h3><p>记录设备型号、系统版本、应用、权限、网络和用户目标；避免将单一配置推广到整个系统。</p></article>
+      <article><h3>观察完整旅程</h3><p>记录操作、反馈、等待、切换、重复输入、失败和恢复，而不只截取页面状态。</p></article>
+      <article><h3>三角验证</h3><p>结合情境观察、可用性测试、访谈或日记研究，并用完成率、耗时、恢复率等补充。</p></article>
+      <article><h3>验证设计机会</h3><p>将发现连到用户影响、设计介入和可复测指标；分清主观感受与任务表现。</p></article>
+    </div>
+    <div class="formula">观察证据 → 用户影响 → 生命感维度 → 设计机会 → 验证指标</div>
+  </section>
+
+  <section class="section" aria-labelledby="matrixTitle">
+    <div class="section-head"><h2 id="matrixTitle">鸿蒙场景：优先检验的设计切入点</h2><span class="index">05 / OPPORTUNITIES</span></div>
+    <div class="card table-wrap">
+      <table>
+        <thead><tr><th>研究场景</th><th>要验证的问题</th><th>可介入方向</th><th>建议观察证据</th></tr></thead>
+        <tbody>
+          <tr><td>跨设备 / 跨应用接续</td><td>用户是否知道传递什么，任务是否丢失或需要重做？</td><td>从设备连接转向任务接续；保留进度，提供暂停、取消和恢复。</td><td>重复输入、接续成功率、恢复耗时</td></tr>
+          <tr><td>系统状态与异常</td><td>等待、权限不足、离线或应用不支持时，用户是否理解原因？</td><td>明确表达当前状态和边界，为失败提供可操作的替代路径。</td><td>状态理解度、误操作、求助与放弃</td></tr>
+          <tr><td>通知与主动建议</td><td>提醒是否与当前目标相关，介入是否及时、可拒绝？</td><td>允许接受、忽略、延后、降频与关闭；说明建议来源。</td><td>采纳、关闭、打扰感与情境差异</td></tr>
+          <tr><td>卡片与系统入口</td><td>是否展示可操作且新鲜的状态，还是增加信息噪音？</td><td>优先支持高频轻任务，标明更新时间与后续入口。</td><td>完成时间、入口选择、过期信息误用</td></tr>
+          <tr><td>多感官与无障碍</td><td>提示是否一致、不过载，重要信息是否只靠一种感官？</td><td>协调视觉/声音/触觉，并支持减弱动效和自定义通知。</td><td>漏读率、可访问性测试、感官负担</td></tr>
+          <tr><td>共享设备与文化情境</td><td>不同生活场景中，默认提醒、语气和隐私边界是否适合？</td><td>基于研究调整默认值；提供可理解的权限与信息流控制。</td><td>分群访谈、隐私理解度、偏好调整</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="balanceTitle">
+    <div class="section-head"><h2 id="balanceTitle">优势与风险必须并置判断</h2><span class="index">06 / BALANCE</span></div>
+    <div class="matrix">
+      <article><b>可能的优势 · 待验证</b><p>若系统入口减少重复步骤、跨设备任务确实接续、反馈清楚且一致，可能增强连续性、效率和被支持感。用真实用户任务验证，而不是用功能清单代替证据。</p></article>
+      <article><b>典型张力 · 需要权衡</b><p>适应性可能减少操作，也可能引起隐私担忧；主动提醒可能有帮助，也可能打断注意力；拟人表达可能亲近，也可能抬高不切实际的能力期待。</p></article>
+      <article><b>不宜预设 · 必须实测</b><p>具体体验会受系统版本、设备、应用、地区、权限与网络影响。本页提供研究框架，不对当前鸿蒙功能表现作未经验证的结论。</p></article>
+    </div>
+    <div class="formula">生命感 ≠ 拟人化　｜　恰当回应 + 连贯协作 + 可理解可控 + 长期可信</div>
+  </section>
+
+  <footer class="foot"><p><b>使用说明：</b>本页是研究与设计评估框架，不是对鸿蒙的实测报告。请以目标用户、具体设备配置和实际观察填入评分与证据。</p><p>MAD MEDICINE · 交互体验研究图谱 · 独立静态网页，无外部依赖。</p></footer>
+</main>
+<script>
+(()=> {
+  const dimensions=['响应性','连续性','可理解性','适应性','可控性','多感官协调','信任','文化适配'];
+  const scores=Array(dimensions.length).fill(0);
+  const colors={grid:'#607276',text:'#dce8df',fill:'rgba(120,224,193,.2)',line:'#78e0c1',point:'#f0c77d'};
+  const canvas=document.getElementById('radar'),ctx=canvas.getContext('2d'),list=document.getElementById('scoreList');
+  const state=document.getElementById('scoreState');
+  list.innerHTML=dimensions.map((name,i)=>`<div class="score-row"><label for="score${i}">${name}</label><input id="score${i}" type="range" min="0" max="5" step="1" value="0" aria-label="${name}评分，0为未评估"><output for="score${i}">—</output></div>`).join('');
+  const center=220,radius=145;
+  function draw(){
+    const dpr=Math.min(window.devicePixelRatio||1,2),size=440;
+    canvas.width=size*dpr;canvas.height=size*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,size,size);
+    const point=(i,r)=>{const a=-Math.PI/2+i*Math.PI*2/dimensions.length;return [center+Math.cos(a)*r,center+Math.sin(a)*r]};
+    for(let ring=1;ring<=5;ring++){ctx.beginPath();dimensions.forEach((_,i)=>{const [x,y]=point(i,radius*ring/5);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.closePath();ctx.strokeStyle=colors.grid;ctx.globalAlpha=.42;ctx.stroke();ctx.globalAlpha=1}
+    dimensions.forEach((name,i)=>{const [x,y]=point(i,radius);ctx.beginPath();ctx.moveTo(center,center);ctx.lineTo(x,y);ctx.strokeStyle=colors.grid;ctx.globalAlpha=.45;ctx.stroke();ctx.globalAlpha=1;const [lx,ly]=point(i,radius+24);ctx.fillStyle=colors.text;ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(name,lx,ly)});
+    const evaluated=scores.some(value=>value>0);
+    if(evaluated){ctx.beginPath();scores.forEach((value,i)=>{const [x,y]=point(i,radius*value/5);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.closePath();ctx.fillStyle=colors.fill;ctx.fill();ctx.strokeStyle=colors.line;ctx.lineWidth=2;ctx.stroke();scores.forEach((value,i)=>{if(!value)return;const [x,y]=point(i,radius*value/5);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=colors.point;ctx.fill()})}
+    const count=scores.filter(Boolean).length;state.textContent=count?`已评估 ${count}/${dimensions.length} 项。分数仅为团队自评；请结合 CSV 中的设备、任务、证据和用户原话解释，不用于版本排名。`:'尚无评估分数。请为已观察的维度评分，并在 CSV 中补充证据与情境。';
+  }
+  list.addEventListener('input',event=>{const input=event.target;if(!input.matches('input[type=range]'))return;const i=Number(input.id.slice(5));scores[i]=Number(input.value);input.nextElementSibling.value=scores[i]?`${scores[i]}/5`:'—';draw()});
+  window.addEventListener('resize',draw);draw();
+  function save(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+  document.getElementById('downloadSvg').addEventListener('click',()=>{
+    const svg=document.getElementById('interactionLoop').cloneNode(true);
+    svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    const style=document.createElementNS('http://www.w3.org/2000/svg','style');
+    style.textContent='.loop text{font-family:sans-serif;fill:#edf4ef}.loop .small{fill:#a6b7b4;font-size:13px}.loop .node{fill:#122a34;stroke:#78e0c1;stroke-width:2}.loop .node.warm{stroke:#f0c77d}.loop .node.rose{stroke:#ee9b91}.loop .route{fill:none;stroke:#759494;stroke-width:2;stroke-dasharray:7 9;animation:flow 3s linear infinite}.loop .feedback{fill:none;stroke:#f0c77d;stroke-width:2;stroke-dasharray:4 8;animation:flow 2.4s linear infinite reverse}.loop .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-in-out infinite}@keyframes flow{to{stroke-dashoffset:-32}}@keyframes pulse{0%,100%{opacity:.45;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}';
+    svg.insertBefore(style,svg.firstChild);
+    save(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml;charset=utf-8'}),'鸿蒙生命感_交互循环.svg');
+  });
+  document.getElementById('downloadPng').addEventListener('click',()=>{
+    const out=document.createElement('canvas');out.width=1600;out.height=1260;
+    const c=out.getContext('2d');c.fillStyle='#071019';c.fillRect(0,0,out.width,out.height);
+    c.fillStyle='#78e0c1';c.font='bold 52px sans-serif';c.fillText('鸿蒙交互中的生命感',76,88);
+    c.fillStyle='#a6b7b4';c.font='25px sans-serif';c.fillText('多学科研究框架 · 非用户实测数据',80,132);
+    c.fillStyle='#dce8df';c.font='bold 28px sans-serif';c.fillText('意图如何成为可信的协作',80,205);
+    const boxes=[['人的意图','目标 · 情境 · 选择'],['系统感知与判断','状态 · 权限 · 边界'],['多感官回应','视觉 · 声音 · 触觉'],['理解结果','继续 · 调整 · 撤销']];
+    const bx=[80,470,860,1250],by=250,bw=270,bh=115;
+    boxes.forEach((box,i)=>{c.fillStyle='#122a34';c.strokeStyle=i===1?'#f0c77d':i===3?'#ee9b91':'#78e0c1';c.lineWidth=3;c.beginPath();c.roundRect(bx[i],by,bw,bh,20);c.fill();c.stroke();c.fillStyle='#edf4ef';c.font='bold 23px sans-serif';c.fillText(box[0],bx[i]+20,by+46);c.fillStyle='#a6b7b4';c.font='18px sans-serif';c.fillText(box[1],bx[i]+20,by+82);if(i<3){c.strokeStyle='#78e0c1';c.lineWidth=3;c.beginPath();c.moveTo(bx[i]+bw+12,by+bh/2);c.lineTo(bx[i+1]-16,by+bh/2);c.stroke();c.beginPath();c.moveTo(bx[i+1]-16,by+bh/2);c.lineTo(bx[i+1]-29,by+bh/2-8);c.lineTo(bx[i+1]-29,by+bh/2+8);c.closePath();c.fillStyle='#78e0c1';c.fill()}});
+    c.fillStyle='#f0c77d';c.font='20px sans-serif';c.fillText('反馈需可理解 · 主动行为需可控 · 失败后可恢复',420,416);
+    c.fillStyle='#78e0c1';c.font='bold 28px sans-serif';c.fillText('八维自评雷达',80,510);
+    c.drawImage(canvas,55,540,570,570);
+    c.fillStyle='#dce8df';c.font='22px sans-serif';
+    ['响应性 · 连续性 · 可理解性 · 适应性','可控性 · 多感官协调 · 信任 · 文化适配','六学科视角：数字媒体 / 交互设计 / 文化研究','行为认知 / 跨感官体验 / 隐私与责任设计','评分应来自具体用户任务与可追溯观察证据'].forEach((text,i)=>c.fillText(text,690,630+i*65));
+    c.fillStyle='#a6b7b4';c.font='18px sans-serif';c.fillText('雷达只显示当前填写的分数；空白表示未评估。请注明设备型号、系统版本、应用、权限与情境。',80,1195);
+    out.toBlob(blob=>{if(blob)save(blob,'鸿蒙生命感_研究总览.png')},'image/png');
+  });
+  document.getElementById('downloadCsv').addEventListener('click',()=>{const rows=[['维度','自评分（0=未评估，1-5）','设备型号','系统版本','任务与情境','观察证据 / 用户原话','影响 / 设计机会','复测指标'],...dimensions.map((name,i)=>[name,scores[i]||'', '', '', '', '', '', ''])];const csv='\uFEFF'+rows.map(row=>row.map(cell=>`"${String(cell).replaceAll('"','""')}"`).join(',')).join('\r\n');save(new Blob([csv],{type:'text/csv;charset=utf-8'}),'鸿蒙生命感_评估记录模板.csv')});
+  document.getElementById('downloadHtml').addEventListener('click',()=>save(new Blob(['<!DOCTYPE html>\n'+document.documentElement.outerHTML],{type:'text/html;charset=utf-8'}),'鸿蒙生命感_研究图谱.html'));
+  document.getElementById('printPage').addEventListener('click',()=>window.print());
+})();
+</script>
+</body>
+</html>

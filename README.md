@@ -30,13 +30,13 @@ https://<你的用户名>.github.io/<仓库名>/
 
 - 主程序（四诊探案）：https://wsemilynss.github.io/mad-medicine/
 - 设计演进对比说明（含动态演示录制与下载、医理探案自动巡夜录制）：https://wsemilynss.github.io/mad-medicine/design-evolution.html
-- 系统架构分析（架构图 · 推理管线 · 交叉学科矩阵 · 生命感建议）：https://wsemilynss.github.io/mad-medicine/system-analysis.html
+- 鸿蒙交互生命感研究图谱（交互循环 · 多学科分析 · 八维自评；支持下载 PNG / SVG / CSV / HTML 与打印 PDF）：https://wsemilynss.github.io/mad-medicine/system-analysis.html
 
 把链接发给别人，用电脑或手机浏览器打开即可使用。录制动态演示视频需用电脑版 Chrome / Edge；手机端浏览与观看演示不受影响。
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 即可（视频需与 `index.html` 放在同一目录）。在本地打开 `design-evolution.html` 时，「自动巡夜录制」对应的是同目录的 `index.html`；线上打开时则对应主程序网址。
+直接用浏览器打开 `index.html` 即可（视频需与 `index.html` 放在同一目录）；`system-analysis.html` 可离线打开并导出图表和评估记录。在本地打开 `design-evolution.html` 时，「自动巡夜录制」对应的是同目录的 `index.html`；线上打开时则对应主程序网址。
 
 ## 自动同步发布
 
@@ -48,7 +48,7 @@ https://<你的用户名>.github.io/<仓库名>/
 | --- | --- |
 | `index.html` | 全部程序（界面、交互、知识库、报告导出），无外部依赖 |
 | `design-evolution.html` | 设计演进对比说明页（五次视觉跃迁），辅助展示用，不影响主程序 |
-| `system-analysis.html` | 系统架构与交叉学科知识体系分析页（含推理引擎微缩模型与「生命感」提升建议），辅助展示用，不影响主程序 |
+| `system-analysis.html` | 鸿蒙交互生命感多学科分析图谱（交互循环、自评雷达、PNG / SVG / CSV / HTML 下载与打印），辅助展示用，不影响主程序 |
 | `reference-figures.mp4` | 中央「颗粒双人」视频素材，必须随网页一起发布 |
 | `界面效果参考.mp4` | 设计参考录像，仅存档用，不影响网页运行（可不发布） |
 | `.nojekyll` | 让 GitHub Pages 原样服务所有文件 |
