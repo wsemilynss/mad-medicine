@@ -5,3 +5,8 @@
 Thumbs.db
 .DS_Store
 *.log
+
+# 本地临时文件（截图 / 测试草稿，不发布）
+_shot.html
+_shot.png
+_test.html

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAD MEDICINE · 系统架构与交叉学科知识体系分析 —— 医理探案如何导出答案</title>
+<style>
+:root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--line:rgba(212,175,106,.28);
+  --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  --bpm:72;--beat:calc(60s / var(--bpm))}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased}
+main{max-width:1080px;margin:0 auto;padding:60px 22px 80px}
+h1{font-family:var(--serif);font-size:clamp(28px,4.6vw,44px);letter-spacing:.18em;font-weight:600;text-align:center;text-shadow:0 0 40px rgba(212,175,106,.25)}
+h1 small{display:block;font:300 12px/2 var(--sans);letter-spacing:.6em;color:var(--gold);margin-top:8px}
+h2{font-family:var(--serif);font-size:22px;letter-spacing:.26em;color:var(--gold);margin:64px 0 6px;display:flex;align-items:center;gap:12px}
+h2::before{content:"";width:8px;height:8px;background:var(--teal);transform:rotate(45deg);box-shadow:0 0 10px var(--teal)}
+h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:normal;margin-left:auto}
+.sub{color:var(--dim);font-size:13px;letter-spacing:.04em;margin-bottom:20px}
+.kicker{text-align:center;font:10px/2 monospace;letter-spacing:.5em;color:var(--teal);margin-bottom:8px}
+.lede{max-width:760px;margin:14px auto 0;text-align:center;color:var(--dim);font-size:14px}
+.card{background:rgba(14,20,34,.82);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(6px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.card+.card{margin-top:16px}
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes lubdubGlow{0%,100%{opacity:.22}10%{opacity:.85}20%{opacity:.3}32%{opacity:.6}46%{opacity:.22}}
+@keyframes ringOut{from{transform:scale(1);opacity:.55}to{transform:scale(1.5);opacity:0}}
+.beat{animation:lubdub var(--beat) ease-in-out infinite}
+.vital{display:block;width:100%;height:100%;overflow:visible}
+.vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.vital .vTrack{opacity:.14}
+.vital .vRun{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
+.heroVital{width:min(420px,80vw);height:44px;color:var(--teal)}
+footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
+code{font-family:monospace;color:var(--teal);font-size:.92em}
+b{color:var(--goldb)}
+/* 层架构图 */
+.layers{display:flex;flex-direction:column;gap:0;margin-top:18px}
+.layer{position:relative;border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--lc,var(--gold));border-radius:12px;
+  background:rgba(5,8,15,.55);padding:14px 18px;display:grid;grid-template-columns:150px 1fr;gap:4px 18px;align-items:start}
+.layer .ln{font-family:var(--serif);font-size:16px;letter-spacing:.14em;color:var(--lc,var(--gold));padding-top:2px}
+.layer .ln small{display:block;font:8.5px/1.6 monospace;letter-spacing:.18em;color:var(--dim);margin-top:4px}
+.layer .ld{font-size:12.5px;color:var(--ink);line-height:1.85}
+.layer .ld span{color:var(--dim)}
+.layer .lm{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.layer .lm i{font:9px/1 monospace;letter-spacing:.1em;color:var(--dim);border:1px solid rgba(233,228,214,.14);padding:4px 8px;border-radius:999px;font-style:normal}
+.bus{height:34px;position:relative;margin:0 0 0 76px;width:2px;background:linear-gradient(180deg,rgba(212,175,106,.05),rgba(212,175,106,.35),rgba(212,175,106,.05))}
+.bus::before,.bus::after{content:"";position:absolute;left:-2px;width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);
+  animation:busUp calc(var(--beat)*4) linear infinite}
+.bus::after{background:var(--teal);box-shadow:0 0 8px var(--teal);animation-name:busDown;animation-delay:calc(var(--beat)*-2)}
+@keyframes busUp{from{top:100%;opacity:0}15%{opacity:1}85%{opacity:1}to{top:0;opacity:0}}
+@keyframes busDown{from{top:0;opacity:0}15%{opacity:1}85%{opacity:1}to{top:100%;opacity:0}}
+.bus b{position:absolute;left:12px;top:50%;transform:translateY(-50%);font:8.5px/1 monospace;letter-spacing:.2em;color:var(--dim);white-space:nowrap}
+/* 指标 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.stat{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5)}
+.stat .k{font-size:10.5px;letter-spacing:.2em;color:var(--dim);font-family:var(--serif)}
+.stat .v{font:22px/1.4 monospace;color:var(--goldb);margin-top:4px}
+.stat .v small{font:10px var(--sans);color:var(--dim)}
+/* 管线 */
+.pipe{display:grid;grid-template-columns:repeat(6,1fr);gap:0;margin-top:18px}
+.pstage{position:relative;padding:14px 10px 12px;border-top:2px solid var(--pc,var(--gold));background:rgba(5,8,15,.45);text-align:center}
+.pstage+.pstage{margin-left:8px}
+.pstage::before{content:"";position:absolute;left:-8px;top:16px;width:8px;height:8px;border-top:2px solid var(--pc,var(--gold));border-right:2px solid var(--pc,var(--gold));transform:rotate(45deg)}
+.pstage:first-child::before{display:none}
+.pstage b{display:block;font-family:var(--serif);font-size:13.5px;letter-spacing:.12em;color:var(--pc,var(--gold))}
+.pstage small{display:block;font:8.5px/1.6 monospace;letter-spacing:.1em;color:var(--dim);margin-top:5px}
+.pstage .dot{width:7px;height:7px;border-radius:50%;background:var(--pc,var(--gold));margin:0 auto 8px;box-shadow:0 0 10px var(--pc,var(--gold));animation:lubdub var(--beat) ease-in-out infinite}
+/* 活体演示 */
+.demoGrid{display:grid;grid-template-columns:1.05fr 1.15fr .9fr;gap:16px;margin-top:16px}
+.demoCol{border:1px solid rgba(233,228,214,.1);border-radius:12px;padding:14px;background:rgba(5,8,15,.45);min-width:0}
+.demoCol h4{font-family:var(--serif);font-size:13px;letter-spacing:.2em;color:var(--teal);margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.demoCol h4 small{font:8.5px/1 monospace;color:var(--dim);letter-spacing:.14em}
+.clueChip{display:inline-flex;align-items:center;gap:6px;margin:0 6px 8px 0;padding:7px 12px;border:1px solid rgba(233,228,214,.18);border-radius:999px;
+  background:rgba(5,8,15,.6);color:var(--ink);font-size:11.5px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent}
+.clueChip i{font:8.5px/1 monospace;font-style:normal;color:var(--dim);border:1px solid rgba(233,228,214,.16);padding:2px 5px;border-radius:4px}
+.clueChip:hover{border-color:var(--gold);color:var(--goldb)}
+.clueChip.on{border-color:var(--teal);color:var(--teal);background:rgba(106,212,200,.1);box-shadow:0 0 12px rgba(106,212,200,.15)}
+.degRow{display:flex;gap:5px;align-items:center;margin:2px 0 10px;flex-wrap:wrap}
+.degRow span{font:9px/1 monospace;letter-spacing:.16em;color:var(--dim);margin-right:2px}
+.degRow button{flex:1;min-width:0;border:1px solid rgba(233,228,214,.14);background:rgba(5,8,15,.55);color:var(--dim);border-radius:8px;
+  padding:6px 0;font-size:10.5px;cursor:pointer;font-family:var(--serif);transition:.2s}
+.degRow button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.12)}
+.wrow{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.wrow .wn{flex:0 0 64px;font-family:var(--serif);letter-spacing:.08em;color:var(--ink)}
+.wrow .wb{flex:1;height:10px;background:rgba(233,228,214,.07);border-radius:5px;overflow:hidden;position:relative}
+.wrow .wb i{display:block;height:100%;width:0;border-radius:5px;background:linear-gradient(90deg,var(--teal),var(--gold));
+  transition:width .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 8px rgba(212,175,106,.4)}
+.wrow .wv{flex:0 0 30px;text-align:right;font:10px monospace;color:var(--goldb)}
+.wrow .wc{flex:0 0 40px;font:8.5px/1.2 monospace;color:var(--teal);text-align:right}
+.wrow.top .wn{color:var(--goldb);text-shadow:0 0 10px rgba(212,175,106,.5)}
+.wrow.top .wb{outline:1px solid rgba(212,175,106,.35)}
+#miniRadar{display:block;width:100%;max-width:280px;margin:0 auto}
+.verdictLine{margin-top:10px;padding:10px 12px;border-left:2px solid var(--cin);background:rgba(212,112,106,.06);font-size:11.5px;line-height:1.9;color:var(--ink);min-height:66px}
+.verdictLine b{color:var(--goldb);font-family:var(--serif);letter-spacing:.08em}
+.elRow{display:flex;gap:6px;margin-top:10px}
+.elRow div{flex:1;text-align:center;border:1px solid rgba(233,228,214,.1);border-radius:8px;padding:6px 2px;background:rgba(5,8,15,.5)}
+.elRow b{display:block;font-family:var(--serif);font-size:13px;letter-spacing:.1em}
+.elRow span{font:9px monospace;color:var(--dim)}
+/* 学科矩阵 */
+.xgridWrap{overflow-x:auto;margin-top:14px;-webkit-overflow-scrolling:touch}
+.xgrid{display:grid;grid-template-columns:92px repeat(11,minmax(34px,1fr));gap:4px;min-width:560px;align-items:center}
+.xgrid .xh{font:8.5px/1.3 monospace;color:var(--dim);writing-mode:vertical-rl;letter-spacing:.1em;justify-self:center;height:64px}
+.xgrid .xr{font-family:var(--serif);font-size:12px;letter-spacing:.1em;color:var(--ink);white-space:nowrap}
+.xgrid .xc{height:22px;display:flex;align-items:center;justify-content:center}
+.xgrid .xc i{width:9px;height:9px;transform:rotate(45deg);background:var(--dc);box-shadow:0 0 7px var(--dc);opacity:.9}
+.xgrid .xrow:hover .xr{color:var(--goldb)}
+.xgrid .xrow:hover .xc i{filter:brightness(1.5)}
+.xleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:10.5px;color:var(--dim)}
+.xleg i{display:inline-block;width:9px;height:9px;transform:rotate(45deg);background:var(--dc);margin-right:5px;box-shadow:0 0 6px var(--dc)}
+/* 循证条 */
+.evBars{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+.evB{display:flex;align-items:center;gap:10px;font-size:11.5px}
+.evB .n{flex:0 0 74px;font-family:var(--serif);letter-spacing:.1em;color:var(--ink)}
+.evB .t{flex:1;height:8px;background:rgba(233,228,214,.07);border-radius:4px;overflow:hidden}
+.evB .t i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--goldb));border-radius:4px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.evB .c{flex:0 0 26px;font:10.5px monospace;color:var(--goldb);text-align:right}
+.evGrade{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.evGrade div{flex:1;min-width:150px;border:1px solid rgba(233,228,214,.12);border-radius:10px;padding:10px 14px;background:rgba(5,8,15,.5);font-size:11.5px;color:var(--dim);line-height:1.7}
+.evGrade b{display:inline-block;font:10px/1 monospace;border:1px solid currentColor;padding:3px 7px;border-radius:999px;margin-right:8px}
+.evGrade .gA b{color:var(--goldb)}.evGrade .gB b{color:var(--teal)}.evGrade .gC b{color:var(--dim)}
+/* 量表 */
+.scales{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.scales span{font:10px/1 monospace;letter-spacing:.08em;color:var(--teal);border:1px solid rgba(106,212,200,.3);padding:7px 11px;border-radius:999px;transition:.25s}
+.scales span:hover{background:rgba(106,212,200,.1);box-shadow:0 0 12px rgba(106,212,200,.2)}
+/* 五行 */
+.wxWrap{display:grid;grid-template-columns:minmax(280px,1fr) minmax(240px,.8fr);gap:20px;align-items:center;margin-top:10px}
+#wxSvg{display:block;width:100%;max-width:420px;margin:0 auto}
+.wxNote{font-size:12px;color:var(--dim);line-height:2}
+.wxNote b{color:var(--goldb);font-family:var(--serif);letter-spacing:.1em}
+.wxNote .emap{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin-top:8px;font-size:11.5px}
+/* 生命感清单 */
+.lifeGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px}
+.life{border:1px solid rgba(233,228,214,.12);border-left:2px solid var(--teal);border-radius:12px;padding:12px 15px;background:rgba(5,8,15,.5);font-size:12px;line-height:1.8;color:var(--dim)}
+.life b{display:block;font-family:var(--serif);letter-spacing:.14em;color:var(--goldb);font-size:13px;margin-bottom:4px}
+.life code{font-size:10.5px}
+/* 建议卡 */
+.sugs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:16px}
+.sug{border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px 18px;background:rgba(5,8,15,.5);position:relative;overflow:hidden}
+.sug::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--sc,var(--gold));box-shadow:0 0 10px var(--sc,var(--gold))}
+.sug h4{font-family:var(--serif);font-size:15px;letter-spacing:.14em;color:var(--sc,var(--gold));margin-bottom:8px;display:flex;align-items:baseline;gap:8px}
+.sug h4 small{font:8.5px/1 monospace;color:var(--dim);letter-spacing:.12em;margin-left:auto}
+.sug .row{font-size:12px;line-height:1.85;color:var(--dim);margin-top:6px}
+.sug .row b{font-family:var(--serif);letter-spacing:.1em;font-size:11.5px}
+.sug .row.now b{color:var(--dim)}
+.sug .row.do b{color:var(--teal)}
+.sug .row.why b{color:var(--cin)}
+.meter{display:flex;gap:3px;align-items:center}
+.meter i{width:14px;height:4px;border-radius:2px;background:rgba(233,228,214,.12)}
+.meter i.on{background:var(--sc,var(--gold));box-shadow:0 0 6px var(--sc,var(--gold))}
+#prio{display:block;width:100%;margin-top:14px}
+/* 路线 */
+.phases{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+.phase{border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px 18px;background:rgba(5,8,15,.5);border-top:2px solid var(--pc)}
+.phase h4{font-family:var(--serif);font-size:14px;letter-spacing:.16em;color:var(--pc);margin-bottom:8px}
+.phase ul{list-style:none;font-size:12px;color:var(--dim);line-height:2}
+.phase li::before{content:"◇ ";color:var(--pc)}
+/* 导航 */
+.navRow{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:40px}
+.navRow a{cursor:pointer;font-family:var(--serif);letter-spacing:.3em;font-size:13px;border-radius:999px;padding:13px 30px;text-decoration:none;
+  color:var(--gold);border:1px solid var(--line);transition:.25s}
+.navRow a:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(212,175,106,.2)}
+.navRow a.primary{color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));border:0;box-shadow:0 8px 26px rgba(212,175,106,.28)}
+@media(max-width:760px){
+  main{padding:36px 12px 56px}
+  .kicker{letter-spacing:.3em;font-size:9px}
+  h1{letter-spacing:.1em}
+  h1 small{letter-spacing:.26em;font-size:10px;margin-top:6px}
+  .lede{font-size:13px}
+  h2{font-size:18px;letter-spacing:.18em;margin:48px 0 6px}
+  .sub{font-size:12.5px;margin-bottom:14px}
+  .card{padding:15px 13px;border-radius:14px}
+  .layer{grid-template-columns:1fr;padding:12px 13px}
+  .bus{margin-left:20px}
+  .pipe{grid-template-columns:1fr;gap:8px}
+  .pstage+.pstage{margin-left:0}
+  .pstage::before{display:none}
+  .demoGrid{grid-template-columns:1fr}
+  .wxWrap{grid-template-columns:1fr}
+  .phases{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr);gap:9px}
+  .stat .v{font-size:18px}
+  .navRow a{width:100%;text-align:center;padding:13px 12px;font-size:12px;letter-spacing:.18em}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">SYSTEM ARCHITECTURE · CROSS-DISCIPLINARY KNOWLEDGE</div>
+  <h1>架 构 × 知 识 × 答 案<small>MAD MEDICINE · 医理探案 · 系统架构与交叉学科知识体系分析</small></h1>
+  <div class="hero">
+    <div class="heroVital" data-vital></div>
+    <p class="lede">医理探案是一个 <b>4405 行、零依赖、单文件</b> 的交互系统：底层是手写 3D 点云渲染引擎，中层是「权重驱动的辨证推理引擎」，上层是游戏化交互与报告产出。本页拆解它的五层架构、交叉学科知识如何沿数据管线变成答案，并在每个维度上给出「生命感」的下一步提升建议。所有图表均由代码实时绘制，第三节含一个<b>可操作的推理引擎微缩模型</b>。</p>
+  </div>
+
+  <h2>一 · 五层系统架构<em>ARCHITECTURE</em></h2>
+  <div class="sub">单文件内部分五层，层间只通过 <code>state</code> 与少量 <code>window.__*</code> 桥接变量通信；无任何框架与外部库，数据流向为「操作 → 权重 → 结论 → 渲染」。</div>
+  <div class="card">
+    <div class="layers">
+      <div class="layer" style="--lc:#e9e4d6"><div class="ln">表现层<small>PRESENTATION</small></div>
+        <div class="ld">六屏流程 <span>开场 / 手册 / 建档 / 舞台 / 推理 / 报告</span> · HUD 仪表 · 线索板 · 星环答题盘 · 里程碑弹窗 · 徽章 Toast · 报告与导出</div>
+        <div class="lm"><i>6 screens</i><i>11 tab 证型卡</i><i>导出 HTML/PNG/打印</i><i>中英双语</i></div></div>
+      <div class="bus"><b>渲染帧 · DOM 更新</b></div>
+      <div class="layer" style="--lc:var(--cin)"><div class="ln">交互层<small>INTERACTION</small></div>
+        <div class="ld">光点捕捉 <span>18+1 条线索沿 3 条轨道巡游</span> · 环绕镜头拖拽 · 多选并存 + 五档程度条 + 情境交叉 + 自述补充 · 切诊把脉四问 + 自测心率</div>
+        <div class="lm"><i>捕捉 / 锁定</i><i>DEG5 程度</i><i>10 情境标签</i><i>寸关尺三部</i></div></div>
+      <div class="bus"><b>addClue(证词, 权重向量)</b></div>
+      <div class="layer" style="--lc:var(--gold)"><div class="ln">推理引擎<small>INFERENCE</small></div>
+        <div class="ld">权重管线 <span>每条证词携带 10 证型权重向量，程度缩放后累加</span> · computeResults 一次算出证型排序、五行、六维、心理四维 · 吻合度 <code>min(95, 38+60·s/top)</code></div>
+        <div class="lm"><i>state.weights[10]</i><i>scaleWeights ×0.5–1.6</i><i>topS&lt;3 → 平和质</i></div></div>
+      <div class="bus"><b>查表 · 映射 · 评分</b></div>
+      <div class="layer" style="--lc:var(--teal)"><div class="ln">知识库<small>KNOWLEDGE</small></div>
+        <div class="ld">10 证型 × 11 学科维度 · 44 条循证交叉 <span>A/B/C 三级</span> · 题库 <span>望 5 · 闻 4 · 问 45+4 · 切 4 问</span> · 脉象模型 PULSE_OF · 14 种心理量表引用</div>
+        <div class="lm"><i>PATTERNS</i><i>EVIDENCE</i><i>Q_* 题库</i><i>PULSE_WEIGHTS</i></div></div>
+      <div class="bus"><b>--cl 显影度 · --bpm 节拍</b></div>
+      <div class="layer" style="--lc:#8ea3c8"><div class="ln">渲染引擎<small>RENDER</small></div>
+        <div class="ld">手写 3D 点云投影 <span>双人对坐 ≈1.2 万粒子 · 680 纸屑 · 200 尘埃 · 48 数据节点 · 3 条意念流 · 72 逸散粒</span> · 三层视频颗粒遮罩 · 全局心跳 <code>--beat</code></div>
+        <div class="lm"><i>60fps Canvas</i><i>DPR≤1.6</i><i>LOWP 降级</i><i>0 依赖</i></div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">单文件</div><div class="v"><span data-count="4405">0</span> <small>行 · 零依赖</small></div></div>
+      <div class="stat"><div class="k">证型知识</div><div class="v"><span data-count="10">0</span> <small>× 11 学科维度</small></div></div>
+      <div class="stat"><div class="k">循证条目</div><div class="v"><span data-count="44">0</span> <small>A/B/C 三级</small></div></div>
+      <div class="stat"><div class="k">心理量表</div><div class="v"><span data-count="14">0</span> <small>种引用</small></div></div>
+      <div class="stat"><div class="k">点云粒子</div><div class="v"><span data-count="12">0</span> <small>K · 双人对坐</small></div></div>
+      <div class="stat"><div class="k">徽章 / 章节</div><div class="v"><span data-count="9">0</span> <small>/ 4 · 段位 5 档</small></div></div>
+    </div>
+  </div>
+
+  <h2>二 · 答案导出管线：知识如何变成结论<em>INFERENCE PIPELINE</em></h2>
+  <div class="sub">从一次点按到一份报告，数据沿六级管线流动。每一步都是显式可查的代码：没有黑箱模型，全部权重在题库里明码写出，玩家可实时看到权重条变化。</div>
+  <div class="card">
+    <div class="pipe">
+      <div class="pstage" style="--pc:#e9e4d6"><div class="dot"></div><b>采 集</b><small>建档 + 四诊<br>18+1 条线索</small></div>
+      <div class="pstage" style="--pc:var(--cin)"><div class="dot"></div><b>量 化</b><small>DEG5 程度<br>×0.5 / .75 / 1 / 1.3 / 1.6</small></div>
+      <div class="pstage" style="--pc:var(--gold)"><div class="dot"></div><b>累 积</b><small>addClue<br>weights[10] 加权</small></div>
+      <div class="pstage" style="--pc:var(--teal)"><div class="dot"></div><b>辨 证</b><small>computeResults<br>证型排序 + 吻合度</small></div>
+      <div class="pstage" style="--pc:#8ea3c8"><div class="dot"></div><b>映 射</b><small>五行 · 六维<br>心理四维</small></div>
+      <div class="pstage" style="--pc:var(--goldb)"><div class="dot"></div><b>产 出</b><small>报告 · 处方<br>路径图 · 小剧场</small></div>
+    </div>
+    <p style="font-size:12px;color:var(--dim);line-height:2;margin-top:16px">关键规则：情境标签（晨起 / 饭后 / 压力大…共 10 种）只在选中异常证词时做<b>加法</b>合并；自测真实心率 &gt;90 或 &lt;60 时并入数脉 / 迟脉权重；若最高证型分 <code>topS&lt;3</code>，则判「平和质」并给出保养式处方——<b>系统被显式设计为允许「没病」这个答案</b>。</p>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:15px;margin-bottom:4px">活体演示 · 推理引擎微缩模型</h4>
+    <p style="font-size:11.5px;color:var(--dim);line-height:1.9">点按左侧证词（与真实题库同构的示例），观察权重累积 → 证型排序（吻合度用真实公式 <code>38+60·s/top</code>）→ 六维雷达与五行用真实 <code>dimsFrom / ELEMENT_OF</code> 公式实时重算。可先选「程度」再点证词，体验 DEG5 缩放。</p>
+    <div class="demoGrid">
+      <div class="demoCol"><h4>① 证词输入<small>CLICK TO FILE</small></h4>
+        <div class="degRow" id="degRow"><span>程度</span></div>
+        <div id="clueChips"></div>
+        <div style="font:9px/1.6 monospace;color:var(--dim);letter-spacing:.1em;margin-top:4px">示例证词 · 权重向量与题库同构；再次点击可撤销</div>
+      </div>
+      <div class="demoCol"><h4>② 权重累积 → 辨证<small>weights[10] → top3</small></h4>
+        <div id="wRows"></div>
+        <div class="verdictLine" id="verdictLine">尚未采集证词 —— 权重全零时，系统什么也不会断言。</div>
+      </div>
+      <div class="demoCol"><h4>③ 多维映射<small>dimsFrom · 五行</small></h4>
+        <canvas id="miniRadar" width="280" height="280"></canvas>
+        <div class="elRow" id="elRow"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>三 · 交叉学科知识体系<em>KNOWLEDGE GRAPH</em></h2>
+  <div class="sub">每一个证型都不是一行结论，而是一张 11 维的知识卡：同一证型同时被中医经典、现代生理、心理学与生活方式四个学科族描述，再由循证库做平行印证。</div>
+  <div class="card">
+    <h4 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:15px">证型 × 学科矩阵 <span style="font:9px monospace;color:var(--dim);letter-spacing:.14em">10 PATTERNS × 11 DIMENSIONS · 报告页每证型 11 个 Tab 全部实装</span></h4>
+    <div class="xgridWrap"><div class="xgrid" id="xgrid"></div></div>
+    <div class="xleg">
+      <span><i style="--dc:var(--gold)"></i>中医经典族</span>
+      <span><i style="--dc:var(--teal)"></i>现代生理族</span>
+      <span><i style="--dc:var(--cin)"></i>心理模式族</span>
+      <span><i style="--dc:#9ec49a"></i>行为处方族</span>
+      <span><i style="--dc:#e9e4d6"></i>循证交叉族</span>
+    </div>
+    <p style="font-size:12px;color:var(--dim);line-height:2;margin-top:12px">以「血瘀」为例：同一行的 11 个格子在报告里依次是 中医病机 → 理论依据（《血证论》等经典 + 现代微循环机制）→ 西医关联 → 心理侧写 → 心理深探（含量表自评参考）→ 营养处方（5 条）→ 药茶调理（2 方，含剂量与制法）→ 运动康复（4 条）→ 生活调整（3 条）→ 疗养方式（4 条）→ 循证交叉。<b>一个中医概念被翻译成了四个学科各自的行动语言。</b></p>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:15px">循证交叉库 · 44 条 <span style="font:9px monospace;color:var(--dim);letter-spacing:.14em">每条 = 学科 + 证据分级 + 结论 + 文献来源；报告对 top2 证型展开</span></h4>
+    <div class="evBars" id="evBars"></div>
+    <div class="evGrade">
+      <div class="gA"><b>A</b>高可信 · 多项随机对照试验 / 系统评价结论一致</div>
+      <div class="gB"><b>B</b>中等可信 · 有一致性证据但研究规模或质量有限</div>
+      <div class="gC"><b>C</b>弱证据或尚存争议 · 明确标注，不与 A/B 混排</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="wxWrap">
+      <canvas id="wxCanvas" width="420" height="420" style="display:block;width:100%;max-width:420px;margin:0 auto"></canvas>
+      <div class="wxNote">
+        <b>五行映射 · ELEMENT_OF</b><br>
+        证型分按 <code>ELEMENT_OF</code> 表求和进五行，能量轮在报告页以「弧形展开 + 金点巡行 + 呼吸光核」呈现；最盛 − 最弱 ≥ 6 时判「五行失衡明显」。
+        <div class="emap">
+          <b>木 · 肝胆</b><span>肝郁气滞 · 血瘀</span>
+          <b>火 · 心</b><span>血虚 · 心火亢盛</span>
+          <b>土 · 脾</b><span>脾虚湿盛 · 痰湿 · 湿热</span>
+          <b>金 · 肺</b><span>气虚</span>
+          <b>水 · 肾</b><span>阴虚 · 阳虚</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:15px">心理深探引用的 14 种量表 <span style="font:9px monospace;color:var(--dim);letter-spacing:.14em">只作自评参考入口，报告始终附「非医学诊断」免责</span></h4>
+    <div class="scales">
+      <span>FSS 疲劳</span><span>PHQ-9 抑郁</span><span>GAD-7 焦虑</span><span>ISI 失眠</span><span>HSP 高敏感</span>
+      <span>SPAQ 季节性</span><span>PSS-10 压力</span><span>PHQ-15 躯体化</span><span>RRS 反刍思维</span><span>STOP-BANG 鼾症风险</span>
+      <span>TFEQ 饮食行为</span><span>AUDIT-C 饮酒</span><span>PCS 疼痛灾难化</span><span>PSAS 术前焦虑</span>
+    </div>
+  </div>
+
+  <h2>四 · 生命感现状盘点<em>ALIVE · TODAY</em></h2>
+  <div class="sub">v4 之后，全站只有一个节拍源 <code>--beat = 60s / --bpm</code>；它目前驱动以下元素。把这份清单摆出来，是为了看清「生命感」还缺哪些维度。</div>
+  <div class="card">
+    <div class="lifeGrid">
+      <div class="life"><b>一个节拍源</b>心电描记 <code>.vRun</code> · 当前步骤图标 · 线索光晕（三个相位错开）· 章节环 · 实时雷达 · 段位涟漪，全部随 <code>--bpm</code> 同步搏动</div>
+      <div class="life"><b>双向心率通道</b>切诊模拟脉率会写入 <code>setBPM</code>；玩家自测真实脉搏（15 秒 × 4）再次写入——<b>界面可以随玩家自己的心跳跳动</b>（clamp 40–140）</div>
+      <div class="life"><b>由虚到实</b>显影度 <code>clarity = 0.42 + 0.58 × 已归档/总数</code> 驱动点云散开、视频颗粒聚拢、扫描线淡出；结案时 1 秒缓动推满并加金光脉冲</div>
+      <div class="life"><b>呼吸式图表</b>所有图表先「从零生长」（1.2–1.4s 缓动），再进入持续微幅呼吸；数字滚动计数而非直接显示</div>
+      <div class="life"><b>脉搏波物理</b>切诊波形 = 主波 + 重搏波高斯叠加，振幅随按压深度按高斯衰减，寸关尺三部灵敏度 1.0 / 0.85 / 0.72，涩脉带节律抖动</div>
+      <div class="life"><b>静默的维度</b>听觉：无 · 触觉：仅视觉缩放 · 时间：界面不随时辰变化 · 记忆：零 localStorage，刷新即遗忘 · 闲置：系统从不入睡</div>
+    </div>
+  </div>
+
+  <h2>五 · 生命感提升建议<em>NEXT · ALIVENESS</em></h2>
+  <div class="sub">按「感官通道 → 时间节律 → 数据生态 → 连续记忆」四个方向展开，每条给出 现状 / 建议 / 为什么。末尾散点图为 影响 × 成本 的优先级评估。</div>
+
+  <div class="sugs">
+    <div class="sug" style="--sc:var(--gold)"><h4>听觉 · 让心跳可被听见<small>影响 9 · 成本 3</small></h4>
+      <div class="row now"><b>现状</b> —— 心跳只有视觉通道（缩放、光晕、描记线）。</div>
+      <div class="row do"><b>建议</b> —— Web Audio 合成 lub-dub 双音，与 <code>--bpm</code> 严格同相；归档一声木鱼、徽章一声磬、通关一段泛音列；默认静音，顶栏小喇叭开启。</div>
+      <div class="row why"><b>为什么</b> —— 心跳声会诱发听者的呼吸与心率同步（声学夹带效应），是所有通道里最能「绕过理智、直抵自主神经」的一个；合成音无需音频素材，单文件原则不破。</div></div>
+    <div class="sug" style="--sc:var(--teal)"><h4>触觉 · 移动端的第二心跳<small>影响 7 · 成本 2</small></h4>
+      <div class="row now"><b>现状</b> —— 按压反馈仅有视觉缩放，手机端没有任何振动。</div>
+      <div class="row do"><b>建议</b> —— 归档 / 徽章 / 通关时刻触发 <code>navigator.vibrate([40,60,80])</code>，节奏复刻 lub-dub 双峰；程度条拖动时给极轻的档位触感。</div>
+      <div class="row why"><b>为什么</b> —— 低频振动绕开屏幕直达本体感觉，是手机端性价比最高的生命感通道；两行代码，零视觉干扰。</div></div>
+    <div class="sug" style="--sc:var(--cin)"><h4>闲置生态 · 系统会入睡<small>影响 8 · 成本 4</small></h4>
+      <div class="row now"><b>现状</b> —— 无论闲置多久，镜头与光点永远以同一节奏运转，像一段循环视频。</div>
+      <div class="row do"><b>建议</b> —— 90 秒无操作：镜头缓缓拉远、双人呼吸放缓（点云起伏减速）、光点收拢慢转、数据雨变稀；任意触碰即「苏醒」并平滑恢复。</div>
+      <div class="row why"><b>为什么</b> —— 「会睡觉」是活物与机器的分水岭；闲置行为几乎不影响任何功能，却能根本改变用户对系统性质的判断。</div></div>
+    <div class="sug" style="--sc:var(--gold)"><h4>数据体液 · 让证据流动<small>影响 7 · 成本 4</small></h4>
+      <div class="row now"><b>现状</b> —— 推理路径图是静态贝塞尔连线，五行轮只有呼吸光核。</div>
+      <div class="row do"><b>建议</b> —— 路径图连线改为粒子流，流速与粒径 ∝ 权重；五行轮沿 木→火→土→金→水 相生方向循环输送光点，最盛行外溢、最弱行回吸。</div>
+      <div class="row why"><b>为什么</b> —— 「循环流动」是活数据最直白的隐喻，同时真的在解释推理过程：哪条证据把多少权重泵给了哪个证型，一眼可读。</div></div>
+    <div class="sug" style="--sc:var(--teal)"><h4>时辰节气 · 与环境同息<small>影响 6 · 成本 5</small></h4>
+      <div class="row now"><b>现状</b> —— 界面在一天任何时刻都完全相同。</div>
+      <div class="row do"><b>建议</b> —— 按本地时辰微调环境色温（子时偏靛蓝、午时偏金、黄昏偏朱），数据节点的脏象词优先显示当令脏腑；报告附一句当令调养提示；四立、二分二至做小彩蛋。</div>
+      <div class="row why"><b>为什么</b> —— 子午流注本就是中医「天人相应」的内核，这是知识体系与生命感天然重合的交点，几乎没有违和成本。</div></div>
+    <div class="sug" style="--sc:var(--cin)"><h4>呼吸跟练 · 镜头会呼吸<small>影响 6 · 成本 4</small></h4>
+      <div class="row now"><b>现状</b> —— 节拍源只有心跳一种（设计演进页已有呼吸九态实验）。</div>
+      <div class="row do"><b>建议</b> —— 报告页处方区附 4-7-8 呼吸引导：镜头推拉、光晕涨落随吸气 / 屏息 / 呼气三相处方化，<code>--beat</code> 临时切换为呼吸节律。</div>
+      <div class="row why"><b>为什么</b> —— 呼吸引导本身是有 A/B 级证据的生理干预，做完报告的用户恰好是最需要它的人；体验与功能在此合一。</div></div>
+    <div class="sug" style="--sc:var(--gold)"><h4>真实心率 · rPPG 摄像测量<small>影响 9 · 成本 8</small></h4>
+      <div class="row now"><b>现状</b> —— 自测心率靠用户手动数 15 秒脉搏，准确性与仪式感都打折。</div>
+      <div class="row do"><b>建议</b> —— 可选模式：指尖盖住摄像头，分析红通道亮度周期性（rPPG），10 秒出率并直接写入 <code>--bpm</code>；明确标注「纯本地处理、不上传任何画面」。</div>
+      <div class="row why"><b>为什么</b> —— 当界面节拍源等于用户此刻的真实心跳，「生命感」从隐喻变成事实；技术成熟（红通道峰值检测即可起步），但必须把隐私声明做成体验的一部分。</div></div>
+    <div class="sug" style="--sc:var(--teal)"><h4>身体史 · 从快照到传记<small>影响 8 · 成本 6</small></h4>
+      <div class="row now"><b>现状</b> —— 全文零 localStorage：刷新即遗忘，每次探案都是第一次见面。</div>
+      <div class="row do"><b>建议</b> —— 可选的本地存档：每次报告存六维与时间戳，再次探案时开场的双人「记得」上次状态（轮廓预显影到上次的清晰度），报告页给出六维变化曲线。</div>
+      <div class="row why"><b>为什么</b> —— 生命体的本质特征是时间中的连续性；对健康管理而言，「比上周好了一点」比任何单次结论都有价值。</div></div>
+    <div class="sug" style="--sc:var(--cin)"><h4>语言拟人 · 身体的自白<small>影响 5 · 成本 3</small></h4>
+      <div class="row now"><b>现状</b> —— 报告以第三人称宣读结论，克制但疏离。</div>
+      <div class="row do"><b>建议</b> —— 每张证型卡开篇一句第一人称：「我是你的脾，最近有点累。」小剧场已有对话雏形，可扩展为脏器之间的夜谈。</div>
+      <div class="row why"><b>为什么</b> —— 拟人化文案是成本最低、情感收益最高的改动；医学内容保持原样，只改叙述视角，专业度无损。</div></div>
+  </div>
+
+  <div class="card">
+    <h4 style="font-family:var(--serif);letter-spacing:.2em;color:var(--gold);font-size:15px">优先级矩阵 <span style="font:9px monospace;color:var(--dim);letter-spacing:.14em">纵轴影响 · 横轴成本 · 左上为速赢</span></h4>
+    <canvas id="prio" height="380"></canvas>
+  </div>
+
+  <h2>六 · 落地路线<em>ROADMAP</em></h2>
+  <div class="phases">
+    <div class="phase" style="--pc:var(--gold)"><h4>近期 · 速赢三件套</h4>
+      <ul><li>听觉心跳（Web Audio lub-dub）</li><li>移动端触觉振动（vibrate 双峰）</li><li>路径图粒子流</li></ul>
+      <p style="font-size:11px;color:var(--dim);margin-top:8px;line-height:1.8">均不改架构：只在 <code>--beat</code> 体系与已有导出函数上叠加，一周内可全部上线。</p></div>
+    <div class="phase" style="--pc:var(--teal)"><h4>中期 · 生态与时间</h4>
+      <ul><li>闲置入睡 / 苏醒</li><li>报告页呼吸引导</li><li>时辰色温与当令提示</li></ul>
+      <p style="font-size:11px;color:var(--dim);margin-top:8px;line-height:1.8">需要新增「闲置计时器」与「时辰上下文」两个小模块，仍在单文件内消化。</p></div>
+    <div class="phase" style="--pc:var(--cin)"><h4>远期 · 真实身体接入</h4>
+      <ul><li>rPPG 摄像头真实心率</li><li>本地身体史与对比曲线</li><li>第一人称叙事实验</li></ul>
+      <p style="font-size:11px;color:var(--dim);margin-top:8px;line-height:1.8">触及隐私与数据留存，需先把「本地处理、用户可控」作为设计前提写进交互。</p></div>
+  </div>
+
+  <div class="navRow">
+    <a href="design-evolution.html">← 返 回 设 计 演 进</a>
+    <a class="primary" href="https://wsemilynss.github.io/mad-medicine/" target="_blank" rel="noopener">进 入 医 理 探 案</a>
+  </div>
+  <footer>MAD MEDICINE · 医理探案 · 系统架构分析 · <span id="dateStamp"></span><br>本页所有数字均来自对 index.html 源码的静态核对；应用内容仅供健康学习参考，不构成医学诊断。</footer>
+</main>
+
+<script>
+/* ---------- 通用：ECG 生命线 / 计数 / 日期 ---------- */
+const VITAL_D='M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105';
+document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="${VITAL_D}"/><path class="vRun" d="${VITAL_D}"/></svg>`);
+document.getElementById('dateStamp').textContent=new Date().toLocaleDateString('zh-CN');
+function countUp(){document.querySelectorAll('[data-count]').forEach(el=>{const end=+el.dataset.count,t0=performance.now();
+  (function s(n){const k=Math.max(0,Math.min(1,(n-t0)/1200)),e=1-Math.pow(1-k,3);el.textContent=Math.round(end*e);if(k<1)requestAnimationFrame(s);})(t0);});}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){countUp();io.disconnect();}}));io.observe(document.querySelector('.stats'));
+
+/* ---------- 与 index.html 同源的事实数据（静态核对自源码） ---------- */
+const PATTERN_KEYS=['qi','xue','yin','yang','yu','pi','tan','re','yux','huo'];
+const PNAME={qi:'气虚',xue:'血虚',yin:'阴虚',yang:'阳虚',yu:'肝郁气滞',pi:'脾虚湿盛',tan:'痰湿',re:'湿热',yux:'血瘀',huo:'心火亢盛'};
+const ELEMENT_OF={qi:'金',xue:'火',yin:'水',yang:'水',yu:'木',pi:'土',tan:'土',re:'土',yux:'木',huo:'火'};
+const EV_COUNT={qi:4,xue:4,yin:4,yang:5,yu:4,pi:4,tan:5,re:5,yux:5,huo:4};   // 44 条
+const DIMS6=['气血能量','脾胃运化','情志平衡','睡眠修复','代谢清净','筋骨活络'];
+const XTABS=['中医病机','理论依据','西医关联','心理侧写','心理深探','营养处方','药茶调理','运动康复','生活调整','疗养方式','循证交叉'];
+const XFAM=[0,0,1,2,2,3,3,3,3,3,4];
+const FAMC=['#d4af6a','#6ad4c8','#d4706a','#9ec49a','#e9e4d6'];
+
+/* ---------- 证型 × 学科矩阵 ---------- */
+(function(){
+  const g=document.getElementById('xgrid');
+  let html='<div></div>'+XTABS.map(t=>`<div class="xh">${t}</div>`).join('');
+  PATTERN_KEYS.forEach(k=>{
+    html+=`<div class="xrow" style="display:contents"><div class="xr">${PNAME[k]}</div>`+
+      XTABS.map((t,i)=>`<div class="xc" title="${PNAME[k]} · ${t}"><i style="--dc:${FAMC[XFAM[i]]}"></i></div>`).join('')+`</div>`;});
+  g.innerHTML=html;
+})();
+
+/* ---------- 循证条 ---------- */
+(function(){
+  const wrap=document.getElementById('evBars');
+  wrap.innerHTML=PATTERN_KEYS.map(k=>`<div class="evB"><span class="n">${PNAME[k]}</span><span class="t"><i data-w="${EV_COUNT[k]/5*100}"></i></span><span class="c">${EV_COUNT[k]}</span></div>`).join('');
+  const io2=new IntersectionObserver(es=>{if(es[0].isIntersecting){wrap.querySelectorAll('i').forEach(i=>i.style.width=i.dataset.w+'%');io2.disconnect();}});
+  io2.observe(wrap);
+})();
+
+/* ---------- 五行生克图 ---------- */
+(function(){
+  const cv=document.getElementById('wxCanvas'),ctx=cv.getContext('2d');
+  const dpr=Math.min(2,devicePixelRatio||1);cv.width=420*dpr;cv.height=420*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  const cx=210,cy=210,R=132;
+  const NODES=[{e:'火',o:'心',p:'血虚 · 心火',c:'#d4706a'},{e:'土',o:'脾',p:'脾虚 · 痰湿 · 湿热',c:'#d4af6a'},{e:'金',o:'肺',p:'气虚',c:'#e9e4d6'},{e:'水',o:'肾',p:'阴虚 · 阳虚',c:'#8ea3c8'},{e:'木',o:'肝胆',p:'肝郁 · 血瘀',c:'#9ec49a'}];
+  const pos=i=>{const a=-Math.PI/2+i*2*Math.PI/5;return [cx+Math.cos(a)*R,cy+Math.sin(a)*R];};
+  function draw(t){
+    ctx.clearRect(0,0,420,420);
+    // 相克：五角星内线（细、暗）
+    ctx.strokeStyle='rgba(233,228,214,.08)';ctx.setLineDash([3,5]);ctx.lineWidth=1;
+    ctx.beginPath();[0,2,4,1,3,0].forEach((n,i)=>{const p=pos(n);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.stroke();ctx.setLineDash([]);
+    // 相生：外圈弧 + 流动光点
+    for(let i=0;i<5;i++){
+      const a0=-Math.PI/2+i*2*Math.PI/5+.28,a1=-Math.PI/2+(i+1)*2*Math.PI/5-.28;
+      ctx.beginPath();ctx.arc(cx,cy,R,a0,a1);ctx.strokeStyle='rgba(212,175,106,.3)';ctx.lineWidth=1.4;ctx.stroke();
+      // 箭头
+      const ex=cx+Math.cos(a1)*R,ey=cy+Math.sin(a1)*R,an=a1+Math.PI/2;
+      ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex-7*Math.cos(an-.42),ey-7*Math.sin(an-.42));ctx.lineTo(ex-7*Math.cos(an+.42),ey-7*Math.sin(an+.42));ctx.closePath();
+      ctx.fillStyle='rgba(212,175,106,.55)';ctx.fill();}
+    const ft=(t*.35)%1, seg=Math.floor((t*.35)%5), a=-Math.PI/2+seg*2*Math.PI/5+.28+ ( -Math.PI/2+(seg+1)*2*Math.PI/5-.28 - (-Math.PI/2+seg*2*Math.PI/5+.28) )*ft;
+    const fx=cx+Math.cos(a)*R,fy=cy+Math.sin(a)*R;
+    const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,14);fg.addColorStop(0,'rgba(240,207,142,.95)');fg.addColorStop(1,'rgba(240,207,142,0)');
+    ctx.fillStyle=fg;ctx.beginPath();ctx.arc(fx,fy,14,0,7);ctx.fill();
+    // 中心呼吸光核
+    const br=26+5*Math.sin(t*2*Math.PI*72/60);
+    const cg=ctx.createRadialGradient(cx,cy,0,cx,cy,br*2.2);cg.addColorStop(0,'rgba(212,175,106,.2)');cg.addColorStop(1,'rgba(212,175,106,0)');
+    ctx.fillStyle=cg;ctx.beginPath();ctx.arc(cx,cy,br*2.2,0,7);ctx.fill();
+    ctx.fillStyle='rgba(233,228,214,.85)';ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('五行',cx,cy);
+    // 节点
+    NODES.forEach((n,i)=>{const p=pos(i);
+      ctx.beginPath();ctx.arc(p[0],p[1],24,0,7);ctx.fillStyle='rgba(5,8,15,.92)';ctx.fill();
+      ctx.strokeStyle=n.c;ctx.lineWidth=1.6;ctx.shadowColor=n.c;ctx.shadowBlur=10;ctx.stroke();ctx.shadowBlur=0;
+      ctx.fillStyle=n.c;ctx.font='600 19px serif';ctx.fillText(n.e,p[0],p[1]-2);
+      ctx.fillStyle='rgba(233,228,214,.75)';ctx.font='9px monospace';ctx.fillText(n.o,p[0],p[1]+34);
+      ctx.fillStyle='rgba(154,149,138,.8)';ctx.font='9px sans-serif';ctx.fillText(n.p,p[0],p[1]+47);});
+  }
+  const t0=performance.now();(function f(n){draw((n-t0)/1000);requestAnimationFrame(f);})(t0);
+})();
+
+/* ---------- 活体演示：推理引擎微缩模型（公式与 index.html 一致） ---------- */
+(function(){
+  const DEG5=[['微',0.5],['轻',0.75],['中',1],['甚',1.3],['极',1.6]];
+  const CLUES=[
+    {t:'舌质淡白',c:'望',w:{xue:2,yang:1}},
+    {t:'舌边齿痕',c:'望',w:{pi:2,tan:1}},
+    {t:'声音低微',c:'闻',w:{qi:2}},
+    {t:'怕冷肢凉',c:'问',w:{yang:2}},
+    {t:'入睡困难',c:'问',w:{huo:1,yin:1}},
+    {t:'神疲乏力',c:'问',w:{qi:2,pi:1}},
+    {t:'心悸心烦',c:'问',w:{huo:2,xue:1}},
+    {t:'胸胁胀闷',c:'问',w:{yu:2}},
+    {t:'形体困重',c:'问',w:{tan:2,pi:1}},
+    {t:'脉弦',c:'切',w:{yu:3}},
+    {t:'压力大时加重',c:'情境',w:{yu:1,huo:.5}}];
+  let deg=2;   // 默认「中」×1.0
+  const chips=document.getElementById('clueChips'),wRows=document.getElementById('wRows'),
+        verdict=document.getElementById('verdictLine'),elRow=document.getElementById('elRow'),
+        degRow=document.getElementById('degRow');
+  degRow.innerHTML='<span>程度</span>'+DEG5.map((d,i)=>`<button data-i="${i}"${i===2?' class="on"':''}>${d[0]} ×${d[1]}</button>`).join('');
+  degRow.onclick=e=>{const b=e.target.closest('button');if(!b)return;deg=+b.dataset.i;
+    [...degRow.querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x===b));};
+  chips.innerHTML=CLUES.map((c,i)=>`<button class="clueChip" data-i="${i}"><i>${c.c}</i>${c.t}</button>`).join('');
+  wRows.innerHTML=PATTERN_KEYS.map(k=>`<div class="wrow" data-k="${k}"><span class="wn">${PNAME[k]}</span><span class="wb"><i></i></span><span class="wv">0</span><span class="wc"></span></div>`).join('');
+  elRow.innerHTML=['木','火','土','金','水'].map(e=>`<div><b>${e}</b><span>0</span></div>`).join('');
+  /* 与源码一致：scaleWeights 四舍五入到 0.5 并丢弃非正项 */
+  function scaleWeights(w,m){const o={};for(const k in w){const v=Math.round(w[k]*m*2)/2;if(v>0)o[k]=v;}return o;}
+  /* 与源码 dimsFrom 一致（建档取默认值：睡 7h · 压力 5 · 周运动 3-4 次 · 清淡 · 无刺激品 · 混合工种） */
+  const cl=v=>Math.max(12,Math.min(96,Math.round(v)));
+  function dimsFrom(s){return [
+    cl(92-(s.qi+s.xue)*5+3*2+4), cl(92-(s.pi+s.tan)*5+4), cl(92-(s.yu+s.huo)*5),
+    cl(92-(s.huo+s.yin)*4), cl(92-(s.tan+s.re)*5+4), cl(92-(s.yux+s.yu*.5)*5+3*4+3)];}
+  function current(){const w={};PATTERN_KEYS.forEach(k=>w[k]=0);
+    chips.querySelectorAll('.clueChip.on').forEach(ch=>{const c=CLUES[+ch.dataset.i],sw=scaleWeights(c.w,c._m||1);
+      for(const k in sw)w[k]+=sw[k];});return w;}
+  function render(){
+    const w=current(),maxW=Math.max(4,...PATTERN_KEYS.map(k=>w[k]));
+    const top=PATTERN_KEYS.slice().sort((a,b)=>w[b]-w[a]);
+    const topS=w[top[0]];
+    PATTERN_KEYS.forEach(k=>{const r=wRows.querySelector(`[data-k="${k}"]`);
+      r.querySelector('i').style.width=(w[k]/maxW*100)+'%';
+      r.querySelector('.wv').textContent=w[k];
+      const rank=top.indexOf(k);
+      const isTop=topS>=3&&rank<3&&w[k]>=2;
+      r.classList.toggle('top',isTop);
+      r.querySelector('.wc').textContent=isTop?('≈'+Math.min(95,Math.round(38+60*w[k]/topS))+'%'):'';});
+    if(topS<1) verdict.innerHTML='尚未采集证词 —— 权重全零时，系统什么也不会断言。';
+    else if(topS<3) verdict.innerHTML=`最高证型分 <b>${topS}</b> ＜ 3 —— 诸证权重皆轻，判 <b>平和质</b>，处方以保养为主。<br><span style="color:var(--dim)">对应真实流程：startDeduce 的 topS&lt;3 分支。</span>`;
+    else verdict.innerHTML=top.slice(0,3).filter(k=>w[k]>=2).map((k,i)=>
+      `结论 ${i+1}：<b>${PNAME[k]}</b>（吻合度 ${Math.min(95,Math.round(38+60*w[k]/topS))}%）`).join(' · ')
+      +`<br><span style="color:var(--dim)">对应真实流程：报告页证型卡 + 循证交叉展开。</span>`;
+    // 五行
+    const els={木:0,火:0,土:0,金:0,水:0};PATTERN_KEYS.forEach(k=>els[ELEMENT_OF[k]]+=w[k]);
+    [...elRow.children].forEach(d=>{const e=d.querySelector('b').textContent;d.querySelector('span').textContent=els[e];
+      d.style.borderColor=els[e]>0?'rgba(212,175,106,.4)':'rgba(233,228,214,.1)';});
+    // 雷达目标值
+    targetDims=dimsFrom(w);}
+  chips.onclick=e=>{const ch=e.target.closest('.clueChip');if(!ch)return;
+    if(ch.classList.contains('on')){ch.classList.remove('on');}
+    else{ch.classList.add('on');ch._m=DEG5[deg][1];}
+    render();};
+  /* 六维迷你雷达：朝目标缓动 + 呼吸 */
+  const cv=document.getElementById('miniRadar'),ctx=cv.getContext('2d');
+  const dpr=Math.min(2,devicePixelRatio||1);cv.width=280*dpr;cv.height=280*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  let targetDims=dimsFrom({qi:0,xue:0,yin:0,yang:0,yu:0,pi:0,tan:0,re:0,yux:0,huo:0}),disp=targetDims.slice();
+  function draw(t){
+    disp=disp.map((v,i)=>v+(targetDims[i]-v)*.08);
+    const cx=140,cy=140,R=98;ctx.clearRect(0,0,280,280);
+    const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
+    for(let ring=1;ring<=4;ring++){ctx.beginPath();for(let i=0;i<6;i++){const p=pt(i,R*ring/4);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);}ctx.closePath();ctx.strokeStyle='rgba(233,228,214,.1)';ctx.stroke();}
+    for(let i=0;i<6;i++){const p=pt(i,R);ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(p[0],p[1]);ctx.strokeStyle='rgba(233,228,214,.09)';ctx.stroke();
+      const lp=pt(i,R+16);ctx.fillStyle='rgba(233,228,214,.7)';ctx.font='9px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(DIMS6[i],lp[0],lp[1]);}
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(106,212,200,${.08+.04*Math.sin(t*2)})`);g.addColorStop(1,'rgba(106,212,200,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fill();
+    ctx.beginPath();disp.forEach((v,i)=>{const b=v*(1+.018*Math.sin(t*1.7+i*1.05));const p=pt(i,R*b/100);i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.closePath();
+    const fg=ctx.createLinearGradient(cx-R,cy-R,cx+R,cy+R);fg.addColorStop(0,'rgba(106,212,200,.32)');fg.addColorStop(1,'rgba(212,175,106,.2)');
+    ctx.fillStyle=fg;ctx.fill();ctx.strokeStyle='rgba(106,212,200,.9)';ctx.lineWidth=1.6;ctx.stroke();
+    disp.forEach((v,i)=>{const p=pt(i,R*v/100);ctx.beginPath();ctx.arc(p[0],p[1],2.6,0,7);ctx.fillStyle='#d4af6a';ctx.fill();});}
+  const t0=performance.now();(function f(n){draw((n-t0)/1000);requestAnimationFrame(f);})(t0);
+  render();
+})();
+
+/* ---------- 优先级散点 ---------- */
+(function(){
+  const cv=document.getElementById('prio'),ctx=cv.getContext('2d');
+  const PTS=[['听觉心跳',3,9,'#d4af6a'],['触觉震动',2,7,'#6ad4c8'],['闲置生态',4,8,'#d4706a'],
+             ['数据流动',4,7,'#d4af6a'],['时辰节气',5,6,'#6ad4c8'],['呼吸引导',4,6,'#d4706a'],
+             ['rPPG 心率',8,9,'#d4af6a'],['身体史',6,8,'#6ad4c8'],['拟人叙事',3,5,'#d4706a']];
+  let W=0,H=380;
+  function fit(){const dpr=Math.min(2,devicePixelRatio||1);W=cv.clientWidth||600;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);}
+  fit();addEventListener('resize',fit);
+  const padL=54,padR=26,padT=26,padB=44;
+  const X=v=>padL+(W-padL-padR)*v/10, Y=v=>padT+(H-padT-padB)*(1-v/10);
+  function draw(t){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(233,228,214,.14)';ctx.lineWidth=1;
+    ctx.strokeRect(padL,padT,W-padL-padR,H-padT-padB);
+    ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(X(5),padT);ctx.lineTo(X(5),H-padB);ctx.moveTo(padL,Y(5));ctx.lineTo(W-padR,Y(5));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(154,149,138,.8)';ctx.font='10px monospace';ctx.textAlign='center';
+    ctx.fillText('成本 EFFORT →',(padL+W-padR)/2,H-14);
+    ctx.save();ctx.translate(18,(padT+H-padB)/2);ctx.rotate(-Math.PI/2);ctx.fillText('影响 IMPACT →',0,0);ctx.restore();
+    ctx.fillStyle='rgba(212,175,106,.75)';ctx.font='10.5px serif';
+    ctx.fillText('速赢',X(2.5),Y(9.4));ctx.fillStyle='rgba(154,149,138,.6)';
+    ctx.fillText('大工程',X(7.5),Y(9.4));ctx.fillText('三思',X(7.5),Y(.8));ctx.fillText('填充',X(2.5),Y(.8));
+    PTS.forEach((p,i)=>{
+      const x=X(p[1]),y=Y(p[2]),r=6+1.6*Math.sin(t*2*Math.PI*72/60+i);
+      const g=ctx.createRadialGradient(x,y,0,x,y,r*2.4);g.addColorStop(0,p[3]+'66');g.addColorStop(1,p[3]+'00');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*2.4,0,7);ctx.fill();
+      ctx.beginPath();ctx.arc(x,y,4.5,0,7);ctx.fillStyle=p[3];ctx.shadowColor=p[3];ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(233,228,214,.85)';ctx.font='10px sans-serif';ctx.fillText(p[0],x,y-11);});
+  }
+  const t0=performance.now();(function f(n){draw((n-t0)/1000);requestAnimationFrame(f);})(t0);
+})();
+</script>
+</body>
+</html>

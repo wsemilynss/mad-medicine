@@ -9,6 +9,8 @@ const ROOT = __dirname;
 const WATCH_FILES = [
   'index.html',
   'design-evolution.html',
+  'system-analysis.html',
+  'interaction-life-design.html',
   'reference-figures.mp4',
   'README.md',
 ];

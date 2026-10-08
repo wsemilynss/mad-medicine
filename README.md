@@ -31,6 +31,7 @@ https://<你的用户名>.github.io/<仓库名>/
 - 主程序（四诊探案）：https://wsemilynss.github.io/mad-medicine/
 - 设计演进对比说明（含动态演示录制与下载、医理探案自动巡夜录制）：https://wsemilynss.github.io/mad-medicine/design-evolution.html
 - 系统架构分析（架构图 · 推理管线 · 交叉学科矩阵 · 生命感建议）：https://wsemilynss.github.io/mad-medicine/system-analysis.html
+- 交互生命感设计研究（心跳节拍 · 显化仪表 · 由虚到实 · 多通道触感）：https://wsemilynss.github.io/mad-medicine/interaction-life-design.html
 
 把链接发给别人，用电脑或手机浏览器打开即可使用。录制动态演示视频需用电脑版 Chrome / Edge；手机端浏览与观看演示不受影响。
 
@@ -49,6 +50,7 @@ https://<你的用户名>.github.io/<仓库名>/
 | `index.html` | 全部程序（界面、交互、知识库、报告导出），无外部依赖 |
 | `design-evolution.html` | 设计演进对比说明页（五次视觉跃迁），辅助展示用，不影响主程序 |
 | `system-analysis.html` | 系统架构与交叉学科知识体系分析页（含推理引擎微缩模型与「生命感」提升建议），辅助展示用，不影响主程序 |
+| `interaction-life-design.html` | 交互生命感设计研究页（心跳节拍 · 显化仪表 · 由虚到实 · 多通道触感），辅助展示用，不影响主程序 |
 | `reference-figures.mp4` | 中央「颗粒双人」视频素材，必须随网页一起发布 |
 | `界面效果参考.mp4` | 设计参考录像，仅存档用，不影响网页运行（可不发布） |
 | `.nojekyll` | 让 GitHub Pages 原样服务所有文件 |

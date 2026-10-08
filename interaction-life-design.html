@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>操作系统生命感设计研究 —— 跨端信息传递的体验评测与提升体系</title>
+<style>
+:root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--violet:#9a8ad4;--line:rgba(212,175,106,.28);
+  --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  --bpm:66;--beat:calc(60s / var(--bpm));--aTf:ease-in-out}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased}
+main{max-width:1040px;margin:0 auto;padding:60px 22px 80px}
+h1{font-family:var(--serif);font-size:clamp(26px,4.4vw,42px);letter-spacing:.14em;font-weight:600;text-align:center;text-shadow:0 0 40px rgba(212,175,106,.25)}
+h1 small{display:block;font:300 11.5px/2 var(--sans);letter-spacing:.44em;color:var(--gold);margin-top:10px}
+h2{font-family:var(--serif);font-size:22px;letter-spacing:.24em;color:var(--gold);margin:64px 0 6px;display:flex;align-items:center;gap:12px}
+h2::before{content:"";width:8px;height:8px;background:var(--teal);transform:rotate(45deg);box-shadow:0 0 10px var(--teal)}
+h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:normal;margin-left:auto}
+.sub{color:var(--dim);font-size:13px;letter-spacing:.04em;margin-bottom:20px}
+.kicker{text-align:center;font:10px/2 monospace;letter-spacing:.5em;color:var(--teal);margin-bottom:8px}
+.lede{max-width:740px;margin:14px auto 0;text-align:center;color:var(--dim);font-size:14px}
+.card{background:rgba(14,20,34,.82);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(6px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106,212,200,.08);padding:1px 6px;border-radius:5px}
+/* 心跳节拍 */
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes lubdubRim{0%,100%{filter:brightness(.7)}10%{filter:brightness(1.16)}20%{filter:brightness(.8)}32%{filter:brightness(.98)}46%{filter:brightness(.7)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes ringOut{from{transform:scale(1);opacity:.5}to{transform:scale(1.6);opacity:0}}
+.beat{animation:lubdub var(--beat) var(--aTf) infinite}
+/* ECG 生命线 */
+.vital{display:block;width:100%;height:100%;overflow:visible}
+.vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.vital .vTrack{opacity:.14}
+.vital .vRun{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
+.heroVital{width:min(420px,80vw);height:44px;color:var(--teal)}
+.bpmRow{display:flex;align-items:center;gap:14px;font:11px/1 monospace;letter-spacing:.2em;color:var(--dim)}
+.bpmRow b{font-size:20px;color:var(--goldb);letter-spacing:.04em;min-width:88px;text-align:right}
+.bpmRow input{width:200px;accent-color:var(--gold)}
+.heart{width:22px;height:22px;color:var(--cin);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--cin) 80%,#fff)) drop-shadow(0 0 12px rgba(212,112,106,.55))}
+/* 导航 */
+.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.nav a{font-family:var(--serif);letter-spacing:.2em;font-size:12px;color:var(--dim);text-decoration:none;border:1px solid rgba(233,228,214,.14);border-radius:999px;padding:7px 18px;transition:.25s}
+.nav a:hover{border-color:var(--gold);color:var(--goldb)}
+.nav a.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.1)}
+/* 张力天平：效率 vs 负担 */
+.tension{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-top:16px}
+.tCol{border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px;background:rgba(5,8,15,.5);text-align:center}
+.tCol.eff{border-color:rgba(106,212,200,.3)}
+.tCol.load{border-color:rgba(212,112,106,.3)}
+.tCol .tIco{width:46px;height:46px;margin:0 auto 8px;color:var(--teal);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--teal) 70%,transparent))}
+.tCol.load .tIco{color:var(--cin);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--cin) 70%,transparent))}
+.tCol b{display:block;font-family:var(--serif);letter-spacing:.2em;font-size:15px;color:var(--goldb)}
+.tCol small{display:block;font:9.5px/1.6 monospace;letter-spacing:.1em;color:var(--dim);margin-top:4px}
+.tCol p{font-size:11.5px;color:var(--dim);margin-top:8px;line-height:1.7}
+.tBeam{font-family:var(--serif);font-size:26px;color:var(--gold);text-align:center;filter:drop-shadow(0 0 10px rgba(212,175,106,.4));animation:breathe 4s ease-in-out infinite}
+.tSweet{margin-top:14px;text-align:center;font-size:12.5px;color:var(--teal);letter-spacing:.06em}
+.tSweet b{font-family:var(--serif);color:var(--goldb);letter-spacing:.16em}
+/* 跨学科能量 四源 */
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.src{position:relative;border:0;border-radius:14px;padding:18px 12px 14px;text-align:center;color:var(--ink);
+  background:radial-gradient(120% 90% at 50% 0%,rgba(255,255,255,.05),transparent 55%),radial-gradient(140% 140% at 50% 0%,#141b29,#05070e 55%,#010204);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.07),inset 0 -4px 10px rgba(0,0,0,.68),inset 0 0 16px rgba(0,0,0,.45);overflow:hidden}
+.src::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:conic-gradient(from 0deg,color-mix(in srgb,#f0f4fa 60%,var(--c)),color-mix(in srgb,#707a92 84%,var(--c)) 90deg,color-mix(in srgb,#59627a 86%,var(--c)) 180deg,color-mix(in srgb,#a4afc3 70%,var(--c)) 300deg,color-mix(in srgb,#f0f4fa 60%,var(--c)));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:lubdubRim var(--beat) var(--aTf) infinite}
+.src .sIco{width:38px;height:38px;margin:0 auto 8px;color:var(--c);filter:drop-shadow(0 0 1px rgba(255,255,255,.8)) drop-shadow(0 0 6px color-mix(in srgb,var(--c) 80%,#fff)) drop-shadow(0 0 16px color-mix(in srgb,var(--c) 50%,transparent))}
+.src .sIco *{animation:breathe 3s ease-in-out infinite;transform-origin:19px 19px}
+.src b{display:block;font-family:var(--serif);letter-spacing:.24em;font-size:14px;color:var(--goldb)}
+.src em{display:block;font:8.5px/1.6 monospace;letter-spacing:.14em;color:var(--dim);font-style:normal;margin:2px 0 8px}
+.src span{display:block;font-size:11px;color:var(--dim);line-height:1.7}
+/* 流程：能量→机制→指标 */
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin-top:16px}
+.flowBox{border:1px solid rgba(233,228,214,.14);border-radius:12px;padding:14px;text-align:center;background:rgba(5,8,15,.5)}
+.flowBox b{display:block;font-family:var(--serif);letter-spacing:.18em;font-size:13px;color:var(--goldb);margin-bottom:4px}
+.flowBox small{font-size:11px;color:var(--dim);line-height:1.6}
+.flowArr{font-size:20px;color:var(--teal);text-align:center;animation:breathe 2.6s ease-in-out infinite}
+/* 评测体系 雷达 + 维度 */
+.radarWrap{display:grid;grid-template-columns:minmax(260px,1fr) minmax(240px,.95fr);gap:22px;align-items:center;margin-top:16px}
+#assessRadar{display:block;width:100%;max-width:440px;margin:0 auto}
+.dims{display:flex;flex-direction:column;gap:8px}
+.dims button{display:flex;align-items:center;gap:10px;background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.12);border-radius:10px;padding:9px 12px;color:var(--ink);cursor:pointer;text-align:left;font-family:var(--sans);transition:.2s}
+.dims button i{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:0 0 auto}
+.dims button b{font-family:var(--serif);letter-spacing:.12em;font-size:13px;color:var(--c)}
+.dims button small{font-size:10px;color:var(--dim);margin-left:auto;font-family:monospace}
+.dims button .dDesc{display:block;font-size:10.5px;color:var(--dim);line-height:1.5;margin-top:2px}
+.dims button.off{opacity:.4}
+/* 评测表 */
+.scoreTbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:18px}
+.scoreTbl th,.scoreTbl td{padding:8px 10px;border-bottom:1px solid rgba(233,228,214,.1);text-align:center}
+.scoreTbl th{font-family:var(--serif);letter-spacing:.1em;color:var(--gold);font-weight:600}
+.scoreTbl td:first-child,.scoreTbl th:first-child{text-align:left}
+.scoreTbl td i{display:inline-block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--cin),var(--gold),var(--teal));vertical-align:middle;margin-right:6px;width:calc(var(--v)*7px);animation:barGrow 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes barGrow{from{width:0}}
+.scoreTbl td b{font-family:monospace;color:var(--goldb)}
+.tblScroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* 前后对照 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+.pane{position:relative;border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px;background:rgba(5,8,15,.55);display:flex;flex-direction:column;overflow:hidden}
+.pane.after{border-color:rgba(106,212,200,.35);box-shadow:inset 0 0 40px rgba(106,212,200,.05)}
+.pane .tag{font:9px/1 monospace;letter-spacing:.24em;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between}
+.pane.after .tag{color:var(--teal)}
+.pane .tag i{font-style:normal;color:var(--gold)}
+.pane .note{margin-top:auto;padding-top:10px;font-size:11.5px;color:var(--dim);line-height:1.7;border-top:1px dashed rgba(233,228,214,.12)}
+.gain{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.gain span{font-size:11px;letter-spacing:.06em;padding:5px 11px;border-radius:999px;border:1px solid rgba(106,212,200,.35);color:var(--teal)}
+.gain span.g{border-color:var(--line);color:var(--gold)}
+/* Demo：杂乱 vs 分层 */
+.msgOld{display:flex;flex-direction:column;gap:6px}
+.msgOld span{font-size:11px;color:var(--ink);border:1px solid rgba(233,228,214,.14);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between}
+.msgOld span em{font-style:normal;color:var(--dim);font:9px monospace}
+.msgNew{display:flex;flex-direction:column;gap:8px}
+.lane{border-left:2px solid var(--c);padding:6px 0 6px 11px}
+.lane b{font-family:var(--serif);font-size:11px;letter-spacing:.14em;color:var(--c);display:flex;align-items:center;gap:7px}
+.lane b svg{width:15px;height:15px}
+.lane b.beat svg{animation:lubdub var(--beat) var(--aTf) infinite}
+.lane small{display:block;font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.6}
+/* Demo：反馈层级 触感 */
+.hapRow{display:flex;flex-direction:column;gap:12px}
+.hapBtn{align-self:flex-start;font-family:var(--serif);letter-spacing:.3em;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));padding:12px 30px;border:0;border-radius:999px;cursor:pointer;box-shadow:0 8px 26px rgba(212,175,106,.28);transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s;-webkit-tap-highlight-color:transparent}
+.hapBtn:hover{transform:translateY(-2px)}
+.hapBtn.press{transform:scale(.94);filter:brightness(.93)}
+.senseRow{display:flex;gap:10px;flex-wrap:wrap}
+.sense{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:64px;border:1px solid rgba(233,228,214,.12);border-radius:11px;padding:10px 6px;transition:.25s}
+.sense svg{width:24px;height:24px;color:var(--c)}
+.sense small{font:9px monospace;color:var(--dim);letter-spacing:.08em}
+.sense.lit{border-color:var(--c);color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 32%,transparent)}
+.sense.lit svg{animation:lubdub var(--beat) var(--aTf) infinite}
+.ripple{position:absolute;border:1px solid var(--teal);border-radius:50%;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none;animation:ringOut .8s ease-out forwards}
+/* 跨平台终端 */
+.plats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+.plat{border:1px solid rgba(233,228,214,.12);border-radius:13px;padding:14px;background:rgba(5,8,15,.5);text-align:center}
+.plat .pIco{width:38px;height:38px;margin:0 auto 8px;color:var(--gold);filter:drop-shadow(0 0 6px rgba(212,175,106,.4))}
+.plat .pIco.beat{animation:lubdub var(--beat) var(--aTf) infinite}
+.plat b{display:block;font-family:var(--serif);letter-spacing:.16em;font-size:13px;color:var(--goldb)}
+.plat small{display:block;font:9px/1.5 monospace;color:var(--teal);margin:3px 0 7px}
+.plat span{font-size:11px;color:var(--dim);line-height:1.6}
+/* 指标 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.stat{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5)}
+.stat .k{font-size:10.5px;letter-spacing:.18em;color:var(--dim);font-family:var(--serif)}
+.stat .v{font:22px/1.4 monospace;color:var(--goldb);margin-top:4px}
+.stat .v small{font:10px var(--sans);color:var(--dim)}
+/* 原则 */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+.rule{border-left:2px solid var(--gold);padding:10px 14px;background:rgba(212,175,106,.05);font-size:12.5px;line-height:1.8}
+.rule b{display:block;font-family:var(--serif);letter-spacing:.16em;color:var(--goldb);margin-bottom:3px}
+/* 分布式超级终端：星座 */
+.superDev{position:relative;width:100%;max-width:520px;margin:10px auto 0;aspect-ratio:1/.72}
+.superDev svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.superDev .link{fill:none;stroke:var(--teal);stroke-width:1.2;opacity:.35;stroke-dasharray:4 6;animation:dash 3s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-20}}
+.superDev .pkt{fill:var(--goldb);filter:drop-shadow(0 0 5px var(--gold))}
+.superDev .node{cursor:default}
+.superDev .node circle{fill:#0a0f1c;stroke:var(--gold);stroke-width:1.4}
+.superDev .hub circle{stroke:var(--cin);stroke-width:1.8}
+.superDev .hub .halo{fill:none;stroke:var(--cin);opacity:.5;animation:ringOut var(--beat) ease-out infinite}
+.superDev .node text{fill:var(--dim);font:9px monospace;text-anchor:middle}
+.superDev .node path{stroke:var(--gold);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.superDev .hub path{stroke:var(--cin)}
+.superDev .hub text{fill:var(--cin)}
+.superNote{text-align:center;font-size:12px;color:var(--dim);margin-top:12px;line-height:1.7}
+.superNote b{font-family:var(--serif);color:var(--goldb);letter-spacing:.14em}
+/* 流转 handoff 演示 */
+.handoff{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;margin-top:16px}
+.hDev{border:1px solid rgba(233,228,214,.14);border-radius:14px;padding:14px;background:rgba(5,8,15,.5);text-align:center;transition:.4s}
+.hDev.active{border-color:var(--teal);box-shadow:0 0 22px rgba(106,212,200,.2)}
+.hDev .hIco{width:40px;height:40px;margin:0 auto 6px;color:var(--gold)}
+.hDev.active .hIco{color:var(--teal)}
+.hDev b{display:block;font-family:var(--serif);letter-spacing:.14em;font-size:13px;color:var(--goldb)}
+.hDev .screen{margin-top:10px;height:56px;border-radius:9px;background:rgba(0,0,0,.4);border:1px solid rgba(233,228,214,.1);display:flex;align-items:center;justify-content:center;font:10px monospace;color:var(--dim);position:relative;overflow:hidden}
+.hDev .screen .fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(106,212,200,.25),rgba(212,175,106,.15));transition:width .5s}
+.hDev .screen span{position:relative;z-index:1}
+.hArrow{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--teal)}
+.hArrow .pulse{font-size:22px;animation:breathe 1.4s ease-in-out infinite}
+.hArrow small{font:8px monospace;letter-spacing:.14em;color:var(--dim)}
+.hBtn{margin:16px auto 0;display:block;font-family:var(--serif);letter-spacing:.3em;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));border:0;border-radius:999px;padding:11px 30px;cursor:pointer;box-shadow:0 8px 24px rgba(212,175,106,.28);transition:transform .22s}
+.hBtn:active{transform:scale(.95)}
+/* 分层评测模型 */
+.layers{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.layer{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center;border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--c);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5)}
+.layer .lName{font-family:var(--serif);letter-spacing:.14em;color:var(--c)}
+.layer .lName small{display:block;font:8.5px/1.5 monospace;letter-spacing:.1em;color:var(--dim);margin-top:2px}
+.layer .lMetrics{display:flex;gap:8px;flex-wrap:wrap}
+.layer .lMetrics span{font-size:11px;color:var(--dim);border:1px solid rgba(233,228,214,.14);border-radius:999px;padding:4px 11px}
+/* 案例 */
+.caseBox{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-top:4px}
+.caseBox .cThumb{width:96px;height:96px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(circle at 50% 30%,#141b29,#05070e);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.caseBox .cThumb svg{width:48px;height:48px;color:var(--cin);animation:lubdub var(--beat) var(--aTf) infinite;filter:drop-shadow(0 0 6px rgba(212,112,106,.5))}
+.caseBox .cText b{font-family:var(--serif);letter-spacing:.14em;color:var(--goldb);font-size:15px}
+.caseBox .cText p{font-size:12.5px;color:var(--dim);margin-top:6px;line-height:1.7}
+.caseBox .cText a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(106,212,200,.4)}
+.caseTags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.caseTags span{font-size:11px;color:var(--gold);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+/* 下载 / 录屏 */
+.dl{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.dl button{cursor:pointer;font-family:var(--serif);letter-spacing:.26em;font-size:13px;border:0;border-radius:999px;padding:14px 30px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));transition:transform .25s,box-shadow .25s;box-shadow:0 8px 26px rgba(212,175,106,.25)}
+.dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
+.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:lubdub var(--beat) var(--aTf) infinite}
+.dl button:hover{transform:translateY(-2px)}
+.dl button:active{transform:scale(.96)}
+#recHint{width:100%;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;margin:2px 0 0;line-height:1.8}
+#recPrev{display:none;width:min(560px,100%);margin:6px auto 0;border:1px solid var(--line);border-radius:12px;background:#000}
+/* 导航出口 */
+.goWrap{margin-top:40px;text-align:center}
+.goLabel{font:9.5px/2 monospace;letter-spacing:.42em;color:var(--teal)}
+.goBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.goBtn{display:inline-block;font-family:var(--serif);letter-spacing:.3em;font-size:14px;border-radius:999px;padding:14px 38px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));text-decoration:none;box-shadow:0 8px 30px rgba(212,175,106,.35);transition:transform .25s,box-shadow .25s;animation:lubdub var(--beat) var(--aTf) infinite}
+.goBtn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,175,106,.45)}
+.goBtn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none;animation:none}
+.goBtn.ghost:hover{border-color:var(--gold);box-shadow:0 8px 26px rgba(212,175,106,.18)}
+footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
+.reveal{opacity:0;animation:fadeUp .7s ease forwards}
+@media(max-width:720px){
+  main{padding:36px 12px 56px}
+  body{line-height:1.7;overflow-x:clip}
+  .kicker{letter-spacing:.3em;font-size:9px}
+  h1{letter-spacing:.08em}
+  h1 small{letter-spacing:.24em;font-size:10px}
+  h2{font-size:19px;letter-spacing:.18em;margin:48px 0 6px}
+  .card{padding:15px 13px;border-radius:14px}
+  .tension{grid-template-columns:1fr;gap:10px}
+  .handoff{grid-template-columns:1fr;gap:10px}
+  .hArrow{flex-direction:row}
+  .hArrow .pulse{transform:rotate(90deg)}
+  .layer{grid-template-columns:1fr;gap:8px}
+  .caseBox{grid-template-columns:1fr;justify-items:center;text-align:center}
+  .tBeam{transform:rotate(90deg)}
+  .quad{grid-template-columns:repeat(2,1fr)}
+  .flow{grid-template-columns:1fr;gap:6px}
+  .flowArr{transform:rotate(90deg)}
+  .radarWrap,.cmp{grid-template-columns:1fr;gap:12px}
+  .scoreTbl{min-width:520px;font-size:11px}
+  .scoreTbl th,.scoreTbl td{padding:6px 7px}
+  .scoreTbl td i{width:calc(var(--v)*4.5px)}
+  .stats{grid-template-columns:repeat(2,1fr);gap:9px}
+  .rules{grid-template-columns:1fr}
+  .goBtns{flex-direction:column;align-items:stretch}
+  .goBtn{display:block;font-size:13px;padding:13px 12px;letter-spacing:.2em}
+  .nav a{font-size:11px;padding:6px 13px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media print{
+  body{background:#fff;color:#111}
+  .dl,.nav,.goWrap,#recPrev,.hBtn,.hapBtn{display:none!important}
+  main{max-width:100%;padding:0}
+  .card,.pane,.layer,.plat,.stat,.src,.flowBox,.tCol{box-shadow:none;background:#fafafa;border-color:#ccc}
+  h1,h2,.rule b,.src b,.plat b,.layer .lName{color:#111!important;text-shadow:none}
+  .sub,.lede,.note,.src span,.plat span{color:#333!important}
+  *{animation:none!important}
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">OPERATING SYSTEM · LIFE DESIGN · RESEARCH</div>
+  <h1>操 作 系 统 生 命 感 设 计 研 究<small>LIFE-SENSE DESIGN FOR OS · 跨端信息传递的体验评测与提升体系</small></h1>
+  <div class="hero">
+    <div class="heroVital" data-vital></div>
+    <div class="bpmRow"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
+      <span>拖动 · 系统节拍随之起伏</span><input type="range" id="bpm" min="48" max="100" value="66"><b id="bpmV">66 bpm</b></div>
+    <p class="lede">当操作系统从单设备走向<b style="color:var(--teal)">分布式、多端协同</b>（如鸿蒙式的「超级终端」），信息在手机、平板、桌面、车机、可穿戴、大屏之间不断流转，<b style="color:var(--cin)">任务效率</b>与<b style="color:var(--cin)">认知负担</b>的张力被成倍放大。本研究面向<b style="color:var(--goldb)">通用操作系统</b>，借数字媒体交互、艺术、文化与跨感官设计之力，提出一套「生命感设计」的评测体系与跨端提升方案——让分散的设备被感知为同一个有呼吸、有节拍的有机体。文末的「医理探案」仅作为验证这套语言的实验案例。</p>
+    <nav class="nav">
+      <a href="design-evolution.html">设计演进对比</a>
+      <a href="system-analysis.html">系统架构分析</a>
+      <a class="on" href="interaction-life-design.html">生命感设计研究</a>
+    </nav>
+  </div>
+
+  <h2>一 · 研究背景：从单设备到分布式<em>CONTEXT</em></h2>
+  <div class="sub">现代操作系统的复杂度不再只来自单屏内的功能堆叠，更来自设备之间的协同。信息要在多端之间被正确、低负担地「传递—接续—再呈现」，是今天体验设计的核心命题。</div>
+  <div class="card reveal">
+    <div class="quad" style="--none:0">
+      <div class="src" style="--c:var(--cin)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="12" height="9" rx="1.5"/><rect x="22" y="6" width="12" height="9" rx="1.5"/><rect x="4" y="23" width="12" height="9" rx="1.5"/><rect x="22" y="23" width="12" height="9" rx="1.5"/></svg>
+        <b>功能爆炸</b><em>COMPLEXITY</em><span>设置项、入口、模式层层叠加，用户在「找得到」与「学得会」上持续失血。</span></div>
+      <div class="src" style="--c:var(--gold)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12h22M8 19h22M8 26h14"/><circle cx="31" cy="26" r="3"/></svg>
+        <b>信息洪流</b><em>OVERLOAD</em><span>通知、消息、状态同时涌来且同一优先级，注意力被切碎，抉择成本高。</span></div>
+      <div class="src" style="--c:var(--teal)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="13" height="10" rx="1.5"/><rect x="22" y="20" width="11" height="12" rx="1.5"/><path d="M15 18c3 4 6 2 9 2" stroke-dasharray="2 3"/></svg>
+        <b>断点流转</b><em>DISCONTINUITY</em><span>换设备就断线：进度、上下文、焦点无法无缝接续，用户被迫重新定位。</span></div>
+      <div class="src" style="--c:var(--violet)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="9" width="10" height="7" rx="1"/><rect x="22" y="9" width="10" height="7" rx="1"/><rect x="14" y="24" width="10" height="7" rx="1"/><path d="M11 16v8M27 16v8"/></svg>
+        <b>体验割裂</b><em>FRAGMENTATION</em><span>各端视觉、手势、反馈语言不一致，心智模型反复重建，记忆负担激增。</span></div>
+    </div>
+    <div class="superNote">生命感设计的主张：与其在每个端上分别「做减法」，不如让<b>整套设备群共享一套生命语言</b>——一个节拍、一种状态显化方式、一致的流转隐喻——使复杂被「组织」而非被「堆叠」。</div>
+  </div>
+
+  <h2>二 · 核心张力：效率与负担的天平<em>THE TENSION</em></h2>
+  <div class="sub">复杂系统的每一次交互，都是在「尽快完成任务」与「不被信息与操作压垮」之间取舍。生命感设计的目标，不是在二者间二选一，而是找到<b style="color:var(--goldb)">动态甜点区</b>。</div>
+  <div class="card reveal">
+    <div class="tension">
+      <div class="tCol eff"><svg class="tIco" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4 8 24h9l-3 12 14-20h-9z"/></svg>
+        <b>任务效率</b><small>EFFICIENCY</small><p>更少步数、更短路径、更快到达目标。衡量「做完一件事要付出多少操作」。</p></div>
+      <div class="tBeam">⚖</div>
+      <div class="tCol load"><svg class="tIco" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="15" r="9"/><path d="M20 24v8M13 32h14M16 12l4 4 5-6"/></svg>
+        <b>认知负担</b><small>COGNITIVE LOAD</small><p>需要记忆、推断、搜寻与抉择的心智消耗。衡量「做这件事要想多少」。</p></div>
+    </div>
+    <div class="tSweet">目标非取舍，而在 <b>甜点区</b>：效率↑ 的同时负担↓ —— 靠减少无谓选择、显化系统状态、用感官线索替代记忆。</div>
+  </div>
+
+  <h2>三 · 跨学科能量四源<em>FOUR SOURCES</em></h2>
+  <div class="sub">提升体验的能量不只来自可用性工程，更来自四个交叉学科领域——把它们的方法翻译成可落地的交互机制，并贯穿到跨端的信息传递中。</div>
+  <div class="quad reveal">
+    <div class="src" style="--c:var(--teal)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="28" height="20" rx="3"/><path d="M14 33h10M19 27v6M11 14l4 4-4 4M20 22h7"/></svg>
+      <b>数字媒体交互</b><em>INTERACTION</em><span>动效节奏、状态可见、即时反馈、信息架构——让操作有回应、有层级。</span></div>
+    <div class="src" style="--c:var(--gold)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4C10 4 5 11 5 18c0 6 4 9 9 9 2 0 2 3 5 3 7 0 14-6 14-15C33 9 28 4 19 4z"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/><circle cx="19" cy="11" r="1.6" fill="currentColor"/><circle cx="26" cy="15" r="1.6" fill="currentColor"/></svg>
+      <b>艺术</b><em>ART</em><span>构图、留白、色彩情绪与韵律——把审美秩序转化为降噪与引导注意力的手段。</span></div>
+    <div class="src" style="--c:var(--cin)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5l3.5 7 8 1-6 5.5 1.5 8L19 29l-7 4.5 1.5-8-6-5.5 8-1z"/></svg>
+      <b>文化</b><em>CULTURE</em><span>隐喻、心智模型与仪式感——借用用户已有的文化经验，降低学习与记忆成本。</span></div>
+    <div class="src" style="--c:var(--violet)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="4"/><path d="M19 4v6M19 28v6M4 19h6M28 19h6M8 8l4 4M26 26l4 4M30 8l-4 4M12 26l-4 4"/></svg>
+      <b>跨感官设计</b><em>MULTISENSORY</em><span>触觉振动、声音、视觉与动态协同——用多通道冗余分担视觉，让反馈更快被感知。</span></div>
+  </div>
+
+  <h2>四 · 分布式信息传递：超级终端<em>SUPER DEVICE</em></h2>
+  <div class="sub">在鸿蒙式的分布式架构里，多台设备可临时组成一个「超级终端」，能力与信息按场景在其间自由调度。生命感设计要让这张网络被感知为<b style="color:var(--goldb)">一个有中心、会呼吸的整体</b>，而非一堆各自独立的屏幕。下图中信息包沿链路在设备间持续流动，中枢节点随全局节拍搏动。</div>
+  <div class="card reveal">
+    <div class="superDev" id="superDev"></div>
+    <div class="superNote"><b>一个节拍 · 一张网</b>：所有设备共享同一 <code>--beat</code>，中枢搏动、链路呼吸、信息包以生命节律流转——复杂的拓扑因此被读成「一个器官系统」，降低了用户对「设备在哪、数据在哪」的记忆负担。</div>
+  </div>
+
+  <h2>五 · 跨端流转的生命感<em>SEAMLESS FLOW</em></h2>
+  <div class="sub">换设备不应意味着「重来」。生命感的流转要让上下文、进度与焦点像一口气一样接续过去——视觉上「由此端淡出、于彼端凝实」，并辅以触觉与声音确认交接完成。点击下方按钮体验一次接力。</div>
+  <div class="card reveal">
+    <div class="handoff" id="handoff">
+      <div class="hDev active" data-dev="phone"><svg class="hIco" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="12" y="4" width="16" height="32" rx="3"/><path d="M17 32h6"/></svg><b>手机</b><div class="screen"><div class="fill" style="width:100%"></div><span id="scrPhone">文档 · 第 12 页</span></div></div>
+      <div class="hArrow"><span class="pulse">⇢</span><small id="flowLabel">待接力</small></div>
+      <div class="hDev" data-dev="pad"><svg class="hIco" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="30" height="26" rx="3"/><path d="M31 20h0"/></svg><b>平板</b><div class="screen"><div class="fill" style="width:0"></div><span id="scrPad">待接续…</span></div></div>
+    </div>
+    <button class="hBtn" id="handoffBtn">轻 碰 · 接 力 到 平 板</button>
+    <div class="superNote">交接过程：源端进度条淡出、目标端由虚到实充盈 + 振动与轻提示音确认——<b>上下文零丢失</b>，用户无需重新寻找自己「刚才到哪了」。这正是把「由虚到实」的生命隐喻从单屏扩展到了设备之间。</div>
+  </div>
+
+  <h2>六 · 从能量到指标：方法论链路<em>METHOD CHAIN</em></h2>
+  <div class="sub">四源能量不能直接打分，需经过「翻译—落地—量化」三步，才能成为可评测的体系；在分布式场景下，还要额外量化「流转」这一维度。</div>
+  <div class="card reveal">
+    <div class="flow">
+      <div class="flowBox"><b>学科能量</b><small>交互 · 艺术 · 文化 · 感官</small></div>
+      <div class="flowArr">→</div>
+      <div class="flowBox"><b>设计机制</b><small>节奏 · 层级 · 隐喻 · 多通道反馈</small></div>
+      <div class="flowArr">→</div>
+      <div class="flowBox"><b>可测指标</b><small>效率 · 负担 · 一致 · 流转 · 生命感</small></div>
+    </div>
+  </div>
+
+  <h2>七 · 评测体系 · 四层模型<em>ASSESSMENT MODEL</em></h2>
+  <div class="sub">把「生命感操作系统」的体验拆为四个评测层：<b style="color:var(--goldb)">效率层 → 负担层 → 流转层 → 生命感层</b>。前两层是基本盘，流转层针对多端协同，生命感层衡量系统整体的「活感」。每层各有可观测指标。</div>
+  <div class="card reveal">
+    <div class="layers">
+      <div class="layer" style="--c:var(--teal)"><div class="lName">效率层<small>EFFICIENCY</small></div><div class="lMetrics"><span>完成步数</span><span>路径长度</span><span>首达时间</span><span>错误率</span></div></div>
+      <div class="layer" style="--c:var(--cin)"><div class="lName">负担层<small>COGNITIVE LOAD</small></div><div class="lMetrics"><span>记忆项数</span><span>抉择分叉</span><span>视觉搜寻</span><span>学习曲线</span></div></div>
+      <div class="layer" style="--c:var(--violet)"><div class="lName">流转层<small>CONTINUITY</small></div><div class="lMetrics"><span>接续成功率</span><span>上下文保真</span><span>交接延迟</span><span>跨端一致</span></div></div>
+      <div class="layer" style="--c:var(--gold)"><div class="lName">生命感层<small>ALIVENESS</small></div><div class="lMetrics"><span>节拍统一</span><span>状态可见</span><span>感官协同</span><span>情感质感</span></div></div>
+    </div>
+  </div>
+
+  <h2>八 · 评测体系 · 六维雷达<em>RADAR</em></h2>
+  <div class="sub">把四层模型落为六个可打分维度，评估一个系统的「效率—负担—流转—生命感」平衡。此处对三类系统示范评分（0–10）。悬停维度可在雷达上高亮其含义。</div>
+  <div class="card reveal">
+    <div class="radarWrap"><canvas id="assessRadar" width="440" height="440"></canvas><div class="dims" id="dims"></div></div>
+    <div class="tblScroll"><table class="scoreTbl" id="scoreTbl"></table></div>
+  </div>
+
+  <h2>九 · 设计提升方案 · 前后对照<em>BEFORE / AFTER</em></h2>
+  <div class="sub">左列为常见的「高负担」形态，右列为注入跨学科能量后的提升方案——均为可交互演示，而非静态示意。</div>
+
+  <!-- A 信息过载 → 分层节奏 -->
+  <div class="card reveal">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · 信息过载</span><i>平铺 · 无优先级</i></div>
+        <div class="msgOld"><span>系统更新可用 <em>now</em></span><span>存储空间不足 <em>now</em></span><span>会议将在 5 分钟后开始 <em>now</em></span><span>3 封新邮件 <em>now</em></span><span>电量低 <em>now</em></span></div>
+        <div class="note">所有通知同一优先级、同一时刻涌入；用户必须逐条阅读、自行判断轻重——纯视觉、纯文字，记忆与抉择成本高。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · 分层 + 节奏</span><i>艺术留白 · 感官分流</i></div>
+        <div class="msgNew">
+          <div class="lane" style="--c:var(--cin)"><b class="beat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v10M12 18v2"/></svg>即时 · 需立刻处置</b><small>会议 5 分钟后开始 —— 强振动 + 心跳式搏动，优先占位</small></div>
+          <div class="lane" style="--c:var(--gold)"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>需关注 · 可稍后</b><small>3 封新邮件 · 电量低 —— 聚合为一组，轻提示色</small></div>
+          <div class="lane" style="--c:var(--dim)"><b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/></svg>背景 · 静默归档</b><small>系统更新 · 存储提醒 —— 不打断，静默入「稍后」抽屉</small></div>
+        </div>
+        <div class="note">按紧迫度分三条泳道、错峰呈现；最紧要者以心跳节拍搏动并触发振动，次要者聚合，背景类静默——用节奏与感官通道替用户完成了「排序与抉择」。</div></div>
+    </div>
+    <div class="gain"><span class="g">交互 · 状态分层</span><span class="g">艺术 · 留白降噪</span><span class="g">感官 · 振动分流</span><span>负担 ↓ · 效率 ↑</span></div>
+  </div>
+
+  <!-- B 无反馈 → 多通道触感 -->
+  <div class="card reveal" style="margin-top:16px">
+    <div class="cmp">
+      <div class="pane"><div class="tag"><span>BEFORE · 哑操作</span><i>点了没反应</i></div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center"><span style="font-family:var(--serif);letter-spacing:.3em;font-size:13px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));padding:12px 30px;border-radius:3px">确 认 提 交</span></div>
+        <div class="note">直角按钮、按下无位移、无声音、无振动；用户不确定是否点中，常重复点击——信任与效率双损。</div></div>
+      <div class="pane after"><div class="tag"><span>AFTER · 多通道反馈</span><i>视 + 触 + 听 协同</i></div>
+        <div class="hapRow"><button class="hapBtn" id="hapBtn">确 认 提 交</button>
+          <div class="senseRow" id="senseRow">
+            <div class="sense" data-s="sight" style="--c:var(--teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg><small>视觉</small></div>
+            <div class="sense" data-s="touch" style="--c:var(--gold)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11V5a2 2 0 0 1 4 0v6M9 11l-2 2 1 6h8l1-7-4-1"/></svg><small>触感</small></div>
+            <div class="sense" data-s="sound" style="--c:var(--cin)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9H4zM17 9a4 4 0 0 1 0 6"/></svg><small>听觉</small></div>
+          </div></div>
+        <div class="note">点按「确认提交」试试：胶囊按钮按压缩放 + 涟漪扩散（视觉）、调用设备振动（触感）、轻短提示音（听觉）同时触发——三通道冗余，让「我点到了」在 100ms 内被确认。</div></div>
+    </div>
+    <div class="gain"><span class="g">交互 · 即时反馈</span><span class="g">感官 · 三通道冗余</span><span>信任 ↑ · 误操作 ↓</span></div>
+  </div>
+
+  <h2>十 · 跨平台终端适配<em>MULTI-TERMINAL</em></h2>
+  <div class="sub">同一套「一个节拍、分层反馈、感官冗余」的原则，在不同终端上按情境换形——核心生命感不变，呈现密度随场景收放。</div>
+  <div class="plats reveal">
+    <div class="plat"><svg class="pIco beat" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="11" y="4" width="16" height="30" rx="3"/><path d="M16 30h6"/></svg><b>手机</b><small>MOBILE</small><span>单手触达 · 振动为主反馈 · 高信息密度折叠</span></div>
+    <div class="plat"><svg class="pIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="7" width="28" height="24" rx="3"/><path d="M30 19h0"/></svg><b>平板 · 桌面</b><small>TABLET · PC</small><span>多栏并置 · 悬停态丰富 · 留白承载节奏</span></div>
+    <div class="plat"><svg class="pIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 24c2-9 6-13 15-13s13 4 15 13M4 24h30v4H4z"/><circle cx="12" cy="20" r="2"/><circle cx="26" cy="20" r="2"/></svg><b>车机</b><small>AUTOMOTIVE</small><span>极简视觉 · 语音 + 触感主导 · 瞥一眼即懂</span></div>
+    <div class="plat"><svg class="pIco beat" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="11" y="9" width="16" height="20" rx="5"/><path d="M15 9l1-4h6l1 4M15 29l1 4h6l1-4"/></svg><b>可穿戴</b><small>WEARABLE</small><span>腕上一瞥 · 触觉优先 · 单一焦点任务</span></div>
+    <div class="plat"><svg class="pIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 14c0-4 3-6 14-6s14 2 14 6-3 6-14 6S5 18 5 14zM5 14v6c0 4 3 6 14 6s14-2 14-6v-6"/></svg><b>空间计算</b><small>SPATIAL · XR</small><span>景深分层 · 凝视 + 手势 · 空间音频定位</span></div>
+  </div>
+
+  <h2>十一 · 实验案例：医理探案<em>CASE STUDY</em></h2>
+  <div class="sub">本研究的设计语言，先在一个受控的小系统里做了完整验证——交互叙事游戏「医理探案」。它不是研究主体，而是把「一个节拍、状态显化、跨端流转、感官冗余」这套通用原则落到一个可玩实例上的试验场。</div>
+  <div class="card reveal">
+    <div class="caseBox">
+      <div class="cThumb"><svg viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg></div>
+      <div class="cText"><b>把通用原则压进一个可玩的系统</b>
+        <p>在「医理探案」里，全站动效共享一个心跳节拍、进度与状态被显化为仪表与生命线、跨屏切换沿用「由虚到实」、点按带多通道触感——与本研究主张一一对应。它证明这套语言既能用于严肃操作系统，也能承载叙事与情感。详见 <a href="design-evolution.html">设计演进对比</a> 与 <a href="system-analysis.html">系统架构分析</a>。</p>
+        <div class="caseTags"><span>节拍统一</span><span>状态显化</span><span>由虚到实</span><span>感官冗余</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>十二 · 研究规模与结论指标<em>METRICS</em></h2>
+  <div class="stats reveal">
+    <div class="stat"><div class="k">评测层</div><div class="v"><span data-count="4">0</span> <small>效率·负担·流转·生命感</small></div></div>
+    <div class="stat"><div class="k">雷达维度</div><div class="v"><span data-count="6">0</span> <small>可操作指标</small></div></div>
+    <div class="stat"><div class="k">学科能量源</div><div class="v"><span data-count="4">0</span> <small>交叉领域</small></div></div>
+    <div class="stat"><div class="k">反馈通道</div><div class="v"><span data-count="3">0</span> <small>视 · 触 · 听</small></div></div>
+    <div class="stat"><div class="k">适配终端</div><div class="v"><span data-count="6">0</span> <small>类平台形态</small></div></div>
+    <div class="stat"><div class="k">节拍源</div><div class="v"><span data-count="1">0</span> <small>全局 --beat 贯穿多端</small></div></div>
+  </div>
+
+  <h2>十三 · 设计原则沉淀<em>PRINCIPLES</em></h2>
+  <div class="rules reveal">
+    <div class="rule"><b>一个节拍</b>整个系统共享一个生命节拍 <code>--beat</code>，让多终端被感知为同一个有机体，而非散落的部件。</div>
+    <div class="rule"><b>显化状态</b>把系统的内部状态变成可见、可感的信号，用感官线索替代用户记忆——负担最大的敌人是「看不见」。</div>
+    <div class="rule"><b>分层节奏</b>按紧迫度与重要度分泳道、错峰呈现；替用户完成排序与抉择，而不是把判断成本转嫁给他。</div>
+    <div class="rule"><b>多通道冗余</b>关键反馈同时经视觉、触觉、听觉传达；任一通道受限时仍能被感知，也让确认更快到达。</div>
+    <div class="rule"><b>文化借力</b>复用用户已有的隐喻与心智模型，降低学习成本——最好的教程是「本来就会」。</div>
+    <div class="rule"><b>无缝流转</b>换端如换气：上下文、进度与焦点在设备间「由此端淡出、于彼端凝实」，零丢失、零重找。</div>
+    <div class="rule"><b>按情境换形</b>核心生命感不变，呈现密度随终端与场景收放：车机极简、桌面丰盈、腕上单焦。</div>
+  </div>
+
+  <h2>十四 · 导出与录制<em>EXPORT</em></h2>
+  <div class="sub">把本研究存为 PDF 或单文件 HTML 离线保存；也可单独导出评测雷达图，或把整页动态演示录制成视频（优先 MP4 / H.264，不支持时回退 WebM）。</div>
+  <div class="dl">
+    <button class="rec" id="dlRec">录 制 动 态 演 示</button>
+    <button class="ghost" id="dlVideo" style="display:none">下 载 演 示 录 像</button>
+    <button id="dlPrint">打 印 / 存 为 PDF</button>
+    <button class="ghost" id="dlHtml">下 载 本 页 (HTML)</button>
+    <button class="ghost" id="dlPng">下 载 评 测 雷 达 (PNG)</button>
+    <p id="recHint">录制采用浏览器标签页捕获：建议用电脑版 Chrome / Edge 打开本页；手机浏览器暂不支持页面捕获，可改用系统自带录屏。</p>
+    <video id="recPrev" controls playsinline muted loop></video>
+  </div>
+
+  <div class="goWrap">
+    <div class="goLabel">SEE THE LANGUAGE ALIVE · 在实际项目中体验这套语言</div>
+    <div class="goBtns">
+      <a class="goBtn ghost" href="design-evolution.html">设 计 演 进 对 比</a>
+      <a class="goBtn" href="https://wsemilynss.github.io/mad-medicine/" target="_blank" rel="noopener">进 入 医 理 探 案</a>
+    </div>
+  </div>
+  <footer>操作系统生命感设计研究 · 跨端信息传递的体验评测与提升体系 · <span id="dateStamp"></span><br>本文档为设计方法研究，评分为示范性设计自评，用于说明评测体系的使用方式，非实测用户数据；「医理探案」仅作为验证设计语言的实验案例。</footer>
+</main>
+
+<script>
+/* ---------- ECG 生命线 ---------- */
+const VITAL_D='M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105';
+document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="${VITAL_D}"/><path class="vRun" d="${VITAL_D}"/></svg>`);
+
+/* ---------- 心跳滑杆 ---------- */
+const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV'),root=document.documentElement;
+function setBpm(v){root.style.setProperty('--bpm',v);bpmV.textContent=v+' bpm';}
+bpm.addEventListener('input',()=>setBpm(bpm.value));setBpm(bpm.value);
+
+/* ---------- 评测维度 + 雷达 ---------- */
+const DIMS=[
+ {k:'任务效率',en:'Efficiency',c:'#6ad4c8',d:'完成目标的步数与路径长度'},
+ {k:'认知负担',en:'Low Load',c:'#d4706a',d:'记忆、搜寻与抉择的心智消耗（越低越好，此处取其「轻」度）'},
+ {k:'状态可见',en:'Visibility',c:'#f0cf8e',d:'系统当前状态被感知的清晰度'},
+ {k:'跨端流转',en:'Continuity',c:'#9a8ad4',d:'信息在多端之间接续的成功率与上下文保真度'},
+ {k:'情感生命感',en:'Aliveness',c:'#d4af6a',d:'系统被感知为「有生命」的整体质感'},
+ {k:'跨端一致',en:'Consistency',c:'#8ad4a0',d:'多终端间体验与心智模型的统一度'},
+];
+const SAMPLES=[
+ {n:'传统桌面系统',c:'rgba(212,112,106,.9)',fill:'rgba(212,112,106,.12)',s:[6,4,5,2,2,4]},
+ {n:'现代移动系统',c:'rgba(212,175,106,.95)',fill:'rgba(212,175,106,.14)',s:[8,6,7,5,5,7]},
+ {n:'生命感·分布式系统',c:'rgba(106,212,200,.95)',fill:'rgba(106,212,200,.16)',s:[9,8,9,9,9,9]},
+];
+let visible=SAMPLES.map(()=>true);
+const cvs=document.getElementById('assessRadar'),ctx=cvs.getContext('2d');
+const DPR=Math.min(2,window.devicePixelRatio||1);
+cvs.width=440*DPR;cvs.height=440*DPR;ctx.scale(DPR,DPR);
+let hi=-1,anim=0;
+function drawRadar(){
+  const cx=220,cy=220,R=150,N=DIMS.length;ctx.clearRect(0,0,440,440);
+  ctx.save();ctx.translate(cx,cy);
+  for(let g=1;g<=5;g++){ctx.beginPath();for(let i=0;i<N;i++){const a=-Math.PI/2+i/N*Math.PI*2,r=R*g/5;ctx.lineTo(Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.strokeStyle='rgba(233,228,214,'+(g===5?.22:.09)+')';ctx.stroke();}
+  for(let i=0;i<N;i++){const a=-Math.PI/2+i/N*Math.PI*2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(a)*R,Math.sin(a)*R);ctx.strokeStyle=i===hi?'rgba(240,207,142,.6)':'rgba(233,228,214,.1)';ctx.lineWidth=i===hi?1.6:1;ctx.stroke();}
+  ctx.lineWidth=1;
+  SAMPLES.forEach((s,si)=>{if(!visible[si])return;ctx.beginPath();for(let i=0;i<N;i++){const a=-Math.PI/2+i/N*Math.PI*2,r=R*(s.s[i]/10)*anim;ctx[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}ctx.closePath();ctx.fillStyle=s.fill;ctx.fill();ctx.strokeStyle=s.c;ctx.lineWidth=2;ctx.stroke();
+    for(let i=0;i<N;i++){const a=-Math.PI/2+i/N*Math.PI*2,r=R*(s.s[i]/10)*anim;ctx.beginPath();ctx.arc(Math.cos(a)*r,Math.sin(a)*r,2.4,0,7);ctx.fillStyle=s.c;ctx.fill();}});
+  ctx.font='11px "PingFang SC",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let i=0;i<N;i++){const a=-Math.PI/2+i/N*Math.PI*2,r=R+22;ctx.fillStyle=i===hi?DIMS[i].c:'rgba(154,149,138,.9)';ctx.fillText(DIMS[i].k,Math.cos(a)*r,Math.sin(a)*r);}
+  ctx.restore();
+}
+function animRadar(){anim=0;const t0=performance.now();(function loop(t){anim=Math.min(1,(t-t0)/900);anim=1-Math.pow(1-anim,3);drawRadar();if(anim<1)requestAnimationFrame(loop);})(t0);}
+/* 维度图例 */
+const dimsEl=document.getElementById('dims');
+DIMS.forEach((d,i)=>{const b=document.createElement('button');b.style.setProperty('--c',d.c);
+  b.innerHTML=`<i></i><div><b>${d.k} · ${d.en}</b><span class="dDesc">${d.d}</span></div>`;
+  b.addEventListener('mouseenter',()=>{hi=i;drawRadar();});b.addEventListener('mouseleave',()=>{hi=-1;drawRadar();});
+  dimsEl.appendChild(b);});
+/* 评测表 */
+const tbl=document.getElementById('scoreTbl');
+let th='<tr><th>界面类型</th>'+DIMS.map(d=>`<th>${d.k}</th>`).join('')+'<th>均值</th></tr>';
+let rows=SAMPLES.map(s=>{const avg=(s.s.reduce((a,b)=>a+b,0)/s.s.length).toFixed(1);
+  return `<tr><td style="color:${s.c}">${s.n}</td>`+s.s.map(v=>`<td><i style="--v:${v}"></i><b>${v}</b></td>`).join('')+`<td><b>${avg}</b></td></tr>`;}).join('');
+tbl.innerHTML=th+rows;
+
+/* ---------- 多通道反馈演示 ---------- */
+const hapBtn=document.getElementById('hapBtn'),senseRow=document.getElementById('senseRow');
+let actx;
+function beep(){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=660;g.gain.value=.001;o.start();g.gain.exponentialRampToValueAtTime(.12,actx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+.16);o.stop(actx.currentTime+.17);}catch(e){}}
+function lightSenses(){['sight','touch','sound'].forEach((s,i)=>{const el=senseRow.querySelector(`[data-s="${s}"]`);setTimeout(()=>{el.classList.add('lit');setTimeout(()=>el.classList.remove('lit'),500);},i*70);});}
+hapBtn.addEventListener('pointerdown',e=>{hapBtn.classList.add('press');
+  const rip=document.createElement('span');rip.className='ripple';const r=hapBtn.getBoundingClientRect();
+  rip.style.left=(e.clientX-r.left)+'px';rip.style.top=(e.clientY-r.top)+'px';hapBtn.style.position='relative';hapBtn.appendChild(rip);setTimeout(()=>rip.remove(),800);
+  if(navigator.vibrate)navigator.vibrate(18);beep();lightSenses();});
+hapBtn.addEventListener('pointerup',()=>hapBtn.classList.remove('press'));
+hapBtn.addEventListener('pointerleave',()=>hapBtn.classList.remove('press'));
+
+/* ---------- 计数 + 滚动显形 ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.style.animationDelay='0s';e.target.classList.add('in');if(e.target.id==='assessRadar'||e.target.querySelector?.('#assessRadar'))animRadar();e.target.querySelectorAll?.('[data-count]').forEach(countUp);io.unobserve(e.target);}}),{threshold:.3});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+function countUp(el){const to=+el.dataset.count,t0=performance.now();(function loop(t){const p=Math.min(1,(t-t0)/900),e=1-Math.pow(1-p,3);el.textContent=Math.round(to*e);if(p<1)requestAnimationFrame(loop);})(t0);}
+/* 雷达首屏若已可见 */
+new IntersectionObserver((es,ob)=>es.forEach(e=>{if(e.isIntersecting){animRadar();ob.disconnect();}}),{threshold:.2}).observe(cvs);
+
+/* ---------- 日期 ---------- */
+document.getElementById('dateStamp').textContent=new Date().toISOString().slice(0,10);
+
+/* ---------- 导出：打印 / HTML / 雷达 PNG ---------- */
+document.getElementById('dlPrint').addEventListener('click',()=>window.print());
+document.getElementById('dlHtml').addEventListener('click',()=>{
+  const html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+  const blob=new Blob([html],{type:'text/html'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='操作系统生命感设计研究.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+});
+document.getElementById('dlPng').addEventListener('click',()=>{
+  const c=document.getElementById('assessRadar');
+  const out=document.createElement('canvas');out.width=c.width;out.height=c.height;
+  const o=out.getContext('2d');o.fillStyle='#05070d';o.fillRect(0,0,out.width,out.height);o.drawImage(c,0,0);
+  const a=document.createElement('a');a.href=out.toDataURL('image/png');a.download='评测雷达.png';a.click();
+});
+
+/* ---------- 录制：标签页捕获 → MP4/WebM ---------- */
+(function(){
+  const btn=document.getElementById('dlRec'),hint=document.getElementById('recHint'),
+        prev=document.getElementById('recPrev'),dlV=document.getElementById('dlVideo');
+  let rec,chunks=[],blobUrl=null,mime='';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){btn.disabled=true;btn.style.opacity=.5;hint.textContent='当前浏览器不支持页面捕获，请用电脑版 Chrome / Edge，或改用系统自带录屏。';return;}
+  function pickMime(){const list=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'];
+    return list.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';}
+  async function start(){
+    try{
+      const stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30},audio:false});
+      mime=pickMime();chunks=[];
+      rec=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+      rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
+      rec.onstop=()=>{
+        stream.getTracks().forEach(t=>t.stop());
+        const type=mime||'video/webm',blob=new Blob(chunks,{type});
+        if(blobUrl)URL.revokeObjectURL(blobUrl);blobUrl=URL.createObjectURL(blob);
+        prev.src=blobUrl;prev.style.display='block';
+        const ext=type.indexOf('mp4')>=0?'mp4':'webm';
+        dlV.style.display='';dlV.textContent='下 载 演 示 录 像 ('+ext.toUpperCase()+')';
+        dlV.onclick=()=>{const a=document.createElement('a');a.href=blobUrl;a.download='生命感设计演示.'+ext;a.click();};
+        btn.textContent='录 制 动 态 演 示';btn.classList.add('rec');hint.textContent='录制完成：下方可预览，点「下载演示录像」保存。';
+      };
+      stream.getVideoTracks()[0].addEventListener('ended',()=>{if(rec&&rec.state!=='inactive')rec.stop();});
+      rec.start();btn.textContent='■ 停 止 录 制';btn.classList.remove('rec');
+      hint.textContent='录制中：在弹窗里选择「本标签页」效果最佳；完成后点本按钮停止。';
+    }catch(e){hint.textContent='已取消或未授权屏幕捕获。';}
+  }
+  btn.addEventListener('click',()=>{if(rec&&rec.state==='recording')rec.stop();else start();});
+})();
+
+/* ---------- 分布式超级终端：星座网络 ---------- */
+(function(){
+  const host=document.getElementById('superDev');if(!host)return;
+  const W=520,H=374,cx=W/2,cy=H/2;
+  // 周边设备节点（极坐标）
+  const defs=[
+    {label:'手机',ic:'M-4-8h8v16h-8z'},
+    {label:'平板',ic:'M-8-6h16v12h-16z'},
+    {label:'桌面',ic:'M-9-6h18v11h-18zM-3 7h6'},
+    {label:'车机',ic:'M-9 2c1-6 3-8 9-8s8 2 9 8M-9 2h18'},
+    {label:'手表',ic:'M-5-5h10v10h-10zM-3-5l1-3h4l1 3'},
+    {label:'大屏',ic:'M-10-6h20v12h-20zM-4 8h8'},
+  ];
+  const R=138,nodes=defs.map((d,i)=>{const a=-Math.PI/2+i/defs.length*Math.PI*2;return{...d,x:cx+Math.cos(a)*R,y:cy+Math.sin(a)*R};});
+  let links='',ndata='';
+  nodes.forEach(n=>{links+=`<path class="link" d="M${cx} ${cy}L${n.x} ${n.y}" data-x1="${cx}" data-y1="${cy}" data-x2="${n.x}" data-y2="${n.y}"/>`;});
+  // 信息包（沿链路往返的小圆）
+  let pkts='';nodes.forEach((n,i)=>{pkts+=`<circle class="pkt" r="2.6" data-i="${i}"><animateMotion dur="${2.4+i*0.35}s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" path="M${cx} ${cy}L${n.x} ${n.y}"/></circle>`;});
+  nodes.forEach(n=>{ndata+=`<g class="node" transform="translate(${n.x} ${n.y})"><circle r="19"/><path transform="scale(.9)" d="${n.ic}"/><text y="33">${n.label}</text></g>`;});
+  const hub=`<g class="node hub" transform="translate(${cx} ${cy})"><circle class="halo" r="26" fill="none"/><circle r="22"/><path d="M-7 0h4l2-6 3 12 2-6h4"/><text y="38">中枢 · 节拍源</text></g>`;
+  host.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${links}${ndata}${hub}${pkts}</svg>`;
+})();
+
+/* ---------- 跨端流转 handoff ---------- */
+(function(){
+  const btn=document.getElementById('handoffBtn');if(!btn)return;
+  const phone=document.querySelector('[data-dev="phone"]'),pad=document.querySelector('[data-dev="pad"]'),
+        fillP=phone.querySelector('.fill'),fillD=pad.querySelector('.fill'),
+        scrPad=document.getElementById('scrPad'),label=document.getElementById('flowLabel');
+  let at='phone',busy=false;
+  btn.addEventListener('click',()=>{
+    if(busy)return;busy=true;const toPad=at==='phone';
+    label.textContent='流转中…';
+    const src=toPad?phone:pad,dst=toPad?pad:phone,srcFill=toPad?fillP:fillD,dstFill=toPad?fillD:fillP,
+          dstScr=toPad?scrPad:document.getElementById('scrPhone');
+    src.classList.remove('active');
+    if(navigator.vibrate)navigator.vibrate(14);
+    srcFill.style.width='0';
+    setTimeout(()=>{dstFill.style.width='100%';dst.classList.add('active');
+      if(dstScr)dstScr.textContent='文档 · 第 12 页';
+      if(navigator.vibrate)navigator.vibrate([8,40,16]);
+      label.textContent='已接续 · 上下文零丢失';
+      at=toPad?'pad':'phone';
+      btn.textContent=toPad?'轻 碰 · 接 回 手 机':'轻 碰 · 接 力 到 平 板';
+      busy=false;},500);
+  });
+})();</script>
+</body>
+</html>
