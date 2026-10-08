@@ -8,7 +8,7 @@
 <style>
 :root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--violet:#9a8ad4;--line:rgba(212,175,106,.28);
   --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
-  --bpm:66;--beat:calc(60s / var(--bpm));--aTf:ease-in-out}
+  --bpm:66;--beat:calc(60s / var(--bpm));--aBeat:lubdub;--aRim:lubdubRim;--aTf:ease-in-out}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased}
 main{max-width:1040px;margin:0 auto;padding:60px 22px 80px}
@@ -28,7 +28,7 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ringOut{from{transform:scale(1);opacity:.5}to{transform:scale(1.6);opacity:0}}
-.beat{animation:lubdub var(--beat) var(--aTf) infinite}
+.beat{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 /* ECG 生命线 */
 .vital{display:block;width:100%;height:100%;overflow:visible}
 .vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
@@ -38,8 +38,24 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 .hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:30px}
 .heroVital{width:min(420px,80vw);height:44px;color:var(--teal)}
 .bpmRow{display:flex;align-items:center;gap:14px;font:11px/1 monospace;letter-spacing:.2em;color:var(--dim)}
+.bpmRow[hidden]{display:none}
 .bpmRow b{font-size:20px;color:var(--goldb);letter-spacing:.04em;min-width:88px;text-align:right}
 .bpmRow input{width:200px;accent-color:var(--gold)}
+/* 节拍源切换（心跳 / 呼吸 / 脉象 / 步态 / 潮汐 / 萤火） */
+.modeTabs{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.modeTabs .mtLabel{font:9px/1 monospace;letter-spacing:.3em;color:var(--dim);margin-right:2px}
+.modeTabs button{background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.15);color:var(--dim);padding:6px 14px;border-radius:999px;font-family:var(--serif);font-size:12px;letter-spacing:.2em;cursor:pointer;transition:.25s;-webkit-tap-highlight-color:transparent}
+.modeTabs button:hover{border-color:var(--gold);color:var(--goldb)}
+.modeTabs button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.1);box-shadow:0 0 14px rgba(212,175,106,.22)}
+.pulseRow{flex-direction:column;align-items:stretch;gap:10px;max-width:560px;width:min(560px,92vw)}
+.pulseRow .pHead{display:flex;align-items:center;gap:12px}
+.pulseRow .pHead input{flex:1;min-width:120px}
+.pGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;width:100%}
+.pGrid button{background:rgba(5,8,15,.55);border:1px solid rgba(233,228,214,.14);color:var(--dim);border-radius:9px;padding:7px 0;font-family:var(--serif);font-size:14px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent}
+.pGrid button:hover{border-color:var(--gold);color:var(--goldb)}
+.pGrid button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.12);box-shadow:0 0 12px rgba(212,175,106,.25)}
+.pDesc{font-size:11.5px;color:var(--dim);letter-spacing:.03em;line-height:1.7;font-family:var(--sans)}
+.pDesc b{color:var(--goldb);font-family:var(--serif);letter-spacing:.18em;margin-right:8px}
 .heart{width:22px;height:22px;color:var(--cin);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--cin) 80%,#fff)) drop-shadow(0 0 12px rgba(212,112,106,.55))}
 /* 导航 */
 .nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
@@ -66,7 +82,7 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
   box-shadow:inset 0 1px 1px rgba(255,255,255,.07),inset 0 -4px 10px rgba(0,0,0,.68),inset 0 0 16px rgba(0,0,0,.45);overflow:hidden}
 .src::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
   background:conic-gradient(from 0deg,color-mix(in srgb,#f0f4fa 60%,var(--c)),color-mix(in srgb,#707a92 84%,var(--c)) 90deg,color-mix(in srgb,#59627a 86%,var(--c)) 180deg,color-mix(in srgb,#a4afc3 70%,var(--c)) 300deg,color-mix(in srgb,#f0f4fa 60%,var(--c)));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:lubdubRim var(--beat) var(--aTf) infinite}
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:var(--aRim) var(--beat) var(--aTf) infinite}
 .src .sIco{width:38px;height:38px;margin:0 auto 8px;color:var(--c);filter:drop-shadow(0 0 1px rgba(255,255,255,.8)) drop-shadow(0 0 6px color-mix(in srgb,var(--c) 80%,#fff)) drop-shadow(0 0 16px color-mix(in srgb,var(--c) 50%,transparent))}
 .src .sIco *{animation:breathe 3s ease-in-out infinite;transform-origin:19px 19px}
 .src b{display:block;font-family:var(--serif);letter-spacing:.24em;font-size:14px;color:var(--goldb)}
@@ -116,7 +132,7 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 .lane{border-left:2px solid var(--c);padding:6px 0 6px 11px}
 .lane b{font-family:var(--serif);font-size:11px;letter-spacing:.14em;color:var(--c);display:flex;align-items:center;gap:7px}
 .lane b svg{width:15px;height:15px}
-.lane b.beat svg{animation:lubdub var(--beat) var(--aTf) infinite}
+.lane b.beat svg{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .lane small{display:block;font-size:10.5px;color:var(--dim);margin-top:3px;line-height:1.6}
 /* Demo：反馈层级 触感 */
 .hapRow{display:flex;flex-direction:column;gap:12px}
@@ -128,13 +144,13 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 .sense svg{width:24px;height:24px;color:var(--c)}
 .sense small{font:9px monospace;color:var(--dim);letter-spacing:.08em}
 .sense.lit{border-color:var(--c);color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 32%,transparent)}
-.sense.lit svg{animation:lubdub var(--beat) var(--aTf) infinite}
+.sense.lit svg{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .ripple{position:absolute;border:1px solid var(--teal);border-radius:50%;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none;animation:ringOut .8s ease-out forwards}
 /* 跨平台终端 */
 .plats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
 .plat{border:1px solid rgba(233,228,214,.12);border-radius:13px;padding:14px;background:rgba(5,8,15,.5);text-align:center}
 .plat .pIco{width:38px;height:38px;margin:0 auto 8px;color:var(--gold);filter:drop-shadow(0 0 6px rgba(212,175,106,.4))}
-.plat .pIco.beat{animation:lubdub var(--beat) var(--aTf) infinite}
+.plat .pIco.beat{animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .plat b{display:block;font-family:var(--serif);letter-spacing:.16em;font-size:13px;color:var(--goldb)}
 .plat small{display:block;font:9px/1.5 monospace;color:var(--teal);margin:3px 0 7px}
 .plat span{font-size:11px;color:var(--dim);line-height:1.6}
@@ -189,17 +205,86 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 /* 案例 */
 .caseBox{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-top:4px}
 .caseBox .cThumb{width:96px;height:96px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(circle at 50% 30%,#141b29,#05070e);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
-.caseBox .cThumb svg{width:48px;height:48px;color:var(--cin);animation:lubdub var(--beat) var(--aTf) infinite;filter:drop-shadow(0 0 6px rgba(212,112,106,.5))}
+.caseBox .cThumb svg{width:48px;height:48px;color:var(--cin);animation:var(--aBeat) var(--beat) var(--aTf) infinite;filter:drop-shadow(0 0 6px rgba(212,112,106,.5))}
 .caseBox .cText b{font-family:var(--serif);letter-spacing:.14em;color:var(--goldb);font-size:15px}
 .caseBox .cText p{font-size:12.5px;color:var(--dim);margin-top:6px;line-height:1.7}
 .caseBox .cText a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(106,212,200,.4)}
 .caseTags{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .caseTags span{font-size:11px;color:var(--gold);border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+/* 深度导轨 + 层级徽标 */
+.depthRail{display:flex;gap:8px;align-items:center;justify-content:center;font:10px monospace;letter-spacing:.14em;color:var(--dim);margin-top:16px;flex-wrap:wrap}
+.depthRail span{border:1px solid rgba(233,228,214,.18);border-radius:999px;padding:4px 12px}
+.depthRail .l1{color:var(--teal);border-color:rgba(106,212,200,.4)}
+.depthRail .l2{color:var(--goldb);border-color:rgba(212,175,106,.4)}
+.depthRail .l3{color:var(--violet);border-color:rgba(154,138,212,.4)}
+.depthRail .l4{color:var(--cin);border-color:rgba(212,112,106,.4)}
+h2 .lv{font:8.5px/1 monospace;letter-spacing:.14em;border:1px solid;border-radius:999px;padding:4px 10px;flex:0 0 auto}
+h2 .lv.l1{color:var(--teal);border-color:rgba(106,212,200,.4)}
+h2 .lv.l2{color:var(--goldb);border-color:rgba(212,175,106,.4)}
+h2 .lv.l3{color:var(--violet);border-color:rgba(154,138,212,.4)}
+h2 .lv.l4{color:var(--cin);border-color:rgba(212,112,106,.4)}
+/* 总览 · 同心四层 */
+.onionWrap{display:grid;grid-template-columns:minmax(250px,1fr) minmax(220px,.9fr);gap:20px;align-items:center;margin-top:4px}
+#onion{display:block;width:100%;max-width:400px;margin:0 auto}
+.onionKeys{display:flex;flex-direction:column;gap:8px}
+.oKey{display:flex;gap:10px;border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--c);border-radius:10px;padding:9px 12px;background:rgba(5,8,15,.5);cursor:pointer;transition:.2s}
+.oKey.on{border-color:var(--c);box-shadow:0 0 16px color-mix(in srgb,var(--c) 25%,transparent)}
+.oKey b{font-family:var(--serif);letter-spacing:.12em;font-size:12.5px;color:var(--c)}
+.oKey small{display:block;font-size:10.5px;color:var(--dim);line-height:1.6;margin-top:2px}
+/* 学科星环 */
+.orbitWrap{position:relative;width:100%;max-width:560px;margin:4px auto 0;aspect-ratio:1/1}
+.orbitWrap svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.orbitWrap .oRing{fill:none;stroke:rgba(233,228,214,.14);stroke-dasharray:3 8}
+.orbitWrap .oLink{fill:none;stroke:var(--teal);stroke-width:1;opacity:.15;stroke-dasharray:3 6;animation:dash 4s linear infinite}
+.orbitWrap .oNode{cursor:pointer;transition:opacity .25s}
+.orbitWrap .oNode circle{fill:#0a0f1c;stroke:var(--nc);stroke-width:1.4;transition:.25s}
+.orbitWrap .oNode.on circle{filter:drop-shadow(0 0 10px var(--nc))}
+.orbitWrap .oNode path{stroke:var(--nc);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.orbitWrap .oNode text{fill:var(--dim);font:10px var(--sans);text-anchor:middle;letter-spacing:.08em}
+.orbitWrap .oNode.on text{fill:var(--nc)}
+.orbitCap{margin-top:14px;min-height:56px;border:1px dashed rgba(233,228,214,.16);border-radius:12px;padding:10px 16px;font-size:12px;color:var(--dim);line-height:1.8;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.orbitCap b{font-family:var(--serif);letter-spacing:.14em}
+.orbitCap i{font-style:normal;color:var(--teal);font-size:11px}
+/* 感知维度 */
+.sensors{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;margin-top:4px}
+.sr{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 8px;background:rgba(5,8,15,.5);text-align:center;transition:.25s}
+.sr:hover{border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 25%,transparent)}
+.sr svg{width:26px;height:26px;color:var(--c);margin:0 auto 6px;display:block;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--c) 55%,transparent))}
+.sr b{display:block;font-family:var(--serif);letter-spacing:.1em;font-size:12px;color:var(--goldb)}
+.sr small{display:block;font-size:9.5px;color:var(--dim);line-height:1.5;margin-top:3px}
+.privacy{margin-top:14px;display:flex;gap:10px;align-items:center;border:1px solid rgba(106,212,200,.3);border-radius:12px;padding:10px 14px;font-size:11.5px;color:var(--dim);line-height:1.7}
+.privacy svg{width:22px;height:22px;color:var(--teal);flex:0 0 auto}
+/* 协作环路 */
+.coopWrap{display:grid;grid-template-columns:minmax(240px,1fr) minmax(230px,1fr);gap:20px;align-items:center;margin-top:4px}
+#coop{display:block;width:100%;max-width:380px;margin:0 auto}
+.coopChain{display:flex;flex-direction:column;gap:8px}
+.cc{display:flex;gap:10px;align-items:center;border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--c);border-radius:10px;padding:9px 12px;background:rgba(5,8,15,.5);font-size:11.5px;color:var(--dim);line-height:1.7}
+.cc svg{width:22px;height:22px;color:var(--c);flex:0 0 auto}
+.cc b{color:var(--c);font-family:var(--serif);letter-spacing:.1em;font-size:12.5px}
+.cc i{font-style:normal;color:var(--teal);font-size:10px}
+/* 案例映射 + 提升路线 */
+.caseStep{font:10px/1 monospace;letter-spacing:.3em;color:var(--teal);margin:4px 0 2px}
+.caseStep.g{color:var(--gold)}
+.mapGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.mp{border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--c);border-radius:11px;padding:11px 13px;background:rgba(5,8,15,.5);font-size:11.5px;color:var(--dim);line-height:1.7}
+.mp b{display:block;font-family:var(--serif);letter-spacing:.1em;font-size:12.5px;color:var(--c);margin-bottom:3px}
+.mp i{display:block;font-style:normal;color:var(--teal);font-size:10.5px;margin-top:4px}
+.roadmap{display:flex;flex-direction:column;margin-top:10px}
+.rm{display:grid;grid-template-columns:30px 1fr;gap:14px;position:relative;padding-bottom:20px}
+.rm::before{content:"";position:absolute;left:14px;top:32px;bottom:2px;width:2px;background:linear-gradient(var(--c),rgba(233,228,214,.06))}
+.rm:last-child{padding-bottom:0}
+.rm:last-child::before{display:none}
+.rm .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--c);background:#0a0f1c;display:flex;align-items:center;justify-content:center;font:12px monospace;color:var(--c);box-shadow:0 0 10px color-mix(in srgb,var(--c) 40%,transparent);animation:var(--aRim) var(--beat) var(--aTf) infinite}
+.rm b{font-family:var(--serif);letter-spacing:.14em;font-size:13.5px;color:var(--c)}
+.rm .rTag{font:9px monospace;letter-spacing:.14em;color:var(--dim);margin-left:8px}
+.rm p{font-size:12px;color:var(--dim);line-height:1.7;margin-top:4px}
+.rm .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.rm .chips span{font-size:10.5px;color:var(--c);border:1px solid color-mix(in srgb,var(--c) 40%,transparent);border-radius:999px;padding:3px 10px}
 /* 下载 / 录屏 */
 .dl{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:20px}
 .dl button{cursor:pointer;font-family:var(--serif);letter-spacing:.26em;font-size:13px;border:0;border-radius:999px;padding:14px 30px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));transition:transform .25s,box-shadow .25s;box-shadow:0 8px 26px rgba(212,175,106,.25)}
 .dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
-.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:lubdub var(--beat) var(--aTf) infinite}
+.dl button.rec{background:linear-gradient(135deg,var(--cin),#e09a92);box-shadow:0 8px 26px rgba(212,112,106,.4);animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .dl button:hover{transform:translateY(-2px)}
 .dl button:active{transform:scale(.96)}
 #recHint{width:100%;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;margin:2px 0 0;line-height:1.8}
@@ -208,7 +293,7 @@ code{font-family:monospace;font-size:.92em;color:var(--teal);background:rgba(106
 .goWrap{margin-top:40px;text-align:center}
 .goLabel{font:9.5px/2 monospace;letter-spacing:.42em;color:var(--teal)}
 .goBtns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-.goBtn{display:inline-block;font-family:var(--serif);letter-spacing:.3em;font-size:14px;border-radius:999px;padding:14px 38px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));text-decoration:none;box-shadow:0 8px 30px rgba(212,175,106,.35);transition:transform .25s,box-shadow .25s;animation:lubdub var(--beat) var(--aTf) infinite}
+.goBtn{display:inline-block;font-family:var(--serif);letter-spacing:.3em;font-size:14px;border-radius:999px;padding:14px 38px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));text-decoration:none;box-shadow:0 8px 30px rgba(212,175,106,.35);transition:transform .25s,box-shadow .25s;animation:var(--aBeat) var(--beat) var(--aTf) infinite}
 .goBtn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(212,175,106,.45)}
 .goBtn.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none;animation:none}
 .goBtn.ghost:hover{border-color:var(--gold);box-shadow:0 8px 26px rgba(212,175,106,.18)}
@@ -218,6 +303,9 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   main{padding:36px 12px 56px}
   body{line-height:1.7;overflow-x:clip}
   .kicker{letter-spacing:.3em;font-size:9px}
+  .bpmRow{flex-wrap:wrap;justify-content:center;gap:8px 10px}
+  .bpmRow input{flex:1 1 150px;min-width:130px;width:auto}
+  .bpmRow b{min-width:54px;font-size:17px}
   h1{letter-spacing:.08em}
   h1 small{letter-spacing:.24em;font-size:10px}
   h2{font-size:19px;letter-spacing:.18em;margin:48px 0 6px}
@@ -230,6 +318,11 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   .caseBox{grid-template-columns:1fr;justify-items:center;text-align:center}
   .tBeam{transform:rotate(90deg)}
   .quad{grid-template-columns:repeat(2,1fr)}
+  .onionWrap,.coopWrap{grid-template-columns:1fr}
+  .sensors,.mapGrid{grid-template-columns:repeat(2,1fr)}
+  .depthRail{font-size:9px;gap:5px}
+  .orbitWrap .oNode text{font-size:9px}
+  h2 .lv{display:none}
   .flow{grid-template-columns:1fr;gap:6px}
   .flowArr{transform:rotate(90deg)}
   .radarWrap,.cmp{grid-template-columns:1fr;gap:12px}
@@ -260,9 +353,34 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   <h1>操 作 系 统 生 命 感 设 计 研 究<small>LIFE-SENSE DESIGN FOR OS · 跨端信息传递的体验评测与提升体系</small></h1>
   <div class="hero">
     <div class="heroVital" data-vital></div>
-    <div class="bpmRow"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
+    <div class="modeTabs" id="modeTabs"><span class="mtLabel">节拍源</span><button data-m="heart" class="on">心 跳</button><button data-m="breath">呼 吸</button><button data-m="pulse">脉 象</button><button data-m="gait">步 态</button><button data-m="tide">潮 汐</button><button data-m="fire">萤 火</button></div>
+    <div class="bpmRow" id="rowHeart"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
       <span>拖动 · 系统节拍随之起伏</span><input type="range" id="bpm" min="48" max="100" value="66"><b id="bpmV">66 bpm</b></div>
-    <p class="lede">当操作系统从单设备走向<b style="color:var(--teal)">分布式、多端协同</b>（如鸿蒙式的「超级终端」），信息在手机、平板、桌面、车机、可穿戴、大屏之间不断流转，<b style="color:var(--cin)">任务效率</b>与<b style="color:var(--cin)">认知负担</b>的张力被成倍放大。本研究面向<b style="color:var(--goldb)">通用操作系统</b>，借数字媒体交互、艺术、文化与跨感官设计之力，提出一套「生命感设计」的评测体系与跨端提升方案——让分散的设备被感知为同一个有呼吸、有节拍的有机体。文末的「医理探案」仅作为验证这套语言的实验案例。</p>
+    <div class="bpmRow pulseRow" id="rowBreath" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--teal);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--teal) 80%,#fff)) drop-shadow(0 0 12px rgba(106,212,200,.55))"><path d="M4 15h17a4 4 0 1 0-4-4M4 21h24a4 4 0 1 1-4 4M4 27h13a3.5 3.5 0 1 1-3.5 3.5"/></svg>
+      <span>择息 · 呼吸之态有九 —— 点按以观其势，拖杆以调快慢</span></span>
+      <div class="pGrid" id="bGrid"></div>
+      <span class="pHead"><span>快慢</span><input type="range" id="brpm" min="6" max="34" value="16"><b id="brpmV">16 次/分</b></span>
+      <div class="pDesc" id="breathDesc"></div></div>
+    <div class="bpmRow pulseRow" id="rowPulse" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--gold);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--gold) 80%,#fff)) drop-shadow(0 0 12px rgba(212,175,106,.55))"><path d="M3 22h8l3-9 5 18 4-14 3 5h11"/></svg>
+      <span>择脉 · 二十八脉位、数、形、势各异 —— 点按以候其气</span></span>
+      <div class="pGrid" id="pGrid"></div>
+      <div class="pDesc" id="pulseDesc"></div></div>
+    <div class="bpmRow pulseRow" id="rowGait" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--violet);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--violet) 80%,#fff)) drop-shadow(0 0 12px rgba(154,138,212,.55))"><path d="M14 4c3 0 4 2 4 5s-2 5-4 5-4-2-4-5 1-5 4-5zM13 14l-1 9 4 5v8M10 23l-3 7M26 12c2.5 0 3.5 1.6 3.5 4s-1.6 4-3.5 4-3.5-1.6-3.5-4 1-4 3.5-4zM25 20l-1 7 3 4v6M23 27l-2.5 5"/></svg>
+      <span>步态 · 双足交替、落地有轻重 —— 拖杆调步频，整页随步点起伏</span><input type="range" id="gaitR" min="70" max="140" value="112"><b id="gaitV">112 步/分</b></span>
+      <div class="pDesc" id="gaitDesc"></div></div>
+    <div class="bpmRow pulseRow" id="rowTide" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--teal);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--teal) 80%,#fff)) drop-shadow(0 0 12px rgba(106,212,200,.55))"><path d="M3 15c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 10 3M3 23c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 10 3M3 31c4 0 4-3 8-3s4 3 8 3 4-3 8-3 4 3 10 3"/></svg>
+      <span>潮汐 · 潮来急、潮退缓 —— 拖杆调涌速，整页如岸上观海</span><input type="range" id="tideR" min="3" max="12" value="6"><b id="tideV">6 涌/分</b></span>
+      <div class="pDesc" id="tideDesc"></div></div>
+    <div class="bpmRow pulseRow" id="rowFire" hidden>
+      <span class="pHead"><svg class="heart beat" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--goldb);filter:drop-shadow(0 0 1px rgba(255,255,255,.85)) drop-shadow(0 0 4px color-mix(in srgb,var(--goldb) 80%,#fff)) drop-shadow(0 0 12px rgba(240,207,142,.55))"><circle cx="20" cy="24" r="7"/><path d="M20 13v-3M11 15l-2-2M29 15l2-2M8 24H5M35 24h-3M20 24h0" stroke-dasharray="0 0"/><circle cx="20" cy="24" r="2.5" fill="currentColor"/></svg>
+      <span>萤火 · 双闪一歇、明灭有信 —— 拖杆调闪频，整页如夏夜萤群</span><input type="range" id="fireR" min="8" max="26" value="14"><b id="fireV">14 闪/分</b></span>
+      <div class="pDesc" id="fireDesc"></div></div>
+    <p class="lede">在<b style="color:var(--teal)">多终端互联</b>的操作系统（手机 · 平板 · 桌面 · 车机 · 穿戴 · 大屏）中，「生命感」不是单屏动效的点缀，而是整个设备群的存在方式：<b style="color:var(--goldb)">一个节拍</b>贯穿全端（心跳）、<b style="color:var(--goldb)">状态显化</b>为可感体征（呼吸）、<b style="color:var(--goldb)">上下文无缝流转</b>（血脉）、<b style="color:var(--goldb)">随时间·天气·体征同调</b>（代谢）。支撑它的是一个多学科纵深——表层：数字视觉艺术 × 交互设计；中层：服务设计 × 艺术文化 × 认知心理；底层：行为分析 × 用户数据 × 设备感知（陀螺仪 · 测距 · 心率 · 血氧）。本研究按四级深度层层递进，文末以「医理探案」作个案实证。页首可将全页节拍源切换为六种生命节律——心跳、呼吸九态、二十八脉象、步态、潮汐、萤火——体验「同一系统、不同生命」的气质差异。</p>
+    <div class="depthRail"><span class="l1">Ⅰ 总览</span>→<span class="l2">Ⅱ 机制</span>→<span class="l3">Ⅲ 体系</span>→<span class="l4">Ⅳ 实证</span></div>
     <nav class="nav">
       <a href="design-evolution.html">设计演进对比</a>
       <a href="system-analysis.html">系统架构分析</a>
@@ -270,7 +388,16 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     </nav>
   </div>
 
-  <h2>一 · 研究背景：从单设备到分布式<em>CONTEXT</em></h2>
+  <h2>一 · 总览：生命感的四层支撑<span class="lv l1">Ⅰ 总览</span><em>OVERVIEW</em></h2>
+  <div class="sub">由外向内：<b style="color:var(--cin)">感知层</b>供血（传感与情境数据）→ <b style="color:var(--teal)">学科层</b>供能（十维方法）→ <b style="color:var(--violet)">协同层</b>供脉络（多端编排）→ 凝为<b style="color:var(--goldb)">体验核</b>。四环随同一节拍由外向内搏动，数据如血液向核心汇流。悬停右侧图例逐层查看。</div>
+  <div class="card reveal">
+    <div class="onionWrap">
+      <svg id="onion" viewBox="0 0 400 400" role="img" aria-label="生命感四层支撑同心图"></svg>
+      <div class="onionKeys" id="onionKeys"></div>
+    </div>
+  </div>
+
+  <h2>二 · 研究背景：从单设备到分布式<span class="lv l1">Ⅰ 总览</span><em>CONTEXT</em></h2>
   <div class="sub">现代操作系统的复杂度不再只来自单屏内的功能堆叠，更来自设备之间的协同。信息要在多端之间被正确、低负担地「传递—接续—再呈现」，是今天体验设计的核心命题。</div>
   <div class="card reveal">
     <div class="quad" style="--none:0">
@@ -286,7 +413,7 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="superNote">生命感设计的主张：与其在每个端上分别「做减法」，不如让<b>整套设备群共享一套生命语言</b>——一个节拍、一种状态显化方式、一致的流转隐喻——使复杂被「组织」而非被「堆叠」。</div>
   </div>
 
-  <h2>二 · 核心张力：效率与负担的天平<em>THE TENSION</em></h2>
+  <h2>三 · 核心张力：效率与负担的天平<span class="lv l1">Ⅰ 总览</span><em>THE TENSION</em></h2>
   <div class="sub">复杂系统的每一次交互，都是在「尽快完成任务」与「不被信息与操作压垮」之间取舍。生命感设计的目标，不是在二者间二选一，而是找到<b style="color:var(--goldb)">动态甜点区</b>。</div>
   <div class="card reveal">
     <div class="tension">
@@ -299,27 +426,54 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="tSweet">目标非取舍，而在 <b>甜点区</b>：效率↑ 的同时负担↓ —— 靠减少无谓选择、显化系统状态、用感官线索替代记忆。</div>
   </div>
 
-  <h2>三 · 跨学科能量四源<em>FOUR SOURCES</em></h2>
-  <div class="sub">提升体验的能量不只来自可用性工程，更来自四个交叉学科领域——把它们的方法翻译成可落地的交互机制，并贯穿到跨端的信息传递中。</div>
-  <div class="quad reveal">
-    <div class="src" style="--c:var(--teal)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="7" width="28" height="20" rx="3"/><path d="M14 33h10M19 27v6M11 14l4 4-4 4M20 22h7"/></svg>
-      <b>数字媒体交互</b><em>INTERACTION</em><span>动效节奏、状态可见、即时反馈、信息架构——让操作有回应、有层级。</span></div>
-    <div class="src" style="--c:var(--gold)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4C10 4 5 11 5 18c0 6 4 9 9 9 2 0 2 3 5 3 7 0 14-6 14-15C33 9 28 4 19 4z"/><circle cx="12" cy="15" r="1.6" fill="currentColor"/><circle cx="19" cy="11" r="1.6" fill="currentColor"/><circle cx="26" cy="15" r="1.6" fill="currentColor"/></svg>
-      <b>艺术</b><em>ART</em><span>构图、留白、色彩情绪与韵律——把审美秩序转化为降噪与引导注意力的手段。</span></div>
-    <div class="src" style="--c:var(--cin)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5l3.5 7 8 1-6 5.5 1.5 8L19 29l-7 4.5 1.5-8-6-5.5 8-1z"/></svg>
-      <b>文化</b><em>CULTURE</em><span>隐喻、心智模型与仪式感——借用用户已有的文化经验，降低学习与记忆成本。</span></div>
-    <div class="src" style="--c:var(--violet)"><svg class="sIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="19" r="4"/><path d="M19 4v6M19 28v6M4 19h6M28 19h6M8 8l4 4M26 26l4 4M30 8l-4 4M12 26l-4 4"/></svg>
-      <b>跨感官设计</b><em>MULTISENSORY</em><span>触觉振动、声音、视觉与动态协同——用多通道冗余分担视觉，让反馈更快被感知。</span></div>
+  <h2>四 · 学科星环：十维能量源<span class="lv l2">Ⅱ 机制</span><em>TEN SOURCES</em></h2>
+  <div class="sub">生命感不是单一学科的产物。十个领域在同一轨道上围绕「生命感」运转，相邻者互为上下游、隔环者互为校验。<b style="color:var(--goldb)">点击任一节点</b>，查看它输出什么、与谁协作。</div>
+  <div class="card reveal">
+    <div class="orbitWrap" id="orbit"></div>
+    <div class="orbitCap" id="orbitCap"><b style="color:var(--goldb)">点击星环节点</b><i>查看该学科向系统输出的能量与协作关系</i></div>
   </div>
 
-  <h2>四 · 分布式信息传递：超级终端<em>SUPER DEVICE</em></h2>
+  <h2>五 · 感知维度：设备与情境数据<span class="lv l2">Ⅱ 机制</span><em>SENSING</em></h2>
+  <div class="sub">设备自带的传感器与情境数据是生命感的「感官末梢」——经用户<b style="color:var(--teal)">明确授权</b>后，它们让系统感知身体、空间与时间，从「回应操作」进化到「感知处境」。</div>
+  <div class="card reveal">
+    <div class="sensors">
+      <div class="sr" style="--c:var(--teal)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="13" cy="13" r="9"/><ellipse cx="13" cy="13" rx="9" ry="3.5"/><path d="M13 4v18"/></svg><b>陀螺仪 · 加速度</b><small>姿态·晤动·视差光影<br>界面随持机角度呼吸偏摆</small></div>
+      <div class="sr" style="--c:var(--gold)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 13h5M17 13h5"/><circle cx="13" cy="13" r="3"/><path d="M8 7l10 12M8 19L18 7" opacity=".4"/></svg><b>红外 · ToF 测距</b><small>感知用户距离与靠近<br>远观极简·近观展开细节</small></div>
+      <div class="sr" style="--c:var(--cin)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 13h5l2-6 3 12 2-6h8"/></svg><b>心率 · HRV</b><small>交感神经张弛度<br>系统节拍与用户心律同频/反向安抚</small></div>
+      <div class="sr" style="--c:var(--violet)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="13" cy="13" r="9"/><path d="M9 13a4 4 0 0 0 8 0M13 4v3"/></svg><b>血氧 SpO₂</b><small>疲劳与状态感知<br>低状态时降信息密度·放慢节拍</small></div>
+      <div class="sr" style="--c:var(--goldb)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="13" cy="13" r="4"/><path d="M13 3v3M13 20v3M3 13h3M20 13h3M6 6l2 2M18 18l2 2M20 6l-2 2M8 18l-2 2"/></svg><b>环境光</b><small>明暗·色温自适应<br>深夜自动转烛光色调</small></div>
+      <div class="sr" style="--c:var(--teal)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="13" cy="13" r="9"/><path d="M13 7v6l4 3"/></svg><b>时间 · 节律</b><small>晨昏四时×作息曲线<br>界面色温与密度随时段呼吸</small></div>
+      <div class="sr" style="--c:var(--gold)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M7 17a5 5 0 1 1 1-9.9A6 6 0 0 1 20 9a4.5 4.5 0 0 1-1 8.9z"/><path d="M9 21l1-2M13 22l1-2M17 21l1-2"/></svg><b>天气预报</b><small>晴雨风雪入杖氛围层<br>色彩·粒子·声景随气象演化</small></div>
+      <div class="sr" style="--c:var(--cin)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 3v8M9 6a8 8 0 1 0 8 0"/></svg><b>行为·使用数据</b><small>高频路径·场景序列<br>预判下一步·减少寻找</small></div>
+      <div class="sr" style="--c:var(--violet)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 22s-8-5.5-8-11a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 5.5-8 11-8 11z"/><circle cx="13" cy="11" r="1.6"/></svg><b>位置 · 场景</b><small>家·通勤·办公场景切换<br>设备群角色随场景重编排</small></div>
+      <div class="sr" style="--c:var(--goldb)"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V9l8-5 8 5v10"/><path d="M9 21v-6h8v6"/></svg><b>气压 · 温湿</b><small>环境舒适度感知<br>极端天气前置关怀提示</small></div>
+    </div>
+    <div class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span><b style="color:var(--teal)">隐私契约：</b>所有体征与情境数据仅在用户逐项授权后使用，优先端侧处理、可视可撤回；生命感的前提是<b style="color:var(--goldb)">被信任的感知</b>，而非监视。</span></div>
+  </div>
+
+  <h2>六 · 协作环路：数据如何变成生命感<span class="lv l2">Ⅱ 机制</span><em>COOPERATION LOOP</em></h2>
+  <div class="sub">十维学科与感知数据不是并列的清单，而是一条在多终端间持续运转的闭环：<b style="color:var(--cin)">感知</b>→<b style="color:var(--violet)">解译</b>→<b style="color:var(--teal)">编排</b>→<b style="color:var(--goldb)">表达</b>→<b style="color:var(--cin)">回授</b>，每转一周即一次「代谢循环」。</div>
+  <div class="card reveal">
+    <div class="coopWrap">
+      <svg id="coop" viewBox="0 0 380 380" role="img" aria-label="协作环路图"></svg>
+      <div class="coopChain">
+        <div class="cc" style="--c:var(--cin)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><div><b>感知</b> · 传感器与情境采集 <i>设备工程 × 用户数据</i></div></div>
+        <div class="cc" style="--c:var(--violet)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3a7 7 0 0 1 7 7c0 3-2 4-2 7h-10c0-3-2-4-2-7a7 7 0 0 1 7-7zM10 21h4"/></svg><div><b>解译</b> · 读懂状态与意图 <i>认知心理 × 行为分析</i></div></div>
+        <div class="cc" style="--c:var(--teal)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="5" width="7" height="6" rx="1"/><rect x="14" y="13" width="7" height="6" rx="1"/><path d="M10 8h7v5" stroke-dasharray="2 3"/></svg><div><b>编排</b> · 谁在哪端·何时呼吸 <i>服务设计 × 交互设计</i></div></div>
+        <div class="cc" style="--c:var(--goldb)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17c3-6 6-9 9-9s6 3 9 9"/><circle cx="12" cy="14" r="2.4"/></svg><div><b>表达</b> · 节拍·色彩·触感·声景 <i>数字视觉艺术 × 艺术文化 × 跨感官</i></div></div>
+        <div class="cc" style="--c:var(--cin)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2 6"/><path d="M20 5v6h-6"/></svg><div><b>回授</b> · 用户反应再入感知 <i>用户数据 × 评测体系，环路自校准</i></div></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>七 · 分布式信息传递：超级终端<span class="lv l2">Ⅱ 机制</span><em>SUPER DEVICE</em></h2>
   <div class="sub">在鸿蒙式的分布式架构里，多台设备可临时组成一个「超级终端」，能力与信息按场景在其间自由调度。生命感设计要让这张网络被感知为<b style="color:var(--goldb)">一个有中心、会呼吸的整体</b>，而非一堆各自独立的屏幕。下图中信息包沿链路在设备间持续流动，中枢节点随全局节拍搏动。</div>
   <div class="card reveal">
     <div class="superDev" id="superDev"></div>
     <div class="superNote"><b>一个节拍 · 一张网</b>：所有设备共享同一 <code>--beat</code>，中枢搏动、链路呼吸、信息包以生命节律流转——复杂的拓扑因此被读成「一个器官系统」，降低了用户对「设备在哪、数据在哪」的记忆负担。</div>
   </div>
 
-  <h2>五 · 跨端流转的生命感<em>SEAMLESS FLOW</em></h2>
+  <h2>八 · 跨端流转的生命感<span class="lv l2">Ⅱ 机制</span><em>SEAMLESS FLOW</em></h2>
   <div class="sub">换设备不应意味着「重来」。生命感的流转要让上下文、进度与焦点像一口气一样接续过去——视觉上「由此端淡出、于彼端凝实」，并辅以触觉与声音确认交接完成。点击下方按钮体验一次接力。</div>
   <div class="card reveal">
     <div class="handoff" id="handoff">
@@ -331,19 +485,19 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="superNote">交接过程：源端进度条淡出、目标端由虚到实充盈 + 振动与轻提示音确认——<b>上下文零丢失</b>，用户无需重新寻找自己「刚才到哪了」。这正是把「由虚到实」的生命隐喻从单屏扩展到了设备之间。</div>
   </div>
 
-  <h2>六 · 从能量到指标：方法论链路<em>METHOD CHAIN</em></h2>
-  <div class="sub">四源能量不能直接打分，需经过「翻译—落地—量化」三步，才能成为可评测的体系；在分布式场景下，还要额外量化「流转」这一维度。</div>
+  <h2>九 · 从能量到指标：方法论链路<span class="lv l3">Ⅲ 体系</span><em>METHOD CHAIN</em></h2>
+  <div class="sub">十维学科能量不能直接打分，需经「翻译—落地—量化」三步，才能成为可评测的体系；在分布式场景下，还要额外量化「流转」这一维度。</div>
   <div class="card reveal">
     <div class="flow">
-      <div class="flowBox"><b>学科能量</b><small>交互 · 艺术 · 文化 · 感官</small></div>
+      <div class="flowBox"><b>学科能量</b><small>视觉艺术 · 交互 · 服务 · 文化 · 认知 · 行为 · 数据 · 感知</small></div>
       <div class="flowArr">→</div>
-      <div class="flowBox"><b>设计机制</b><small>节奏 · 层级 · 隐喻 · 多通道反馈</small></div>
+      <div class="flowBox"><b>设计机制</b><small>节奏 · 层级 · 隐喻 · 多通道反馈 · 情境自适应</small></div>
       <div class="flowArr">→</div>
       <div class="flowBox"><b>可测指标</b><small>效率 · 负担 · 一致 · 流转 · 生命感</small></div>
     </div>
   </div>
 
-  <h2>七 · 评测体系 · 四层模型<em>ASSESSMENT MODEL</em></h2>
+  <h2>十 · 评测体系 · 四层模型<span class="lv l3">Ⅲ 体系</span><em>ASSESSMENT MODEL</em></h2>
   <div class="sub">把「生命感操作系统」的体验拆为四个评测层：<b style="color:var(--goldb)">效率层 → 负担层 → 流转层 → 生命感层</b>。前两层是基本盘，流转层针对多端协同，生命感层衡量系统整体的「活感」。每层各有可观测指标。</div>
   <div class="card reveal">
     <div class="layers">
@@ -354,14 +508,14 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     </div>
   </div>
 
-  <h2>八 · 评测体系 · 六维雷达<em>RADAR</em></h2>
+  <h2>十一 · 评测体系 · 六维雷达<span class="lv l3">Ⅲ 体系</span><em>RADAR</em></h2>
   <div class="sub">把四层模型落为六个可打分维度，评估一个系统的「效率—负担—流转—生命感」平衡。此处对三类系统示范评分（0–10）。悬停维度可在雷达上高亮其含义。</div>
   <div class="card reveal">
     <div class="radarWrap"><canvas id="assessRadar" width="440" height="440"></canvas><div class="dims" id="dims"></div></div>
     <div class="tblScroll"><table class="scoreTbl" id="scoreTbl"></table></div>
   </div>
 
-  <h2>九 · 设计提升方案 · 前后对照<em>BEFORE / AFTER</em></h2>
+  <h2>十二 · 设计提升方案 · 前后对照<span class="lv l3">Ⅲ 体系</span><em>BEFORE / AFTER</em></h2>
   <div class="sub">左列为常见的「高负担」形态，右列为注入跨学科能量后的提升方案——均为可交互演示，而非静态示意。</div>
 
   <!-- A 信息过载 → 分层节奏 -->
@@ -399,7 +553,7 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="gain"><span class="g">交互 · 即时反馈</span><span class="g">感官 · 三通道冗余</span><span>信任 ↑ · 误操作 ↓</span></div>
   </div>
 
-  <h2>十 · 跨平台终端适配<em>MULTI-TERMINAL</em></h2>
+  <h2>十三 · 跨平台终端适配<span class="lv l3">Ⅲ 体系</span><em>MULTI-TERMINAL</em></h2>
   <div class="sub">同一套「一个节拍、分层反馈、感官冗余」的原则，在不同终端上按情境换形——核心生命感不变，呈现密度随场景收放。</div>
   <div class="plats reveal">
     <div class="plat"><svg class="pIco beat" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="11" y="4" width="16" height="30" rx="3"/><path d="M16 30h6"/></svg><b>手机</b><small>MOBILE</small><span>单手触达 · 振动为主反馈 · 高信息密度折叠</span></div>
@@ -409,29 +563,44 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="plat"><svg class="pIco" viewBox="0 0 38 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 14c0-4 3-6 14-6s14 2 14 6-3 6-14 6S5 18 5 14zM5 14v6c0 4 3 6 14 6s14-2 14-6v-6"/></svg><b>空间计算</b><small>SPATIAL · XR</small><span>景深分层 · 凝视 + 手势 · 空间音频定位</span></div>
   </div>
 
-  <h2>十一 · 实验案例：医理探案<em>CASE STUDY</em></h2>
-  <div class="sub">本研究的设计语言，先在一个受控的小系统里做了完整验证——交互叙事游戏「医理探案」。它不是研究主体，而是把「一个节拍、状态显化、跨端流转、感官冗余」这套通用原则落到一个可玩实例上的试验场。</div>
+  <h2>十四 · 实证案例：MAD-MEDICINE 医理探案<span class="lv l4">Ⅳ 实证</span><em>CASE STUDY</em></h2>
+  <div class="sub">本研究的设计语言，先在一个受控的小系统里做了完整验证——交互叙事游戏「医理探案」。下文分两步：先对照<b style="color:var(--teal)">已落地的部分</b>，再基于前文十维分析给出<b style="color:var(--goldb)">后续可提升的路线</b>。</div>
   <div class="card reveal">
     <div class="caseBox">
       <div class="cThumb"><svg viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg></div>
       <div class="cText"><b>把通用原则压进一个可玩的系统</b>
-        <p>在「医理探案」里，全站动效共享一个心跳节拍、进度与状态被显化为仪表与生命线、跨屏切换沿用「由虚到实」、点按带多通道触感——与本研究主张一一对应。它证明这套语言既能用于严肃操作系统，也能承载叙事与情感。详见 <a href="design-evolution.html">设计演进对比</a> 与 <a href="system-analysis.html">系统架构分析</a>。</p>
-        <div class="caseTags"><span>节拍统一</span><span>状态显化</span><span>由虚到实</span><span>感官冗余</span></div>
+        <p>全站动效共享一个心跳节拍、进度与状态显化为仪表与生命线、跨屏切换沿用「由虚到实」、点按带多通道触感——证明这套语言既能用于严肃操作系统，也能承载叙事与情感。详见 <a href="design-evolution.html">设计演进对比</a> 与 <a href="system-analysis.html">系统架构分析</a>。</p>
       </div>
+    </div>
+    <div class="caseStep">STEP 1 · 已落地 · 与十维的对照</div>
+    <div class="mapGrid">
+      <div class="mp" style="--c:var(--teal)"><b>交互 × 视觉艺术</b>全局 <code>--beat</code> 心跳贯穿所有动效；金·青·朱三色情绪语义系统。<i>→ 节拍统一 · 状态显化</i></div>
+      <div class="mp" style="--c:var(--gold)"><b>艺术文化</b>中医「望闻问切」作为信息架构隐喻，用户「本来就懂」探案流程。<i>→ 文化借力 · 零学习成本</i></div>
+      <div class="mp" style="--c:var(--cin)"><b>跨感官</b>点按振动 + 提示音 + 涟漪三通道冗余；关键节点心跳式搏动。<i>→ 感官分流 · 确认提速</i></div>
+      <div class="mp" style="--c:var(--violet)"><b>认知心理</b>线索按紧迫度分层呈现、进度仪表替代记忆——把排序与回忆成本从用户身上卸下。<i>→ 负担外部化</i></div>
+    </div>
+    <div class="caseStep g" style="margin-top:18px">STEP 2 · 基于十维分析 · 后续可提升路线</div>
+    <div class="roadmap">
+      <div class="rm" style="--c:var(--teal)"><div class="dot">1</div><div><b>感知接入</b><span class="rTag">设备感知 × 跨感官</span><p>接入陀螺仪与环境光：证物卡片随持机角度泛起光泽，深夜自动切烛光色调；授权后读心率，让探案紧张段的系统节拍与玩家心律互动——或同频共振，或反向安抚。</p><div class="chips"><span>陀螺仪视差</span><span>环境光色温</span><span>心率同频</span></div></div></div>
+      <div class="rm" style="--c:var(--gold)"><div class="dot">2</div><div><b>情境叙事</b><span class="rTag">时间 × 天气 × 服务设计</span><p>案情氛围随现实时间与天气演化：雨夜打开，坨里竹影带雨声；晨间再访，光线和配色随之转暖。服务设计视角把「一次游玩」扩展为「长线陪伴」：案子在现实时间里发酵、来信、留痕。</p><div class="chips"><span>天气入景</span><span>晨昏四时</span><span>长线服务蓝图</span></div></div></div>
+      <div class="rm" style="--c:var(--violet)"><div class="dot">3</div><div><b>多端探案</b><span class="rTag">分布式 × 流转</span><p>手机查证物、平板铺开全局线索墙、手表在关键推理时以触感节拍「提醒脉象」——同一案情在设备群间按角色分工，探案进度随身流转、零丢失。</p><div class="chips"><span>角色式多端</span><span>线索接力</span><span>腕上脉象</span></div></div></div>
+      <div class="rm" style="--c:var(--cin)"><div class="dot">4</div><div><b>行为回授</b><span class="rTag">行为分析 × 用户数据 × 评测</span><p>匿名统计卡点与回读路径，用六维雷达持续自测；难度与提示密度随个体行为曲线自适应——让「协作环路」在这个小系统里完整跑通，再反哺通用体系。</p><div class="chips"><span>雷达自测</span><span>自适应难度</span><span>环路闭合</span></div></div></div>
     </div>
   </div>
 
-  <h2>十二 · 研究规模与结论指标<em>METRICS</em></h2>
+  <h2>十五 · 研究规模与结论指标<span class="lv l4">Ⅳ 实证</span><em>METRICS</em></h2>
   <div class="stats reveal">
+    <div class="stat"><div class="k">深度层级</div><div class="v"><span data-count="4">0</span> <small>总览·机制·体系·实证</small></div></div>
+    <div class="stat"><div class="k">学科能量源</div><div class="v"><span data-count="10">0</span> <small>星环维度</small></div></div>
+    <div class="stat"><div class="k">感知通道</div><div class="v"><span data-count="10">0</span> <small>传感·情境数据源</small></div></div>
     <div class="stat"><div class="k">评测层</div><div class="v"><span data-count="4">0</span> <small>效率·负担·流转·生命感</small></div></div>
     <div class="stat"><div class="k">雷达维度</div><div class="v"><span data-count="6">0</span> <small>可操作指标</small></div></div>
-    <div class="stat"><div class="k">学科能量源</div><div class="v"><span data-count="4">0</span> <small>交叉领域</small></div></div>
-    <div class="stat"><div class="k">反馈通道</div><div class="v"><span data-count="3">0</span> <small>视 · 触 · 听</small></div></div>
     <div class="stat"><div class="k">适配终端</div><div class="v"><span data-count="6">0</span> <small>类平台形态</small></div></div>
+    <div class="stat"><div class="k">提升路线</div><div class="v"><span data-count="4">0</span> <small>医理探案后续阶段</small></div></div>
     <div class="stat"><div class="k">节拍源</div><div class="v"><span data-count="1">0</span> <small>全局 --beat 贯穿多端</small></div></div>
   </div>
 
-  <h2>十三 · 设计原则沉淀<em>PRINCIPLES</em></h2>
+  <h2>十六 · 设计原则沉淀<span class="lv l4">Ⅳ 实证</span><em>PRINCIPLES</em></h2>
   <div class="rules reveal">
     <div class="rule"><b>一个节拍</b>整个系统共享一个生命节拍 <code>--beat</code>，让多终端被感知为同一个有机体，而非散落的部件。</div>
     <div class="rule"><b>显化状态</b>把系统的内部状态变成可见、可感的信号，用感官线索替代用户记忆——负担最大的敌人是「看不见」。</div>
@@ -439,10 +608,12 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
     <div class="rule"><b>多通道冗余</b>关键反馈同时经视觉、触觉、听觉传达；任一通道受限时仍能被感知，也让确认更快到达。</div>
     <div class="rule"><b>文化借力</b>复用用户已有的隐喻与心智模型，降低学习成本——最好的教程是「本来就会」。</div>
     <div class="rule"><b>无缝流转</b>换端如换气：上下文、进度与焦点在设备间「由此端淡出、于彼端凝实」，零丢失、零重找。</div>
+    <div class="rule"><b>感知入微</b>陀螺仪、心率、环境光等授权传感数据是生命感的末梢神经——用得节制、透明、可撤回。</div>
+    <div class="rule"><b>情境同调</b>时间、天气、场景进入系统的呼吸：晨昏有色温、雨晴有声景，让系统活在用户的现实里。</div>
     <div class="rule"><b>按情境换形</b>核心生命感不变，呈现密度随终端与场景收放：车机极简、桌面丰盈、腕上单焦。</div>
   </div>
 
-  <h2>十四 · 导出与录制<em>EXPORT</em></h2>
+  <h2>十七 · 导出与录制<em>EXPORT</em></h2>
   <div class="sub">把本研究存为 PDF 或单文件 HTML 离线保存；也可单独导出评测雷达图，或把整页动态演示录制成视频（优先 MP4 / H.264，不支持时回退 WebM）。</div>
   <div class="dl">
     <button class="rec" id="dlRec">录 制 动 态 演 示</button>
@@ -472,7 +643,144 @@ document.querySelectorAll('[data-vital]').forEach(e=>e.innerHTML=`<svg class="vi
 /* ---------- 心跳滑杆 ---------- */
 const bpm=document.getElementById('bpm'),bpmV=document.getElementById('bpmV'),root=document.documentElement;
 function setBpm(v){root.style.setProperty('--bpm',v);bpmV.textContent=v+' bpm';}
-bpm.addEventListener('input',()=>setBpm(bpm.value));setBpm(bpm.value);
+
+/* ---------- 节拍源：心跳 / 呼吸九态 / 二十八脉象 / 步态 / 潮汐 / 萤火 ----------
+   与 design-evolution 共用同一波形引擎：wave(t)→动态 keyframes + ECG 路径 */
+const PULSES=[
+ {n:'浮',hint:'如水漂木',zhu:'表证',meta:'至数如常 · 约72次/分',rate:72,amp:1.12,sh:{rise:.07,decay:.42}},
+ {n:'沉',hint:'如石投水',zhu:'里证',meta:'至数如常 · 约70次/分',rate:70,amp:.5,sh:{rise:.16,decay:.55}},
+ {n:'迟',hint:'一息三至',zhu:'寒证',meta:'不足四至 · 约46次/分',rate:46,amp:1,sh:{}},
+ {n:'数',hint:'一息六至',zhu:'热证',meta:'往来急促 · 约108次/分',rate:108,amp:.95,sh:{decay:.4}},
+ {n:'滑',hint:'如珠走盘',zhu:'痰饮 · 食滞 · 实热',meta:'往来流利 · 约80次/分',rate:80,amp:1.05,sh:{rise:.13,round:1}},
+ {n:'涩',hint:'轻刀刮竹',zhu:'精伤血少 · 气滞血瘀',meta:'往来艰涩 · 约62次/分',rate:62,amp:.8,sh:{rough:.45,decay:.45}},
+ {n:'虚',hint:'豁然而空',zhu:'气血两虚',meta:'举按无力 · 约68次/分',rate:68,amp:.38,sh:{round:1}},
+ {n:'实',hint:'充实满指',zhu:'实证',meta:'举按有力 · 约78次/分',rate:78,amp:1.25,sh:{sustain:.08}},
+ {n:'长',hint:'过于本位',zhu:'阳证 · 热证',meta:'首尾端长 · 约64次/分',rate:64,amp:1.05,sh:{decay:.82}},
+ {n:'短',hint:'不及本位',zhu:'气郁 · 气虚',meta:'首尾俱短 · 约76次/分',rate:76,amp:.9,sh:{rise:.09,decay:.26}},
+ {n:'洪',hint:'波涛汹涌',zhu:'气分热盛',meta:'来盛去衰 · 约88次/分',rate:88,amp:1.35,sh:{rise:.06,decay:.38}},
+ {n:'微',hint:'似有似无',zhu:'气血大虚 · 阳气衰微',meta:'极细极软 · 约60次/分',rate:60,amp:.2,sh:{}},
+ {n:'紧',hint:'如转绳索',zhu:'寒 · 痛 · 宿食',meta:'绷急弹指 · 约84次/分',rate:84,amp:1.05,sh:{sustain:.1,tremor:.38,decay:.35}},
+ {n:'缓',hint:'从容和缓',zhu:'湿证 · 脾虚',meta:'一息四至 · 约58次/分',rate:58,amp:.95,sh:{round:1}},
+ {n:'芤',hint:'如按葱管',zhu:'失血 · 伤阴',meta:'浮大中空 · 约74次/分',rate:74,amp:1.1,sh:{hollow:1}},
+ {n:'弦',hint:'如按琴弦',zhu:'肝胆病 · 痛 · 痰饮',meta:'端直以长 · 约76次/分',rate:76,amp:1.1,sh:{rise:.1,sustain:.16,decay:.32}},
+ {n:'革',hint:'如按鼓皮',zhu:'亡血 · 失精',meta:'弦大中空 · 约72次/分',rate:72,amp:1,sh:{hollow:1,sustain:.08}},
+ {n:'牢',hint:'坚牢不移',zhu:'阴寒内实 · 疝气癥瘕',meta:'沉而实大 · 约66次/分',rate:66,amp:1.15,sh:{rise:.18,decay:.6,sustain:.06}},
+ {n:'濡',hint:'如帛浮水',zhu:'虚证 · 湿证',meta:'浮细而软 · 约70次/分',rate:70,amp:.5,sh:{rise:.13,round:1}},
+ {n:'弱',hint:'无力应指',zhu:'气血不足',meta:'沉细而软 · 约64次/分',rate:64,amp:.32,sh:{rise:.15}},
+ {n:'散',hint:'杨花散漫',zhu:'元气离散',meta:'至数不齐 · 快慢无序',rate:68,amp:.8,scat:1,sh:{}},
+ {n:'细',hint:'细如丝线',zhu:'气血两虚 · 诸虚劳损 · 湿证',meta:'应指显然 · 约72次/分',rate:72,amp:.45,sh:{decay:.32}},
+ {n:'伏',hint:'推筋着骨',zhu:'邪闭 · 厥证 · 痛极',meta:'重按乃得 · 约58次/分',rate:58,amp:.12,sh:{}},
+ {n:'动',hint:'如豆动摇',zhu:'痛证 · 惊证',meta:'厥厥滑数 · 约96次/分',rate:96,amp:1,sh:{rise:.1,decay:.28,round:1}},
+ {n:'促',hint:'数中一止',zhu:'阳盛实热 · 气血痰食停滞',meta:'止无定数 · 约106次/分',rate:106,amp:1,skip:{c:8,s:[3,6]},sh:{}},
+ {n:'结',hint:'缓中一止',zhu:'阴盛气结 · 寒痰血瘀',meta:'止无定数 · 约54次/分',rate:54,amp:1,skip:{c:8,s:[3,6]},sh:{}},
+ {n:'代',hint:'止有定数',zhu:'脏气衰微 · 痛证',meta:'动而中止 · 约66次/分',rate:66,amp:1,skip:{c:4,s:[3]},sh:{}},
+ {n:'疾',hint:'脉流薄疾',zhu:'阳极阴竭 · 元气将脱',meta:'一息七至 · 约134次/分',rate:134,amp:.9,sh:{decay:.3}}];
+const BREATHS=[
+ {n:'平',full:'平气',hint:'从容和缓 · 节律均匀',zhu:'见于常人',meta:'约16次/分',rate:16,amp:1,inh:.42},
+ {n:'深',full:'深息',hint:'深缓绵长 · 腹式调息',zhu:'调息养生之用',meta:'约8次/分',rate:8,amp:1.26,inh:.46},
+ {n:'浅',full:'浅息',hint:'呼吸表浅 · 起伏甚微',zhu:'主肺脾气虚',meta:'约22次/分',rate:22,amp:.5,inh:.4},
+ {n:'粗',full:'气粗',hint:'声高息涌 · 按之有力',zhu:'主实证热证',meta:'约20次/分',rate:20,amp:1.18,inh:.38},
+ {n:'微',full:'少气',hint:'声低息微 · 气少不足以息',zhu:'主气血大虚',meta:'约12次/分',rate:12,amp:.3,inh:.42},
+ {n:'喘',full:'喘促',hint:'短促急迫 · 张口抬肩',zhu:'主肺失宣降、肾不纳气',meta:'约28次/分',rate:28,amp:.85,inh:.32,rough:.22},
+ {n:'哮',full:'哮鸣',hint:'呼气延长 · 喉间哮鸣',zhu:'主痰饮伏肺',meta:'约20次/分',rate:20,amp:.8,inh:.22},
+ {n:'短',full:'短气',hint:'气急而短 · 数不能续',zhu:'主气虚气滞',meta:'约32次/分',rate:32,amp:.55,inh:.3},
+ {n:'叹',full:'太息',hint:'胸闷善叹 · 叹后觉舒',zhu:'主肝气郁结',meta:'约14次/分 · 四息一叹',rate:14,amp:.95,inh:.4,sigh:{amp:1.7,len:1.45}}];
+let mode='heart',pIdx=0,bIdx=0,kc=0;
+const dynKF=document.createElement('style');document.head.appendChild(dynKF);
+const brpm=document.getElementById('brpm'),brpmV=document.getElementById('brpmV'),
+      gaitR=document.getElementById('gaitR'),gaitV=document.getElementById('gaitV'),gaitDesc=document.getElementById('gaitDesc'),
+      tideR=document.getElementById('tideR'),tideV=document.getElementById('tideV'),tideDesc=document.getElementById('tideDesc'),
+      fireR=document.getElementById('fireR'),fireV=document.getElementById('fireV'),fireDesc=document.getElementById('fireDesc'),
+      pGrid=document.getElementById('pGrid'),pulseDesc=document.getElementById('pulseDesc'),modeTabs=document.getElementById('modeTabs'),
+      bGrid=document.getElementById('bGrid'),breathDesc=document.getElementById('breathDesc');
+const ROWS={heart:'rowHeart',breath:'rowBreath',pulse:'rowPulse',gait:'rowGait',tide:'rowTide',fire:'rowFire'};
+pGrid.innerHTML=PULSES.map((p,i)=>`<button data-i="${i}" title="${p.n}脉 · ${p.hint} · 主${p.zhu}">${p.n}</button>`).join('');
+bGrid.innerHTML=BREATHS.map((b,i)=>`<button data-i="${i}" title="${b.full} · ${b.hint} · ${b.zhu}">${b.n}</button>`).join('');
+function paintGrid(){[...pGrid.children].forEach((b,i)=>b.classList.toggle('on',i===pIdx));}
+function paintBGrid(){[...bGrid.children].forEach((x,i)=>x.classList.toggle('on',i===bIdx));}
+function shapeAt(x,sh){sh=sh||{};
+  const rise=sh.rise||.11,sus=sh.sustain||0,dec=sh.decay||.5;let v=0;
+  if(x<rise){const u=x/rise;v=sh.round?u*u*(3-2*u):Math.pow(u,.65);}
+  else if(x<rise+sus)v=1;
+  else{const u=(x-rise-sus)/dec;
+    if(u>=0&&u<1){v=1-u;
+      if(sh.hollow)v*=1-.8*Math.exp(-Math.pow((u-.3)/.13,2));
+      else v+=.15*Math.exp(-Math.pow((u-.42)/.15,2));
+      if(v<0)v=0;}}
+  if(sh.tremor)v*=1-sh.tremor/2+sh.tremor*Math.abs(Math.sin(x*44));
+  if(sh.rough)v*=Math.max(.3,1+sh.rough*.6*(Math.sin(x*29)*.6+Math.sin(x*53+1.3)*.4));
+  return v;}
+function buildCycle(p){
+  const D=60/p.rate,ev=[];
+  if(p.scat){const jit=[0,.35,-.2,.5,-.3,.25,-.15],amps=[.7,.3,.9,.2,.55,.35,.18];let t=0;
+    for(let i=0;i<7;i++){ev.push({t:t,a:p.amp*amps[i]});t+=D*(1+jit[i]);}
+    const C=t+D*.5;
+    return {C,wave:tm=>{let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,p.sh);}return v;}};}
+  if(p.skip){for(let i=0;i<p.skip.c;i++)if(p.skip.s.indexOf(i)<0)ev.push({t:i*D,a:p.amp});}
+  else for(let i=0;i<4;i++)ev.push({t:i*D,a:p.amp});
+  const C=(p.skip?p.skip.c:4)*D;
+  return {C,wave:tm=>{let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,p.sh);}return v;}};}
+function buildBreath(b,rate){
+  const D=60/rate,ev=[],amps=b.sigh?[1,1,1,b.sigh.amp]:[1,1,1,1],lens=b.sigh?[1,1,1,b.sigh.len]:[1,1,1,1];
+  let t=0;for(let i=0;i<amps.length;i++){ev.push({t:t,d:D*lens[i],a:b.amp*amps[i]});t+=D*lens[i];}
+  const C=t;
+  return {C,wave:tm=>{let v=0;
+    for(const e of ev){const x=(tm-e.t)/e.d;
+      if(x>=0&&x<1){const p=b.inh||.4;let s=x<p?Math.sin(x/p*Math.PI/2):Math.cos((x-p)/(1-p)*Math.PI/2);
+        if(b.rough)s*=1-b.rough/2+b.rough*Math.abs(Math.sin(x*26));
+        v+=e.a*s;}}
+    return v;}};}
+/* 步态：双足交替，落地轻重相间 */
+function buildGait(rate){const D=60/rate,amps=[1.1,.88,1.1,.88],ev=amps.map((a,i)=>({t:i*D,a}));const C=4*D;
+  return {C,wave:tm=>{let v=0;for(const e of ev){const x=(tm-e.t)/D;if(x>=0&&x<1)v+=e.a*shapeAt(x,{rise:.07,decay:.36});}return v;}};}
+/* 潮汐：涌急退缓的不对称长波 + 退潮余涟 */
+function buildTide(rate){const C=60/rate;
+  return {C,wave:tm=>{const x=tm/C;let v;const p=.3;
+    v=x<p?Math.sin(x/p*Math.PI/2):Math.cos((x-p)/(1-p)*Math.PI/2);
+    if(x>=p)v+=.1*Math.sin((x-p)/(1-p)*Math.PI*3)*(1-x);
+    return Math.max(0,v*1.2);}};}
+/* 萤火：双闪一歇，闪短歇长 */
+function buildFire(rate){const C=60/rate,fd=Math.min(.55,C*.16),ev=[{t:0,a:1.3},{t:fd*1.5,a:.95}];
+  return {C,wave:tm=>{let v=0;for(const e of ev){const x=(tm-e.t)/fd;if(x>=0&&x<1)v+=e.a*shapeAt(x,{rise:.2,decay:.6,round:1});}return v;}};}
+function genKF(wave,C){const tag='dyn'+(++kc),M=44;let kb='',kr='';
+  for(let k=0;k<=M;k++){const a=Math.min(1.35,Math.max(0,wave(k/M*C))),pc=(k/M*100).toFixed(2)+'%';
+    kb+=pc+'{transform:scale('+(1+.13*a).toFixed(4)+')}';
+    kr+=pc+'{filter:brightness('+(.7+.42*a).toFixed(3)+')}';}
+  dynKF.textContent='@keyframes '+tag+'B{'+kb+'}@keyframes '+tag+'R{'+kr+'}';
+  return [tag+'B',tag+'R'];}
+function pathFromWave(wave,C){const N=140;let d='M0 20';for(let i=1;i<=N;i++){const v=Math.min(1.35,Math.max(0,wave(i/N*C)));d+='L'+(i/N*240).toFixed(1)+' '+(20-v*14).toFixed(1);}return d;}
+function setVital(d){document.querySelectorAll('[data-vital] path').forEach(p=>p.setAttribute('d',d));}
+function applyCycle(cy){const kf=genKF(cy.wave,cy.C),rs=root.style;
+  rs.setProperty('--bpm',(60/cy.C).toFixed(3));rs.setProperty('--aBeat',kf[0]);rs.setProperty('--aRim',kf[1]);rs.setProperty('--aTf','linear');
+  setVital(pathFromWave(cy.wave,cy.C));}
+function applyMode(){
+  const rs=root.style;
+  if(mode==='heart'){dynKF.textContent='';
+    rs.setProperty('--bpm',bpm.value);rs.setProperty('--aBeat','lubdub');rs.setProperty('--aRim','lubdubRim');rs.setProperty('--aTf','ease-in-out');
+    bpmV.textContent=bpm.value+' bpm';setVital(VITAL_D);return;}
+  if(mode==='breath'){const b=BREATHS[bIdx],r=+brpm.value;applyCycle(buildBreath(b,r));
+    brpmV.textContent=r+' 次/分';breathDesc.innerHTML='<b>'+b.full+'</b>'+b.hint+' · '+b.zhu+' · '+b.meta;return;}
+  if(mode==='pulse'){const p=PULSES[pIdx];applyCycle(buildCycle(p));
+    pulseDesc.innerHTML='<b>'+p.n+'脉</b>'+p.hint+' · 主'+p.zhu+' · '+p.meta;return;}
+  if(mode==='gait'){const r=+gaitR.value;applyCycle(buildGait(r));gaitV.textContent=r+' 步/分';
+    gaitDesc.innerHTML='<b>步态</b>系统如随身同行者：步频即界面脉搏——缓行从容、疾走急促，重轻交替的落点让节奏有了「身体性」。';return;}
+  if(mode==='tide'){const r=+tideR.value;applyCycle(buildTide(r));tideV.textContent=r+' 涌/分';
+    tideDesc.innerHTML='<b>潮汐</b>自然界最大的呼吸：潮来急、潮退缓，退时留三道余涟——适合环境屏与休息态，系统退为背景而不死寂。';return;}
+  const r=+fireR.value;applyCycle(buildFire(r));fireV.textContent=r+' 闪/分';
+  fireDesc.innerHTML='<b>萤火</b>群体生物的发光信号：双闪确认、长歇蓄能——通知的轻重可映射为闪的疏密，黑暗中亦有生命的在场。';}
+function setMode(m){mode=m;
+  [...modeTabs.querySelectorAll('button')].forEach(x=>x.classList.toggle('on',x.dataset.m===m));
+  Object.keys(ROWS).forEach(k=>{document.getElementById(ROWS[k]).hidden=k!==m;});
+  applyMode();}
+bpm.addEventListener('input',()=>{if(mode==='heart')applyMode();});
+brpm.oninput=()=>{if(mode==='breath')applyMode();};
+gaitR.oninput=()=>{if(mode==='gait')applyMode();};
+tideR.oninput=()=>{if(mode==='tide')applyMode();};
+fireR.oninput=()=>{if(mode==='fire')applyMode();};
+pGrid.onclick=e=>{const b=e.target.closest('button');if(!b)return;pIdx=+b.dataset.i;paintGrid();if(mode==='pulse')applyMode();};
+bGrid.onclick=e=>{const b=e.target.closest('button');if(!b)return;bIdx=+b.dataset.i;brpm.value=BREATHS[bIdx].rate;paintBGrid();if(mode==='breath')applyMode();};
+modeTabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)setMode(b.dataset.m);});
+paintGrid();paintBGrid();setMode('heart');
 
 /* ---------- 评测维度 + 雷达 ---------- */
 const DIMS=[
@@ -608,6 +916,86 @@ document.getElementById('dlPng').addEventListener('click',()=>{
   nodes.forEach(n=>{ndata+=`<g class="node" transform="translate(${n.x} ${n.y})"><circle r="19"/><path transform="scale(.9)" d="${n.ic}"/><text y="33">${n.label}</text></g>`;});
   const hub=`<g class="node hub" transform="translate(${cx} ${cy})"><circle class="halo" r="26" fill="none"/><circle r="22"/><path d="M-7 0h4l2-6 3 12 2-6h4"/><text y="38">中枢 · 节拍源</text></g>`;
   host.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${links}${ndata}${hub}${pkts}</svg>`;
+})();
+
+/* ---------- 总览：同心四层 ---------- */
+(function(){
+  const svg=document.getElementById('onion'),keys=document.getElementById('onionKeys');if(!svg)return;
+  const LAYERS=[
+    {r:186,c:'#d4706a',n:'感知层',en:'SENSING',d:'陀螺仪 · 测距 · 心率 · 血氧 · 时间 · 天气 · 位置——授权后的体征与情境数据，为系统供血。'},
+    {r:142,c:'#6ad4c8',n:'学科层',en:'DISCIPLINES',d:'视觉艺术 · 交互 · 服务 · 文化 · 认知 · 行为 · 数据等十维方法，把数据翻译为设计机制。'},
+    {r:98,c:'#9a8ad4',n:'协同层',en:'ORCHESTRATION',d:'多终端编排：谁呈现、谁振动、谁静默；上下文如血脉在设备群间流转。'},
+    {r:54,c:'#d4af6a',n:'体验核',en:'LIFE-SENSE',d:'用户最终感到的「活」：一个节拍、会呼吸的状态、无缝的接续、与我同调的系统。'},
+  ];
+  let rings='';
+  LAYERS.forEach((l,i)=>{
+    rings+=`<circle class="oL" data-i="${i}" cx="200" cy="200" r="${l.r}" fill="${l.c}" fill-opacity="${.05+i*.035}" stroke="${l.c}" stroke-opacity=".55" stroke-width="1.3" style="transform-origin:200px 200px;animation:breathe ${3.6-i*.5}s ease-in-out ${i*.3}s infinite"/>`;
+    rings+=`<text x="200" y="${200-l.r+15}" text-anchor="middle" fill="${l.c}" font-size="10.5" letter-spacing="2" font-family="monospace">${l.n}</text>`;
+  });
+  // 向心数据粒子
+  let dots='';for(let i=0;i<10;i++){const a=i/10*Math.PI*2;
+    dots+=`<circle r="2" fill="#f0cf8e" opacity=".8"><animateMotion dur="${3+i%4}s" begin="${i*.4}s" repeatCount="indefinite" path="M${200+Math.cos(a)*182} ${200+Math.sin(a)*182}L200 200"/></circle>`;}
+  svg.innerHTML=rings+dots+`<path d="M193 200h4l2-6 3 12 2-6h4" stroke="#f0cf8e" stroke-width="1.6" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 5px #d4af6a)"/>`;
+  LAYERS.forEach((l,i)=>{const k=document.createElement('div');k.className='oKey';k.style.setProperty('--c',l.c);
+    k.innerHTML=`<div><b>${l.n} · ${l.en}</b><small>${l.d}</small></div>`;
+    k.addEventListener('mouseenter',()=>{k.classList.add('on');svg.querySelector(`.oL[data-i="${i}"]`).setAttribute('stroke-width','3');});
+    k.addEventListener('mouseleave',()=>{k.classList.remove('on');svg.querySelector(`.oL[data-i="${i}"]`).setAttribute('stroke-width','1.3');});
+    keys.appendChild(k);});
+})();
+
+/* ---------- 学科星环：十维能量源 ---------- */
+(function(){
+  const host=document.getElementById('orbit'),cap=document.getElementById('orbitCap');if(!host)return;
+  const S=560,c=S/2,R=228;
+  const DISC=[
+    {n:'数字视觉艺术',c:'#f0cf8e',ic:'M-7 5c3-8 6-11 7-11s4 3 7 11M-4 1h8',out:'色彩·构图·动态质感——把状态变成可读的美',ally:'与交互设计供形，与艺术文化供魂'},
+    {n:'交互设计',c:'#6ad4c8',ic:'M-7-6h14v9h-14zM-2 3v4M-5 7h6',out:'反馈·层级·手势语法——让操作有回应',ally:'承接认知心理的约束，输出给服务设计'},
+    {n:'服务设计',c:'#8ad4a0',ic:'M-8-2h5v5h-5zM3-2h5v5h-5zM-3 1h6',out:'全旅程蓝图——跨端·跨时的体验编排',ally:'统筹行为分析与多终端协同层'},
+    {n:'艺术文化',c:'#d4af6a',ic:'M0-8l2.4 4.8 5.6.8-4 4 1 5.6L0 4.6l-5 2.6 1-5.6-4-4 5.6-.8z',out:'隐喻·仪式·心智模型——「本来就会」的语言',ally:'为视觉艺术供魂，为认知心理减负'},
+    {n:'认知心理',c:'#9a8ad4',ic:'M0-7a6 6 0 0 1 6 6c0 3-2 3.5-2 6h-8c0-2.5-2-3-2-6a6 6 0 0 1 6-6zM-2 8h4',out:'注意·记忆·负荷模型——负担的科学边界',ally:'校验所有表达层的认知成本'},
+    {n:'行为分析',c:'#d4706a',ic:'M-7 6l4-5 3 3 4-7M-7 6h14',out:'路径·卡点·习惯曲线——用户实际怎么走',ally:'以数据喂给服务设计与自适应机制'},
+    {n:'用户数据',c:'#6ad4c8',ic:'M-6-6h12M-6 0h12M-6 6h8M4 6h2',out:'偏好·场景序列——预判下一步的底料',ally:'与行为分析互证，受隐私契约约束'},
+    {n:'跨感官设计',c:'#e09a92',ic:'M-7 0h3l2-6 3 12 2-6h4',out:'触觉·声景·振动语法——三通道冗余',ally:'把交互反馈翻译为身体可感的信号'},
+    {n:'时空情境',c:'#f0cf8e',ic:'M0-7a7 7 0 1 0 .1 0zM0-3v3l3 2',out:'时间节律·天气·位置——系统活在现实里',ally:'为视觉艺术与声景提供演化参数'},
+    {n:'设备感知',c:'#9a8ad4',ic:'M0-7v4M0 3v4M-7 0h4M3 0h4M0 0m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0',out:'陀螺仪·测距·心率·血氧——授权的体征末梢',ally:'供血给全部上层，经隐私契约过滤'},
+  ];
+  let defs='',links='',nodes='';
+  const pos=DISC.map((d,i)=>{const a=-Math.PI/2+i/DISC.length*Math.PI*2;return[c+Math.cos(a)*R,c+Math.sin(a)*R];});
+  // 相邻链 + 对位校验线
+  pos.forEach((p,i)=>{const q=pos[(i+1)%pos.length];links+=`<path class="oLink" d="M${p[0]} ${p[1]}L${q[0]} ${q[1]}"/>`;
+    const o=pos[(i+5)%pos.length];if(i<5)links+=`<path class="oLink" d="M${p[0]} ${p[1]}L${o[0]} ${o[1]}"/>`;});
+  DISC.forEach((d,i)=>{const[x,y]=pos[i];
+    nodes+=`<g class="oNode" data-i="${i}" style="--nc:${d.c}" transform="translate(${x} ${y})"><circle r="26"/><path transform="scale(1.1)" d="${d.ic}"/><text y="42">${d.n}</text></g>`;});
+  const core=`<g style="--nc:#d4af6a"><circle cx="${c}" cy="${c}" r="44" fill="#0a0f1c" stroke="#d4af6a" stroke-width="1.6" style="transform-origin:${c}px ${c}px;animation:var(--aBeat) var(--beat) var(--aTf) infinite"/><path d="M${c-12} ${c}h7l3-9 4 18 3-9h7" stroke="#d4706a" stroke-width="2" fill="none" stroke-linecap="round" style="filter:drop-shadow(0 0 6px #d4706a)"/><text x="${c}" y="${c+24}" text-anchor="middle" fill="#d4af6a" font-size="10" font-family="monospace" letter-spacing="2">生命感</text></g>`;
+  host.innerHTML=`<svg viewBox="0 0 ${S} ${S}"><circle class="oRing" cx="${c}" cy="${c}" r="${R}"/>${links}${core}${nodes}</svg>`;
+  let sel=-1;
+  host.querySelectorAll('.oNode').forEach(g=>{
+    g.addEventListener('click',()=>{
+      const i=+g.dataset.i;sel=sel===i?-1:i;
+      host.querySelectorAll('.oNode').forEach(n=>{n.classList.toggle('on',+n.dataset.i===sel);n.style.opacity=sel<0||+n.dataset.i===sel?1:.35;});
+      if(sel<0){cap.innerHTML='<b style="color:var(--goldb)">点击星环节点</b><i>查看该学科向系统输出的能量与协作关系</i>';}
+      else{const d=DISC[sel];cap.innerHTML=`<b style="color:${d.c}">${d.n}</b><span style="margin-top:4px">输出：${d.out}</span><i>协作：${d.ally}</i>`;}
+    });
+  });
+})();
+
+/* ---------- 协作环路 ---------- */
+(function(){
+  const svg=document.getElementById('coop');if(!svg)return;
+  const c=190,R=130;
+  const STEPS=[
+    {n:'感知',c:'#d4706a'},{n:'解译',c:'#9a8ad4'},{n:'编排',c:'#6ad4c8'},{n:'表达',c:'#f0cf8e'},{n:'回授',c:'#d4706a'},
+  ];
+  let arcs='',nodes='';
+  const pos=STEPS.map((s,i)=>{const a=-Math.PI/2+i/STEPS.length*Math.PI*2;return[c+Math.cos(a)*R,c+Math.sin(a)*R,a];});
+  pos.forEach((p,i)=>{const q=pos[(i+1)%pos.length];
+    arcs+=`<path d="M${p[0]} ${p[1]} A${R} ${R} 0 0 1 ${q[0]} ${q[1]}" fill="none" stroke="${STEPS[i].c}" stroke-opacity=".4" stroke-width="1.4" stroke-dasharray="4 6" style="animation:dash 3s linear infinite"/>`;});
+  // 环流粒子
+  let flow='';for(let i=0;i<3;i++){flow+=`<circle r="3" fill="#f0cf8e" style="filter:drop-shadow(0 0 5px #d4af6a)"><animateMotion dur="7s" begin="${i*2.3}s" repeatCount="indefinite" path="M${c} ${c-R} A${R} ${R} 0 1 1 ${c-0.1} ${c-R}"/></circle>`;}
+  STEPS.forEach((s,i)=>{const[x,y]=pos[i];
+    nodes+=`<g transform="translate(${x} ${y})"><circle r="24" fill="#0a0f1c" stroke="${s.c}" stroke-width="1.5" style="transform-origin:0 0;animation:breathe 3s ease-in-out ${i*.5}s infinite"/><text y="4" text-anchor="middle" fill="${s.c}" font-size="12.5" font-family="var(--serif)" letter-spacing="2">${s.n}</text></g>`;});
+  const core=`<circle cx="${c}" cy="${c}" r="40" fill="rgba(212,175,106,.06)" stroke="#d4af6a" stroke-opacity=".5" style="transform-origin:${c}px ${c}px;animation:var(--aBeat) var(--beat) var(--aTf) infinite"/><text x="${c}" y="${c-3}" text-anchor="middle" fill="#f0cf8e" font-size="11" font-family="var(--serif)" letter-spacing="2">代谢</text><text x="${c}" y="${c+13}" text-anchor="middle" fill="#9a958a" font-size="8.5" font-family="monospace" letter-spacing="1">LOOP</text>`;
+  svg.innerHTML=arcs+flow+core+nodes;
 })();
 
 /* ---------- 跨端流转 handoff ---------- */
