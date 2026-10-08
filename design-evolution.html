@@ -55,6 +55,11 @@ h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:no
 .pGrid button.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.12);box-shadow:0 0 12px rgba(212,175,106,.25)}
 .pDesc{font-size:11.5px;color:var(--dim);letter-spacing:.03em;line-height:1.7;font-family:var(--sans)}
 .pDesc b{color:var(--goldb);font-family:var(--serif);letter-spacing:.18em;margin-right:8px}
+/* 页间导航 */
+.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.nav a{font-family:var(--serif);letter-spacing:.2em;font-size:12px;color:var(--dim);text-decoration:none;border:1px solid rgba(233,228,214,.14);border-radius:999px;padding:7px 18px;transition:.25s}
+.nav a:hover{border-color:var(--gold);color:var(--goldb)}
+.nav a.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.1)}
 /* 页首节拍演示：一列随当前节拍源搏动的图标 */
 .beatDemo{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
 .bdLabel{font:9px/1 monospace;letter-spacing:.3em;color:var(--dim)}
@@ -349,6 +354,11 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
       <span>萤火 · 双闪一歇、明灭有信 —— 拖杆调闪频，全页如夏夜萤群</span><input type="range" id="fireR" min="8" max="26" value="14"><b id="fireV">14 闪/分</b></span>
       <div class="pDesc" id="fireDesc"></div></div>
     <div class="beatDemo" id="beatDemo"><span class="bdLabel">节拍演示 · 随源而动</span></div>
+    <nav class="nav">
+      <a class="on" href="design-evolution.html">设计演进对比</a>
+      <a href="system-analysis.html">系统架构分析</a>
+      <a href="interaction-life-design.html">生命感设计研究</a>
+    </nav>
     <p class="lede">这份说明本身就是用 v4 的「生命感」语言写成的：页面上一切会动的东西，都跟随同一颗心脏——页首可将节拍源切换为「心跳 · 呼吸九态 · 二十八脉象 · 步态 · 潮汐 · 萤火」，比较六种生命节律下整页气质的差异。下面逐项对照每一次修改前后的差别，并给出提升分析。所有演示均为可运行的动态对照，而非静态截图。</p>
   </div>
 
@@ -478,8 +488,9 @@ footer{margin-top:50px;text-align:center;font-size:11px;color:var(--dim);letter-
   </div>
 
   <h2>六 · 下载本说明<em>EXPORT</em></h2>
-  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；亦可单独导出评估雷达图，或把整页动态对照录制成视频——优先 MP4（H.264，全平台可播），不支持的浏览器自动回退 WebM；手动录制自由滚动，自动巡页则由页面带你逐节走一遍、结束后自动下载。</div>
+  <div class="sub">导出的 HTML 为单文件、离线可开，动态演示原样保留；可下载<b style="color:var(--goldb)">动态 PPT</b>（HTML 幻灯片，与本页同背景同色调同心跳，全屏演示、键盘/触屏翻页、自动播放）；亦可单独导出评估雷达图，或把整页动态对照录制成视频——优先 MP4（H.264），不支持的浏览器自动回退 WebM。</div>
   <div class="dl">
+    <button id="dlPpt">下 载 动 态 P P T</button>
     <button id="dlRec">录 制 动 态 演 示</button>
     <button class="ghost" id="dlTour">自 动 巡 页 录 制</button>
     <button class="ghost" id="dlVideo" style="display:none">下 载 演 示 录 像</button>
@@ -807,6 +818,87 @@ document.getElementById('dlPng').onclick=()=>{
   ctx.fillStyle='rgba(212,175,106,.9)';ctx.font='24px monospace';ctx.textAlign='left';ctx.fillText('MAD MEDICINE · DESIGN ASSESSMENT · 生命感 × 游戏性 · 0-10 self-rated',60,1150);
   const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='MAD-MEDICINE_评估雷达.png';a.click();};
 document.getElementById('dlPrint').onclick=()=>window.print();
+
+/* ---------- 动态 PPT（HTML 幻灯片）生成与下载 ---------- */
+function buildDeck(meta,slides){
+ const V=VITAL_D;
+ const sl=slides.map(s=>{
+  const rows=(s.rows||[]).map((r,j)=>`<div class="row" style="--d:${(j*.14+.2).toFixed(2)}s;--c:${r.c||'var(--gold)'}"><b>${r.h}</b><span>${r.d}</span></div>`).join('');
+  if(s.cover)return `<section class="sl cover"><div class="kick">${s.k||''}</div><h1>${s.t}</h1><div class="en">${s.en||''}</div><svg class="hb" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg><div class="vt"><svg viewBox="0 0 240 40" preserveAspectRatio="none"><path class="tr" d="${V}"/><path class="rn" d="${V}"/></svg></div><div class="hint">← → / 空格 / 点击翻页 · F 全屏 · P 自动播放</div></section>`;
+  return `<section class="sl"><div class="kick">${s.k||meta.kick}</div><h2>${s.t}<em>${s.en||''}</em></h2>${s.lead?'<p class="lead">'+s.lead+'</p>':''}<div class="rows">${rows}</div><div class="vt vt2"><svg viewBox="0 0 240 40" preserveAspectRatio="none"><path class="tr" d="${V}"/><path class="rn" d="${V}"/></svg></div></section>`;}).join('');
+ return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>${meta.title} · 动态PPT</title><style>
+:root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--violet:#9a8ad4;--serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;--bpm:72;--beat:calc(60s/var(--bpm))}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}
+body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.sl{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:6vh 9vw;gap:2vh}
+.sl.on{display:flex}
+.kick{font:10px/2 monospace;letter-spacing:.5em;color:var(--teal);animation:fadeUp .5s ease both}
+h1{font-family:var(--serif);font-size:clamp(30px,5.4vw,58px);letter-spacing:.14em;font-weight:600;text-shadow:0 0 40px rgba(212,175,106,.25);animation:fadeUp .6s .05s ease both}
+.cover{align-items:center;text-align:center}
+.cover .en{font:300 12px/2 var(--sans);letter-spacing:.44em;color:var(--gold);animation:fadeUp .6s .15s ease both}
+.hb{width:44px;height:44px;color:var(--cin);animation:lubdub var(--beat) ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(212,112,106,.6))}
+h2{font-family:var(--serif);font-size:clamp(22px,3.4vw,36px);letter-spacing:.2em;color:var(--gold);display:flex;align-items:center;gap:16px;animation:fadeUp .5s ease both}
+h2::before{content:"";width:10px;height:10px;background:var(--teal);transform:rotate(45deg);box-shadow:0 0 10px var(--teal);flex:0 0 auto}
+h2 em{font:10px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:normal}
+.lead{color:var(--dim);font-size:clamp(12px,1.4vw,15px);max-width:70ch;animation:fadeUp .5s .1s ease both}
+.rows{display:flex;flex-direction:column;gap:1.6vh;margin-top:1vh}
+.row{border:1px solid rgba(233,228,214,.12);border-left:3px solid var(--c);border-radius:12px;padding:1.6vh 22px;background:rgba(14,20,34,.82);backdrop-filter:blur(6px);box-shadow:0 14px 40px rgba(0,0,0,.4);animation:fadeUp .55s var(--d) ease both}
+.row b{font-family:var(--serif);letter-spacing:.14em;font-size:clamp(14px,1.8vw,19px);color:var(--goldb);margin-right:14px}
+.row span{font-size:clamp(11.5px,1.3vw,14px);color:var(--dim);line-height:1.7}
+.vt{width:min(420px,60vw);height:40px;color:var(--teal);margin-top:1vh;animation:fadeUp .6s .3s ease both}
+.vt2{position:absolute;right:9vw;bottom:5vh;width:180px;height:28px;opacity:.55;margin:0}
+.vt svg{width:100%;height:100%;overflow:visible}
+.vt path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.vt .tr{opacity:.14}
+.vt .rn{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+.hint{font:10px/2 monospace;letter-spacing:.2em;color:var(--dim);margin-top:2vh;animation:fadeUp .6s .4s ease both}
+#bar{position:fixed;left:0;top:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--teal));width:0;transition:width .4s;z-index:9}
+#pg{position:fixed;right:18px;bottom:14px;font:11px monospace;letter-spacing:.2em;color:var(--dim)}
+#auto{position:fixed;left:18px;bottom:12px;font:10px monospace;letter-spacing:.2em;color:var(--dim);background:none;border:1px solid rgba(233,228,214,.2);border-radius:999px;padding:6px 14px;cursor:pointer}
+#auto.on{color:var(--teal);border-color:var(--teal)}
+@media(max-width:720px){.sl{padding:5vh 6vw}.row{padding:1.2vh 14px}.vt2{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style></head><body><div id="bar"></div>${sl}<button id="auto">▶ 自动播放</button><div id="pg"></div><script>
+const S=[...document.querySelectorAll('.sl')];let i=0,tm=null;
+const pg=document.getElementById('pg'),bar=document.getElementById('bar'),ab=document.getElementById('auto');
+function go(n){i=(n+S.length)%S.length;S.forEach((s,k)=>s.classList.toggle('on',k===i));pg.textContent=(i+1)+' / '+S.length;bar.style.width=((i+1)/S.length*100)+'%';}
+function nx(){go(i+1)}function pv(){go(i-1)}
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown')nx();else if(e.key==='ArrowLeft'||e.key==='PageUp')pv();else if(e.key==='Home')go(0);else if(e.key==='End')go(S.length-1);else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}else if(e.key==='p'||e.key==='P')ab.click();});
+addEventListener('click',e=>{if(e.target.closest('#auto'))return;(e.clientX>innerWidth/2?nx:pv)();});
+let tx=0;addEventListener('touchstart',e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>40)(d<0?nx:pv)();});
+ab.addEventListener('click',()=>{if(tm){clearInterval(tm);tm=null;ab.classList.remove('on');ab.textContent='\u25b6 自动播放';}else{tm=setInterval(nx,7000);ab.classList.add('on');ab.textContent='\u25a0 停止播放';}});
+go(0);<\/script></body></html>`;}
+function downloadDeck(meta,slides){
+  const blob=new Blob([buildDeck(meta,slides)],{type:'text/html'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=meta.file;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+const DECK_META={title:'MAD MEDICINE 设计演进对比',kick:'DESIGN EVOLUTION · v0 → v4',file:'设计演进对比_动态PPT.html'};
+const DECK_SLIDES=[
+ {cover:1,k:'DESIGN EVOLUTION · v0 → v4',t:'生命感 × 游戏性',en:'MAD MEDICINE · 医理探案 · 五次设计跃迁对比'},
+ {t:'演进时间线',en:'TIMELINE',lead:'五个阶段，专业内容一字未减，只改变呈现与体验',rows:[
+  {h:'v0 → v1',d:'信息平铺 → 分屏分流：六屏流程把一整面「设置墙」拆成有节奏的旅程',c:'var(--cin)'},
+  {h:'v2 → v3',d:'游戏化：建档 · 捕捉 · 徽章 · 里程碑；叙事化：望闻问切四诊入剧',c:'var(--gold)'},
+  {h:'v4 · 生命',d:'全局心跳节拍 · ECG 生命线 · 环形仪表 · 呼吸式图表 · 把脉波头光核',c:'var(--teal)'}]},
+ {t:'一个节拍源 · 六种生命节律',en:'ONE BEAT · SIX RHYTHMS',rows:[
+  {h:'--beat = 60s / --bpm',d:'光晕、章节环、仪表、雷达、徽章、生命线全部按 lub-dub 双峰同步搏动',c:'var(--gold)'},
+  {h:'心跳 · 呼吸九态 · 二十八脉',d:'生理节律：自测心率后界面改随自己的心跳',c:'var(--cin)'},
+  {h:'步态 · 潮汐 · 萤火',d:'自然节律：双足轻重 · 涌急退缓 · 双闪一歇——同一系统、不同生命',c:'var(--teal)'}]},
+ {t:'由虚到实 · 凝实隐喻',en:'MATERIALIZE',rows:[
+  {h:'背景显影',d:'点云双人随探案清晰度由散变聚、由灰变彩',c:'var(--teal)'},
+  {h:'屏幕进场 · 雷达生长 · 数字计数',d:'所有出现都沿用同一个「凝实」隐喻，跨屏切换即呼吸',c:'var(--gold)'},
+  {h:'按压触感',d:'苹果式圆角 + 振动 + 提示音，点按在 100ms 内被三通道确认',c:'var(--cin)'}]},
+ {t:'评估与指标',en:'ASSESSMENT',rows:[
+  {h:'六维评估雷达',d:'清晰 · 节奏 · 情感 · 游戏性 · 专业保真 · 生命感——v0→v4 逐版生长',c:'var(--teal)'},
+  {h:'9 类心跳同步元素 · 1 个节拍源',d:'复杂被「组织」而非「堆叠」：动效不是装饰，是状态语言',c:'var(--gold)'}]},
+ {t:'原则沉淀',en:'PRINCIPLES',rows:[
+  {h:'一个节拍源',d:'所有动效共享 --beat，系统被感知为一个生命体而非一堆动画',c:'var(--gold)'},
+  {h:'由虚到实',d:'显影 · 进场 · 生长 · 计数，全部沿用同一个凝实隐喻',c:'var(--teal)'},
+  {h:'专业不减',d:'知识库、权重算法、循证分级完整保留，改变的只是呈现与体验层',c:'var(--cin)'}]},
+ {cover:1,k:'READ IT ALIVE',t:'亲自体验这套设计语言',en:'wsemilynss.github.io/mad-medicine'}];
+document.getElementById('dlPpt').addEventListener('click',()=>downloadDeck(DECK_META,DECK_SLIDES));
 
 /* ---------- 动态演示录制（标签页捕获 → MP4 优先 / WebM 回退，手动 / 自动巡页两种模式） ---------- */
 (function(){
