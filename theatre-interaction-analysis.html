@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>MAD MEDICINE · 剧场交互设计动态分析 —— 游戏思维 × 生命医学 × 心理学 × 剧场</title>
+<style>
+:root{--bg:#05070d;--ink:#e9e4d6;--dim:#9a958a;--gold:#d4af6a;--goldb:#f0cf8e;--teal:#6ad4c8;--cin:#d4706a;--violet:#9a8ad4;--steel:#8ea3c8;--line:rgba(212,175,106,.28);
+  --serif:"Songti SC","STSong","SimSun","Noto Serif SC",serif;--sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+  --bpm:72;--beat:calc(60s / var(--bpm))}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 50% 0%,#0b1222,#04060c 70%);color:var(--ink);font-family:var(--sans);line-height:1.8;-webkit-font-smoothing:antialiased;min-height:100vh}
+main{max-width:1120px;margin:0 auto;padding:60px 22px 80px}
+h1{font-family:var(--serif);font-size:clamp(26px,4.4vw,44px);letter-spacing:.16em;font-weight:600;text-align:center;text-shadow:0 0 40px rgba(212,175,106,.25)}
+h1 small{display:block;font:300 12px/2 var(--sans);letter-spacing:.5em;color:var(--gold);margin-top:8px}
+h2{font-family:var(--serif);font-size:22px;letter-spacing:.24em;color:var(--gold);margin:68px 0 6px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h2::before{content:"";width:8px;height:8px;background:var(--teal);transform:rotate(45deg);box-shadow:0 0 10px var(--teal)}
+h2 em{font:9.5px/1 monospace;letter-spacing:.24em;color:var(--dim);font-style:normal;margin-left:auto}
+h3{font-family:var(--serif);letter-spacing:.18em;color:var(--goldb);font-size:15px;margin-bottom:6px}
+.sub{color:var(--dim);font-size:13px;letter-spacing:.03em;margin-bottom:18px;max-width:900px}
+.sub b{color:var(--ink);font-weight:500}
+.kicker{text-align:center;font:10px/2 monospace;letter-spacing:.5em;color:var(--teal);margin-bottom:8px}
+.lede{max-width:780px;margin:14px auto 0;text-align:center;color:var(--dim);font-size:14px}
+.lede b{color:var(--goldb);font-weight:500}
+.card{background:rgba(14,20,34,.82);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(6px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.card+.card{margin-top:16px}
+canvas.cv{display:block;width:100%;height:auto;border-radius:12px;background:rgba(5,8,15,.55)}
+@keyframes lubdub{0%,100%{transform:scale(1)}10%{transform:scale(1.07)}20%{transform:scale(1)}32%{transform:scale(1.04)}46%{transform:scale(1)}}
+@keyframes ringOut{from{transform:scale(1);opacity:.55}to{transform:scale(1.5);opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes dashRun{to{stroke-dashoffset:-40}}
+.beat{animation:lubdub var(--beat) ease-in-out infinite}
+.vital{display:block;width:100%;height:100%;overflow:visible}
+.vital path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.vital .vTrack{opacity:.14}
+.vital .vRun{stroke-dasharray:60 400;stroke-dashoffset:460;animation:vitalRun var(--beat) linear infinite;filter:drop-shadow(0 0 4px currentColor)}
+@keyframes vitalRun{to{stroke-dashoffset:0}}
+.hero{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:28px}
+.heroVital{width:min(440px,80vw);height:44px;color:var(--teal)}
+.bpmRow{display:flex;align-items:center;gap:14px;font:11px/1 monospace;letter-spacing:.2em;color:var(--dim);flex-wrap:wrap;justify-content:center}
+.bpmRow b{font-size:22px;color:var(--goldb);letter-spacing:.04em;min-width:64px;text-align:right}
+.bpmRow input{width:200px;accent-color:var(--gold)}
+.heart{width:22px;height:22px;color:var(--cin);filter:drop-shadow(0 0 8px var(--cin))}
+.nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.nav a{font-family:var(--serif);letter-spacing:.2em;font-size:12px;color:var(--dim);text-decoration:none;border:1px solid rgba(233,228,214,.14);border-radius:999px;padding:7px 18px;transition:.25s}
+.nav a:hover{border-color:var(--gold);color:var(--goldb)}
+.nav a.on{border-color:var(--gold);color:var(--goldb);background:rgba(212,175,106,.1)}
+.toc{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:4px}
+.toc a{font:10px/1 monospace;letter-spacing:.16em;color:var(--teal);text-decoration:none;padding:6px 10px;border:1px dashed rgba(106,212,200,.3);border-radius:8px}
+.toc a:hover{background:rgba(106,212,200,.08)}
+/* 四支柱 */
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.pillar{--c:var(--gold);position:relative;border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px 14px 14px;background:rgba(5,8,15,.5);overflow:hidden;opacity:0;animation:fadeUp .7s ease forwards}
+.pillar:nth-child(2){animation-delay:.15s}.pillar:nth-child(3){animation-delay:.3s}.pillar:nth-child(4){animation-delay:.45s}
+.pillar::before{content:"";position:absolute;left:0;top:0;right:0;height:2px;background:var(--c);box-shadow:0 0 12px var(--c)}
+.pillar svg{width:36px;height:36px;color:var(--c);filter:drop-shadow(0 0 8px var(--c))}
+.pillar b{display:block;font-family:var(--serif);letter-spacing:.2em;font-size:16px;color:var(--c);margin-top:6px}
+.pillar small{display:block;font:9px/1.6 monospace;letter-spacing:.2em;color:var(--dim)}
+.pillar span{display:block;font-size:12px;color:var(--ink);opacity:.86;line-height:1.75;margin-top:6px}
+.formula{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:18px;font-family:var(--serif);letter-spacing:.14em}
+.formula span{padding:8px 14px;border:1px solid var(--line);border-radius:10px;color:var(--goldb);font-size:14px;background:rgba(212,175,106,.05)}
+.formula i{font-style:normal;color:var(--dim);font-size:16px}
+.formula span.res{color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));border:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-top:18px}
+.stat{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5)}
+.stat .k{font-size:10.5px;letter-spacing:.2em;color:var(--dim);font-family:var(--serif)}
+.stat .v{font:22px/1.4 monospace;color:var(--goldb);margin-top:4px}
+.stat .v small{font:10px var(--sans);color:var(--dim)}
+/* 通用双栏 */
+.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:18px;align-items:start}
+.split.even{grid-template-columns:1fr 1fr}
+.info{border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:16px 16px 14px;background:rgba(5,8,15,.55);min-height:100%}
+.info .tg{font:9px/1 monospace;letter-spacing:.26em;color:var(--teal);margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.info .tg i{font-style:normal;color:var(--gold)}
+.info dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px;line-height:1.75}
+.info dt{font-family:var(--serif);letter-spacing:.14em;color:var(--gold);white-space:nowrap}
+.info dd{color:var(--ink);opacity:.9}
+.info .big{font-family:var(--serif);font-size:22px;letter-spacing:.2em;color:var(--goldb);line-height:1.4}
+.info .big small{font:10px monospace;letter-spacing:.2em;color:var(--dim);margin-left:8px}
+.info .note{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(233,228,214,.14);font-size:12px;color:var(--dim);line-height:1.8}
+.chipRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chipRow button{cursor:pointer;font-family:var(--serif);letter-spacing:.12em;font-size:12px;color:var(--dim);background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.14);border-radius:999px;padding:5px 12px;transition:.2s}
+.chipRow button:hover{color:var(--goldb);border-color:var(--gold)}
+.chipRow button.on{color:var(--bg);background:var(--gold);border-color:var(--gold)}
+.legendRow{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:11px;color:var(--dim)}
+.legendRow span{display:inline-flex;align-items:center;gap:6px}
+.legendRow i{width:16px;height:3px;border-radius:2px;background:var(--c);box-shadow:0 0 6px var(--c)}
+.legendRow i.dot{width:9px;height:9px;border-radius:50%}
+/* 剧场概念 */
+.roleWrap{display:grid;grid-template-columns:minmax(260px,.9fr) minmax(0,1.4fr);gap:20px;align-items:center}
+#roleSvg{width:100%;max-width:420px;display:block;margin:0 auto}
+#roleSvg .edge{fill:none;stroke-width:1.4;stroke-dasharray:4 6;animation:dashRun calc(var(--beat)*3) linear infinite}
+#roleSvg .core{transform-origin:210px 200px;animation:lubdub var(--beat) ease-in-out infinite}
+#roleSvg .ring{transform-origin:210px 200px;animation:ringOut var(--beat) ease-out infinite}
+.concepts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.concept{--c:var(--gold);border:1px solid rgba(233,228,214,.1);border-left:2px solid var(--c);border-radius:10px;padding:10px 12px;background:rgba(5,8,15,.5);font-size:12px;line-height:1.75;transition:.25s}
+.concept:hover{background:rgba(212,175,106,.06);transform:translateY(-2px)}
+.concept b{font-family:var(--serif);letter-spacing:.14em;color:var(--c);font-size:13.5px}
+.concept small{font:8.5px monospace;letter-spacing:.16em;color:var(--dim);margin-left:6px}
+.concept p{color:var(--ink);opacity:.88;margin-top:3px}
+.concept p i{font-style:normal;color:var(--teal)}
+/* 模拟器 */
+.gpGrid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:14px;margin-top:14px;align-items:stretch}
+.clipBox{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#05070d;min-height:100%}
+.clipBox video,.clipBox canvas{display:block;width:100%;height:100%;object-fit:cover;border-radius:0}
+.clipTag{position:absolute;left:10px;top:10px;right:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;pointer-events:none;font:9.5px/1 monospace;letter-spacing:.2em}
+.clipTag span{color:var(--teal);background:rgba(5,7,13,.78);padding:5px 9px;border-radius:999px;border:1px solid rgba(106,212,200,.35)}
+.clipTag b{color:var(--goldb);background:rgba(5,7,13,.78);padding:5px 9px;border-radius:999px;font-weight:400}
+.clipTag.bottom{top:auto;bottom:10px}
+.clipCap{position:absolute;left:0;right:0;bottom:0;padding:22px 14px 10px;background:linear-gradient(transparent,rgba(5,7,13,.92));font-size:11.5px;color:var(--ink);line-height:1.6}
+.clipCap b{font-family:var(--serif);color:var(--goldb);letter-spacing:.14em;margin-right:6px}
+.readout .ro{min-width:0}
+.ctrl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;font:10px monospace;letter-spacing:.16em;color:var(--dim)}
+.ctrl input[type=range]{flex:1;min-width:180px;accent-color:var(--gold)}
+.ctrl button,.ctrl select{cursor:pointer;font-family:var(--serif);letter-spacing:.2em;font-size:12px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));border:0;border-radius:999px;padding:7px 18px}
+.ctrl select{background:rgba(5,8,15,.6);color:var(--gold);border:1px solid var(--line);letter-spacing:.06em;padding:6px 10px}
+.readout{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.ro{border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:10px 12px;background:rgba(5,8,15,.5);font-size:12px;line-height:1.7}
+.ro .h{font:9px/1 monospace;letter-spacing:.24em;color:var(--c,var(--teal));margin-bottom:6px;display:block}
+.ro b{font-family:var(--serif);letter-spacing:.12em;color:var(--goldb);font-size:14px;display:block}
+.meter{display:flex;align-items:center;gap:8px;font:10px monospace;color:var(--dim);margin-top:2px}
+.meter i{flex:1;height:4px;border-radius:2px;background:rgba(233,228,214,.1);overflow:hidden;display:block}
+.meter i b{display:block;height:100%;width:0;background:var(--c);box-shadow:0 0 6px var(--c);transition:width .2s}
+/* 矩阵 */
+.mDetail{margin-top:12px;font-size:12.5px;line-height:1.85;color:var(--dim);min-height:48px}
+.mDetail b{color:var(--goldb);font-family:var(--serif);letter-spacing:.1em}
+.mDetail i{font-style:normal;color:var(--teal)}
+/* 视觉通道 */
+.chan{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ch{--c:var(--gold);border:1px solid rgba(233,228,214,.12);border-radius:14px;padding:14px;background:rgba(5,8,15,.5);display:grid;grid-template-columns:54px 1fr;gap:12px;align-items:center}
+.ch canvas{width:54px;height:54px;display:block}
+.ch b{font-family:var(--serif);letter-spacing:.18em;color:var(--c);font-size:14px}
+.ch small{font:8.5px monospace;letter-spacing:.16em;color:var(--dim);margin-left:6px}
+.ch p{font-size:11.5px;line-height:1.7;color:var(--ink);opacity:.86}
+.ch p em{font-style:normal;color:var(--teal)}
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.tbl th,.tbl td{padding:9px 10px;border-bottom:1px solid rgba(233,228,214,.1);text-align:left;vertical-align:top;line-height:1.7}
+.tbl th{font-family:var(--serif);letter-spacing:.14em;color:var(--gold);font-weight:600;white-space:nowrap}
+.tbl td:first-child{color:var(--cin);white-space:nowrap}
+.tbl td:nth-child(2){color:var(--dim)}
+.tbl td:last-child{color:var(--ink)}
+.tbl tr{opacity:0;animation:fadeUp .6s ease forwards}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px}
+.rule{--c:var(--gold);border-left:2px solid var(--c);padding:10px 14px;background:rgba(212,175,106,.05);font-size:12.5px;line-height:1.8;border-radius:0 10px 10px 0}
+.rule b{display:block;font-family:var(--serif);letter-spacing:.16em;color:var(--goldb);margin-bottom:3px}
+.rule em{font-style:normal;color:var(--teal)}
+/* 用户群 */
+.personas{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.persona{--c:var(--gold);border:1px solid rgba(233,228,214,.12);border-radius:12px;padding:12px 14px;background:rgba(5,8,15,.5);font-size:11.5px;line-height:1.7;cursor:pointer;transition:.25s}
+.persona.on,.persona:hover{border-color:var(--c);box-shadow:0 0 18px color-mix(in srgb,var(--c) 25%,transparent)}
+.persona b{font-family:var(--serif);letter-spacing:.14em;color:var(--c);font-size:13.5px}
+.persona .tier{float:right;font:9px monospace;letter-spacing:.16em;padding:2px 8px;border-radius:999px;border:1px solid var(--c);color:var(--c)}
+.persona p{color:var(--ink);opacity:.86;margin-top:4px}
+.persona p span{color:var(--dim)}
+/* 导出 */
+.filmWrap{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#05070d}
+#filmC{display:block;width:100%;height:auto}
+.prog{height:3px;background:rgba(233,228,214,.1);margin-top:10px;border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--goldb));box-shadow:0 0 8px var(--gold)}
+.dl{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.dl button{cursor:pointer;font-family:var(--serif);letter-spacing:.24em;font-size:13.5px;border:0;border-radius:999px;padding:13px 28px;color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--goldb));transition:transform .25s,box-shadow .25s;box-shadow:0 8px 26px rgba(212,175,106,.25)}
+.dl button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line);box-shadow:none}
+.dl button:hover{transform:translateY(-2px)}
+.dl button:active{transform:scale(.96)}
+.dl button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.hint{text-align:center;font-size:11.5px;color:var(--dim);margin-top:10px;min-height:20px}
+#recPrev{display:none;width:100%;margin-top:14px;border-radius:12px;border:1px solid var(--line)}
+footer{margin-top:56px;text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em;line-height:1.9}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:none}
+@media(max-width:860px){.pillars{grid-template-columns:1fr 1fr}.split,.split.even,.roleWrap,.gpGrid{grid-template-columns:1fr}.readout{grid-template-columns:1fr 1fr}.chan,.personas{grid-template-columns:1fr 1fr}.concepts{grid-template-columns:1fr}}
+@media(max-width:560px){main{padding:40px 14px 60px}.pillars,.chan,.personas{grid-template-columns:1fr}.card{padding:16px 14px}.tbl{font-size:11.5px}.tbl td:first-child{white-space:normal}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">DRAMATURGY × LIFE SCIENCE × PSYCHOLOGY × PLAY</div>
+  <h1>游 戏 · 医 学 · 心 理 · 剧 场<small>MAD MEDICINE · 医理探案 · 剧场交互设计动态分析研究</small></h1>
+  <div class="hero">
+    <div class="heroVital"><svg class="vital" viewBox="0 0 240 40" preserveAspectRatio="none" aria-hidden="true"><path class="vTrack" d="M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105"/><path class="vRun" d="M0 20h60l6-9 7 18 7-26 7 34 6-17h20l5-6 6 12 5-6h105"/></svg></div>
+    <div class="bpmRow"><svg class="heart beat" viewBox="0 0 40 40" fill="currentColor"><path d="M20 35S6 26 6 16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 10-14 19-14 19z"/></svg>
+      <span>拖动 · 全页图表与影片随同一颗心脏搏动</span><input type="range" id="bpm" min="48" max="120" value="72"><b id="bpmV">72 bpm</b></div>
+    <nav class="nav">
+      <a href="design-evolution.html">设计演进对比</a>
+      <a href="system-analysis.html">系统架构分析</a>
+      <a href="interaction-life-design.html">生命感设计研究</a>
+      <a class="on" href="theatre-interaction-analysis.html">剧场交互分析</a>
+    </nav>
+    <p class="lede">把「医理探案」当作一出<b>可游玩的戏</b>来解剖：中医四诊是剧本骨架，生命医学与循证医学是台词的可信度，心理学是观众的心电图，游戏机制是舞台机关，点云视觉是灯光。本页以动态图表拆解其<b>学科构成 · 设计逻辑 · 用户体验</b>，重点分析<b>游戏机制 × 视觉艺术变化 × 用户心理体感</b>的三轨联动，并评估其<b>科普意义</b>与<b>用户群定位</b>。文末可一键导出<b>动态分析影片</b>与<b>静态分析图</b>。</p>
+    <div class="toc">
+      <a href="#s1">01 框架</a><a href="#s2">02 戏剧弧线</a><a href="#s3">03 剧场转译</a><a href="#s4">04 学科星图</a><a href="#s5">05 三轨联动</a><a href="#s6">06 作用矩阵</a><a href="#s7">07 体验逻辑</a><a href="#s8">08 科普意义</a><a href="#s9">09 用户群</a><a href="#s10">10 伦理结论</a><a href="#s11">11 导出</a>
+    </div>
+  </div>
+
+  <h2 id="s1">一 · 研究框架：四根支柱<em>FRAMEWORK</em></h2>
+  <div class="sub">「医理探案」不是把医学知识「套上游戏皮」，而是让四个领域各司其职、彼此咬合：<b>医学提供可信的内容，心理学定义要唤起的体验，游戏提供让体验发生的机制，剧场提供把它们串成一晚演出的结构。</b></div>
+  <div class="card reveal">
+    <div class="pillars">
+      <div class="pillar" style="--c:var(--cin)"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h8l3-9 5 18 4-14 3 5h11"/></svg><b>生命医学</b><small>CONTENT · 可信</small><span>中医四诊与十证型为骨，现代生理机制、鉴别提示与 A/B/C 证据分级为肉——每个结论都能追溯。</span></div>
+      <div class="pillar" style="--c:var(--violet)"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6c-7 0-12 5-12 11 0 4 2 6 3 8v7h10v-4h4c2 0 3-1 3-3v-4l3-1-3-5c0-5-3-9-8-9z"/><path d="M16 15c2-2 6-2 7 1M15 21h6"/></svg><b>心理学</b><small>EXPERIENCE · 可感</small><span>以好奇、自主、胜任、心流、内感受与宣泄为体验目标；以压力 / 情绪 / 睡眠 / 躯体化四维侧写身心。</span></div>
+      <div class="pillar" style="--c:var(--gold)"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="12" width="30" height="18" rx="9"/><path d="M13 18v6M10 21h6"/><circle cx="26" cy="19" r="1.6" fill="currentColor"/><circle cx="29" cy="23" r="1.6" fill="currentColor"/></svg><b>游戏思维</b><small>MECHANIC · 可玩</small><span>捕捉 → 归档 → 通关 → 奖励的核心循环；XP、连击、9 枚徽章、段位与显影雷达构成短周期反馈。</span></div>
+      <div class="pillar" style="--c:var(--teal)"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8c6 3 10 3 16 0 6 3 10 3 16 0v6c-3 8-9 12-16 12S7 22 4 14z"/><path d="M4 8v24M36 8v24M4 32h32"/></svg><b>剧场</b><small>STRUCTURE · 可共情</small><span>九场戏剧弧线、双人对坐的镜框舞台、幕间灯光、突转与发现、五幕推理小剧场与谢幕。</span></div>
+    </div>
+    <div class="formula"><span>知识可信</span><i>×</i><span>机制可玩</span><i>×</i><span>视觉可感</span><i>×</i><span>叙事可共情</span><i>=</i><span class="res">有生命感的健康科普剧场</span></div>
+    <div class="stats">
+      <div class="stat"><div class="k">学科</div><div class="v" data-count="14">0 <small>门 · 5 族</small></div></div>
+      <div class="stat"><div class="k">戏剧场次</div><div class="v" data-count="9">0 <small>场</small></div></div>
+      <div class="stat"><div class="k">线索 / 章节</div><div class="v" data-count="18">0 <small>/ 4 章</small></div></div>
+      <div class="stat"><div class="k">证型</div><div class="v" data-count="10">0 <small>× 11 维</small></div></div>
+      <div class="stat"><div class="k">徽章</div><div class="v" data-count="9">0 <small>枚</small></div></div>
+      <div class="stat"><div class="k">循证条目</div><div class="v" data-count="44">0 <small>A/B/C</small></div></div>
+    </div>
+  </div>
+
+  <h2 id="s2">二 · 剧场化结构：九场戏剧弧线<em>DRAMATURGY</em></h2>
+  <div class="sub">整局游戏被组织为一出完整的戏：上方是剧场术语，下方是游戏界面。<b style="color:var(--gold)">金线</b>为戏剧张力，<b style="color:var(--teal)">青线</b>为视觉显影度（人影由虚到实），<b style="color:var(--cin)">朱线</b>为情绪效价。张力在每次「幕间闪光」后短暂回落，再于「突转 · 发现」处达到峰值——这正是弗赖塔格金字塔在交互中的复现。悬停或点击查看每一场。</div>
+  <div class="card reveal">
+    <canvas class="cv" id="arcC" width="1600" height="704"></canvas>
+    <div class="chipRow" id="phaseChips"></div>
+    <div class="split even" style="margin-top:12px">
+      <div class="info" id="phaseInfo"></div>
+      <div class="clipBox"><video id="phaseClip" muted playsinline loop preload="metadata" src="gameplay-demo.mp4"></video>
+        <div class="clipTag"><span>REAL PLAY · 本场实录</span><b id="clipT">--</b></div>
+        <div class="clipCap" id="clipCap"></div></div>
+    </div>
+  </div>
+
+  <h2 id="s3">三 · 剧场概念的交互转译<em>THEATRE → INTERACTION</em></h2>
+  <div class="sub">玩家同时扮演三个角色：<b>侦探</b>（主动推理）、<b>病人</b>（被侧写的身体）、<b>观众</b>（观看以自己为主角的五幕剧）。三者之间的往返，构成了「既入戏又出戏」的剧场张力；八个经典剧场概念被逐一转译为交互机制。</div>
+  <div class="card reveal">
+    <div class="roleWrap">
+      <svg id="roleSvg" viewBox="0 0 420 400" role="img" aria-label="玩家三重角色">
+        <defs><radialGradient id="rg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#f0cf8e" stop-opacity=".55"/><stop offset="1" stop-color="#f0cf8e" stop-opacity="0"/></radialGradient></defs>
+        <path class="edge" d="M210 56 Q330 140 356 316" stroke="#d4af6a"/>
+        <path class="edge" d="M356 316 Q210 380 64 316" stroke="#6ad4c8"/>
+        <path class="edge" d="M64 316 Q90 140 210 56" stroke="#d4706a"/>
+        <text x="318" y="168" fill="#d4af6a" font-size="11" text-anchor="middle" transform="rotate(52 318 168)">推理他人 = 审视自身</text>
+        <text x="210" y="372" fill="#6ad4c8" font-size="11" text-anchor="middle">看自己被写成一出戏</text>
+        <text x="102" y="168" fill="#d4706a" font-size="11" text-anchor="middle" transform="rotate(-52 102 168)">间离之后 再次入戏</text>
+        <circle class="ring" cx="210" cy="200" r="44" fill="none" stroke="#f0cf8e" stroke-width="1"/>
+        <g class="core"><circle cx="210" cy="200" r="60" fill="url(#rg)"/><circle cx="210" cy="200" r="38" fill="#0a0f1c" stroke="#f0cf8e"/>
+          <text x="210" y="198" fill="#f0cf8e" font-size="15" text-anchor="middle" font-family="serif" letter-spacing="3">玩 家</text><text x="210" y="214" fill="#9a958a" font-size="8" text-anchor="middle" font-family="monospace" letter-spacing="2">PLAYER</text></g>
+        <g><circle cx="210" cy="56" r="30" fill="#0a0f1c" stroke="#d4af6a"/><text x="210" y="56" fill="#d4af6a" font-size="14" text-anchor="middle" font-family="serif">侦 探</text><text x="210" y="70" fill="#9a958a" font-size="7" text-anchor="middle" font-family="monospace">DETECTIVE</text></g>
+        <g><circle cx="356" cy="316" r="30" fill="#0a0f1c" stroke="#6ad4c8"/><text x="356" y="316" fill="#6ad4c8" font-size="14" text-anchor="middle" font-family="serif">观 众</text><text x="356" y="330" fill="#9a958a" font-size="7" text-anchor="middle" font-family="monospace">AUDIENCE</text></g>
+        <g><circle cx="64" cy="316" r="30" fill="#0a0f1c" stroke="#d4706a"/><text x="64" y="316" fill="#d4706a" font-size="14" text-anchor="middle" font-family="serif">病 人</text><text x="64" y="330" fill="#9a958a" font-size="7" text-anchor="middle" font-family="monospace">PATIENT</text></g>
+      </svg>
+      <div class="concepts" id="concepts"></div>
+    </div>
+  </div>
+
+  <h2 id="s4">四 · 交叉学科星图<em>DISCIPLINES</em></h2>
+  <div class="sub">14 门学科按 5 个学科族环绕「医理探案」排布，21 条桥接关系标明它们在作品中如何相互借力。光粒沿连线流动，表示知识在学科间的转译方向。悬停节点查看该学科「贡献了什么、落在哪里」。</div>
+  <div class="card reveal">
+    <div class="split">
+      <canvas class="cv" id="conC" width="1024" height="1024"></canvas>
+      <div class="info" id="discInfo"></div>
+    </div>
+    <div class="legendRow" id="famLegend"></div>
+  </div>
+
+  <h2 id="s5">五 · 三轨联动：机制 × 视觉 × 心理<em>MECHANIC · VISUAL · PSYCHE</em></h2>
+  <div class="sub">本页的核心模型。把一局完整游戏压缩为一条时间轴：<b>每一个机制事件</b>（捕捉、通关、徽章、指认）都会立刻引发<b>一处视觉变化</b>（显影、饱和、闪光），再沉淀为<b>一种心理体感</b>（张力、心流、愉悦）。事件发生时，三轨之间会亮起因果涟漪。时间轴按一局<b>真实游戏实录</b>（自动演示 · 约 162 秒 · 建档 → 望闻问切 19 条线索 → 把脉 → 推理 → 报告 → 小剧场）逐秒标定：左下为实录画面，右下为对应的抽象「双人对坐」点云模型，三者共用同一时钟——拖动进度条或点击时间轴，实录同步跳转。</div>
+  <div class="card reveal">
+    <canvas class="cv" id="laneC" width="1600" height="736"></canvas>
+    <div class="ctrl"><button id="simPlay">❚❚ 暂停</button><span>SESSION</span><input type="range" id="simU" min="0" max="1000" value="0"><span id="simPct">0%</span>
+      <select id="simSpd"><option value="1">1× · 实时 162s</option><option value="2" selected>2× · 81s</option><option value="4">4× · 40s</option></select></div>
+    <div class="gpGrid">
+      <div class="clipBox"><video id="gpVideo" muted playsinline preload="auto" src="gameplay-demo.mp4"></video>
+        <div class="clipTag bottom"><span>REAL PLAY · 游戏实录</span><b id="gpT">0:00</b></div></div>
+      <div class="clipBox"><canvas class="cv" id="stageC" width="1024" height="640"></canvas>
+        <div class="clipTag bottom"><i></i><span>MODEL · 抽象模型</span></div></div>
+    </div>
+    <div class="readout">
+      <div class="ro" style="--c:var(--goldb)"><span class="h">SCENE · 当前场次</span><b id="roScene">—</b><span id="roTheatre" style="color:var(--dim)"></span></div>
+      <div class="ro" style="--c:var(--gold)"><span class="h">MECHANIC · 机制</span><span id="roMech"></span></div>
+      <div class="ro" style="--c:var(--teal)"><span class="h">VISUAL · 视觉</span><span id="roVis"></span>
+        <div class="meter" style="--c:var(--teal)">显影<i><b id="mCl"></b></i></div><div class="meter" style="--c:var(--gold)">饱和<i><b id="mSat"></b></i></div></div>
+      <div class="ro" style="--c:var(--cin)"><span class="h">PSYCHE · 心理</span><span id="roPsy"></span>
+        <div class="meter" style="--c:var(--gold)">张力<i><b id="mTen"></b></i></div><div class="meter" style="--c:var(--violet)">心流<i><b id="mFlow"></b></i></div><div class="meter" style="--c:var(--cin)">愉悦<i><b id="mVal"></b></i></div></div>
+    </div>
+  </div>
+
+  <h2 id="s6">六 · 机制 — 心理作用矩阵<em>MECHANIC → PSYCHE MATRIX</em></h2>
+  <div class="sub">11 项核心机制 × 8 种心理效应的作用强度（0–3 级，依据设计意图与理论推演评定）。每一行同时标注该机制所依赖的<b>视觉变化</b>——视觉是机制抵达心理的「传导介质」。悬停单元格查看作用路径。</div>
+  <div class="card reveal">
+    <canvas class="cv" id="matC" width="1600" height="960"></canvas>
+    <div class="mDetail" id="matDetail">悬停任一单元格：<i>机制</i> → <b>视觉通道</b> → <i>心理效应</i>（理论依据）。</div>
+  </div>
+
+  <h2 id="s7">七 · 用户体验逻辑<em>UX LOGIC</em></h2>
+  <div class="sub">视觉艺术在本作中不是装饰，而是六条把「状态」翻译成「体感」的通道；每条通道都绑定一种心理反应。下方表格则列出健康类产品的典型体验痛点，及本作对应的设计回应。</div>
+  <div class="card reveal">
+    <div class="chan" id="chan"></div>
+  </div>
+  <div class="card reveal">
+    <table class="tbl" id="painTbl"><thead><tr><th>体验痛点</th><th>心理根源</th><th>设计回应</th></tr></thead><tbody></tbody></table>
+  </div>
+
+  <h2 id="s8">八 · 科普意义：知识的五级翻译<em>SCIENCE COMMUNICATION</em></h2>
+  <div class="sub">每个证型都沿一条「翻译阶梯」向上传递：经典概念 → 生活隐喻 → 现代机制 → 心理画像 → 行动处方，对应布鲁姆认知层级从「识记」走向「应用」。这让玩家不只是「被告知」，而是在游戏中完成一次可迁移的理解。点击证型切换。</div>
+  <div class="card reveal">
+    <canvas class="cv" id="ladC" width="1600" height="736"></canvas>
+    <div class="chipRow" id="patChips"></div>
+  </div>
+  <div class="card reveal">
+    <div class="rules" id="sciRules" style="margin-top:0"></div>
+  </div>
+
+  <h2 id="s9">九 · 用户群定位<em>AUDIENCE</em></h2>
+  <div class="sub">以「健康知识需求」（纵轴）与「游戏 / 艺术互动偏好」（横轴）定位六类人群，气泡大小代表潜在规模。右上象限——<b>既想看懂身体、又愿意玩</b>——是本作的核心用户；剧场与展陈观众则是把作品推向线下的拓展群体。</div>
+  <div class="card reveal">
+    <div class="split even">
+      <canvas class="cv" id="bubC" width="1216" height="832"></canvas>
+      <div class="info" id="segInfo"></div>
+    </div>
+    <div class="personas" id="personas"></div>
+  </div>
+
+  <h2 id="s10">十 · 风险、伦理与结论<em>ETHICS · CONCLUSION</em></h2>
+  <div class="sub">把健康话题游戏化、剧场化，必须正视其副作用。下列为主要风险与作品中已有的缓解设计，以及本研究的结论。</div>
+  <div class="card reveal">
+    <div class="rules" id="ethRules" style="margin-top:0"></div>
+  </div>
+  <div class="card reveal">
+    <h3>研究结论</h3>
+    <div class="rules" id="conRules" style="margin-top:8px"></div>
+  </div>
+
+  <h2 id="s11">十一 · 导出：动态影片与静态分析图<em>EXPORT</em></h2>
+  <div class="sub">影片由本页的同一套绘图引擎实时渲染（约 <span id="filmDurTxt">100</span> 秒，1280×720，30fps），其中「三轨联动」一幕把<b>游戏实录</b>与分析时间轴逐段同步剪辑；浏览器内直接录制为 <b>MP4</b>（不支持时为 WebM），无需屏幕授权。静态分析图为 2400×5120 的高清长图 PNG，汇总全部图表与 9 帧实录对照。录制期间请保持本标签页处于前台。</div>
+  <div class="card reveal">
+    <div class="filmWrap"><canvas id="filmC" width="1280" height="720"></canvas></div>
+    <div class="prog"><i id="filmProg"></i></div>
+    <div class="dl">
+      <button id="btnPlay" class="ghost">▶ 预 览 影 片</button>
+      <button id="btnRec">● 录 制 并 下 载 视 频</button>
+      <button id="btnPng">⬇ 下 载 静 态 分 析 图</button>
+    </div>
+    <div class="hint" id="recHint">提示：电脑版 Chrome / Edge 可直接导出 MP4；Safari / Firefox 将导出 WebM。</div>
+    <video id="recPrev" controls playsinline></video>
+  </div>
+
+  <footer>MAD MEDICINE · 医理探案 · 剧场交互设计动态分析研究<br>本页所有图表、影片与长图均由同一套原生 Canvas 代码实时绘制，零外部依赖 · 本作品为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。</footer>
+</main>
+<script id="js-data">
+'use strict';
+const SERIF='"Songti SC","STSong","SimSun","Noto Serif SC",serif',SANS='"PingFang SC","Microsoft YaHei","Segoe UI",sans-serif',MONO='Consolas,"SFMono-Regular",monospace';
+const C={bg:'#05070d',ink:'#e9e4d6',dim:'#9a958a',gold:'#d4af6a',goldb:'#f0cf8e',teal:'#6ad4c8',cin:'#d4706a',violet:'#9a8ad4',steel:'#8ea3c8',grey:'#4f5a6c'};
+let BPM=72;
+const ss=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t);};
+const gs=(x,m,s)=>Math.exp(-((x-m)*(x-m))/(2*s*s));
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const ease=x=>{x=clamp(x);return 1-Math.pow(1-x,3);};
+function pulse(t){const ph=((t*BPM/60)%1+1)%1;return Math.exp(-(((ph-.06)/.045)**2))+.6*Math.exp(-(((ph-.3)/.05)**2));}
+function hex2(h){const n=parseInt(h.slice(1),16);return [n>>16,n>>8&255,n&255];}
+function rgba(h,a){const [r,g,b]=hex2(h);return `rgba(${r},${g},${b},${a})`;}
+function mixc(h1,h2,t,a=1){const x=hex2(h1),y=hex2(h2);return `rgba(${x.map((v,i)=>Math.round(v+(y[i]-v)*t)).join(',')},${a})`;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- 一局游戏的时间模型 (u ∈ 0–1)：按真实游戏实录 gameplay-demo.mp4 标定，u = 实录秒数 / REC.dur ---------- */
+const REC={src:'gameplay-demo.mp4',dur:161.91,
+  marks:[0,9.04,21.16,51.93,75.19,117.42,133.4,143.26,153.41,161.91],
+  intake:13.66,caps:[24.62,29.37,34.94,40.21,45.62,55.45,59.87,64.49,69.01,78.43,82.63,86.72,90.97,94.98,99.07,103.47,107.53,111.52,129.56],
+  clears:[47.92,71.21,113.43,130.58],
+  clips:[1,12.4,26,46.6,97,122.5,135.2,144.2,154],
+  frames:[3.2,14.6,28.2,48.3,104,125,138.4,146.5,156.5]};
+const RU=v=>v/REC.dur;
+const PS=REC.marks.map(RU);
+const CLEARS=REC.clears.map(RU),CLIMAX=PS[6]+.4*(PS[7]-PS[6]),PLAY_MID=(PS[8]+1)/2;
+const curve={
+  clarity:u=>clamp(.08+.64*ss(PS[2]-.01,PS[6],u)+.28*ss(PS[6],PS[6]+.03,u)),
+  sat:u=>clamp(.12+.5*ss(PS[2],PS[6]+.01,u)+.38*ss(PS[6]+.02,PS[7]+.01,u)),
+  flash:u=>Math.max(...CLEARS.map(c=>.65*gs(u,c,.006)),gs(u,CLIMAX,.009)),
+  tension:u=>{let v=.16+.74*Math.pow(ss(.02,CLIMAX,u),1.15);CLEARS.forEach(c=>{v-=.07*gs(u,c+.014,.01);});v*=1-.72*ss(CLIMAX+.01,.97,u);v+=.1*gs(u,PLAY_MID,.018);return clamp(v);},
+  flow:u=>clamp(.15+.62*ss(PS[2]-.02,PS[4]+.03,u)+.1*ss(PS[5]-.05,PS[6],u)-.28*gs(u,PS[7]+.01,.045)+.12*gs(u,PLAY_MID,.03)),
+  valence:u=>clamp(.32+.08*ss(0,PS[2],u)+CLEARS.reduce((s,c)=>s+.28*gs(u,c+.004,.012),0)+.45*gs(u,CLIMAX+.008,.018)+.3*ss(PS[7]-.03,1,u))
+};
+const PHASES=[
+ {k:'开场',en:'PROLOGUE',th:'幕启',thl:'幕启 · 序幕（Prologue）',s:0,e:.06,mech:'一句话 + 四张图标步骤卡（建档 → 捕捉 → 通关 → 奖励）',vis:'点云散逸、低饱和冷色；ECG 生命线第一次跳动',psy:'好奇被点燃：信息缺口大于认知负荷',intent:'用剧场「暗场—亮灯」的仪式感建立契约，3 秒内告诉观众：你将成为侦探。'},
+ {k:'建档',en:'CASTING',th:'入场',thl:'入场 · 角色分配（Casting）',s:.06,e:.14,mech:'30 秒基础建档（可跳过）→「档案开启」初始雷达 + 一句侧写',vis:'初始六维雷达闪现，人影仍是虚影',psy:'自我投射：从「别人的病」转向「我的身体」',intent:'观众领到自己的「角色卡」；自我参照效应让后续每条线索都与「我」相关。'},
+ {k:'望',en:'ACT I · LOOK',th:'第一幕',thl:'第一幕 · 展示（Exposition）',s:.14,e:.28,mech:'5 条视觉线索光点沿轨道巡游，点按捕捉；先选后确认归档',vis:'每归档一条，人影显影度上升、金色回归',psy:'探索欲与掌控感；「初次锁定」徽章带来首胜',intent:'教会规则的同时给出第一次胜利：低门槛、即时反馈。'},
+ {k:'闻',en:'ACT II · LISTEN',th:'第二幕',thl:'第二幕 · 上升（Rising Action）',s:.28,e:.40,mech:'4 条声音 / 气息线索；章节进度环逐格点亮',vis:'章节通关全屏闪光 = 幕间灯光',psy:'节奏建立；「再收一条」的未完成张力',intent:'短章节制造第二个小高峰，把奖励回路压缩到 30 秒以内。'},
+ {k:'问',en:'ACT III · ASK',th:'第三幕',thl:'第三幕 · 复杂化（Complication）',s:.40,e:.60,mech:'8 组问诊（女性另加经期 1 组）：多选并存 + 五档程度 + 情境交叉 + 自述补充；连击 ×3',vis:'显影雷达随证词缓动形变；实时权重条公开涨落',psy:'进入心流：挑战与技能匹配；自我觉察加深',intent:'最长的一幕，用「看得见的推理」维持专注；情绪与睡眠在此被温和地问及。'},
+ {k:'切',en:'ACT IV · PULSE',th:'第四幕',thl:'第四幕 · 具身（Embodiment）',s:.60,e:.72,mech:'把脉小游戏：寸关尺 + 轻中重按压辨脉；可自测真实心率',vis:'手腕图示、脉波光核与全局心跳同频',psy:'内感受被唤醒：身体从「被描述」变为「被感受」',intent:'把知识放回指尖；具身学习让抽象的「脉」成为可感的节律。'},
+ {k:'推理',en:'CLIMAX',th:'突转·发现',thl:'突转与发现（Peripeteia & Anagnorisis）',s:.72,e:.80,mech:'「水落石出」→ 推理引擎排序证型 → 指认主证',vis:'全屏闪光；人影完全实体化，色彩饱满',psy:'顿悟（Aha）与张力峰值后的释放',intent:'亚里士多德式的「发现」：线索拼合为答案，峰值体验锚定记忆。'},
+ {k:'报告',en:'DENOUEMENT',th:'解结',thl:'结局 · 解结（Dénouement）',s:.80,e:.92,mech:'身体侧写：六维雷达、五行轮、证型解读、心理四维、生活处方、推理路径图',vis:'呼吸式图表、暖色收束',psy:'反思与意义建构；由娱乐转向自我照护',intent:'把高潮的情绪能量导向行动：每条处方都是可执行的小目标。'},
+ {k:'小剧场',en:'EPILOGUE',th:'谢幕',thl:'尾声 · 谢幕（Epilogue）',s:.92,e:1,mech:'五幕推理小剧场 + 徽章墙 + 导出 HTML / PNG 存档',vis:'剧场字幕、幕间转场；ECG 渐缓',psy:'宣泄与叙事闭合；分享冲动（峰终定律之「终」）',intent:'用戏剧把个人数据讲成故事，让结束成为第二个高峰，并留下「未完待续」。'}
+];
+PHASES.forEach((p,i)=>{p.s=PS[i];p.e=PS[i+1];p.v0=REC.marks[i];p.v1=REC.marks[i+1];p.clip=REC.clips[i];p.frame=REC.frames[i];});
+const phaseAt=u=>{const i=PHASES.findIndex(p=>u>=p.s&&u<p.e);return i<0?(u<0?0:PHASES.length-1):i;};
+const EVENTS=[{u:.004,t:'start',l:'幕启'},{u:RU(REC.intake),t:'start',l:'初始雷达'}];
+const CH_ZH={observe:'望',listen:'闻',inquire:'问',pulse:'切'};
+REC.caps.forEach((v,i)=>EVENTS.push({u:RU(v),t:'cap',l:'线索 '+(i+1)}));
+CLEARS.forEach((c,i)=>EVENTS.push({u:c,t:'clear',l:'望闻问切'[i]+'诊全收'}));
+[[RU(REC.caps[0])+.002,'初次锁定'],[RU(REC.caps[2])+.002,'连击 ×3'],[RU(REC.caps[9])+.002,'细察入微']].forEach(([u,l])=>EVENTS.push({u,t:'badge',l}));
+EVENTS.push({u:CLEARS[3]+.006,t:'climax',l:'水落石出'},{u:CLIMAX,t:'climax',l:'证型指认'},{u:PS[7]+.004,t:'out',l:'侧写报告'},{u:PS[7]+.035,t:'out',l:'推理路径图'},{u:PS[8]+.006,t:'out',l:'五幕小剧场'},{u:.99,t:'out',l:'导出分享'});
+EVENTS.sort((a,b)=>a.u-b.u);
+const TOTAL_CAPS=REC.caps.length;
+const EVC={start:C.ink,cap:C.gold,clear:C.teal,badge:C.cin,climax:C.goldb,out:C.steel};
+const EVN={start:'开场',cap:'捕捉线索',clear:'章节通关',badge:'成就徽章',climax:'推理高潮',out:'产出与谢幕'};
+const capturedAt=u=>EVENTS.filter(e=>e.t==='cap'&&e.u<=u).length;
+
+/* ---------- 剧场概念转译 ---------- */
+const THEATRE=[
+ {n:'第四堵墙 · 间离',en:'BRECHT',c:C.gold,g:'实时权重条与推理路径图全部公开',x:'观众看见「机关怎么转」，结论不再玄学化，培养证据意识'},
+ {n:'沉浸式剧场',en:'IMMERSIVE',c:C.teal,g:'光点任意顺序捕捉、环绕镜头、章节可直跳',x:'像在剧场中自由走位：自己决定先看哪一场'},
+ {n:'幕结构与幕间',en:'ACTS',c:C.goldb,g:'望闻问切四章 + 通关全屏闪光',x:'把长流程切成可呼吸的段落，每幕都有起落'},
+ {n:'突转与发现',en:'ARISTOTLE',c:C.cin,g:'「水落石出」→ 证型指认',x:'线索拼合的顿悟时刻 = 峰值体验'},
+ {n:'审美距离',en:'BULLOUGH',c:C.violet,g:'以「侦探」身份侧写自己的身体',x:'保持安全距离谈论疲劳、失眠与情绪，降低健康焦虑'},
+ {n:'净化 · 宣泄',en:'CATHARSIS',c:C.cin,g:'五幕推理小剧场 + 整合生活处方',x:'情绪有落点，结局转化为可执行的自我照护'},
+ {n:'舞台调度',en:'MISE-EN-SCÈNE',c:C.teal,g:'双人对坐构图、三条光点轨道、镜头环绕',x:'用光与走位引导注意力，而非用文字命令'},
+ {n:'「假使」代入',en:'STANISLAVSKI',c:C.gold,g:'30 秒建档 → 初始雷达与一句侧写',x:'观众领取角色卡，从旁观者变为当事人'}
+];
+
+/* ---------- 交叉学科 ---------- */
+const FAM={med:{n:'生命医学族',c:C.cin},psy:{n:'心理行为族',c:C.violet},game:{n:'游戏交互族',c:C.gold},art:{n:'艺术剧场族',c:C.teal},com:{n:'传播数据族',c:C.steel}};
+const DISC=[
+ {id:'tcm',n:'中医学',en:'TCM',f:'med',give:'四诊合参、辨证论治、十证型与五行',where:'望闻问切四章关卡的骨架；推理引擎的证型知识'},
+ {id:'bio',n:'生命医学',en:'PHYSIOLOGY',f:'med',give:'HPA 轴、自主神经、线粒体与铁代谢等生理机制',where:'每个证型的「现代生理」维度与鉴别提示'},
+ {id:'ebm',n:'循证医学',en:'EBM',f:'med',give:'A/B/C 三级证据分级、鉴别诊断思维',where:'报告中 44 条循证交叉，标明证据强弱'},
+ {id:'hpsy',n:'健康心理学',en:'HEALTH PSY',f:'psy',give:'压力—应激、躯体化、身心医学',where:'心理四维侧写：压力负荷 / 情绪能量 / 夜间觉醒 / 躯体化'},
+ {id:'cog',n:'认知心理学',en:'COGNITION',f:'psy',give:'注意、工作记忆、认知负荷、格式塔闭合',where:'图标卡替代长文、先选后确认、由虚到实的显影'},
+ {id:'mot',n:'动机心理学',en:'MOTIVATION',f:'psy',give:'自我决定论、心流、目标梯度、可变奖励',where:'自由顺序、章节进度环、XP / 连击 / 9 枚徽章'},
+ {id:'beh',n:'行为科学',en:'BEHAVIOR',f:'psy',give:'习惯回路、小胜利、行为激活、助推',where:'生活处方拆成可执行的小目标与时间锚点'},
+ {id:'game',n:'游戏设计',en:'GAME DESIGN',f:'game',give:'MDA 框架、核心循环、成就系统、段位',where:'捕捉 → 归档 → 通关 → 奖励的核心循环'},
+ {id:'hci',n:'交互设计',en:'HCI',f:'game',give:'反馈、可供性、触感、跨端适配',where:'按压触感、抽屉式移动布局、确认并归档键'},
+ {id:'narr',n:'叙事学',en:'NARRATIVE',f:'game',give:'侦探小说结构：线索 → 推理 → 指认',where:'「医理探案」身份设定、推理路径图'},
+ {id:'thea',n:'戏剧剧场学',en:'THEATRE',f:'art',give:'幕结构、突转与发现、第四堵墙、间离、审美距离',where:'九场戏剧弧线、双人对坐舞台、五幕推理小剧场'},
+ {id:'vis',n:'数字视觉艺术',en:'GENERATIVE ART',f:'art',give:'点云、颗粒、生成式影像、色彩叙事',where:'约 1.2 万粒子双人对坐、颗粒视频遮罩、显影度'},
+ {id:'dv',n:'数据可视化',en:'DATAVIZ',f:'com',give:'雷达图、五行轮、路径图、实时权重条',where:'显影雷达、报告图表、可下载的推理路径图'},
+ {id:'sci',n:'科学传播',en:'SCICOMM',f:'com',give:'知识翻译、隐喻、受众分层、风险沟通',where:'「气如电量」式隐喻、中英双语、「不构成诊断」声明'}
+];
+const LINKS=[['tcm','bio','「证」↔ 生理机制的双语翻译'],['tcm','thea','四诊 = 四幕'],['bio','ebm','鉴别与证据分级'],['hpsy','tcm','情志致病 ↔ 躯体化'],['hpsy','bio','HPA 轴：压力的生理通路'],['mot','game','奖励回路与段位'],['cog','hci','降低认知负荷'],['narr','game','侦探核心循环'],['narr','thea','突转与发现'],['vis','thea','舞台光 = 显影度'],['vis','mot','显影即即时反馈'],['dv','tcm','五行轮 · 六维雷达'],['dv','sci','让推理过程可读'],['sci','ebm','证据分级 = 科学素养'],['beh','bio','生活处方'],['beh','mot','小胜利重建效能'],['hci','bio','自测心率 · 内感受'],['hci','vis','全局心跳节拍'],['thea','hpsy','审美距离与宣泄'],['cog','vis','格式塔闭合：由虚到实'],['sci','thea','以戏剧讲科学']];
+
+/* ---------- 机制 × 心理 ---------- */
+const PSY=[
+ {n:'好奇',en:'CURIOSITY',th:'信息缺口理论 · Loewenstein',c:C.goldb},
+ {n:'自主',en:'AUTONOMY',th:'自我决定论 · Deci & Ryan',c:C.teal},
+ {n:'胜任',en:'COMPETENCE',th:'自我效能 · Bandura',c:C.gold},
+ {n:'心流',en:'FLOW',th:'心流理论 · Csikszentmihalyi',c:C.violet},
+ {n:'未完成张力',en:'ZEIGARNIK',th:'蔡格尼克效应 · 目标梯度',c:C.cin},
+ {n:'具身感知',en:'INTEROCEPTION',th:'内感受 · 节律同步',c:C.cin},
+ {n:'自我关联',en:'SELF-REF',th:'自我参照效应',c:C.steel},
+ {n:'宣泄 · 意义',en:'CATHARSIS',th:'亚里士多德 · 峰终定律',c:C.goldb}];
+const MECH=[
+ {n:'光点捕捉',vis:'金色光点沿三条轨道巡游，锁定时光环收拢',v:[3,2,1,2,1,0,0,0],note:'移动目标制造「抓住它」的微挑战；巡游本身就是舞台走位。'},
+ {n:'自由顺序 · 可跳过',vis:'环绕镜头自由拖拽，章节徽章可直跳',v:[1,3,1,1,0,0,1,0],note:'如沉浸式剧场的自由走位，观众自己决定看哪一场。'},
+ {n:'多选 · 五档程度 · 情境',vis:'程度条由淡到浓，情境标签点亮',v:[0,2,1,1,0,2,3,0],note:'把「有没有」变成「有多少、何时」，引导玩家向内觉察身体。'},
+ {n:'章节进度环',vis:'四枚章节徽章外环逐格点亮',v:[1,0,2,1,3,0,0,0],note:'未闭合的圆环持续提醒「还差一条」。'},
+ {n:'XP · 连击 · 9 枚徽章',vis:'+XP 飞字、徽章 Toast 滑入',v:[1,0,3,2,2,0,0,1],note:'奖励密度从「结案一次」提升到「每条 + 每章 + 成就」。'},
+ {n:'显影雷达 · 实时权重',vis:'六维雷达缓动形变，权重条公开涨落',v:[2,1,1,1,2,0,3,0],note:'推理机关对玩家可见——布莱希特式间离，培养证据意识。'},
+ {n:'由虚到实 · 点云显影',vis:'粒子从散逸到聚合，色彩逐步回归',v:[2,0,1,2,2,0,1,1],note:'格式塔闭合：画面越完整，越想补完最后一块。'},
+ {n:'切诊小游戏 · 自测心率',vis:'寸关尺手腕图、脉波光核随心跳搏动',v:[2,1,2,1,0,3,2,0],note:'具身学习：知识从屏幕回到指尖与脉搏。'},
+ {n:'推理指认 · 侧写报告',vis:'全屏闪光、五行轮与雷达呼吸',v:[1,0,2,0,0,0,3,3],note:'「发现」时刻即峰值体验；报告把峰值导向自我照护。'},
+ {n:'五幕推理小剧场',vis:'剧场字幕、幕间转场、谢幕',v:[1,0,0,0,1,0,2,3],note:'把数据讲成故事，结尾成为第二个高峰，并引发分享。'},
+ {n:'全局心跳节拍',vis:'所有动效以 lub-dub 同频搏动',v:[0,0,0,2,0,3,1,1],note:'节律同步（entrainment）让界面像一个在场的活体。'}];
+
+/* ---------- 视觉通道 · 痛点 ---------- */
+const CHANNELS=[
+ {n:'显影',en:'CLARITY',c:C.teal,k:'clarity',p:'人影由虚到实 → <em>进度感与完成欲</em>：看见「世界因我而清晰」。'},
+ {n:'色彩',en:'SATURATION',c:C.gold,k:'sat',p:'冷灰 → 暖金 → <em>情绪效价</em>：色彩回归即愉悦回归。'},
+ {n:'光',en:'FLASH',c:C.goldb,k:'flash',p:'幕间闪光与光核 → <em>峰值标记</em>：为记忆打上时间戳。'},
+ {n:'节拍',en:'RHYTHM',c:C.cin,k:'beat',p:'全局 lub-dub → <em>唤醒度与具身</em>：界面与心跳同频。'},
+ {n:'形变',en:'MORPH',c:C.violet,k:'morph',p:'雷达缓动形变 → <em>因果可见</em>：每条证词都「推了一下」结果。'},
+ {n:'空间',en:'SPACE',c:C.steel,k:'orbit',p:'环绕镜头与轨道 → <em>自主与沉浸</em>：观众在舞台中走位。'}];
+const PAINS=[
+ ['问卷式问诊枯燥','任务被感知为「义务」而非「选择」','光点捕捉 + 自由顺序，把填表变成寻宝'],
+ ['长文说明读不下去','工作记忆超载','开场与手册改为图标卡；答题面板图示化'],
+ ['单击即提交、易误触','控制感缺失、后悔规避','先选中、再「确认并归档」，确认前可替换'],
+ ['流程长、中途流失','缺少近端目标','四章关卡 + 进度环 + 每章奖励卡'],
+ ['担心「被诊断出病」','健康焦虑、灾难化思维','审美距离（侦探身份）；允许「平和质」；明示不构成诊断'],
+ ['不信任结论','黑箱 → 怀疑','实时权重公开 + 推理路径图 + A/B/C 证据分级'],
+ ['知道了也不会做','意图—行为鸿沟','生活处方拆成小目标、时间锚点与具体食材'],
+ ['结果无法留存与分享','体验无「终点仪式」','五幕小剧场 + 导出 HTML / PNG 存档']];
+
+/* ---------- 科普：十证型翻译阶梯 ---------- */
+const LADDER=[['经典概念','REMEMBER · 识记',C.cin],['生活隐喻','UNDERSTAND · 理解',C.gold],['现代机制','ANALYZE · 分析',C.teal],['心理画像','RELATE · 关联',C.violet],['行动处方','APPLY · 应用',C.goldb]];
+const PATS=[
+ {n:'气虚',e:'QI DEFICIENCY',o:'脾肺',one:'气如电量：生成不足、消耗过度，身体进入低功耗模式。',w:'慢性疲劳、线粒体能量代谢效率下降、免疫偏低；需鉴别贫血、甲减、睡眠呼吸暂停。',p:'「心有余而力不足」：动机尚存但启动困难，易滑向习得性无助。',a:'用小目标、小胜利重建效能感；规律三餐、低强度有氧、固定起床时间。'},
+ {n:'血虚',e:'BLOOD DEFICIENCY',o:'心肝',one:'血是营养运输网：血量不足，末端与神明先失养。',w:'首要鉴别缺铁性贫血、维生素 B12 / 叶酸缺乏；与末梢灌注不足相关。',p:'「背景性焦虑」：易慌、易惊醒、注意力难以锚定的高警觉。',a:'血红素铁与维生素 C 同餐；23 点前入睡；正念身体扫描。'},
+ {n:'阴虚',e:'YIN DEFICIENCY',o:'肾肺',one:'阴是冷却与润滑系统：水少了，虚火就往上窜。',w:'交感偏亢、代谢率偏高、皮质醇节律紊乱；鉴别甲亢、糖尿病。',p:'内在「散热不良」：耐心阈值低、对声光敏感，与高敏感人格重叠。',a:'主动降噪降刺激；少量多次饮水；游泳、阴瑜伽；避免熬夜。'},
+ {n:'阳虚',e:'YANG DEFICIENCY',o:'肾脾',one:'阳是身体的炉膛：火力不足，全身进入「低温运行」。',w:'基础代谢偏低、体温调节偏冷；怕冷 + 乏力 + 增重务必查甲功。',p:'情绪「低功耗」：晨重暮轻、冬天更明显，与季节性情绪失调有交集。',a:'力量训练「增肌即增火」；晨间日照 10–15 分钟；温热饮食。'},
+ {n:'肝郁气滞',e:'QI STAGNATION',o:'肝胆',one:'气该流动而不流动：情绪堵住的地方，身体最先知道。',w:'HPA 轴持续激活、自主神经紊乱；与 IBS、紧张性头痛、经前综合征相关。',p:'「我应该」多过「我想要」：反刍思维与情绪压抑是核心。',a:'给情绪建立出口：表达、书写、有氧泄压；限酒、减咖啡因。'},
+ {n:'脾虚湿盛',e:'SPLEEN DEFICIENCY',o:'脾胃',one:'脾是中央厨房：火弱了，食物变成「湿气」堆积。',w:'胃肠动力不足、菌群失衡倾向、餐后血糖波动；与肠脑轴密切相关。',p:'「思伤脾」：想得多 → 做得少 → 更焦虑的循环。',a:'行为激活——先动起来再完善想法；规律进食、减少生冷。'},
+ {n:'痰湿',e:'PHLEGM-DAMPNESS',o:'脾肺',one:'湿聚成痰：身体的「代谢库存」开始积压。',w:'代谢综合征谱系：中心性肥胖、血脂异常、脂肪肝、睡眠呼吸暂停风险。',p:'动机「黏滞」：不是懒惰，而是生理性的低唤醒。',a:'先身体后意志：用固定课表、运动搭子等外部节律替代意志力。'},
+ {n:'湿热',e:'DAMP-HEAT',o:'脾胃肝胆',one:'湿与热勾结：像一间又闷又潮还开着暖气的屋子。',w:'慢性低度炎症：成人痘、脂溢性皮炎、高尿酸风险；酒精与高果糖是推手。',p:'烦躁与黏滞并存：心里有一团散不掉的闷火。',a:'清爽的环境与断舍离式整理；限酒、减少高果糖饮食。'},
+ {n:'血瘀',e:'BLOOD STASIS',o:'心肝',one:'血行不畅：身体的河流出现了淤塞段。',w:'微循环障碍、慢性疼痛、静脉曲张倾向；久坐是最常见的现代诱因。',p:'常与「卡住」有关：未处理的过往、长期紧绷的身体记忆。',a:'以身体的「通」松动心理的「结」：按摩、热敷、规律运动。'},
+ {n:'心火亢盛',e:'HEART FIRE',o:'心',one:'心神这盏灯烧得太旺：亮了别人，耗了自己。',w:'交感持续兴奋、入睡潜伏期延长、高觉醒——慢性失眠的现代模型。',p:'「躺下即开会」：停不下来的内心独白，常伴广泛性焦虑。',a:'建立「心理下班」仪式；CBT-I 为循证首选；睡前减少蓝光与咖啡因。'}];
+const SCI=[
+ {c:C.cin,n:'双语翻译',t:'同一证型同时用中医经典、现代生理、心理学三种语言讲述，<em>打通传统与现代的概念壁垒</em>。'},
+ {c:C.teal,n:'证据素养',t:'44 条循证交叉按 A/B/C 分级，玩家第一次接触「证据有强弱」的思维，<em>是对伪养生信息的免疫</em>。'},
+ {c:C.gold,n:'具身学习',t:'把脉小游戏与自测心率让知识经过手指与脉搏，<em>记忆保持远高于阅读</em>。'},
+ {c:C.violet,n:'身心去污名',t:'情绪、睡眠与躯体症状被放在同一张侧写上，<em>把「心理问题」讲成「身体的另一种语言」</em>。'},
+ {c:C.goldb,n:'安全边界',t:'允许「平和质」作为答案、每个证型附鉴别提示、全程声明不构成诊断，<em>示范负责任的健康传播</em>。'},
+ {c:C.steel,n:'过程透明',t:'权重、推理路径公开可查——科普的不只是结论，<em>更是「科学如何得出结论」</em>。'}];
+
+/* ---------- 用户群 ---------- */
+const SEG=[
+ {n:'都市高压青年',age:'25–40 岁',x:.68,y:.85,r:1,tier:'核心',c:C.goldb,need:'疲劳、失眠、情绪内耗；想「看懂自己的身体」，但不愿读长文。',why:'问诊覆盖压力 / 睡眠 / 情绪；心理四维与生活处方直接对口。',scene:'通勤碎片 · 手机端 10 分钟一局'},
+ {n:'Z 世代学生',age:'18–24 岁',x:.87,y:.57,r:.85,tier:'核心',c:C.gold,need:'对国潮与中医好奇，喜欢测试类内容与社交分享。',why:'侦探身份、徽章、段位与可导出的小剧场天然适合二次传播。',scene:'宿舍 · 社交平台分享'},
+ {n:'剧场 / 展陈观众',age:'20–45 岁',x:.8,y:.32,r:.7,tier:'拓展',c:C.teal,need:'追求新奇的感官体验与参与感。',why:'双人对坐点云、心跳节拍与九场结构可直接转化为展陈装置。',scene:'美术馆 · 剧场前厅大屏'},
+ {n:'中医养生爱好者',age:'35–60 岁',x:.28,y:.8,r:.8,tier:'次要',c:C.cin,need:'想系统了解体质，却常被碎片化养生信息误导。',why:'十证型 × 现代机制 × 证据分级，提供「可信的入门」。',scene:'家庭 · 平板 / 电脑'},
+ {n:'医学 / 心理学教育',age:'18–50 岁',x:.48,y:.64,r:.62,tier:'次要',c:C.violet,need:'需要生动的教学工具讲解身心交叉。',why:'透明的权重引擎与循证库可作课堂演示与讨论素材。',scene:'课堂 · 工作坊'},
+ {n:'设计 / 交互研究者',age:'22–45 岁',x:.6,y:.2,r:.5,tier:'拓展',c:C.steel,need:'寻找健康 × 游戏化 × 生成艺术的案例。',why:'单文件零依赖，设计演进与系统架构均可拆解。',scene:'研究 · 作品集参考'}];
+
+/* ---------- 伦理 · 结论 ---------- */
+const ETH=[
+ {c:C.cin,n:'巴纳姆效应',t:'侧写语言容易让人「觉得都说中了」。<em>缓解：</em>结论附吻合度与证据等级，权重公开可追溯。'},
+ {c:C.gold,n:'过度医学化',t:'把正常波动解读为「有证」。<em>缓解：</em>topS&lt;3 判「平和质」，系统被设计为允许「没病」。'},
+ {c:C.violet,n:'奖励轻佻化',t:'徽章与 XP 可能弱化健康话题的严肃性。<em>缓解：</em>奖励只奖励「觉察」，不奖励「症状多」。'},
+ {c:C.teal,n:'隐私与数据',t:'身体与情绪信息高度敏感。<em>缓解：</em>单文件本地运算，导出由用户自行保存。'},
+ {c:C.steel,n:'文化准确性',t:'中医概念被现代化转述时可能失真。<em>缓解：</em>经典论述与现代机制并列呈现、不互相替代。'},
+ {c:C.goldb,n:'替代就医风险',t:'用户可能以游戏结论代替就诊。<em>缓解：</em>每个证型附鉴别提示，全程声明不构成诊断。'}];
+const CON=[
+ {c:C.gold,n:'剧场是骨架',t:'九场弧线让 18 条线索不再是问卷，而是一出有起落、有高潮、有谢幕的戏。'},
+ {c:C.teal,n:'视觉是传导介质',t:'机制要抵达心理，必须先变成「看得见的变化」——显影、饱和、闪光、节拍。'},
+ {c:C.cin,n:'医学是信任底座',t:'可信的知识与透明的推理，是游戏化健康产品区别于「趣味测试」的根本。'},
+ {c:C.violet,n:'心理是设计目标',t:'以 SDT 与心流为体验指标，以峰终定律安排高潮与结尾，让「好玩」服务于「自我照护」。'}];
+</script>
+<script id="js-draw">
+'use strict';
+/* ========== 共享绘图引擎：页面 / 影片 / 长图共用 ========== */
+function T(ctx,s,x,y,o={}){
+  ctx.font=`${o.w||400} ${o.sz||14}px ${o.f||SANS}`;ctx.fillStyle=o.c||C.ink;ctx.textAlign=o.a||'left';ctx.textBaseline=o.b||'alphabetic';
+  if('letterSpacing' in ctx)ctx.letterSpacing=(o.ls||0)+'px';
+  const ga=ctx.globalAlpha;if(o.al!=null)ctx.globalAlpha=ga*o.al;
+  if(o.glow){ctx.shadowColor=o.glow;ctx.shadowBlur=o.gb||10;}
+  ctx.fillText(s,x,y);ctx.shadowBlur=0;ctx.globalAlpha=ga;if('letterSpacing' in ctx)ctx.letterSpacing='0px';
+}
+function wrap(ctx,s,x,y,maxW,lh,o={},maxL=9){
+  ctx.font=`${o.w||400} ${o.sz||14}px ${o.f||SANS}`;let line='',n=0;
+  const out=[];for(const ch of s){const t=line+ch;if(ctx.measureText(t).width>maxW&&line){out.push(line);line=ch;}else line=t;}
+  if(line)out.push(line);
+  out.slice(0,maxL).forEach((l,i)=>T(ctx,i===maxL-1&&out.length>maxL?l.slice(0,-1)+'…':l,x,y+i*lh,o));n=Math.min(out.length,maxL);return n;
+}
+function dot(ctx,x,y,r,c,glow=10){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=glow;ctx.fill();ctx.shadowBlur=0;}
+function diamond(ctx,x,y,r){ctx.beginPath();ctx.moveTo(x,y-r);ctx.lineTo(x+r,y);ctx.lineTo(x,y+r);ctx.lineTo(x-r,y);ctx.closePath();}
+function star(ctx,x,y,r){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(x+rr*Math.cos(a),y+rr*Math.sin(a));}ctx.closePath();}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function seg(ctx,x1,y1,x2,y2,c,w=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=c;ctx.lineWidth=w;ctx.stroke();}
+function ecg(ctx,x,y,w,h,t,c,a=1){
+  const P=[[0,0],[.25,0],[.275,-.22],[.3,.45],[.33,-1],[.36,.85],[.385,-.1],[.47,0],[.5,-.15],[.53,.2],[.55,0],[1,0]];
+  ctx.save();ctx.globalAlpha*=.18*a;ctx.beginPath();P.forEach(([px,py],i)=>{i?ctx.lineTo(x+px*w,y+py*h/2):ctx.moveTo(x+px*w,y+py*h/2);});ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();ctx.restore();
+  const ph=((t*BPM/60)%1+1)%1,head=ph*1.15,len=.16;
+  ctx.save();ctx.globalAlpha*=a;ctx.beginPath();let first=true;
+  for(let i=0;i<=60;i++){const u=head-len+len*i/60;if(u<0||u>1)continue;let k=0;while(k<P.length-2&&P[k+1][0]<u)k++;const [x1,y1]=P[k],[x2,y2]=P[k+1];const yy=y1+(y2-y1)*((u-x1)/(x2-x1||1));
+    first?(ctx.moveTo(x+u*w,y+yy*h/2),first=false):ctx.lineTo(x+u*w,y+yy*h/2);}
+  ctx.strokeStyle=c;ctx.lineWidth=2;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.stroke();ctx.restore();
+}
+function fit(rw,rh,b){const s=Math.min(b.w/rw,b.h/rh);return {x:b.x+(b.w-rw*s)/2,y:b.y+(b.h-rh*s)/2,s};}
+function drawIn(ctx,fn,ref,box,o){const f=fit(ref[0],ref[1],box);ctx.save();ctx.translate(f.x,f.y);ctx.scale(f.s,f.s);fn(ctx,o);ctx.restore();return f;}
+
+/* ---------- A · 戏剧弧线 (1000×440) ---------- */
+const ARC_REF=[1000,440];
+function drawArc(ctx,o={}){
+  const p=o.p??1,hi=o.hi??-1,t=o.t||0,X0=46,X1=982,Y0=104,Y1=328,X=u=>X0+(X1-X0)*u,Y=v=>Y1-(Y1-Y0)*v;
+  PHASES.forEach((ph,i)=>{const a=X(ph.s),b=X(ph.e),on=i===hi;
+    ctx.fillStyle=on?rgba(C.gold,.12):(i%2?'rgba(233,228,214,.025)':'rgba(0,0,0,0)');ctx.fillRect(a,Y0-16,b-a,Y1-Y0+26);
+    seg(ctx,a,Y0-16,a,Y1+10,'rgba(233,228,214,.08)');
+    T(ctx,ph.th,(a+b)/2,58,{a:'center',f:SERIF,sz:Math.min(13.5,(b-a)/(ph.th.length*1.08)),c:on?C.goldb:C.gold,w:600});
+    T(ctx,ph.en.replace('ACT ','').replace(' · ','·'),(a+b)/2,78,{a:'center',f:MONO,sz:Math.min(8.5,(b-a)/(ph.en.length*.62)),c:C.dim});
+    T(ctx,ph.k,(a+b)/2,Y1+36,{a:'center',f:SERIF,sz:16,w:600,c:on?C.goldb:C.ink});
+  });
+  seg(ctx,X0,Y1,X1,Y1,'rgba(233,228,214,.2)');
+  T(ctx,'高',X0-14,Y0+4,{a:'center',sz:10,c:C.dim});T(ctx,'低',X0-14,Y1,{a:'center',sz:10,c:C.dim});
+  T(ctx,'剧 场',12,58,{sz:10,c:C.dim,f:SERIF});T(ctx,'游 戏',12,Y1+36,{sz:10,c:C.dim,f:SERIF});
+  CLEARS.forEach(c=>{if(c>p)return;ctx.save();ctx.globalAlpha=.5+.5*curve.flash(c);seg(ctx,X(c),Y0-10,X(c),Y1,rgba(C.goldb,.35),1);ctx.restore();diamond(ctx,X(c),Y1,4);ctx.fillStyle=C.teal;ctx.fill();});
+  T(ctx,'◆ 幕间闪光',X(CLEARS[0])+6,Y1-6,{sz:9,c:C.teal,al:p>CLEARS[0]?1:0});
+  // 张力面积
+  const N=320;ctx.beginPath();ctx.moveTo(X(0),Y1);for(let i=0;i<=N;i++){const u=i/N*p;ctx.lineTo(X(u),Y(curve.tension(u)));}ctx.lineTo(X(p),Y1);ctx.closePath();
+  const g=ctx.createLinearGradient(0,Y0,0,Y1);g.addColorStop(0,rgba(C.gold,.22));g.addColorStop(1,rgba(C.gold,0));ctx.fillStyle=g;ctx.fill();
+  [['valence',C.cin,1.6,[6,5]],['clarity',C.teal,2,[]],['tension',C.gold,3,[]]].forEach(([k,col,lw,dash])=>{
+    ctx.beginPath();for(let i=0;i<=N;i++){const u=i/N*p,v=curve[k](u);i?ctx.lineTo(X(u),Y(v)):ctx.moveTo(X(u),Y(v));}
+    ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.setLineDash(dash);ctx.shadowColor=col;ctx.shadowBlur=8;ctx.stroke();ctx.setLineDash([]);ctx.shadowBlur=0;
+    dot(ctx,X(p),Y(curve[k](p)),2.5+2*pulse(t),col,14);});
+  if(p>CLIMAX){const x=X(CLIMAX),y=Y(curve.tension(CLIMAX));ctx.save();ctx.globalAlpha=ease((p-CLIMAX)/.08);
+    ctx.beginPath();ctx.arc(x,y,10+6*pulse(t),0,Math.PI*2);ctx.strokeStyle=C.goldb;ctx.lineWidth=1;ctx.stroke();
+    T(ctx,'峰值 · 顿悟',x-16,y-20,{a:'right',f:SERIF,sz:13,c:C.goldb,glow:C.gold});ctx.restore();}
+  [['戏剧张力',C.gold],['视觉显影',C.teal],['情绪效价',C.cin]].forEach(([n,c],i)=>{const x=X0+i*120;seg(ctx,x,414,x+22,414,c,i===2?1.6:2.6);T(ctx,n,x+30,418,{sz:11,c:C.dim});});
+  T(ctx,'TENSION · CLARITY · VALENCE  /  SESSION →',X1,418,{a:'right',f:MONO,sz:9,c:C.dim});
+}
+
+/* ---------- B · 学科星图 (640×640) ---------- */
+const CON_REF=[640,640],CON_POS=(()=>{const N=DISC.length,m={};DISC.forEach((d,i)=>{const a=-Math.PI/2+(i+.5)/N*Math.PI*2;m[d.id]={x:320+200*Math.cos(a),y:320+200*Math.sin(a),a,i};});return m;})();
+function qpt(a,b,c,t){const m=1-t;return {x:m*m*a.x+2*m*t*b.x+t*t*c.x,y:m*m*a.y+2*m*t*b.y+t*t*c.y};}
+function drawConstellation(ctx,o={}){
+  const p=o.p??1,hi=o.hi??-1,t=o.t||0,cx=320,cy=320,hid=hi>=0?DISC[hi].id:null;
+  // 学科族弧
+  const N=DISC.length;let start=0;
+  Object.keys(FAM).forEach(fk=>{const n=DISC.filter(d=>d.f===fk).length;const a0=-Math.PI/2+start/N*Math.PI*2+.03,a1=-Math.PI/2+(start+n)/N*Math.PI*2-.03;
+    ctx.beginPath();ctx.arc(cx,cy,176,a0,a1);ctx.strokeStyle=rgba(FAM[fk].c,.5*ease(p*2));ctx.lineWidth=3;ctx.stroke();
+    const am=(a0+a1)/2;T(ctx,FAM[fk].n,cx+150*Math.cos(am),cy+150*Math.sin(am)+4,{a:'center',sz:9.5,c:FAM[fk].c,al:.75*ease(p*2)});start+=n;});
+  // 连线
+  const lp=clamp((p-.35)/.65);
+  const hl=hid?LINKS.filter(([a,b])=>a===hid||b===hid):[];
+  LINKS.forEach(([a,b,l],j)=>{if(j/LINKS.length>lp)return;const A=CON_POS[a],B=CON_POS[b],M={x:(A.x+B.x)/2,y:(A.y+B.y)/2},Q={x:M.x+(cx-M.x)*.55,y:M.y+(cy-M.y)*.55};
+    const on=hid&&(a===hid||b===hid),fa=FAM[DISC[A.i].f].c,fb=FAM[DISC[B.i].f].c;
+    const g=ctx.createLinearGradient(A.x,A.y,B.x,B.y);g.addColorStop(0,rgba(fa,on?.95:hid?.08:.38));g.addColorStop(1,rgba(fb,on?.95:hid?.08:.38));
+    ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.quadraticCurveTo(Q.x,Q.y,B.x,B.y);ctx.strokeStyle=g;ctx.lineWidth=on?2:1.1;ctx.stroke();
+    const k=((t*.22+j*.137)%1);const P=qpt(A,Q,B,k);dot(ctx,P.x,P.y,on?2.6:1.6,on?C.goldb:rgba(C.ink,hid?.25:.7),on?10:4);
+    if(on){const n=hl.length,q=hl.findIndex(x=>x[2]===l),near=a===hid?1:0,tt=n>1?.3+.4*q/(n-1):.5,L=qpt(A,Q,B,near?1-tt*.9:tt*.9+.05);ctx.font=`11px ${SANS}`;const w=ctx.measureText(l).width+12;ctx.fillStyle='rgba(5,7,13,.9)';rrect(ctx,L.x-w/2,L.y-10,w,19,9);ctx.fill();ctx.strokeStyle=rgba(C.gold,.5);ctx.lineWidth=1;ctx.stroke();T(ctx,l,L.x,L.y+4,{a:'center',sz:11,c:C.goldb});}});
+  // 核心
+  const pb=pulse(t),r=40*(1+.05*pb);
+  const rg=ctx.createRadialGradient(cx,cy,0,cx,cy,r*2.2);rg.addColorStop(0,rgba(C.goldb,.35));rg.addColorStop(1,rgba(C.goldb,0));ctx.fillStyle=rg;ctx.beginPath();ctx.arc(cx,cy,r*2.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle='#0a0f1c';ctx.fill();ctx.strokeStyle=C.goldb;ctx.lineWidth=1.2;ctx.stroke();
+  const ro=((t*BPM/60)%1);ctx.beginPath();ctx.arc(cx,cy,r*(1+ro*.6),0,Math.PI*2);ctx.strokeStyle=rgba(C.goldb,.5*(1-ro));ctx.stroke();
+  T(ctx,'医理探案',cx,cy+2,{a:'center',f:SERIF,sz:16,w:600,c:C.goldb,ls:2});T(ctx,'MAD MEDICINE',cx,cy+18,{a:'center',f:MONO,sz:7.5,c:C.dim});
+  // 节点
+  DISC.forEach((d,i)=>{const P=CON_POS[d.id],np=clamp(p*1.6*N/N-i/N*.9);if(np<=0)return;const col=FAM[d.f].c,on=i===hi,dim=hid&&!on&&!LINKS.some(([a,b])=>(a===hid&&b===d.id)||(b===hid&&a===d.id));
+    ctx.save();ctx.globalAlpha=ease(np*3)*(dim?.35:1);
+    dot(ctx,P.x,P.y,(on?8:5.5)*(1+.15*pulse(t-i*.04)),col,on?22:12);
+    ctx.beginPath();ctx.arc(P.x,P.y,on?13:9,0,Math.PI*2);ctx.strokeStyle=rgba(col,.6);ctx.lineWidth=1;ctx.stroke();
+    const lx=320+238*Math.cos(P.a),ly=320+238*Math.sin(P.a),al=Math.cos(P.a)>.25?'left':Math.cos(P.a)<-.25?'right':'center';
+    T(ctx,d.n,lx,ly+2,{a:al,f:SERIF,sz:on?16:14,w:600,c:on?C.goldb:col});T(ctx,d.en,lx,ly+17,{a:al,f:MONO,sz:8,c:C.dim});ctx.restore();});
+}
+
+/* ---------- C · 三轨联动 (1000×460) ---------- */
+const LANE_REF=[1000,460];
+function drawLanes(ctx,o={}){
+  const u=o.u??0,t=o.t||0,X0=128,X1=986,X=v=>X0+(X1-X0)*v;
+  const L=[{y:64,h:96,n:'游戏机制',en:'MECHANIC',c:C.gold},{y:180,h:120,n:'视觉艺术',en:'VISUAL',c:C.teal},{y:320,h:120,n:'心理体感',en:'PSYCHE',c:C.cin}];
+  PHASES.forEach((ph,i)=>{const a=X(ph.s),b=X(ph.e),on=u>=ph.s&&u<ph.e;ctx.fillStyle=on?rgba(C.gold,.14):'rgba(233,228,214,.03)';rrect(ctx,a+1,22,b-a-2,26,5);ctx.fill();
+    T(ctx,ph.k,(a+b)/2,40,{a:'center',f:SERIF,sz:12,c:on?C.goldb:C.dim,w:on?600:400});
+    ctx.fillStyle=on?rgba(C.gold,.05):'rgba(0,0,0,0)';ctx.fillRect(a,56,b-a,392);});
+  L.forEach(l=>{ctx.fillStyle='rgba(233,228,214,.025)';rrect(ctx,X0-4,l.y,X1-X0+8,l.h,8);ctx.fill();
+    seg(ctx,10,l.y,10,l.y+l.h,l.c,2);T(ctx,l.n,22,l.y+24,{f:SERIF,sz:15,w:600,c:l.c,ls:1});T(ctx,l.en,22,l.y+40,{f:MONO,sz:8.5,c:C.dim});});
+  T(ctx,'● 捕捉  ◆ 通关  ★ 徽章  ■ 产出',22,L[0].y+62,{sz:8.5,c:C.dim});T(ctx,'▒ 显影  ─ 饱和',22,L[1].y+62,{sz:8.5,c:C.dim});T(ctx,'│ 闪光',22,L[1].y+78,{sz:8.5,c:C.dim});
+  T(ctx,'─ 张力  ─ 心流',22,L[2].y+62,{sz:8.5,c:C.dim});T(ctx,'┄ 愉悦',22,L[2].y+78,{sz:8.5,c:C.dim});
+  // 机制事件
+  const by=L[0].y+50;seg(ctx,X0,by,X1,by,'rgba(233,228,214,.12)');let lab=0,outN=0,clN=0;
+  EVENTS.forEach(e=>{const x=X(e.u),past=e.u<=u,c=EVC[e.t];ctx.save();ctx.globalAlpha=past?1:.22;
+    if(e.t==='cap'){dot(ctx,x,by,3,c,past?8:0);}
+    else if(e.t==='clear'){diamond(ctx,x,by,7);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=past?12:0;ctx.fill();ctx.shadowBlur=0;}
+    else if(e.t==='badge'){star(ctx,x,by-24,7);ctx.fillStyle=c;ctx.fill();seg(ctx,x,by-17,x,by,rgba(c,.5));}
+    else if(e.t==='climax'){diamond(ctx,x,by,10);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=past?20:0;ctx.fill();ctx.shadowBlur=0;}
+    else if(e.t==='out'){ctx.fillStyle=c;ctx.fillRect(x-4,by+18,8,8);seg(ctx,x,by,x,by+18,rgba(c,.5));}
+    else {ctx.beginPath();ctx.arc(x,by,5,0,Math.PI*2);ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();}
+    if(e.t!=='cap'){const ty=e.t==='badge'?by-36:e.t==='out'?by+38+(outN++%2)*11:e.t==='climax'?(clN++%2?by+24:by-16):(lab++%2?by+24:by-14);T(ctx,e.l,x,ty,{a:'center',sz:e.t==='out'?8.5:9.5,c:past?c:C.dim});}
+    ctx.restore();});
+  // 视觉轨
+  const vy=L[1].y+L[1].h-8,vh=L[1].h-24,V=v=>vy-vh*v,N=300;
+  ctx.beginPath();ctx.moveTo(X(0),vy);for(let i=0;i<=N;i++){const k=i/N;ctx.lineTo(X(k),V(curve.clarity(k)));}ctx.lineTo(X(1),vy);ctx.closePath();
+  const g=ctx.createLinearGradient(X0,0,X1,0);g.addColorStop(0,rgba(C.teal,.05));g.addColorStop(clamp(u),rgba(C.teal,.32));g.addColorStop(Math.min(1,u+.001),rgba(C.teal,.06));g.addColorStop(1,rgba(C.teal,.04));ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();for(let i=0;i<=N;i++){const k=i/N;i?ctx.lineTo(X(k),V(curve.sat(k))):ctx.moveTo(X(k),V(curve.sat(k)));}ctx.strokeStyle=rgba(C.gold,.75);ctx.lineWidth=1.6;ctx.stroke();
+  for(let i=0;i<=N;i++){const k=i/N,f=curve.flash(k);if(f>.08)seg(ctx,X(k),vy,X(k),vy-vh*f,rgba('#ffffff',f*.35*(k<=u?1:.4)),1.2);}
+  // 心理轨
+  const py=L[2].y+L[2].h-8,phh=L[2].h-24,Pp=v=>py-phh*v;
+  [['tension',C.gold,2.4,[]],['flow',C.violet,1.8,[]],['valence',C.cin,1.6,[5,4]]].forEach(([k,col,lw,d])=>{
+    ctx.beginPath();for(let i=0;i<=N;i++){const q=i/N;i?ctx.lineTo(X(q),Pp(curve[k](q))):ctx.moveTo(X(q),Pp(curve[k](q)));}
+    ctx.strokeStyle=rgba(col,.35);ctx.lineWidth=lw;ctx.setLineDash(d);ctx.stroke();
+    ctx.beginPath();for(let i=0;i<=N*u;i++){const q=i/N;i?ctx.lineTo(X(q),Pp(curve[k](q))):ctx.moveTo(X(q),Pp(curve[k](q)));}
+    ctx.strokeStyle=col;ctx.shadowColor=col;ctx.shadowBlur=6;ctx.stroke();ctx.shadowBlur=0;ctx.setLineDash([]);});
+  // 因果涟漪
+  EVENTS.forEach(e=>{const age=u-e.u;if(age<0||age>.045||e.t==='start')return;const a=1-age/.045,x=X(e.u),x2=X(Math.min(1,e.u+.012)),c=EVC[e.t];
+    ctx.save();ctx.globalAlpha=a;ctx.setLineDash([3,4]);ctx.lineDashOffset=-t*30;
+    ctx.beginPath();ctx.moveTo(x,by+8);ctx.bezierCurveTo(x,by+60,x2,V(curve.clarity(e.u))-40,x2,V(curve.clarity(e.u)));ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x2,V(curve.clarity(e.u)));ctx.bezierCurveTo(x2,vy+30,x2+8,Pp(curve.valence(e.u))-40,x2+8,Pp(curve.valence(e.u)));ctx.stroke();ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(x,by,8+18*(1-a),0,Math.PI*2);ctx.strokeStyle=c;ctx.stroke();ctx.restore();});
+  // 播放头
+  const xh=X(u);ctx.save();ctx.shadowColor=C.goldb;ctx.shadowBlur=10;seg(ctx,xh,52,xh,446,rgba(C.goldb,.8),1.2);ctx.restore();
+  dot(ctx,xh,V(curve.clarity(u)),3.5,C.teal,12);dot(ctx,xh,V(curve.sat(u)),3,C.gold,10);
+  dot(ctx,xh,Pp(curve.tension(u)),3.5+1.5*pulse(t),C.gold,12);dot(ctx,xh,Pp(curve.flow(u)),3,C.violet,10);dot(ctx,xh,Pp(curve.valence(u)),3,C.cin,10);
+  T(ctx,Math.round(u*100)+'%',xh,454,{a:'center',f:MONO,sz:9,c:C.goldb});
+}
+
+/* ---------- D · 舞台点云 (640×400) ---------- */
+const STAGE_REF=[640,400];
+const STAGE_PTS=(()=>{const R=mulberry32(7),pts=[];
+  const fig=[['c',190,118,26],['s',196,146,199,162,8],['s',201,168,186,255,30],['s',206,176,246,222,10],['s',246,222,300,230,9],['s',190,262,262,268,18],['s',263,270,268,344,12],['s',268,346,292,350,6]];
+  const chair=[['s',148,284,226,284,3],['s',148,284,138,172,3],['s',154,286,154,352,2.5],['s',222,286,224,352,2.5]];
+  const table=[['s',284,233,356,233,4],['s',298,237,298,352,2.5],['s',342,237,342,352,2.5]];
+  function add(sh,k,mir){const m=x=>mir?640-x:x;
+    if(sh[0]==='c'){const [,x,y,r]=sh,n=Math.round(Math.PI*r*r*.13);for(let i=0;i<n;i++){const a=R()*Math.PI*2,d=r*Math.sqrt(R());push(m(x+d*Math.cos(a)),y+d*Math.sin(a),k);}}
+    else{const [,x1,y1,x2,y2,r]=sh,len=Math.hypot(x2-x1,y2-y1),n=Math.round(r<5?len*.55:len*r*.1);
+      for(let i=0;i<n;i++){const q=R(),px=x1+(x2-x1)*q,py=y1+(y2-y1)*q,a=R()*Math.PI*2,d=r*Math.sqrt(R());push(m(px+d*Math.cos(a)),py+d*Math.sin(a),k);}}}
+  function push(x,y,k){const a=R()*Math.PI*2,d=60+R()*240;pts.push({x,y,k,ox:Math.cos(a)*d,oy:Math.sin(a)*d*.7,ph:R()*6.28,s:R()*.9});}
+  fig.forEach(s=>add(s,0,false));fig.forEach(s=>add(s,1,true));chair.forEach(s=>{add(s,2,false);add(s,2,true);});table.forEach(s=>add(s,3,false));
+  return pts;})();
+function drawStage(ctx,o={}){
+  const u=o.u??0,t=o.t||0,cl=curve.clarity(u),sat=curve.sat(u),fl=curve.flash(u),pb=pulse(t),sc=Math.pow(1-cl,1.35);
+  const sp=ctx.createRadialGradient(320,90,10,320,250,330);sp.addColorStop(0,rgba(C.goldb,.05+.1*cl));sp.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=sp;ctx.fillRect(0,0,640,400);
+  ctx.beginPath();ctx.ellipse(320,356,260,22,0,0,Math.PI*2);ctx.fillStyle=rgba(C.gold,.03+.05*cl);ctx.fill();
+  const KC=[mixc(C.grey,C.gold,sat,.25+.65*cl),mixc(C.grey,C.teal,sat,.25+.65*cl),mixc(C.grey,C.steel,sat*.6,.15+.35*cl),mixc(C.grey,C.ink,sat*.5,.2+.4*cl)];
+  for(let k=0;k<4;k++){ctx.fillStyle=KC[k];
+    for(const q of STAGE_PTS){if(q.k!==k)continue;const j=.7+sc*7,x=q.x+q.ox*sc+Math.sin(t*.9+q.ph)*j,y=q.y+q.oy*sc+Math.cos(t*.7+q.ph*1.3)*j,z=(1+q.s)*(1+.4*pb*cl);ctx.fillRect(x-z/2,y-z/2,z,z);}}
+  const rem=TOTAL_CAPS-capturedAt(u);ctx.beginPath();ctx.ellipse(320,250,290,74,0,0,Math.PI*2);ctx.strokeStyle=rgba(C.gold,.08);ctx.lineWidth=1;ctx.stroke();
+  for(let i=0;i<rem;i++){const a=t*.35+i/TOTAL_CAPS*Math.PI*2;dot(ctx,320+290*Math.cos(a),250+74*Math.sin(a),2.6+1.2*pulse(t+i*.07),C.goldb,14);}
+  if(fl>.02){const f=ctx.createRadialGradient(320,220,0,320,220,360);f.addColorStop(0,`rgba(255,246,220,${fl*.55})`);f.addColorStop(1,'rgba(255,246,220,0)');ctx.fillStyle=f;ctx.fillRect(0,0,640,400);}
+  const ph=PHASES[phaseAt(u)];
+  T(ctx,ph.thl.split('（')[0],20,30,{f:SERIF,sz:15,w:600,c:C.goldb,ls:2});T(ctx,ph.en,20,47,{f:MONO,sz:9,c:C.dim});
+  T(ctx,`显影 ${Math.round(cl*100)}%  ·  饱和 ${Math.round(sat*100)}%  ·  待捕捉 ${rem}`,620,30,{a:'right',f:MONO,sz:10,c:C.teal});
+  ecg(ctx,20,382,180,14,t,C.teal,.9);
+}
+
+/* ---------- E · 机制×心理矩阵 (1000×600) ---------- */
+const MAT_REF=[1000,600];
+function drawMatrix(ctx,o={}){
+  const p=o.p??1,hr=o.hr??-1,hc=o.hc??-1,t=o.t||0,LW=214,TOP=84,cw=(1000-LW-8)/PSY.length,rh=(600-TOP-6)/MECH.length;
+  PSY.forEach((ps,c)=>{const x=LW+c*cw+cw/2,on=c===hc;T(ctx,ps.n,x,36,{a:'center',f:SERIF,sz:14,w:600,c:on?C.goldb:ps.c});T(ctx,ps.en,x,54,{a:'center',f:MONO,sz:8,c:C.dim});
+    ctx.fillStyle=rgba(ps.c,on?.8:.35);ctx.fillRect(x-14,64,28,2);});
+  MECH.forEach((m,r)=>{const y=TOP+r*rh,on=r===hr;if(on){ctx.fillStyle=rgba(C.gold,.07);rrect(ctx,4,y+2,992,rh-4,8);ctx.fill();}
+    T(ctx,m.n,LW-14,y+rh/2+5,{a:'right',f:SERIF,sz:13.5,w:600,c:on?C.goldb:C.ink});
+    m.v.forEach((v,c)=>{const k=(r/MECH.length+c/PSY.length)/2;const a=ease((p-k*.8)/.25);if(a<=0)return;
+      const x=LW+c*cw+4,yy=y+3,w=cw-8,h=rh-6,col=PSY[c].c,sel=r===hr&&c===hc;
+      ctx.save();ctx.globalAlpha=a*((hr>=0||hc>=0)&&r!==hr&&c!==hc?.45:1);
+      rrect(ctx,x,yy,w,h,7);ctx.fillStyle=rgba(col,v?.07+.11*v+(v===3?.06*pulse(t-r*.05):0):.02);ctx.fill();
+      if(v===3||sel){ctx.strokeStyle=rgba(sel?C.goldb:col,sel?1:.55);ctx.lineWidth=sel?2:1;ctx.stroke();}
+      for(let i=0;i<v;i++)dot(ctx,x+w/2+(i-(v-1)/2)*12,yy+h/2,3.2,col,v===3?10:4);
+      if(!v)T(ctx,'·',x+w/2,yy+h/2+4,{a:'center',c:C.dim,sz:12});ctx.restore();});});
+  T(ctx,'强度  ● 弱  ●● 中  ●●● 强',14,40,{sz:10,c:C.dim});T(ctx,'机制 ↓  /  心理 →',14,58,{f:MONO,sz:9,c:C.dim});
+}
+
+/* ---------- F · 科普阶梯 (1000×460) ---------- */
+const LAD_REF=[1000,460];
+function drawLadder(ctx,o={}){
+  const p=o.p??1,k=o.k||0,t=o.t||0,P=PATS[k],txt=[`${P.n}（${P.o}）`,P.one,P.w,P.p,P.a];
+  T(ctx,P.n,36,64,{f:SERIF,sz:40,w:600,c:C.goldb,ls:6,glow:C.gold,gb:16});T(ctx,P.e+'  ·  '+P.o,40,90,{f:MONO,sz:10,c:C.dim,ls:2});
+  T(ctx,'知识翻译阶梯 · 布鲁姆认知层级 ↗',40,116,{sz:11,c:C.teal});
+  for(let i=0;i<5;i++){const a=ease((p-i*.17)/.2);if(a<=0)continue;const [n,bl,col]=LADDER[i],x=36+i*132,y=372-i*80,w=420,h=74;
+    ctx.save();ctx.globalAlpha=a;ctx.translate(0,(1-a)*16);
+    if(i){ctx.beginPath();ctx.moveTo(x-132+40,y+80);ctx.quadraticCurveTo(x-30,y+76,x+20,y+h);ctx.strokeStyle=rgba(col,.5);ctx.setLineDash([3,4]);ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);}
+    rrect(ctx,x,y,w,h,10);ctx.fillStyle='rgba(8,12,22,.92)';ctx.fill();ctx.fillStyle=rgba(col,.08);ctx.fill();ctx.strokeStyle=rgba(col,.6);ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle=col;ctx.fillRect(x,y+10,3,h-20);
+    T(ctx,'①②③④⑤'[i]+' '+n,x+14,y+22,{f:SERIF,sz:13.5,w:600,c:col,ls:1});T(ctx,bl,x+w-12,y+21,{a:'right',f:MONO,sz:8.5,c:C.dim});
+    wrap(ctx,txt[i],x+14,y+44,w-26,18,{sz:12.2,c:C.ink},2);ctx.restore();}
+  dot(ctx,36+4*132+420,52,3+2*pulse(t),C.goldb,14);
+}
+
+/* ---------- G · 用户群气泡 (760×520) ---------- */
+const BUB_REF=[760,520];
+function drawBubbles(ctx,o={}){
+  const p=o.p??1,hi=o.hi??-1,t=o.t||0,X0=74,X1=736,Y0=28,Y1=452,X=v=>X0+(X1-X0)*v,Y=v=>Y1-(Y1-Y0)*v;
+  ctx.fillStyle=rgba(C.gold,.05);ctx.fillRect(X(.5),Y0,X1-X(.5),Y(.5)-Y0);
+  T(ctx,'核心区 · 既想懂身体，也愿意玩',X1-8,Y0+18,{a:'right',f:SERIF,sz:12,c:C.gold,al:.8});
+  seg(ctx,X0,Y1,X1,Y1,'rgba(233,228,214,.3)');seg(ctx,X0,Y0,X0,Y1,'rgba(233,228,214,.3)');
+  ctx.setLineDash([3,5]);seg(ctx,X(.5),Y0,X(.5),Y1,'rgba(233,228,214,.12)');seg(ctx,X0,Y(.5),X1,Y(.5),'rgba(233,228,214,.12)');ctx.setLineDash([]);
+  T(ctx,'游戏 / 艺术互动偏好 →',X1,Y1+30,{a:'right',f:SERIF,sz:12,c:C.dim});
+  ctx.save();ctx.translate(X0-40,Y0);ctx.rotate(Math.PI/2);T(ctx,'健康知识需求 →',0,0,{f:SERIF,sz:12,c:C.dim});ctx.restore();
+  T(ctx,'低',X0,Y1+18,{a:'center',sz:10,c:C.dim});T(ctx,'高',X1,Y1+18,{a:'center',sz:10,c:C.dim});
+  SEG.forEach((s,i)=>{const a=ease((p-i*.12)/.3);if(a<=0)return;const on=i===hi,x=X(s.x),y=Y(s.y),r=(26+40*s.r)*(1+.05*pulse(t-i*.1))*a;
+    ctx.save();ctx.globalAlpha=hi>=0&&!on?.45:1;
+    const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,rgba(s.c,on?.5:.32));g.addColorStop(1,rgba(s.c,.05));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=rgba(s.c,on?1:.7);ctx.lineWidth=on?2:1;if(s.tier==='核心'){ctx.setLineDash([5,4]);ctx.lineDashOffset=-t*12;}ctx.stroke();ctx.setLineDash([]);
+    T(ctx,s.n,x,y+1,{a:'center',f:SERIF,sz:on?14:12.5,w:600,c:on?C.goldb:C.ink});T(ctx,s.tier+' · '+s.age,x,y+17,{a:'center',f:MONO,sz:8.5,c:s.c});ctx.restore();});
+}
+</script>
+<script id="js-page">
+'use strict';
+const $=s=>document.querySelector(s);
+/* ---------- 心跳 ---------- */
+$('#bpm').addEventListener('input',e=>{BPM=+e.target.value;document.documentElement.style.setProperty('--bpm',BPM);$('#bpmV').textContent=BPM+' bpm';});
+/* ---------- reveal & counters ---------- */
+const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+document.querySelectorAll('[data-count]').forEach(el=>{const n=+el.dataset.count,small=el.querySelector('small').outerHTML,t0=performance.now();
+  (function tick(now){const k=ease((now-t0)/1600);el.innerHTML=Math.round(n*k)+' '+small;if(k<1)requestAnimationFrame(tick);})(t0);});
+
+/* ---------- 视图注册：仅绘制可见画布 ---------- */
+const VIEWS=[];
+function view(id,ref,draw,st={}){const c=document.getElementById(id),v={c,ctx:c.getContext('2d'),ref,draw,st,vis:false,t0:null};
+  new IntersectionObserver(es=>es.forEach(en=>{v.vis=en.isIntersecting;if(v.vis&&v.t0==null)v.t0=performance.now();}),{threshold:.05}).observe(c);
+  c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();v.mx=(e.clientX-r.left)/r.width*ref[0];v.my=(e.clientY-r.top)/r.height*ref[1];v.st.hover&&v.st.hover(v.mx,v.my);});
+  c.addEventListener('mouseleave',()=>{v.st.leave&&v.st.leave();});
+  c.addEventListener('click',()=>{v.st.click&&v.st.click(v.mx,v.my);});
+  VIEWS.push(v);return v;}
+function since(v,now){return v.t0==null?0:(now-v.t0)/1000;}
+
+/* 二 · 戏剧弧线 */
+const arcSt={hi:-1,lock:-1};
+const clipV=$('#phaseClip');let clipRange=[0,5];
+function fmtT(s){s=Math.max(0,s);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
+clipV.addEventListener('timeupdate',()=>{if(clipV.currentTime>=clipRange[1]||clipV.currentTime<clipRange[0]-.5)clipV.currentTime=clipRange[0];$('#clipT').textContent=fmtT(clipV.currentTime)+' / '+fmtT(REC.dur);});
+function setClip(p){clipRange=[p.clip,Math.min(p.v1,p.clip+6.5)];if(clipV.readyState>=1)clipV.currentTime=clipRange[0];
+  $('#clipCap').innerHTML=`<b>${p.k} · ${p.th}</b>${p.vis}`;}
+clipV.addEventListener('loadedmetadata',()=>{clipV.currentTime=clipRange[0];});
+new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting)clipV.play().catch(()=>{});else clipV.pause();}),{threshold:.1}).observe(clipV);
+function renderPhase(i){const p=PHASES[i];$('#phaseInfo').innerHTML=`<div class="tg"><span>SCENE ${String(i+1).padStart(2,'0')} / 09 · ${p.en}</span><i>${p.thl}</i></div>
+  <div class="big">${p.k}<small>实录 ${fmtT(p.v0)}–${fmtT(p.v1)} · ${Math.round(p.s*100)}–${Math.round(p.e*100)}% SESSION</small></div>
+  <dl style="margin-top:8px"><dt>游戏机制</dt><dd>${p.mech}</dd><dt>视觉变化</dt><dd>${p.vis}</dd><dt>心理体感</dt><dd>${p.psy}</dd></dl><div class="note">设计意图 · ${p.intent}</div>`;
+  document.querySelectorAll('#phaseChips button').forEach((b,j)=>b.classList.toggle('on',j===i));setClip(p);}
+PHASES.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.k;b.onclick=()=>{arcSt.lock=i;arcSt.hi=i;renderPhase(i);};$('#phaseChips').appendChild(b);});
+renderPhase(2);arcSt.lock=2;arcSt.hi=2;
+arcSt.hover=(x)=>{const u=(x-46)/936;if(u<0||u>1)return;const i=phaseAt(u);if(i!==arcSt.hi){arcSt.hi=i;renderPhase(i);}};
+arcSt.leave=()=>{arcSt.hi=arcSt.lock;renderPhase(arcSt.lock);};
+arcSt.click=(x)=>{const u=(x-46)/936;if(u>=0&&u<=1){arcSt.lock=phaseAt(u);}};
+view('arcC',ARC_REF,(ctx,t,v)=>drawArc(ctx,{p:ease(since(v,performance.now())/4),hi:arcSt.hi,t}),arcSt);
+
+/* 三 · 剧场概念 */
+$('#concepts').innerHTML=THEATRE.map(c=>`<div class="concept" style="--c:${c.c}"><b>${c.n}</b><small>${c.en}</small><p><i>→ </i>${c.g}<br><span style="color:var(--dim)">${c.x}</span></p></div>`).join('');
+
+/* 四 · 学科星图 */
+const conSt={hi:0,user:false,last:0};
+function renderDisc(i){const d=DISC[i],f=FAM[d.f],ls=LINKS.filter(([a,b])=>a===d.id||b===d.id).map(([a,b,l])=>{const o=DISC.find(x=>x.id===(a===d.id?b:a));return `<span style="color:${FAM[o.f].c}">${o.n}</span> · ${l}`;});
+  $('#discInfo').innerHTML=`<div class="tg"><span>${f.n}</span><i>${d.en}</i></div><div class="big" style="color:${f.c}">${d.n}</div>
+  <dl style="margin-top:8px"><dt>贡献</dt><dd>${d.give}</dd><dt>落点</dt><dd>${d.where}</dd></dl><div class="note">桥接 ${ls.length} 条：<br>${ls.join('<br>')}</div>`;}
+renderDisc(0);
+conSt.hover=(x,y)=>{let best=-1,bd=30;DISC.forEach((d,i)=>{const P=CON_POS[d.id],lx=320+238*Math.cos(P.a),ly=320+238*Math.sin(P.a);const dd=Math.min(Math.hypot(x-P.x,y-P.y),Math.hypot(x-lx,y-ly-6));if(dd<bd){bd=dd;best=i;}});
+  if(best>=0){conSt.user=true;if(best!==conSt.hi){conSt.hi=best;renderDisc(best);}}};
+conSt.leave=()=>{conSt.user=false;};
+view('conC',CON_REF,(ctx,t,v)=>{if(!conSt.user&&t-conSt.last>3.2){conSt.last=t;conSt.hi=(conSt.hi+1)%DISC.length;renderDisc(conSt.hi);}drawConstellation(ctx,{p:ease(since(v,performance.now())/3.5),hi:conSt.hi,t});},conSt);
+$('#famLegend').innerHTML=Object.values(FAM).map(f=>`<span><i class="dot" style="--c:${f.c}"></i>${f.n}</span>`).join('');
+
+/* 五 · 三轨联动模拟器：实录视频为主时钟，加载失败时退回内部时钟 */
+const gv=$('#gpVideo');
+const sim={u:0,play:true,rate:2,lastNow:null,drag:false,vis:false,vidOK:false};
+gv.addEventListener('loadedmetadata',()=>{sim.vidOK=true;gv.playbackRate=sim.rate;gv.currentTime=sim.u*REC.dur;});
+gv.addEventListener('error',()=>{sim.vidOK=false;});
+gv.addEventListener('ended',()=>{gv.currentTime=0;if(sim.play&&sim.vis)gv.play().catch(()=>{});});
+new IntersectionObserver(es=>es.forEach(en=>{sim.vis=en.isIntersecting;syncPlay();}),{threshold:.1}).observe(gv);
+function syncPlay(){if(!sim.vidOK)return;if(sim.play&&sim.vis&&!sim.drag){gv.playbackRate=sim.rate;gv.play().catch(()=>{});}else gv.pause();}
+function seekU(u){sim.u=clamp(u);if(sim.vidOK)gv.currentTime=sim.u*REC.dur;simUI();}
+function simUI(){const u=sim.u,ph=PHASES[phaseAt(u)];$('#simU').value=Math.round(u*1000);$('#simPct').textContent=Math.round(u*100)+'%';$('#gpT').textContent=fmtT(u*REC.dur)+' / '+fmtT(REC.dur);
+  $('#roScene').textContent=ph.k;$('#roTheatre').textContent=ph.thl;$('#roMech').textContent=ph.mech;$('#roVis').textContent=ph.vis;$('#roPsy').textContent=ph.psy;
+  [['#mCl','clarity'],['#mSat','sat'],['#mTen','tension'],['#mFlow','flow'],['#mVal','valence']].forEach(([id,k])=>{$(id).style.width=Math.round(curve[k](u)*100)+'%';});}
+function simStep(now){if(sim.lastNow==null)sim.lastNow=now;const dt=(now-sim.lastNow)/1000;sim.lastNow=now;
+  if(sim.vidOK){if(!sim.drag)sim.u=clamp(gv.currentTime/REC.dur);}
+  else if(sim.play&&!sim.drag&&sim.vis){sim.u+=dt*sim.rate/REC.dur;if(sim.u>1)sim.u=0;}
+  if(sim.vis)simUI();}
+$('#simPlay').onclick=()=>{sim.play=!sim.play;$('#simPlay').textContent=sim.play?'❚❚ 暂停':'▶ 播放';syncPlay();};
+$('#simU').addEventListener('input',e=>seekU(e.target.value/1000));
+$('#simU').addEventListener('pointerdown',()=>{sim.drag=true;syncPlay();});window.addEventListener('pointerup',()=>{if(sim.drag){sim.drag=false;syncPlay();}});
+$('#simSpd').onchange=e=>{sim.rate=+e.target.value;syncPlay();};
+const laneSt={click:(x)=>{const u=(x-128)/858;if(u>=0&&u<=1)seekU(u);}};
+view('laneC',LANE_REF,(ctx,t)=>drawLanes(ctx,{u:sim.u,t}),laneSt);
+view('stageC',STAGE_REF,(ctx,t)=>drawStage(ctx,{u:sim.u,t}));
+simUI();
+
+/* 六 · 矩阵 */
+const matSt={hr:-1,hc:-1};
+matSt.hover=(x,y)=>{const LW=214,TOP=84,cw=(1000-LW-8)/PSY.length,rh=(600-TOP-6)/MECH.length;const c=Math.floor((x-LW)/cw),r=Math.floor((y-TOP)/rh);
+  if(c>=0&&c<PSY.length&&r>=0&&r<MECH.length){if(c!==matSt.hc||r!==matSt.hr){matSt.hr=r;matSt.hc=c;const m=MECH[r],ps=PSY[c],v=m.v[c];
+    $('#matDetail').innerHTML=`<i>${m.n}</i> → <b>${m.vis}</b> → <i style="color:${ps.c}">${ps.n}</i>（${ps.th}）　强度 <b>${'●'.repeat(v)||'—'}</b><br>${m.note}`;}}else{matSt.hr=matSt.hc=-1;}};
+matSt.leave=()=>{matSt.hr=matSt.hc=-1;};
+view('matC',MAT_REF,(ctx,t,v)=>drawMatrix(ctx,{p:ease(since(v,performance.now())/2.6),hr:matSt.hr,hc:matSt.hc,t}),matSt);
+
+/* 七 · 视觉通道小图标动画 */
+$('#chan').innerHTML=CHANNELS.map((c,i)=>`<div class="ch" style="--c:${c.c}"><canvas width="108" height="108" data-ch="${i}"></canvas><div><b>${c.n}</b><small>${c.en}</small><p>${c.p}</p></div></div>`).join('');
+const chCanvases=[...document.querySelectorAll('[data-ch]')].map(c=>({c,ctx:c.getContext('2d'),k:CHANNELS[+c.dataset.ch].k,col:CHANNELS[+c.dataset.ch].c}));
+function drawChannels(t){chCanvases.forEach(({ctx,k,col})=>{ctx.clearRect(0,0,108,108);const u=(t*.12)%1,R=mulberry32(3);
+  if(k==='clarity'){const cl=curve.clarity(u);for(let i=0;i<70;i++){const a=R()*6.28,d=R()*18,ox=(R()-.5)*90,oy=(R()-.5)*90,s=Math.pow(1-cl,1.3);ctx.fillStyle=rgba(col,.3+.6*cl);ctx.fillRect(54+d*Math.cos(a)+ox*s,54+d*Math.sin(a)+oy*s,2,2);}}
+  else if(k==='sat'){const s=curve.sat(u);ctx.fillStyle=mixc(C.grey,col,s,1);ctx.beginPath();ctx.arc(54,54,26,0,6.28);ctx.fill();}
+  else if(k==='flash'){const f=Math.max(curve.flash(u),.05);const g=ctx.createRadialGradient(54,54,0,54,54,50);g.addColorStop(0,`rgba(255,246,220,${f})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,108,108);diamond(ctx,54,54,10);ctx.fillStyle=col;ctx.fill();}
+  else if(k==='beat'){const b=pulse(t);ctx.save();ctx.translate(54,58);ctx.scale(1+.15*b,1+.15*b);ctx.beginPath();ctx.moveTo(0,22);ctx.bezierCurveTo(-36,-2,-18,-30,0,-12);ctx.bezierCurveTo(18,-30,36,-2,0,22);ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=14*b;ctx.fill();ctx.restore();}
+  else if(k==='morph'){ctx.beginPath();for(let i=0;i<=6;i++){const a=-Math.PI/2+i/6*6.283,r=18+14*Math.sin(t*1.3+i*1.7)*.5+10*Math.sin(t*.7+i);i?ctx.lineTo(54+r*Math.cos(a),54+r*Math.sin(a)):ctx.moveTo(54+r*Math.cos(a),54+r*Math.sin(a));}ctx.closePath();ctx.fillStyle=rgba(col,.25);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}
+  else{ctx.beginPath();ctx.ellipse(54,54,40,14,0,0,6.28);ctx.strokeStyle=rgba(col,.4);ctx.stroke();for(let i=0;i<5;i++){const a=t*.8+i*1.256;dot(ctx,54+40*Math.cos(a),54+14*Math.sin(a),3,col,8);}dot(ctx,54,54,5,C.goldb,10);}
+});}
+$('#painTbl tbody').innerHTML=PAINS.map((r,i)=>`<tr style="animation-delay:${i*.08}s"><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+
+/* 八 · 科普阶梯 */
+const ladSt={k:0,user:false,last:0,t0:0};
+function setPat(k,user){ladSt.k=k;ladSt.t0=performance.now();if(user)ladSt.user=true;document.querySelectorAll('#patChips button').forEach((b,j)=>b.classList.toggle('on',j===k));}
+PATS.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.n;b.onclick=()=>setPat(i,true);$('#patChips').appendChild(b);});setPat(0);
+view('ladC',LAD_REF,(ctx,t)=>{if(!ladSt.user&&t-ladSt.last>5){ladSt.last=t;setPat((ladSt.k+1)%PATS.length);}drawLadder(ctx,{p:ease((performance.now()-ladSt.t0)/1600),k:ladSt.k,t});});
+$('#sciRules').innerHTML=SCI.map(s=>`<div class="rule" style="--c:${s.c};border-left-color:${s.c}"><b>${s.n}</b>${s.t}</div>`).join('');
+
+/* 九 · 用户群 */
+const bubSt={hi:0};
+function renderSeg(i){const s=SEG[i];$('#segInfo').innerHTML=`<div class="tg"><span>PERSONA · ${s.tier}</span><i>${s.age}</i></div><div class="big" style="color:${s.c}">${s.n}</div>
+  <dl style="margin-top:8px"><dt>需求</dt><dd>${s.need}</dd><dt>契合</dt><dd>${s.why}</dd><dt>场景</dt><dd>${s.scene}</dd></dl>
+  <div class="note">健康知识需求 ${Math.round(s.y*100)} · 互动偏好 ${Math.round(s.x*100)} · 规模指数 ${Math.round(s.r*100)}</div>`;
+  document.querySelectorAll('.persona').forEach((el,j)=>el.classList.toggle('on',j===i));}
+$('#personas').innerHTML=SEG.map((s,i)=>`<div class="persona" style="--c:${s.c}" data-i="${i}"><span class="tier">${s.tier}</span><b>${s.n}</b><p><span>${s.age} · ${s.scene}</span><br>${s.need}</p></div>`).join('');
+document.querySelectorAll('.persona').forEach(el=>el.addEventListener('mouseenter',()=>{bubSt.hi=+el.dataset.i;renderSeg(bubSt.hi);}));
+bubSt.hover=(x,y)=>{const X=v=>74+662*v,Y=v=>452-424*v;let best=-1,bd=1e9;SEG.forEach((s,i)=>{const d=Math.hypot(x-X(s.x),y-Y(s.y));if(d<26+40*s.r&&d<bd){bd=d;best=i;}});if(best>=0&&best!==bubSt.hi){bubSt.hi=best;renderSeg(best);}};
+renderSeg(0);
+view('bubC',BUB_REF,(ctx,t,v)=>drawBubbles(ctx,{p:ease(since(v,performance.now())/2.4),hi:bubSt.hi,t}),bubSt);
+
+/* 十 · 伦理与结论 */
+$('#ethRules').innerHTML=ETH.map(s=>`<div class="rule" style="border-left-color:${s.c}"><b>${s.n}</b>${s.t}</div>`).join('');
+$('#conRules').innerHTML=CON.map(s=>`<div class="rule" style="border-left-color:${s.c}"><b>${s.n}</b>${s.t}</div>`).join('');
+
+/* ========== 动态影片：时间轴 (1280×720) ========== */
+/* file:// 下视频会污染画布导致无法导出，故仅在 http(s) 下把实录画面绘入影片与长图 */
+const VIDEO_OK=location.protocol!=='file:';
+const fv=document.createElement('video');fv.muted=true;fv.playsInline=true;fv.preload='auto';if(VIDEO_OK)fv.src=REC.src;
+function drawStrip(ctx,b,u,t){
+  ctx.fillStyle='rgba(14,20,34,.88)';rrect(ctx,b.x,b.y,b.w,b.h,10);ctx.fill();ctx.strokeStyle=rgba(C.gold,.25);ctx.lineWidth=1;ctx.stroke();
+  const x0=b.x+86,x1=b.x+b.w-14,X=v=>x0+(x1-x0)*v,rows=[['机制',C.gold],['视觉',C.teal],['心理',C.cin]],rh=(b.h-30)/3,ry=i=>b.y+24+i*rh;
+  PHASES.forEach((p,i)=>{const on=u>=p.s&&u<p.e;ctx.fillStyle=on?rgba(C.gold,.16):(i%2?'rgba(233,228,214,.04)':'rgba(0,0,0,0)');ctx.fillRect(X(p.s),b.y+4,X(p.e)-X(p.s),b.h-8);
+    T(ctx,p.k,(X(p.s)+X(p.e))/2,b.y+17,{a:'center',f:SERIF,sz:11,c:on?C.goldb:C.dim});});
+  rows.forEach(([n,c],i)=>T(ctx,n,b.x+14,ry(i)+rh*.62,{f:SERIF,sz:12,w:600,c,ls:2}));
+  EVENTS.forEach(e=>{const c=EVC[e.t];ctx.globalAlpha=e.u<=u?1:.25;e.t==='clear'||e.t==='climax'?(diamond(ctx,X(e.u),ry(0)+rh/2,5),ctx.fillStyle=c,ctx.fill()):dot(ctx,X(e.u),ry(0)+rh/2,2.2,c,0);ctx.globalAlpha=1;});
+  const N=220;ctx.beginPath();ctx.moveTo(X(0),ry(1)+rh-2);for(let i=0;i<=N;i++){const k=i/N;ctx.lineTo(X(k),ry(1)+rh-2-(rh-4)*curve.clarity(k));}ctx.lineTo(X(1),ry(1)+rh-2);ctx.closePath();ctx.fillStyle=rgba(C.teal,.25);ctx.fill();
+  [['tension',C.gold],['valence',C.cin]].forEach(([k,c])=>{ctx.beginPath();for(let i=0;i<=N;i++){const q=i/N,y=ry(2)+rh-2-(rh-4)*curve[k](q);i?ctx.lineTo(X(q),y):ctx.moveTo(X(q),y);}ctx.strokeStyle=c;ctx.lineWidth=1.4;ctx.stroke();});
+  const xh=X(clamp(u));ctx.save();ctx.shadowColor=C.goldb;ctx.shadowBlur=8;seg(ctx,xh,b.y+4,xh,b.y+b.h-4,C.goldb,1.4);ctx.restore();dot(ctx,xh,ry(2)+rh-2-(rh-4)*curve.tension(u),3+1.5*pulse(t),C.gold,10);
+}
+const FW=1280,FH=720,CBOX={x:40,y:128,w:1200,h:500};
+function filmBg(ctx,t){ctx.fillStyle=C.bg;ctx.fillRect(0,0,FW,FH);const g=ctx.createRadialGradient(FW/2,-80,40,FW/2,0,900);g.addColorStop(0,'#0f1a30');g.addColorStop(1,'rgba(4,6,12,0)');ctx.fillStyle=g;ctx.fillRect(0,0,FW,FH);
+  const R=mulberry32(11);for(let i=0;i<90;i++){const x=R()*FW,y=(R()*FH+t*(4+R()*10))%FH;ctx.fillStyle=rgba(C.goldb,.08+R()*.2);ctx.fillRect(x,y,1.4,1.4);}}
+function filmHead(ctx,h,a){if(!h)return;ctx.save();ctx.globalAlpha=a;T(ctx,h[0],48,74,{f:SERIF,sz:40,w:600,c:C.teal,glow:C.teal,gb:14});
+  T(ctx,h[1],108,62,{f:SERIF,sz:26,w:600,c:C.goldb,ls:6});T(ctx,h[2],110,84,{f:MONO,sz:11,c:C.dim,ls:3});
+  wrap(ctx,h[3],48,112,FW-96,18,{sz:13.5,c:C.dim},1);ctx.restore();}
+function filmFoot(ctx,t,T0){ecg(ctx,48,684,220,22,t,C.teal,.9);T(ctx,'MAD MEDICINE · 医理探案 · 剧场交互设计动态分析',FW-48,690,{a:'right',f:SERIF,sz:12,c:C.dim,ls:2});
+  ctx.fillStyle='rgba(233,228,214,.08)';ctx.fillRect(300,684,560,2);const g=ctx.createLinearGradient(300,0,860,0);g.addColorStop(0,C.teal);g.addColorStop(1,C.goldb);ctx.fillStyle=g;ctx.fillRect(300,684,560*clamp(T0/FILM_DUR),2);}
+const FILM=[
+ {d:6,f:(ctx,lt,t)=>{const a=ease(lt/1.2);ctx.save();ctx.globalAlpha=a;
+   T(ctx,'DRAMATURGY × LIFE SCIENCE × PSYCHOLOGY × PLAY',FW/2,230,{a:'center',f:MONO,sz:13,c:C.teal,ls:6});
+   T(ctx,'游 戏 · 医 学 · 心 理 · 剧 场',FW/2,320,{a:'center',f:SERIF,sz:60,w:600,c:C.ink,ls:8,glow:C.gold,gb:30});
+   T(ctx,'MAD MEDICINE · 医理探案 · 剧场交互设计动态分析研究',FW/2,372,{a:'center',f:SERIF,sz:18,c:C.gold,ls:6});
+   ecg(ctx,FW/2-260,440,520,40,t,C.teal,1);
+   T(ctx,'学科构成 · 设计逻辑 · 用户体验 · 机制×视觉×心理 · 科普意义 · 用户群定位',FW/2,520,{a:'center',sz:15,c:C.dim,ls:2,al:ease((lt-1.5)/1.2)});ctx.restore();}},
+ {d:11,h:['01','九场戏剧弧线','DRAMATURGY','整局游戏被组织为一出戏：金 = 戏剧张力，青 = 视觉显影，朱 = 情绪效价；幕间闪光后张力回落，于「突转 · 发现」达到峰值。'],
+  f:(ctx,lt,t,d)=>drawIn(ctx,drawArc,ARC_REF,CBOX,{p:ease(lt/(d*.75)),hi:lt>d*.78?6:-1,t})},
+ {d:11,h:['02','交叉学科星图','DISCIPLINES','14 门学科 · 5 个学科族 · 21 条桥接：医学给内容，心理给目标，游戏给机制，剧场与视觉给结构与感官。'],
+  f:(ctx,lt,t)=>{const hi=lt>5?Math.floor((lt-5)/1.1)%DISC.length:-1;drawIn(ctx,drawConstellation,CON_REF,{x:40,y:128,w:700,h:540},{p:ease(lt/4),hi,t});
+   if(hi>=0){const d=DISC[hi],f=FAM[d.f];ctx.save();ctx.globalAlpha=ease(((lt-5)%1.1)/.3);T(ctx,f.n,790,260,{f:MONO,sz:12,c:f.c,ls:3});T(ctx,d.n,790,310,{f:SERIF,sz:38,w:600,c:f.c,ls:6});
+     T(ctx,'贡献',790,360,{f:SERIF,sz:14,c:C.gold});wrap(ctx,d.give,850,360,380,22,{sz:15,c:C.ink},3);T(ctx,'落点',790,440,{f:SERIF,sz:14,c:C.gold});wrap(ctx,d.where,850,440,380,22,{sz:15,c:C.ink},3);ctx.restore();}}},
+ {d:31,h:['03','实录 × 三轨联动','REAL PLAY · MECHANIC · VISUAL · PSYCHE','一局真实游戏的九个片段（1.5× 速），与分析时间轴逐秒同步：机制事件 → 视觉变化 → 心理体感。'],
+  f:(ctx,lt,t)=>{const SEG=31/9,k=Math.min(8,Math.floor(lt/SEG)),ph=PHASES[k],box={x:40,y:128,w:742,h:431};
+   let u=RU(ph.clip+(lt-k*SEG)*1.5);
+   if(VIDEO_OK&&fv.readyState>=2){if(fv._seg!==k){fv._seg=k;fv.currentTime=ph.clip;fv.playbackRate=1.5;fv.play().catch(()=>{});}
+     u=RU(fv.currentTime);ctx.drawImage(fv,box.x,box.y,box.w,box.h);}
+   else drawIn(ctx,drawStage,STAGE_REF,box,{u,t});
+   ctx.strokeStyle=rgba(C.gold,.45);ctx.lineWidth=1;rrect(ctx,box.x,box.y,box.w,box.h,10);ctx.stroke();
+   ctx.fillStyle='rgba(5,7,13,.8)';rrect(ctx,box.x+12,box.y+12,206,26,13);ctx.fill();T(ctx,(VIDEO_OK?'REAL PLAY · 游戏实录 ':'MODEL · 抽象模型 ')+fmtT(u*REC.dur),box.x+24,box.y+30,{f:MONO,sz:10.5,c:C.teal});
+   const x0=806;T(ctx,String(k+1).padStart(2,'0')+' / 09',x0,160,{f:MONO,sz:12,c:C.dim,ls:3});
+   T(ctx,ph.k,x0,206,{f:SERIF,sz:38,w:600,c:C.goldb,ls:6});T(ctx,ph.thl,x0,236,{f:SERIF,sz:13,c:C.gold});
+   [['机制',ph.mech,C.gold],['视觉',ph.vis,C.teal],['心理',ph.psy,C.cin]].forEach(([n,s,c],i)=>{const y=276+i*92;seg(ctx,x0,y-14,x0,y+56,c,2);T(ctx,n,x0+14,y+2,{f:SERIF,sz:14,w:600,c,ls:3});wrap(ctx,s,x0+14,y+26,418,20,{sz:13.5,c:C.ink},2);});
+   drawStrip(ctx,{x:40,y:578,w:1200,h:84},u,t);}},
+ {d:10,h:['04','机制 — 心理作用矩阵','MECHANIC → PSYCHE','11 项机制 × 8 种心理效应；视觉变化是机制抵达心理的传导介质。'],
+  f:(ctx,lt,t)=>{const hr=lt>4?Math.floor((lt-4)/1.5)%MECH.length:-1;const hc=hr>=0?MECH[hr].v.indexOf(Math.max(...MECH[hr].v)):-1;drawIn(ctx,drawMatrix,MAT_REF,{x:40,y:130,w:1200,h:470},{p:ease(lt/3),hr,hc,t});
+   if(hr>=0){const m=MECH[hr];T(ctx,`${m.n}  →  ${m.vis}  →  ${PSY[hc].n}（${PSY[hc].th}）`,FW/2,632,{a:'center',sz:14,c:C.goldb});}}},
+ {d:11,h:['05','科普意义：知识的五级翻译','SCIENCE COMMUNICATION','经典概念 → 生活隐喻 → 现代机制 → 心理画像 → 行动处方，对应布鲁姆认知层级由「识记」走向「应用」。'],
+  f:(ctx,lt,t)=>{const k=Math.floor(lt/3.6)%PATS.length;drawIn(ctx,drawLadder,LAD_REF,CBOX,{p:ease((lt%3.6)/1.4),k:[0,4,9][k%3],t});}},
+ {d:9,h:['06','用户群定位','AUDIENCE','核心：都市高压青年与 Z 世代——既想看懂身体，也愿意玩；拓展：剧场 / 展陈观众与设计研究者。'],
+  f:(ctx,lt,t)=>{const hi=lt>3?Math.floor((lt-3)/1)%SEG.length:-1;drawIn(ctx,drawBubbles,BUB_REF,{x:40,y:130,w:760,h:520},{p:ease(lt/2.4),hi,t});
+   if(hi>=0){const s=SEG[hi];ctx.save();ctx.globalAlpha=ease(((lt-3)%1)/.25);T(ctx,s.tier+' · '+s.age,830,250,{f:MONO,sz:12,c:s.c,ls:3});T(ctx,s.n,830,296,{f:SERIF,sz:32,w:600,c:s.c,ls:4});
+     wrap(ctx,s.need,830,340,400,22,{sz:15,c:C.ink},3);wrap(ctx,s.why,830,420,400,22,{sz:14,c:C.dim},3);T(ctx,s.scene,830,500,{sz:13,c:C.teal});ctx.restore();}}},
+ {d:9,h:['07','结论','CONCLUSION','视觉是机制抵达心理的传导介质；医学是信任底座；剧场是把一切串成一晚演出的骨架。'],
+  f:(ctx,lt,t)=>{const items=['知识可信','机制可玩','视觉可感','叙事可共情'],cols=[C.cin,C.gold,C.teal,C.violet];
+   items.forEach((s,i)=>{const a=ease((lt-i*.6)/.8);if(a<=0)return;ctx.save();ctx.globalAlpha=a;const x=90+i*280,y=220;rrect(ctx,x,y,220,90,14);ctx.fillStyle=rgba(cols[i],.1);ctx.fill();ctx.strokeStyle=cols[i];ctx.stroke();
+     T(ctx,s,x+110,y+56,{a:'center',f:SERIF,sz:26,w:600,c:cols[i],ls:4});if(i<3)T(ctx,'×',x+250,y+56,{a:'center',sz:26,c:C.dim});ctx.restore();});
+   const a=ease((lt-3)/1);ctx.save();ctx.globalAlpha=a;T(ctx,'=',FW/2,370,{a:'center',sz:30,c:C.dim});const g=ctx.createLinearGradient(380,0,900,0);g.addColorStop(0,C.gold);g.addColorStop(1,C.goldb);rrect(ctx,370,392,540,70,35);ctx.fillStyle=g;ctx.fill();
+   T(ctx,'有生命感的健康科普剧场',FW/2,438,{a:'center',f:SERIF,sz:28,w:600,c:C.bg,ls:6});ctx.restore();
+   CON.forEach((c,i)=>{const b=ease((lt-4.2-i*.5)/.6);if(b<=0)return;ctx.save();ctx.globalAlpha=b;const x=90+i*280;seg(ctx,x,500,x,580,c.c,2);T(ctx,c.n,x+14,518,{f:SERIF,sz:15,w:600,c:C.goldb});wrap(ctx,c.t,x+14,542,240,19,{sz:12.5,c:C.dim},3);ctx.restore();});}},
+ {d:5,f:(ctx,lt,t)=>{ctx.save();ctx.globalAlpha=ease(lt/1)*(1-ss(4,5,lt));const b=pulse(t);
+   ctx.beginPath();ctx.arc(FW/2,300,50*(1+.06*b),0,6.28);ctx.strokeStyle=C.goldb;ctx.lineWidth=1.5;ctx.stroke();T(ctx,'谢 幕',FW/2,312,{a:'center',f:SERIF,sz:30,w:600,c:C.goldb,glow:C.gold,gb:20});
+   T(ctx,'CURTAIN CALL · TO BE CONTINUED',FW/2,400,{a:'center',f:MONO,sz:12,c:C.teal,ls:6});T(ctx,'本作品为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。',FW/2,450,{a:'center',sz:13,c:C.dim});
+   T(ctx,'wsemilynss.github.io/mad-medicine',FW/2,480,{a:'center',f:MONO,sz:12,c:C.gold});ctx.restore();}}
+];
+const FILM_DUR=FILM.reduce((s,x)=>s+x.d,0);
+function drawFilm(ctx,T0,t){filmBg(ctx,t);let acc=0;for(const sc of FILM){if(T0<acc+sc.d){const lt=T0-acc,fa=Math.min(ease(lt/.6),1-ss(sc.d-.5,sc.d,lt));ctx.save();ctx.globalAlpha=fa;filmHead(ctx,sc.h,1);sc.f(ctx,lt,t,sc.d);ctx.restore();break;}acc+=sc.d;}filmFoot(ctx,t,T0);}
+
+/* ========== 静态分析长图 (2400×4200) ========== */
+function panel(ctx,x,y,w,h,num,title,en,desc){rrect(ctx,x,y,w,h,24);ctx.fillStyle='rgba(14,20,34,.88)';ctx.fill();ctx.strokeStyle=rgba(C.gold,.3);ctx.lineWidth=1.5;ctx.stroke();
+  T(ctx,num,x+32,y+62,{f:SERIF,sz:40,w:600,c:C.teal,glow:C.teal});T(ctx,title,x+96,y+52,{f:SERIF,sz:28,w:600,c:C.goldb,ls:6});T(ctx,en,x+98,y+76,{f:MONO,sz:12,c:C.dim,ls:3});
+  if(desc)wrap(ctx,desc,x+32,y+110,w-64,24,{sz:16,c:C.dim},2);return {x:x+24,y:y+(desc?150:100),w:w-48,h:h-(desc?170:120)};}
+function renderPoster(frames){const W=2400,H=5120,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d'),t=.06;
+  ctx.fillStyle=C.bg;ctx.fillRect(0,0,W,H);const g=ctx.createRadialGradient(W/2,0,50,W/2,0,1800);g.addColorStop(0,'#0f1a30');g.addColorStop(1,'rgba(4,6,12,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  T(ctx,'DRAMATURGY × LIFE SCIENCE × PSYCHOLOGY × PLAY',W/2,96,{a:'center',f:MONO,sz:20,c:C.teal,ls:10});
+  T(ctx,'游 戏 · 医 学 · 心 理 · 剧 场',W/2,196,{a:'center',f:SERIF,sz:84,w:600,c:C.ink,ls:12,glow:C.gold,gb:40});
+  T(ctx,'MAD MEDICINE · 医理探案 · 剧场交互设计动态分析研究 · 静态分析图',W/2,256,{a:'center',f:SERIF,sz:26,c:C.gold,ls:8});
+  const st=[['14','学科 · 5 族'],['9','戏剧场次'],['19','线索 / 4 章'],['10','证型 × 11 维'],['11 × 8','机制 × 心理'],['162s','实录 · 一局']];
+  st.forEach(([v,k],i)=>{const x=150+i*360;T(ctx,v,x+150,326,{a:'center',f:MONO,sz:40,c:C.goldb});T(ctx,k,x+150,356,{a:'center',f:SERIF,sz:16,c:C.dim,ls:3});});
+  let b=panel(ctx,60,400,1440,800,'01','九场戏剧弧线','DRAMATURGY','金 = 戏剧张力 · 青 = 视觉显影 · 朱 = 情绪效价。幕间闪光后张力短暂回落，于「突转 · 发现」达到峰值，构成交互版弗赖塔格金字塔。');drawIn(ctx,drawArc,ARC_REF,b,{p:1,hi:6,t});
+  b=panel(ctx,1530,400,810,800,'02','剧场概念转译','THEATRE → INTERACTION','');
+  THEATRE.forEach((c,i)=>{const y=b.y+10+i*80;seg(ctx,b.x+8,y,b.x+8,y+62,c.c,3);T(ctx,c.n,b.x+26,y+20,{f:SERIF,sz:19,w:600,c:c.c});T(ctx,c.en,b.x+b.w-6,y+20,{a:'right',f:MONO,sz:11,c:C.dim});wrap(ctx,'→ '+c.g,b.x+26,y+46,b.w-40,22,{sz:15,c:C.ink},1);});
+  b=panel(ctx,60,1240,880,920,'03','交叉学科星图','DISCIPLINES','14 门学科 · 5 族 · 21 条桥接，汇于「医理探案」。');drawIn(ctx,drawConstellation,CON_REF,b,{p:1,hi:10,t});
+  b=panel(ctx,970,1240,1370,920,'04','机制 — 心理作用矩阵','MECHANIC → PSYCHE','11 项机制 × 8 种心理效应（0–3 级）；视觉变化是机制抵达心理的传导介质。');drawIn(ctx,drawMatrix,MAT_REF,b,{p:1,t});
+  b=panel(ctx,60,2200,2280,760,'05','三轨联动：机制 × 视觉 × 心理','MECHANIC · VISUAL · PSYCHE',`按一局真实游戏实录（162 秒）逐秒标定。左：「双人对坐」点云在突转时刻完全显影；右：机制事件 → 视觉变化 → 心理体感的时间轴与因果涟漪（播放头位于实录 ${fmtT(CLIMAX*REC.dur)}）。`);
+  drawIn(ctx,drawStage,STAGE_REF,{x:b.x,y:b.y,w:860,h:b.h},{u:CLIMAX,t});drawIn(ctx,drawLanes,LANE_REF,{x:b.x+890,y:b.y,w:b.w-890,h:b.h},{u:CLIMAX,t});
+  b=panel(ctx,60,3000,2280,880,'06','游戏实录 × 分析对照','REAL PLAY ↔ ANALYSIS',frames?'从同一局实录中按九场各取一帧：上为真实游戏画面，下为该场的机制与心理体感——画面由虚到实、由冷到暖的变化即「三轨联动」的直观证据。':'（本地 file:// 打开时浏览器禁止导出视频帧，此处以抽象模型代替；用线上地址导出可得实录帧。）');
+  const fw=(b.w-4*24)/5,fh=fw*744/1280;
+  PHASES.forEach((p,i)=>{const r=i<5?0:1,col=i<5?i:i-5,x=b.x+col*(fw+24),y=b.y+r*(fh+108);
+    if(frames&&frames[i])ctx.drawImage(frames[i],x,y,fw,fh);else{ctx.fillStyle='#070a12';ctx.fillRect(x,y,fw,fh);drawIn(ctx,drawStage,STAGE_REF,{x,y,w:fw,h:fh},{u:RU(p.frame),t});}
+    ctx.strokeStyle=rgba(C.gold,.55);ctx.lineWidth=1.5;ctx.strokeRect(x,y,fw,fh);
+    ctx.fillStyle='rgba(5,7,13,.82)';rrect(ctx,x+10,y+10,190,30,15);ctx.fill();T(ctx,`${String(i+1).padStart(2,'0')} ${p.k} · ${fmtT(p.frame)}`,x+24,y+31,{f:SERIF,sz:16,w:600,c:C.goldb});
+    T(ctx,p.thl.split('（')[0],x,y+fh+28,{f:SERIF,sz:16,w:600,c:C.gold,ls:2});
+    wrap(ctx,'机制 · '+p.mech,x,y+fh+54,fw,20,{sz:13.5,c:C.ink},1);wrap(ctx,'心理 · '+p.psy,x,y+fh+78,fw,20,{sz:13.5,c:C.cin},1);});
+  {const x=b.x+4*(fw+24),y=b.y+fh+108;
+   T(ctx,'读图方式',x+10,y+34,{f:SERIF,sz:20,w:600,c:C.teal,ls:4});
+   ['· 显影：人影从散逸点云 → 实体（望闻问切逐条归档）','· 色彩：冷灰 → 暖金（章节通关与指认）','· 光：四次幕间闪光 + 「水落石出」','· 节拍：全局心跳贯穿始终','· 结尾：报告与五幕小剧场把峰值导向行动'].forEach((s,k)=>wrap(ctx,s,x+10,y+72+k*34,fw-20,20,{sz:14.5,c:C.ink},1));}
+  b=panel(ctx,60,3920,1200,720,'07','科普意义：知识的五级翻译','SCIENCE COMMUNICATION','以「肝郁气滞」为例：经典 → 隐喻 → 机制 → 心理 → 处方，对应布鲁姆认知层级。');drawIn(ctx,drawLadder,LAD_REF,b,{p:1,k:4,t});
+  b=panel(ctx,1290,3920,1050,720,'08','用户群定位','AUDIENCE','纵轴：健康知识需求 · 横轴：游戏 / 艺术互动偏好 · 气泡：规模。');drawIn(ctx,drawBubbles,BUB_REF,b,{p:1,hi:0,t});
+  b=panel(ctx,60,4680,2280,380,'09','体验逻辑 · 伦理 · 结论','UX · ETHICS · CONCLUSION','');
+  const cols=[['视觉通道',CHANNELS.map(c=>c.n+' → '+c.p.replace(/<[^>]+>/g,''))],['风险与缓解',ETH.map(e=>e.n+'：'+e.t.replace(/<[^>]+>/g,'').replace('&lt;','<'))],['研究结论',CON.map(c=>c.n+'：'+c.t)]];
+  cols.forEach(([h,list],i)=>{const x=b.x+10+i*750;T(ctx,h,x,b.y,{f:SERIF,sz:20,w:600,c:[C.teal,C.cin,C.goldb][i],ls:4});let y=b.y+34;
+    list.slice(0,6).forEach(s=>{const n=wrap(ctx,'· '+s,x,y,710,21,{sz:14,c:C.ink},2);y+=n*21+6;});});
+  T(ctx,'MAD MEDICINE · 医理探案 · 本作品为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。',W/2,H-24,{a:'center',sz:15,c:C.dim,ls:2});
+  return c;}
+
+/* ========== 导出 ========== */
+function save(blob,name){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
+function grabFrames(){if(!VIDEO_OK)return Promise.resolve(null);
+  return new Promise(res=>{const v=document.createElement('video');v.muted=true;v.preload='auto';v.src=REC.src;const out=[];let done=false;
+    const fail=()=>{if(!done){done=true;res(null);}};const to=setTimeout(fail,30000);v.onerror=fail;
+    v.onloadeddata=async()=>{try{for(const p of PHASES){await new Promise((r,j)=>{const k=setTimeout(j,8000);v.onseeked=()=>{clearTimeout(k);r();};v.currentTime=p.frame;});
+      const c=document.createElement('canvas');c.width=640;c.height=372;c.getContext('2d').drawImage(v,0,0,640,372);out.push(c);}
+      clearTimeout(to);done=true;res(out);}catch(e){fail();}};});}
+async function posterBlob(){const fr=await grabFrames();return new Promise(r=>renderPoster(fr).toBlob(r,'image/png'));}
+function pickMime(){return ['video/mp4;codecs=avc1.42E01E','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';}
+const filmC=$('#filmC'),fctx=filmC.getContext('2d');let film={mode:'idle',t0:0,timer:0};
+function filmTick(){const T0=(performance.now()-film.t0)/1000;drawFilm(fctx,Math.min(T0,FILM_DUR-.01),performance.now()/1000);$('#filmProg').style.width=clamp(T0/FILM_DUR)*100+'%';return T0>=FILM_DUR;}
+function stopFilm(){clearInterval(film.timer);film.mode='idle';fv.pause();$('#btnPlay').textContent='▶ 预 览 影 片';}
+function playFilm(){if(film.mode!=='idle'){if(film.mode==='play')stopFilm();return;}film.mode='play';fv._seg=-1;film.t0=performance.now();$('#btnPlay').textContent='■ 停 止 预 览';film.timer=setInterval(()=>{if(filmTick())stopFilm();},1000/30);}
+function recordFilm(onProg){return new Promise((res,rej)=>{
+  if(!filmC.captureStream||typeof MediaRecorder==='undefined'){rej(new Error('unsupported'));return;}
+  if(film.mode==='play')stopFilm();const mime=pickMime(),stream=filmC.captureStream(30),chunks=[];
+  const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:5e6}:{videoBitsPerSecond:5e6});
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const type=(mime||'video/webm').split(';')[0];res({blob:new Blob(chunks,{type}),ext:type.includes('mp4')?'mp4':'webm'});};
+  film.mode='rec';fv._seg=-1;film.t0=performance.now();drawFilm(fctx,0,0);rec.start(1000);
+  film.timer=setInterval(()=>{const done=filmTick();onProg&&onProg(clamp((performance.now()-film.t0)/1000/FILM_DUR));if(done){clearInterval(film.timer);film.mode='idle';fv.pause();setTimeout(()=>rec.stop(),300);}},1000/30);});}
+$('#btnPlay').onclick=playFilm;
+$('#filmDurTxt').textContent=Math.round(FILM_DUR);
+if(!VIDEO_OK)$('#recHint').textContent='提示：本地直接打开（file://）时浏览器禁止导出视频帧，影片与长图中的实录画面将以抽象模型代替；用线上地址或本地服务器打开即可导出含实录的版本。';
+$('#btnPng').onclick=async()=>{$('#recHint').textContent='正在生成 2400×5120 静态分析图（含实录帧）…';save(await posterBlob(),'MAD-MEDICINE_剧场交互设计分析图.png');$('#recHint').textContent='静态分析图已生成并开始下载。';};
+$('#btnRec').onclick=async()=>{const btn=$('#btnRec');if(film.mode==='rec')return;btn.disabled=true;$('#btnPlay').disabled=true;
+  try{const {blob,ext}=await recordFilm(p=>{$('#recHint').textContent=`录制中 ${Math.round(p*100)}% · 约 ${Math.ceil(FILM_DUR*(1-p))} 秒 · 请保持本标签页在前台`;});
+    const name='MAD-MEDICINE_剧场交互设计动态分析.'+ext;save(blob,name);const pv=$('#recPrev');pv.src=URL.createObjectURL(blob);pv.style.display='block';
+    $('#recHint').textContent=`录制完成（${ext.toUpperCase()} · ${(blob.size/1048576).toFixed(1)} MB），已开始下载；下方可预览。`;}
+  catch(e){$('#recHint').textContent='当前浏览器不支持画布录制，请使用电脑版 Chrome / Edge。';}
+  btn.disabled=false;$('#btnPlay').disabled=false;};
+drawFilm(fctx,1.5,0);
+window.MMA={renderPoster,posterBlob,recordFilm,FILM_DUR};
+
+/* ---------- 主循环 ---------- */
+function loop(now){const t=now/1000;simStep(now);
+  VIEWS.forEach(v=>{if(!v.vis)return;const {c,ctx,ref}=v;ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,c.width,c.height);ctx.setTransform(c.width/ref[0],0,0,c.height/ref[1],0,0);v.draw(ctx,t,v);});
+  drawChannels(t);requestAnimationFrame(loop);}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

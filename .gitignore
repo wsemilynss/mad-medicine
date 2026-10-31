@@ -1,12 +1,18 @@
 # 原始参考素材（网站用不到，不发布）
 界面效果参考.mp4
 
+# 怪物原画参考库（体积庞大，仅作本地素材源；网页用 assets/img 优化版）
+Reference/
+
 # 系统 / 编辑器文件
 Thumbs.db
 .DS_Store
 *.log
 
-# 本地临时文件（截图 / 测试草稿，不发布）
+# 本地临时文件（截图 / 测试草稿 / 素材脚本，不发布）
 _shot.html
 _shot.png
 _test.html
+_verify.html
+_resize.ps1
+_resize_bom.ps1

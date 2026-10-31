@@ -11,8 +11,13 @@ const WATCH_FILES = [
   'design-evolution.html',
   'system-analysis.html',
   'interaction-life-design.html',
+  'theatre-interaction-analysis.html',
+  'MAD-MEDICINE_设计演进对比说明.html',
+  'gameplay-demo.mp4',
   'reference-figures.mp4',
   'README.md',
+  'assets',
+  'exports',
 ];
 const DEBOUNCE_MS = 5000; // 停止改动 5 秒后才提交，避免连续保存产生大量提交
 

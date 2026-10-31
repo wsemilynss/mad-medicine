@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#05070d">
+<meta name="theme-color" content="#0a0b0e">
 <meta name="color-scheme" content="dark">
-<meta name="description" content="MAD MEDICINE · 医理探案：以望闻问切为线索的中医医理推理交互剧场，含身体状态侧写、跨学科循证交叉验证与可下载的推理路径图。">
+<meta name="description" content="MAD MEDICINE · 怪物诊所：山海志异交互剧场——身体即山河，证型即精怪。以望闻问切四术寻妖收录图鉴，含身体状态侧写、十精怪图鉴、跨学科循证交叉验证与可下载的推理路径图。">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -17,16 +17,17 @@
    视觉：双人对坐、意念相通、环绕镜头（粒子生成艺术）
    ============================================================ */
 :root{
-  --bg:#05070d;
-  --bg2:#0a0f1c;
-  --ink:#e9e4d6;
-  --ink-dim:#9a958a;
-  --gold:#d4af6a;
-  --gold-bright:#f0cf8e;
-  --teal:#6ad4c8;
-  --cinnabar:#d4706a;
-  --card:rgba(14,20,34,.82);
-  --line:rgba(212,175,106,.28);
+  --bg:#0a0b0e;
+  --bg2:#121419;
+  --ink:#ece5d1;
+  --ink-dim:#a29a84;
+  --gold:#c99a52;
+  --gold-bright:#eeca86;
+  --teal:#7fbfae;
+  --cinnabar:#d6563a;
+  --card:rgba(21,24,30,.84);
+  --line:rgba(201,154,82,.28);
+  --paper:#ece3c9;
   --serif:"Songti SC","STSong","STZhongsong","SimSun","Noto Serif SC",serif;
   --sans:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
 }
@@ -53,7 +54,7 @@ body.stage-live #figLayer{display:flex}
 .figGrain:nth-child(2){-webkit-mask-position:0 0,calc(var(--dot)*.5) calc(var(--dot)*.25);mask-position:0 0,calc(var(--dot)*.5) calc(var(--dot)*.25)}
 .figGrain:nth-child(3){-webkit-mask-position:0 0,calc(var(--dot)*.25) calc(var(--dot)*.5);mask-position:0 0,calc(var(--dot)*.25) calc(var(--dot)*.5)}
 #vignette{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 40%,transparent 26%,rgba(3,5,10,.55) 74%,rgba(2,3,7,.92) 100%)}
+  background:radial-gradient(ellipse at 50% 40%,transparent 26%,rgba(8,9,13,.55) 74%,rgba(5,6,9,.92) 100%)}
 body.stage-live #vignette{opacity:calc(1.3 - var(--cl)*.55)}
 #scanlines{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;opacity:.5;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0,rgba(0,0,0,.28) 1px,transparent 1px,transparent 3px);
@@ -73,7 +74,7 @@ body.stage-live #scanlines{opacity:calc(.82 - var(--cl)*.62)}
 #brand{font-family:var(--serif);letter-spacing:.35em;font-size:13px;color:var(--gold);
   pointer-events:auto;user-select:none}
 #brand b{color:var(--ink);font-weight:600}
-#clueToggle{pointer-events:auto;cursor:pointer;background:rgba(10,15,28,.7);
+#clueToggle{pointer-events:auto;cursor:pointer;background:rgba(18,21,27,.7);
   border:1px solid var(--line);color:var(--gold);font-size:12px;letter-spacing:.2em;
   padding:8px 14px;border-radius:2px;font-family:var(--serif)}
 #clueToggle:hover{background:rgba(212,175,106,.12)}
@@ -81,7 +82,7 @@ body.stage-live #scanlines{opacity:calc(.82 - var(--cl)*.62)}
 /* ---------- 线索簿 ---------- */
 #clueBook{
   position:fixed;top:0;right:-360px;width:340px;height:100vh;height:100dvh;z-index:20;
-  background:rgba(7,10,18,.96);border-left:1px solid var(--line);
+  background:rgba(16,18,23,.96);border-left:1px solid var(--line);
   transition:right .35s ease;padding:70px 22px 30px;overflow-y:auto;
 }
 #clueBook.open{right:0}
@@ -140,7 +141,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 .field.full{grid-column:1/-1}
 .field label{font-size:12px;letter-spacing:.2em;color:var(--ink-dim);font-family:var(--serif)}
 .field input[type=text],.field input[type=number],.field select{
-  background:rgba(5,8,15,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);
+  background:rgba(13,15,19,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);
   padding:11px 12px;border-radius:2px;font-size:14px;font-family:var(--sans);outline:none}
 .field input:focus,.field select:focus{border-color:var(--gold)}
 .field input[type=range]{accent-color:var(--gold);height:26px}
@@ -149,7 +150,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 
 /* ---------- 选项卡（单选/多选） ---------- */
 .optGroup{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
-.opt{cursor:pointer;border:1px solid rgba(233,228,214,.2);background:rgba(5,8,15,.55);
+.opt{cursor:pointer;border:1px solid rgba(233,228,214,.2);background:rgba(13,15,19,.55);
   color:var(--ink);padding:10px 18px;border-radius:2px;font-size:13.5px;
   transition:all .18s;user-select:none;line-height:1.5}
 .opt:hover{border-color:var(--gold);color:var(--gold-bright)}
@@ -165,7 +166,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 /* ---------- 进度 ---------- */
 #progress{position:fixed;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
   display:flex;justify-content:center;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
-#progress .inner{display:flex;gap:8px;align-items:center;background:rgba(7,10,18,.8);
+#progress .inner{display:flex;gap:8px;align-items:center;background:rgba(16,18,23,.8);
   border:1px solid var(--line);border-radius:20px;padding:8px 18px}
 #progress .step{width:8px;height:8px;border-radius:50%;background:rgba(233,228,214,.18);
   transition:all .3s}
@@ -176,19 +177,19 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 
 /* ---------- 把脉游戏 ---------- */
 #pulseStage{display:flex;flex-direction:column;align-items:center;gap:16px}
-#pulseCanvas{width:100%;max-width:680px;height:230px;background:rgba(5,8,15,.6);
+#pulseCanvas{width:100%;max-width:680px;height:230px;background:rgba(13,15,19,.6);
   border:1px solid var(--line);border-radius:4px}
 .pressureRow{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--ink-dim);
   letter-spacing:.15em}
 .pressureRow input{width:220px}
 .pulseTutorial{display:grid;grid-template-columns:minmax(240px,1.1fr) minmax(210px,.9fr);gap:14px;margin:18px 0 22px}
-.pulseMapWrap,.pressureSteps{border:1px solid rgba(233,228,214,.12);background:rgba(5,8,15,.48);padding:12px 14px}
+.pulseMapWrap,.pressureSteps{border:1px solid rgba(233,228,214,.12);background:rgba(13,15,19,.48);padding:12px 14px}
 .pulseMapTitle{font-family:var(--serif);font-size:12px;letter-spacing:.16em;color:var(--gold);margin-bottom:4px}
 .pulseMap{display:block;width:100%;height:auto;max-height:176px;overflow:visible}
 /* 手形分两层绘制：底层略粗作描边，上层实色填充，避免自由曲线变形 */
 .pulseMap .handOutline{fill:rgba(233,228,214,.82);stroke:rgba(233,228,214,.82);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
 .pulseMap .handOutline line{stroke-width:26}
-.pulseMap .handFill{fill:#243047;stroke:#243047;stroke-width:0;stroke-linecap:round;stroke-linejoin:round}
+.pulseMap .handFill{fill:#35291a;stroke:#35291a;stroke-width:0;stroke-linecap:round;stroke-linejoin:round}
 .pulseMap .handFill line{stroke-width:22}
 .pulseMap .palmLine{fill:none;stroke:rgba(233,228,214,.3);stroke-width:1.2;stroke-linecap:round}
 .pulseMap .artery{fill:none;stroke:var(--cinnabar);stroke-width:2;stroke-dasharray:5 4;opacity:.9}
@@ -205,7 +206,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 .pulseMapNote{font-size:10.5px;line-height:1.6;color:var(--ink-dim)}
 .pulsePosRow{display:flex;gap:8px;width:100%;justify-content:center}
 .pulsePos{cursor:pointer;min-width:82px;border:1px solid var(--line);padding:8px 14px;border-radius:2px;
-  background:rgba(5,8,15,.55);font-family:var(--serif);color:var(--ink-dim);text-align:center}
+  background:rgba(13,15,19,.55);font-family:var(--serif);color:var(--ink-dim);text-align:center}
 .pulsePosName{display:block;letter-spacing:.24em;font-size:14px}
 .pulsePos small{display:block;font:9px/1.5 var(--sans);letter-spacing:.04em;color:var(--ink-dim)}
 .pulsePos.on{color:var(--gold-bright);border-color:var(--gold);background:rgba(212,175,106,.12)}
@@ -249,7 +250,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 .rCard h3::before{content:"◆";font-size:9px;color:var(--teal)}
 .statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px}
 .stat{border:1px solid rgba(233,228,214,.12);border-radius:3px;padding:12px 14px;
-  background:rgba(5,8,15,.5)}
+  background:rgba(13,15,19,.5)}
 .stat .k{font-size:11px;color:var(--ink-dim);letter-spacing:.2em;font-family:var(--serif)}
 .stat .v{font-size:20px;color:var(--gold-bright);font-family:monospace;margin-top:6px}
 .stat .v small{font-size:11px;color:var(--ink-dim);font-family:var(--sans)}
@@ -258,7 +259,7 @@ h2{font-family:var(--serif);font-size:28px;font-size:clamp(24px,3.4vw,34px);lett
 .chartBox{display:flex;justify-content:center}
 canvas.chart{max-width:100%}
 .patternCard{border:1px solid var(--line);border-radius:4px;margin-bottom:18px;
-  background:rgba(5,8,15,.45);overflow:hidden}
+  background:rgba(13,15,19,.45);overflow:hidden}
 .patternHead{display:flex;align-items:baseline;gap:14px;padding:16px 20px;
   background:rgba(212,175,106,.07);flex-wrap:wrap}
 .patternHead .name{font-family:var(--serif);font-size:20px;letter-spacing:.2em;
@@ -299,7 +300,7 @@ canvas.chart{max-width:100%}
 .actBody .who.dr{color:var(--teal)}
 
 /* ---------- 语言切换 ---------- */
-#btnLang{pointer-events:auto;cursor:pointer;background:rgba(10,15,28,.7);
+#btnLang{pointer-events:auto;cursor:pointer;background:rgba(18,21,27,.7);
   border:1px solid rgba(106,212,200,.4);color:var(--teal);font-size:12px;letter-spacing:.15em;
   padding:8px 14px;border-radius:2px;font-family:monospace;margin-right:10px}
 #btnLang:hover{background:rgba(106,212,200,.12)}
@@ -313,7 +314,7 @@ canvas.chart{max-width:100%}
   color:var(--gold);will-change:left,top,opacity,transform;-webkit-tap-highlight-color:transparent;
   display:flex;align-items:center;justify-content:center}
 .orb i{display:block;position:relative;width:13px;height:13px;transform:rotate(45deg);
-  border:1px solid currentColor;background:rgba(5,8,15,.82);box-shadow:0 0 18px currentColor;
+  border:1px solid currentColor;background:rgba(13,15,19,.82);box-shadow:0 0 18px currentColor;
   transition:transform .25s,box-shadow .25s}
 .orb i::after{content:"";position:absolute;top:3px;left:3px;right:3px;bottom:3px;background:currentColor;opacity:.75}
 .orb b{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;
@@ -329,7 +330,7 @@ canvas.chart{max-width:100%}
 .orb.done{pointer-events:none;cursor:default}
 .orb.done b,.orb.done em{display:none}
 .orb.done i{box-shadow:0 0 5px currentColor;width:8px;height:8px}
-.orb.done i::after{background:#05070d}
+.orb.done i::after{background:var(--bg)}
 .orb.skipped i{opacity:.45}
 .orb.absorbed{animation:orbAbsorb .65s ease-in forwards}
 .orb.cat-observe{color:var(--gold)}
@@ -370,7 +371,7 @@ body.stage-live #contactReticle{transition:left .5s cubic-bezier(.2,.8,.2,1),top
   text-shadow:0 1px 8px rgba(0,0,0,.9)}
 /* ---------- 线索板（稳定清单，取代追逐移动光圈） ---------- */
 #clueDock{position:fixed;left:18px;top:66px;width:298px;width:min(298px,32vw);max-height:calc(100vh - 124px);z-index:8;
-  display:flex;flex-direction:column;background:rgba(7,10,18,.84);border:1px solid var(--line);
+  display:flex;flex-direction:column;background:rgba(16,18,23,.84);border:1px solid var(--line);
   border-radius:4px;backdrop-filter:blur(9px);overflow:hidden;
   transition:opacity .3s,transform .3s,max-height .32s ease}
 #dockHead{padding:14px 16px 12px;border-bottom:1px solid rgba(233,228,214,.1);flex:0 0 auto;position:relative;cursor:pointer}
@@ -392,7 +393,7 @@ body.stage-answering #clueDock{opacity:.22;pointer-events:none}
   padding-bottom:5px;border-bottom:1px dashed rgba(233,228,214,.14)}
 .dockGroupProg{font:10px/1 monospace;color:var(--ink-dim);letter-spacing:.08em}
 .dockItem{display:flex;align-items:center;gap:9px;width:100%;min-height:38px;text-align:left;cursor:pointer;
-  background:rgba(5,8,15,.5);border:1px solid rgba(233,228,214,.1);border-left:2px solid var(--catc);
+  background:rgba(13,15,19,.5);border:1px solid rgba(233,228,214,.1);border-left:2px solid var(--catc);
   color:var(--ink);padding:8px 10px;margin-bottom:6px;font-size:12px;line-height:1.55;border-radius:2px;
   transition:filter .18s,border-color .18s;font-family:var(--sans)}
 .dockItem i{flex:0 0 7px;width:7px;height:7px;transform:rotate(45deg);background:var(--catc);box-shadow:0 0 8px var(--catc)}
@@ -413,13 +414,13 @@ body.stage-answering #clueDock{opacity:.22;pointer-events:none}
 #btnSkipRest:hover{color:var(--gold);border-color:var(--gold)}
 #stageControls{position:fixed;right:25px;bottom:60px;z-index:8;display:flex;align-items:center;gap:7px}
 #stageControls button{width:38px;height:38px;border:1px solid rgba(233,228,214,.2);border-radius:50%;
-  background:rgba(5,8,15,.62);color:var(--ink);font-size:20px;cursor:pointer;backdrop-filter:blur(5px)}
+  background:rgba(13,15,19,.62);color:var(--ink);font-size:20px;cursor:pointer;backdrop-filter:blur(5px)}
 #stageControls button:hover{border-color:var(--gold);color:var(--gold)}
 #stageControls span{font:9px/1 monospace;letter-spacing:.18em;color:var(--ink-dim);padding:0 5px}
 body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 #signalToast{position:fixed;left:50%;top:17%;z-index:12;transform:translate(-50%,-8px);opacity:0;
   pointer-events:none;font:10px/1.5 monospace;letter-spacing:.16em;color:var(--gold-bright);
-  padding:7px 12px;border-left:1px solid var(--gold);background:rgba(5,8,15,.68);transition:.25s}
+  padding:7px 12px;border-left:1px solid var(--gold);background:rgba(13,15,19,.68);transition:.25s}
 #signalToast.show{opacity:1;transform:translate(-50%,0)}
 #deduceGate{position:fixed;bottom:64px;left:0;right:0;z-index:8;display:none;
   flex-direction:column;align-items:center;gap:12px}
@@ -430,12 +431,12 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 /* ---------- 场景内答案星环 ---------- */
 #qPanel{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:9;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s}
 #qPanel.open{opacity:1;visibility:visible;pointer-events:auto}
-#qPanel::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;inset:0;background:radial-gradient(circle at var(--focus-x,50%) var(--focus-y,48%),transparent 0 17%,rgba(2,4,9,.2) 48%,rgba(2,4,9,.66) 100%);opacity:0;transition:.3s}
+#qPanel::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;inset:0;background:radial-gradient(circle at var(--focus-x,50%) var(--focus-y,48%),transparent 0 17%,rgba(5,6,9,.2) 48%,rgba(5,6,9,.66) 100%);opacity:0;transition:.3s}
 #qPanel.open::before{opacity:1}
 #qPanelInner{position:absolute;left:var(--focus-x,50vw);top:var(--focus-y,48vh);width:0;height:0;
   pointer-events:none;color:var(--focus-color,var(--gold))}
 .focusQuestion{position:absolute;left:0;top:0;width:330px;width:clamp(270px,29vw,390px);transform:translate(-50%,-50%);
-  pointer-events:auto;padding:14px 18px 15px;background:linear-gradient(100deg,rgba(6,9,16,.96),rgba(9,14,24,.78) 82%,transparent);
+  pointer-events:auto;padding:14px 18px 15px;background:linear-gradient(100deg,rgba(14,16,21,.96),rgba(19,22,28,.78) 82%,transparent);
   border-left:2px solid currentColor;border-top:1px solid rgba(233,228,214,.2);
   clip-path:polygon(0 0,94% 0,100% 16%,100% 100%,4% 100%,0 85%);box-shadow:-18px 18px 48px rgba(0,0,0,.42)}
 .focusQuestion::after{content:"";position:absolute;left:0;right:7%;top:0;height:1px;background:currentColor;
@@ -458,7 +459,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   min-height:52px;transform:translate(-50%,-50%);opacity:1;pointer-events:auto;cursor:pointer;
   display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:9px 10px;border:0;border-left:1px solid currentColor;
   border-bottom:1px solid rgba(233,228,214,.14);border-radius:0;color:var(--ink);
-  background:linear-gradient(100deg,rgba(6,9,16,.93),rgba(9,14,24,.6),transparent);
+  background:linear-gradient(100deg,rgba(14,16,21,.93),rgba(19,22,28,.6),transparent);
   font-family:var(--serif);font-size:11.5px;line-height:1.5;letter-spacing:.04em;backdrop-filter:blur(4px)}
 .answerMain{display:flex;align-items:flex-start;gap:8px}
 .answerDeg{display:none;margin-top:8px;padding-top:7px;border-top:1px dashed rgba(233,228,214,.16)}
@@ -472,19 +473,19 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .ctxRow .miniChip.on{border-color:var(--teal);color:var(--teal);background:rgba(106,212,200,.12)}
 /* 桌面端：情境标签离开证词卡，停靠在屏幕底部，免得卡片过高被星环覆盖 */
 .ctxDock{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);width:min(780px,92vw);justify-content:center;
-  margin:0;padding:10px 14px 12px;background:rgba(6,9,16,.88);border-top:1px solid rgba(233,228,214,.18);
+  margin:0;padding:10px 14px 12px;background:rgba(14,16,21,.88);border-top:1px solid rgba(233,228,214,.18);
   pointer-events:auto;z-index:3;backdrop-filter:blur(6px);color:var(--focus-color,var(--gold))}
 .ctxDock .ctxLbl{text-align:center}
 .ctxAfter{margin-top:14px;padding:12px 4px 2px;border-top:1px dashed rgba(233,228,214,.18);color:var(--focus-color,var(--gold))}
 #qPanel.open .answerNode{animation:answerDecode .42s var(--answer-delay,0ms) ease forwards}
 @keyframes answerDecode{0%{opacity:.78;transform:translate(-50%,-50%) scale(.92) skewX(-4deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 .answerNode .answerIndex{flex:0 0 auto;font:9px/1.4 monospace;color:currentColor;letter-spacing:0}
-.answerNode:hover,.answerNode.sel{border-left-width:3px;color:var(--gold-bright);filter:brightness(1.35);background:rgba(16,23,36,.9)}
+.answerNode:hover,.answerNode.sel{border-left-width:3px;color:var(--gold-bright);filter:brightness(1.35);background:rgba(27,31,39,.9)}
 .answerNode.sel::after{content:"REC";position:absolute;right:6px;top:4px;color:currentColor;font:8px/1 monospace;letter-spacing:.08em}
 #qPanel.resolving .focusQuestion,#qPanel.resolving .answerNode{animation:fieldCollapse .48s ease-in forwards!important}
 @keyframes fieldCollapse{to{left:calc(50vw - var(--focus-x));top:calc(55vh - var(--focus-y));transform:translate(-50%,-50%) scale(.04);opacity:0}}
 #qPanelClose{position:fixed;left:calc(var(--focus-x,50vw) + max(135px,min(14.5vw,195px)) + 18px);top:calc(var(--focus-y,48vh) - 52px);
-  width:34px;height:34px;pointer-events:auto;cursor:pointer;background:rgba(5,8,15,.72);border:1px solid rgba(233,228,214,.2);
+  width:34px;height:34px;pointer-events:auto;cursor:pointer;background:rgba(13,15,19,.72);border:1px solid rgba(233,228,214,.2);
   border-radius:50%;color:var(--ink-dim);font-size:18px;z-index:2;opacity:0;transition:.2s}
 #qPanel.open #qPanelClose{opacity:1}
 #qPanelClose:hover{color:var(--gold);border-color:var(--gold);transform:rotate(90deg)}
@@ -493,7 +494,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   animation:moteIn .72s var(--mote-delay) cubic-bezier(.55,0,.3,1) forwards}
 @keyframes moteIn{to{transform:translate(var(--mote-tx),var(--mote-ty)) scale(.1);opacity:0}}
 .pulseField{position:absolute;left:0;top:0;width:calc(100vw - 36px);width:min(760px,calc(100vw - 36px));max-height:82vh;overflow:auto;
-  transform:translate(-50%,-50%);pointer-events:auto;padding:20px 24px;background:rgba(5,8,15,.91);
+  transform:translate(-50%,-50%);pointer-events:auto;padding:20px 24px;background:rgba(13,15,19,.91);
   border-left:1px solid currentColor;border-right:1px solid rgba(233,228,214,.14);backdrop-filter:blur(10px);
   box-shadow:0 24px 80px rgba(0,0,0,.68)}
 #pulseDock{display:none}
@@ -533,11 +534,11 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   #qPanelInner{position:fixed;left:0;right:0;top:auto;bottom:0;width:100%;height:auto;max-height:76vh;max-height:76dvh;
     overflow-y:auto;-webkit-overflow-scrolling:touch;
     padding:18px 15px calc(22px + env(safe-area-inset-bottom));pointer-events:auto;color:var(--focus-color,var(--gold));
-    background:rgba(7,10,18,.97);border-top:1px solid var(--focus-color,var(--gold));border-radius:16px 16px 0 0;
+    background:rgba(16,18,23,.97);border-top:1px solid var(--focus-color,var(--gold));border-radius:16px 16px 0 0;
     transform:translateY(103%);transition:transform .3s ease;box-sizing:border-box}
   #qPanel.open #qPanelInner{transform:none}
   .focusQuestion{position:static;width:100%;transform:none;padding:13px 14px;box-shadow:none;
-    clip-path:none;background:rgba(6,9,16,.9);display:flex;flex-direction:column}
+    clip-path:none;background:rgba(14,16,21,.9);display:flex;flex-direction:column}
   .focusQuestion .degreeNote{order:5}.focusQuestion .customWrap{order:8}.focusQuestion .skipOrbBtn{order:9}
   .focusQuestion::after{display:none}
   .focusTitle{font-size:15.5px}
@@ -547,7 +548,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .answerWire{display:none}
   .answerNode{position:relative;left:auto;top:auto;width:100%;min-height:48px;transform:none;margin-top:8px;padding:12px;
     font-size:13px;line-height:1.5;border:1px solid rgba(233,228,214,.16);border-left:2px solid currentColor;
-    background:rgba(9,14,24,.7);backdrop-filter:none;display:flex}
+    background:rgba(19,22,28,.7);backdrop-filter:none;display:flex}
   .answerNode.lv1{border-left-width:3px}.answerNode.lv2{border-left-width:5px}.answerNode.lv3{border-left-width:7px}
   #qPanel.open .answerNode{animation:none;opacity:1}
   .answerNode .answerIndex{line-height:1.8}
@@ -590,7 +591,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .degreeRow{display:flex;align-items:center;gap:7px;margin-top:11px;flex-wrap:wrap}
 .degreeRow:empty{display:none}
 .degreeLbl{font:9px/1 monospace;letter-spacing:.18em;color:var(--ink-dim)}
-.miniChip{cursor:pointer;border:1px solid rgba(233,228,214,.2);background:rgba(5,8,15,.6);
+.miniChip{cursor:pointer;border:1px solid rgba(233,228,214,.2);background:rgba(13,15,19,.6);
   color:var(--ink-dim);font-size:10.5px;padding:7px 11px;border-radius:2px;font-family:var(--serif);letter-spacing:.06em}
 .miniChip.on{border-color:var(--gold);color:var(--gold-bright);background:rgba(212,175,106,.14)}
 .degreeNote{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(233,228,214,.15);
@@ -603,10 +604,10 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 
 /* ---------- 阶段侧写奖励弹窗 ---------- */
 #milestoneModal{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;
-  padding:22px;background:rgba(2,4,9,.6);backdrop-filter:blur(4px);
+  padding:22px;background:rgba(5,6,9,.6);backdrop-filter:blur(4px);
   opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
 #milestoneModal.show{opacity:1;visibility:visible}
-.msCard{max-width:440px;width:100%;background:linear-gradient(160deg,rgba(12,17,28,.98),rgba(7,10,18,.94));
+.msCard{max-width:440px;width:100%;background:linear-gradient(160deg,rgba(32,25,14,.98),rgba(16,18,23,.94));
   border:1px solid var(--gold);border-radius:6px;padding:26px 26px 20px;
   box-shadow:0 24px 80px rgba(0,0,0,.65),0 0 46px rgba(212,175,106,.14);animation:rewardIn .5s ease}
 .msKicker{font:10px/1.5 monospace;letter-spacing:.3em;color:var(--teal);margin-bottom:10px}
@@ -701,14 +702,14 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .answerNode.lv3{border-left-width:6px}
 /* 自填补充 */
 .customWrap{margin-top:11px;position:relative}
-.customWrap input{width:100%;background:rgba(5,8,15,.78);border:1px solid rgba(233,228,214,.16);
+.customWrap input{width:100%;background:rgba(13,15,19,.78);border:1px solid rgba(233,228,214,.16);
   border-left:2px solid currentColor;color:var(--ink);padding:10px 11px;font-size:12.5px;
   font-family:var(--sans);outline:none;border-radius:0}
 .customWrap input::placeholder{color:rgba(154,149,138,.7)}
-.customWrap input:focus{border-color:var(--gold);background:rgba(9,14,24,.9)}
+.customWrap input:focus{border-color:var(--gold);background:rgba(19,22,28,.9)}
 /* 循证交叉验证 */
 .evItem{border:1px solid rgba(233,228,214,.12);border-left:2px solid var(--teal);border-radius:2px;
-  padding:12px 15px;margin-bottom:10px;background:rgba(5,8,15,.45)}
+  padding:12px 15px;margin-bottom:10px;background:rgba(13,15,19,.45)}
 .evHead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
 .evDisc{font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--teal)}
 .evGrade{font:8.5px/1 monospace;letter-spacing:.12em;border:1px solid currentColor;padding:3px 6px;border-radius:2px}
@@ -718,7 +719,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .evLegend{font:9.5px/1.8 monospace;letter-spacing:.1em;color:var(--ink-dim);margin-top:4px;
   padding-top:10px;border-top:1px dashed rgba(233,228,214,.14)}
 /* 推理路径图：窄屏下保留可读字号，改为横向滑动查看 */
-#pathWrap{width:100%;border:1px solid rgba(233,228,214,.12);background:#070a12;
+#pathWrap{width:100%;border:1px solid rgba(233,228,214,.12);background:#16110a;
   overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
 #pathC{display:block;max-width:none}
 #pathHint{display:none;font:9.5px/1.7 monospace;letter-spacing:.14em;color:var(--ink-dim);
@@ -743,7 +744,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 /* 开场：四步图标卡取代长段说明 */
 .introSteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:min(640px,92vw);margin-top:26px}
 .istep{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px 13px;text-align:center;
-  border:1px solid rgba(233,228,214,.12);background:rgba(7,10,18,.55);backdrop-filter:blur(4px);
+  border:1px solid rgba(233,228,214,.12);background:rgba(16,18,23,.55);backdrop-filter:blur(4px);
   clip-path:polygon(0 0,100% 0,100% 84%,88% 100%,0 100%);animation:fadeUp .7s ease both}
 .istep:nth-child(2){animation-delay:.08s}.istep:nth-child(3){animation-delay:.16s}.istep:nth-child(4){animation-delay:.24s}
 .istep i{display:block;width:40px;height:40px;color:var(--gold);filter:drop-shadow(0 0 10px rgba(212,175,106,.45))}
@@ -753,7 +754,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 /* 手册：图标网格 */
 .manualGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
 .mcard{--catc:var(--gold);display:flex;flex-direction:column;gap:6px;padding:14px 14px 12px;border:1px solid rgba(233,228,214,.12);
-  border-top:2px solid var(--catc);background:rgba(5,8,15,.5)}
+  border-top:2px solid var(--catc);background:rgba(13,15,19,.5)}
 .mcard.cat-listen{--catc:var(--teal)}.mcard.cat-inquire{--catc:var(--cinnabar)}.mcard.cat-pulse{--catc:#e9e4d6}
 .mcard i{display:block;width:34px;height:34px;color:var(--catc);filter:drop-shadow(0 0 8px var(--catc))}
 .mcard b{font-family:var(--serif);font-size:13px;letter-spacing:.2em;color:var(--catc)}
@@ -763,12 +764,12 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 /* HUD：章节徽章行 —— 每章一枚，进度环随收集填满，收齐即点亮 */
 #chapterRow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 0}
 .chChip{--catc:var(--gold);--p:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px 5px;
-  border:1px solid rgba(233,228,214,.1);border-radius:3px;background:rgba(5,8,15,.5);color:var(--ink-dim);cursor:pointer;transition:.25s}
+  border:1px solid rgba(233,228,214,.1);border-radius:3px;background:rgba(13,15,19,.5);color:var(--ink-dim);cursor:pointer;transition:.25s}
 .chChip.cat-observe{--catc:var(--gold)}.chChip.cat-listen{--catc:var(--teal)}.chChip.cat-inquire{--catc:var(--cinnabar)}.chChip.cat-pulse{--catc:#e9e4d6}
 .chChip:hover{border-color:var(--catc)}
 .chRing{position:relative;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   background:conic-gradient(var(--catc) calc(var(--p)*1%),rgba(233,228,214,.1) 0);transition:background .4s}
-.chRing::before{content:"";position:absolute;inset:3px;border-radius:50%;background:rgba(7,10,18,.96)}
+.chRing::before{content:"";position:absolute;inset:3px;border-radius:50%;background:rgba(16,18,23,.96)}
 .chRing i{position:relative;display:block;width:18px;height:18px;color:var(--catc);opacity:.7}
 .chChip small{font:8.5px/1 monospace;letter-spacing:.1em}
 .chChip.clear{color:var(--catc);border-color:var(--catc);box-shadow:0 0 14px color-mix(in srgb,var(--catc) 35%,transparent)}
@@ -785,16 +786,16 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 #hudSide #xpRow{margin-top:2px}
 #badgeShelf{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
 .bSlot{width:22px;height:22px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(233,228,214,.12);
-  border-radius:3px;color:rgba(233,228,214,.18);background:rgba(5,8,15,.5);transition:.3s;position:relative}
+  border-radius:3px;color:rgba(233,228,214,.18);background:rgba(13,15,19,.5);transition:.3s;position:relative}
 .bSlot i{display:block;width:14px;height:14px}
 .bSlot.on{color:var(--gold-bright);border-color:var(--gold);box-shadow:0 0 10px rgba(212,175,106,.4)}
 .bSlot.on.silver{color:#cfd6dd;border-color:rgba(207,214,221,.6);box-shadow:0 0 8px rgba(207,214,221,.25)}
 .bSlot.pop{animation:chPop .7s ease}
 .bSlot[data-tip]:hover::after{content:attr(data-tip);position:absolute;left:50%;top:-26px;transform:translateX(-50%);white-space:nowrap;
-  font:9px/1 monospace;letter-spacing:.1em;color:var(--ink);background:rgba(5,8,15,.95);border:1px solid var(--line);padding:5px 7px;z-index:2}
+  font:9px/1 monospace;letter-spacing:.1em;color:var(--ink);background:rgba(13,15,19,.95);border:1px solid var(--line);padding:5px 7px;z-index:2}
 /* 徽章解锁 Toast */
 #badgeToast{position:fixed;right:24px;top:118px;z-index:16;display:flex;align-items:center;gap:12px;padding:10px 14px 10px 12px;
-  background:rgba(7,10,18,.94);border:1px solid var(--gold);border-left-width:3px;color:var(--ink);
+  background:rgba(16,18,23,.94);border:1px solid var(--gold);border-left-width:3px;color:var(--ink);
   transform:translateX(120%);opacity:0;transition:transform .45s cubic-bezier(.2,.9,.3,1.2),opacity .3s;pointer-events:none;
   box-shadow:0 10px 34px rgba(0,0,0,.5),0 0 22px rgba(212,175,106,.2)}
 #badgeToast.show{transform:none;opacity:1}
@@ -834,7 +835,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .ctxRow .ctxLbl{cursor:pointer;user-select:none}
 .ctxRow .ctxLbl:hover{color:var(--gold-bright)}
 .ctxRow.open .ctxLbl{color:var(--teal)}
-.ctxDock:not(.open){padding:8px 14px;width:auto;border-top:0;background:rgba(6,9,16,.72)}
+.ctxDock:not(.open){padding:8px 14px;width:auto;border-top:0;background:rgba(14,16,21,.72)}
 .customWrap:not(.open) input{display:none}
 .customToggle{background:none;border:0;border-bottom:1px dashed rgba(154,149,138,.5);color:var(--ink-dim);
   font:10.5px/1 var(--sans);letter-spacing:.12em;padding:4px 2px;cursor:pointer}
@@ -844,7 +845,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .focusFoot .skipOrbBtn{margin:0}
 .focusActions .archiveNode:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 .confirmDock{position:fixed;left:50%;bottom:22px;z-index:4;display:flex;align-items:center;gap:18px;width:min(560px,calc(100vw - 40px));pointer-events:auto;
-  transform:translateX(-50%);padding:10px 12px 10px 16px;background:rgba(6,9,16,.94);border:1px solid var(--focus-color,var(--gold));
+  transform:translateX(-50%);padding:10px 12px 10px 16px;background:rgba(14,16,21,.94);border:1px solid var(--focus-color,var(--gold));
   box-shadow:0 12px 34px rgba(0,0,0,.5),0 0 24px color-mix(in srgb,var(--focus-color,var(--gold)) 18%,transparent);backdrop-filter:blur(8px)}
 .confirmDock::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--focus-color,var(--gold));box-shadow:0 0 12px var(--focus-color,var(--gold))}
 .confirmDock .focusActions{flex:1;margin:0;align-items:center;gap:10px}
@@ -894,7 +895,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 /* 报告：徽章墙 */
 .badgeWall{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:16px}
 .badgeWall .bw{display:flex;flex-direction:column;align-items:center;gap:5px;width:78px;padding:10px 4px 8px;border:1px solid rgba(233,228,214,.12);
-  color:rgba(233,228,214,.2);background:rgba(5,8,15,.5)}
+  color:rgba(233,228,214,.2);background:rgba(13,15,19,.5)}
 .badgeWall .bw i{display:block;width:26px;height:26px}
 .badgeWall .bw span{font:8.5px/1.3 monospace;letter-spacing:.08em;text-align:center}
 .badgeWall .bw.on{color:var(--gold-bright);border-color:var(--gold);box-shadow:0 0 14px rgba(212,175,106,.3)}
@@ -1029,8 +1030,168 @@ input[type=range]{accent-color:var(--gold)}
   h1.title{animation-name:titleInLite}
   @keyframes titleInLite{from{opacity:0;letter-spacing:.4em}}
 }
+/* ============================================================
+   v5 · 志怪水墨木刻层：宣纸肌理 / 木刻框线 / 笔锋分隔 / 朱砂印
+   视觉参照：东方志怪绣像 · 民俗版画的粗粝颗粒与拙朴边框
+   ============================================================ */
+#grain{opacity:.12}
+/* 宣纸纤维：一层极淡的水平帘纹 + 斑驳晕渍，铺在所有内容之下 */
+#paper{position:fixed;top:0;left:0;right:0;bottom:0;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background:
+    repeating-linear-gradient(0deg,rgba(236,227,207,.016) 0 1px,transparent 1px 7px),
+    radial-gradient(ellipse 40% 28% at 18% 22%,rgba(201,154,82,.05),transparent 70%),
+    radial-gradient(ellipse 36% 30% at 84% 72%,rgba(208,84,63,.035),transparent 70%),
+    radial-gradient(ellipse 50% 40% at 60% 10%,rgba(127,191,174,.025),transparent 70%)}
+/* 木刻双框：外粗内细，四角略破损（版画拙感） */
+.panel,.rCard,.msCard{position:relative;border-radius:6px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 0 0 1px rgba(236,227,207,.045),inset 0 0 70px rgba(0,0,0,.3)}
+.panel::after,.rCard::after,.msCard::after{content:"";position:absolute;inset:5px;pointer-events:none;border-radius:3px;
+  border:1px solid rgba(201,154,82,.14);
+  -webkit-mask-image:linear-gradient(#000,#000),radial-gradient(circle 14px at 0 0,transparent 92%,#000),radial-gradient(circle 14px at 100% 100%,transparent 92%,#000);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(#000,#000),radial-gradient(circle 14px at 0 0,transparent 92%,#000),radial-gradient(circle 14px at 100% 100%,transparent 92%,#000);
+  mask-composite:intersect}
+.stat,.patternCard,.evItem,.teaF,.istep,.mcard{border-radius:5px}
+.field input[type=text],.field input[type=number],.field select,.customWrap input{border-radius:5px}
+#pathWrap,.pulseMapWrap,.pressureSteps,.pulsePos,.pressureStep{border-radius:5px}
+#pulseCanvas{border-radius:6px}
+.opt{border-radius:7px}.dockItem{border-radius:6px}
+/* 主按钮：由金丸改为「关防长印」——矩形、细框、字距拉开 */
+.btn{border-radius:5px;background:linear-gradient(145deg,var(--gold),#b98a40 58%,var(--gold-bright));
+  box-shadow:0 4px 0 rgba(0,0,0,.4),0 10px 28px rgba(201,154,82,.22),inset 0 0 0 1px rgba(10,12,16,.35),inset 0 0 0 3px rgba(238,202,134,.22)}
+.btn:hover{box-shadow:0 6px 0 rgba(0,0,0,.42),0 14px 34px rgba(201,154,82,.34),inset 0 0 0 1px rgba(10,12,16,.35),inset 0 0 0 3px rgba(238,202,134,.3)}
+.btn:active{box-shadow:0 1px 0 rgba(0,0,0,.4),0 4px 14px rgba(201,154,82,.2),inset 0 0 0 1px rgba(10,12,16,.35)!important}
+.btn.ghost{background:transparent;box-shadow:none;border:1px solid var(--line);border-radius:5px}
+#clueToggle,#btnLang,#btnSound,#dockToggle{border-radius:4px}
+/* 分隔线 → 笔锋：中段饱满、两端枯笔 */
+.divider{width:120px;height:3px;border-radius:2px;opacity:.75;
+  background:linear-gradient(90deg,transparent,rgba(201,154,82,.25) 12%,var(--gold) 38% 62%,rgba(201,154,82,.25) 88%,transparent)}
+.divider::after{content:"";display:block;width:34px;height:1px;margin:3px auto 0;background:rgba(208,84,63,.55)}
+/* 标题缀朱砂点（志怪绣像卷首符号） */
+h2{position:relative}
+.kicker{color:var(--teal)}
+/* 小剧场 / 采访语：改用楷体的手写话本气 */
+.actBody,.interview,.msQuote{font-family:"Kaiti SC","STKaiti","KaiTi","Noto Serif SC",var(--serif)}
+.actBody p.scene{color:var(--cinnabar);opacity:.8}
+.actTitle{color:var(--cinnabar);border-bottom:1px dashed rgba(208,84,63,.3);padding-bottom:6px;display:inline-block}
+.actBody .who{color:var(--gold-bright)}
+.actBody .who.sp{color:var(--cinnabar)}
+/* 朱砂印章强化：双框 + 微噪 */
+.stamp{border-width:3px;box-shadow:inset 0 0 0 1.5px rgba(10,12,16,.8),inset 0 0 0 2.5px var(--cinnabar);background:rgba(208,84,63,.07)}
+/* 顶部音效钮 */
+#btnSound{pointer-events:auto;cursor:pointer;background:rgba(18,21,27,.7);border:1px solid var(--line);
+  color:var(--gold);font-size:12px;padding:8px 12px;font-family:monospace;letter-spacing:.05em;margin-right:10px}
+#btnSound.off{color:var(--ink-dim);opacity:.7}
+#btnSound:hover{background:rgba(201,154,82,.12)}
+@media(max-width:700px){#btnSound{font-size:9px;padding:6px 8px}}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ============================================================
+   v6 · 怪物山海经层：玄墨为底 · 白描怪物 · 朱砂印 · 宣纸图鉴
+   视觉素材出自 Reference/01. 怪物角色设定（手绘白描，assets/img 优化版）
+   暗底：invert 反白 + screen 混合 → 线条如碑拓浮出夜色
+   图鉴：宣纸原色 + multiply 融合 → 白描直接印在纸上
+   ============================================================ */
+::selection{background:rgba(214,86,58,.4);color:#fff}
+/* 墨线游丝：手写流水纹平铺，极淡，贴着画面边缘缓慢漂移 */
+#inkline{position:fixed;inset:-6%;z-index:1;pointer-events:none;opacity:.5;mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560' viewBox='0 0 560 560'%3E%3Cg fill='none' stroke='%23ece5d1' stroke-opacity='.5' stroke-width='1'%3E%3Cpath d='M-20 96C90 40 170 168 292 112S474 28 590 96'/%3E%3Cpath d='M-20 130C96 76 178 198 300 144S482 66 590 130'/%3E%3Cpath d='M-20 164C102 112 186 226 308 174S490 104 590 164'/%3E%3Cpath d='M-20 384C88 330 172 450 296 394S478 310 590 378'/%3E%3Cpath d='M-20 418C94 366 180 478 304 426S486 346 590 410'/%3E%3Cpath d='M-20 452C100 404 188 508 312 460S494 384 590 444'/%3E%3Cpath d='M118 -20C66 92 172 182 122 304S46 482 124 590'/%3E%3Cpath d='M152 -20C102 98 202 190 154 312S80 490 158 590'/%3E%3Cpath d='M418 -20C370 86 468 176 422 300S350 474 426 590'/%3E%3Cpath d='M452 -20C404 92 500 184 454 308S382 482 458 590'/%3E%3C/g%3E%3Cg fill='%23ece5d1' fill-opacity='.5'%3E%3Ccircle cx='86' cy='302' r='1.4'/%3E%3Ccircle cx='102' cy='322' r='1'/%3E%3Ccircle cx='68' cy='334' r='.9'/%3E%3Ccircle cx='112' cy='348' r='1.1'/%3E%3Ccircle cx='470' cy='212' r='1.3'/%3E%3Ccircle cx='490' cy='230' r='.9'/%3E%3Ccircle cx='452' cy='244' r='1.1'/%3E%3Ccircle cx='250' cy='482' r='1.3'/%3E%3Ccircle cx='270' cy='498' r='.9'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:560px 560px;animation:inkDrift 110s linear infinite;
+  -webkit-mask-image:radial-gradient(ellipse 74% 68% at 50% 46%,transparent 26%,#000 80%);
+  mask-image:radial-gradient(ellipse 74% 68% at 50% 46%,transparent 26%,#000 80%)}
+@keyframes inkDrift{to{background-position:560px 280px}}
+/* 竖排卷边引文（超宽屏两侧） */
+.scrollTag{position:fixed;top:50%;transform:translateY(-50%);z-index:2;pointer-events:none;
+  writing-mode:vertical-rl;letter-spacing:.5em;font-family:var(--serif);font-size:13px;
+  color:rgba(236,229,209,.30);text-shadow:0 0 12px rgba(0,0,0,.85);user-select:none}
+.scrollTag.l{left:24px}.scrollTag.r{right:24px}
+.scrollTag b{color:var(--cinnabar);font-weight:400}
+@media(max-width:1180px){.scrollTag{display:none}}
+/* 朱砂印 */
+.seal{display:inline-flex;align-items:center;justify-content:center;background:var(--cinnabar);color:#f5ecd6;
+  font-family:var(--serif);font-weight:600;letter-spacing:.08em;padding:.3em .38em;border-radius:3px;
+  box-shadow:0 3px 14px rgba(214,86,58,.38),inset 0 0 0 1px rgba(245,236,214,.4);
+  transform:rotate(-3deg);line-height:1.15;text-align:center;user-select:none}
+.seal.mini{font-size:11px;letter-spacing:.05em}
+.seal.vert{writing-mode:vertical-rl;letter-spacing:.18em;padding:.45em .3em}
+.seal.ghost{background:transparent;color:var(--cinnabar);border:1.5px solid var(--cinnabar);box-shadow:none}
+/* 白描怪物 · 暗底拓片处理 */
+.inkArt{mix-blend-mode:screen;filter:invert(.94) sepia(.18) brightness(1.02) contrast(.94)}
+/* 白描怪物 · 宣纸图鉴处理 */
+.paperArt{mix-blend-mode:multiply;filter:contrast(1.03)}
+/* 顶栏吉祥物 */
+#brand{display:flex;align-items:center;gap:9px}
+.brandArt{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 18%;opacity:.95}
+/* ---------- 开场主视觉 ---------- */
+.heroWrap{position:relative;width:100%;max-width:1120px;display:flex;align-items:center;justify-content:center;gap:8px}
+.heroMain{position:relative;z-index:2;flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+.heroArt{position:relative;flex:0 0 min(330px,30vw);pointer-events:none;user-select:none;margin-right:2vw}
+.heroArt img{width:100%;display:block;animation:heroFloat 7.5s ease-in-out infinite;
+  -webkit-mask-image:radial-gradient(ellipse 62% 56% at 50% 46%,#000 46%,transparent 82%);
+  mask-image:radial-gradient(ellipse 62% 56% at 50% 46%,#000 46%,transparent 82%)}
+.heroArt figcaption{position:absolute;right:-8px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;
+  font-family:var(--serif);letter-spacing:.55em;font-size:12.5px;color:rgba(236,229,209,.42)}
+.heroArt figcaption b{color:var(--cinnabar);font-weight:400}
+@keyframes heroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@media(max-width:760px){
+  .heroWrap{display:block}
+  .heroArt{position:absolute;right:-16%;top:44%;transform:translateY(-50%);width:70vw;max-width:330px;
+    margin:0;opacity:.42;z-index:0}
+  .heroArt figcaption{display:none}
+}
+/* 手册卡小像 */
+.mcard{position:relative}
+.mThumb{position:absolute;right:10px;top:10px;width:42px;height:42px;border-radius:50%;object-fit:cover;opacity:.9}
+.mcard b{padding-right:52px}
+/* 线索板章节小像（望·眼 / 闻·羽 / 问·结 / 切·缕） */
+.dockGroupHead::before{content:"";width:30px;height:30px;border-radius:50%;flex:0 0 auto;align-self:center;
+  background-size:cover;background-position:center;mix-blend-mode:screen;opacity:.85;
+  filter:invert(.92) sepia(.15) brightness(.95)}
+.dockGroup.cat-observe .dockGroupHead::before{background-image:url("assets/img/eye.jpg")}
+.dockGroup.cat-listen .dockGroupHead::before{background-image:url("assets/img/bird.jpg")}
+.dockGroup.cat-inquire .dockGroupHead::before{background-image:url("assets/img/world.jpg")}
+.dockGroup.cat-pulse .dockGroupHead::before{background-image:url("assets/img/img057.jpg")}
+/* ---------- 怪物图鉴 · 宣纸卡 ---------- */
+.beastGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:16px}
+.beastCard{position:relative;background:linear-gradient(163deg,#f0e9d3 8%,#e7dcbd 88%);color:#221d12;border-radius:6px;
+  padding:14px 14px 13px;box-shadow:0 16px 38px rgba(0,0,0,.5),inset 0 0 0 1px rgba(60,45,20,.32);overflow:hidden;
+  animation:cardIn .7s cubic-bezier(.2,.8,.2,1) both}
+.beastCard::before{content:"";position:absolute;inset:5px;border:1px solid rgba(60,45,20,.3);border-radius:3px;pointer-events:none;z-index:2}
+.beastCard .bImg{display:block;width:100%;height:196px;object-fit:contain}
+.beastCard .bName{font-family:var(--serif);font-size:17px;letter-spacing:.2em;color:#2b2415;margin-top:9px}
+.beastCard .bName small{font-size:10px;letter-spacing:.1em;color:#94422c;margin-left:7px;font-family:var(--sans)}
+.beastCard .bDen{font-size:10.5px;color:#6d6046;letter-spacing:.08em;margin:3px 0 9px;line-height:1.6}
+.beastCard .bClassic{font-family:"Kaiti SC","STKaiti","KaiTi","Noto Serif SC",var(--serif);
+  font-size:12.5px;line-height:1.95;color:#3a3222;border-top:1px dashed rgba(60,45,20,.32);padding-top:9px;text-align:justify}
+.beastCard .bMoral{font-family:"Kaiti SC","STKaiti","KaiTi",var(--serif);font-size:12px;line-height:1.8;
+  color:#94422c;margin-top:8px}
+.beastCard .bSeal{position:absolute;right:10px;top:10px;z-index:3;font-size:10px}
+.beastCard.shan .bImg{height:220px}
+@media print{.beastCard{break-inside:avoid;box-shadow:none}}
+/* ---------- 章节收录弹窗 · 怪物现形 ---------- */
+.msBeast{display:flex;flex-direction:column;align-items:center;gap:7px;margin:2px 0 10px;animation:cardIn .6s cubic-bezier(.2,.8,.2,1) both}
+.msBeast .ring{width:112px;height:112px;border-radius:50%;overflow:hidden;border:1px solid rgba(236,229,209,.28);
+  box-shadow:0 0 34px rgba(0,0,0,.55),0 0 18px rgba(214,86,58,.18);display:flex;background:#0d0f13}
+.msBeast img{width:100%;height:100%;object-fit:cover;mix-blend-mode:screen;filter:invert(.94) sepia(.18) brightness(1.03)}
+.msBeast small{font-family:var(--serif);color:var(--cinnabar);letter-spacing:.3em;font-size:11px}
+.msBeast small b{color:var(--ink);font-weight:400;letter-spacing:.12em}
+@media(max-width:700px){.msBeast .ring{width:88px;height:88px}}
+/* 心理侧写卡 · 欲灵小像（心之欲望所化） */
+.psyCard{position:relative;overflow:hidden}
+.psyArt{position:absolute;right:18px;top:14px;width:96px;height:128px;object-fit:cover;opacity:.75;
+  -webkit-mask-image:radial-gradient(ellipse 70% 66% at 50% 44%,#000 40%,transparent 82%);
+  mask-image:radial-gradient(ellipse 70% 66% at 50% 44%,#000 40%,transparent 82%);pointer-events:none}
+@media(max-width:700px){.psyArt{width:64px;height:88px;opacity:.5;right:8px;top:8px}}
+/* 建档屏 · 山姬姣迎宾（宽屏侧立） */
+@media(min-width:1100px){
+  #screen-intake::after{content:"";position:fixed;right:1.5vw;bottom:0;width:23vw;max-width:330px;height:92vh;
+    background:url("assets/img/shanji.jpg") center bottom/contain no-repeat;
+    mix-blend-mode:screen;filter:invert(.94) sepia(.18) brightness(1.02);opacity:.38;pointer-events:none;z-index:0;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 22% 82%,transparent 100%);
+    mask-image:linear-gradient(180deg,transparent 0%,#000 22% 82%,transparent 100%)}
+  #screen-intake .panel{margin-right:min(20vw,300px)}
 }
 </style>
 </head>
@@ -1042,60 +1203,73 @@ input[type=range]{accent-color:var(--gold)}
   <video class="figGrain" muted loop playsinline webkit-playsinline preload="none"><source src="reference-figures.mp4" type="video/mp4"></video>
 </div>
 <div id="vignette"></div>
+<div id="paper"></div>
+<div id="inkline"></div>
 <div id="scanlines"></div>
 <div id="grain"></div>
+<div class="scrollTag l" aria-hidden="true">身 即 山 河 <b>·</b> 怪 即 未 病</div>
+<div class="scrollTag r" aria-hidden="true">山 海 有 怪 <b>·</b> 诊 所 收 之</div>
 
 <div id="topbar">
-  <div id="brand"><b>MAD MEDICINE</b> · <span data-zh="医理探案" data-en="Body Profiler">医理探案</span></div>
+  <div id="brand"><img class="brandArt inkArt" src="assets/img/keyao.jpg" alt="嗑药科斯基 · 诊所吉祥物"><b>MAD MEDICINE</b> · <span data-zh="怪物诊所" data-en="Monster Clinic">怪物诊所</span></div>
   <div>
+    <button id="btnSound" aria-label="音效开关" title="音效开关">♪ ON</button>
     <button id="btnLang">EN</button>
-    <button id="clueToggle" data-zh="线 索 簿" data-en="CLUE BOOK">线 索 簿</button>
+    <button id="clueToggle" data-zh="医 案 册" data-en="CASE BOOK">医 案 册</button>
   </div>
 </div>
 
 <aside id="clueBook">
-  <h3 data-zh="线 索 簿" data-en="C L U E · B O O K">线 索 簿</h3>
-  <div class="sub" data-zh="四诊收集到的每一条线索，都会进入推理链" data-en="Every clue from the four examinations feeds the deduction">四诊收集到的每一条线索，都会进入推理链</div>
-  <div id="clueList"><div class="clueEmpty" data-zh="尚未收集线索 —— 开始探案后，线索将在此归档。" data-en="No clues yet — they will be filed here as you investigate.">尚未收集线索 —— 开始探案后，线索将在此归档。</div></div>
+  <h3 data-zh="医 案 · 线 索 簿" data-en="C A S E · B O O K">医 案 · 线 索 簿</h3>
+  <div class="sub" data-zh="望闻问切收来的异象，皆入此册，以待辨证" data-en="Every omen gathered by the four examinations is filed here, awaiting diagnosis">望闻问切收来的异象，皆入此册，以待辨证</div>
+  <div id="clueList"><div class="clueEmpty" data-zh="尚未收录异象 —— 入山之后，异象将在此归档。" data-en="No omens yet — they will be filed here once you enter the mountains.">尚未收录异象 —— 入山之后，异象将在此归档。</div></div>
 </aside>
 
 <div id="app">
 
   <!-- 0 · 开场 -->
   <section class="screen" id="screen-intro">
-    <div class="kicker">A FORENSIC JOURNEY THROUGH THE BODY</div>
-    <h1 class="title"><span data-zh="医 理 探 案" data-en="BODY PROFILER">医 理 探 案</span>
-      <span class="en">MAD MEDICINE · 医理探案</span>
-    </h1>
-    <div class="vitalLine" data-vital></div>
-    <p class="lede"
-      data-zh="你是「身体侦探」。捕捉漂浮的线索光点，让灰雾中的两个人影逐层显形——<b>每收齐一章，解锁一枚徽章与一次侧写更新</b>。"
-      data-en="You are the body's detective. Capture the drifting clue-orbs and let the two grey figures develop layer by layer — <b>every chapter cleared unlocks a badge and a profile update</b>.">
-      你是「身体侦探」。捕捉漂浮的线索光点，让灰雾中的两个人影逐层显形——<b>每收齐一章，解锁一枚徽章与一次侧写更新</b>。</p>
-    <div class="introSteps">
-      <div class="istep"><i data-glyph="file"></i><b data-zh="建 档" data-en="INTAKE">建 档</b><span data-zh="30 秒 · 可跳过" data-en="30 s · skippable">30 秒 · 可跳过</span></div>
-      <div class="istep"><i data-glyph="orb"></i><b data-zh="捕 捉" data-en="CAPTURE">捕 捉</b><span data-zh="点按光点 · 照图作答" data-en="tap orbs · match the pictures">点按光点 · 照图作答</span></div>
-      <div class="istep"><i data-glyph="badge"></i><b data-zh="通 关" data-en="CLEAR">通 关</b><span data-zh="望闻问切 · 四章四徽章" data-en="4 chapters · 4 badges">望闻问切 · 四章四徽章</span></div>
-      <div class="istep"><i data-glyph="gift"></i><b data-zh="奖 励" data-en="REWARD">奖 励</b><span data-zh="侧写报告 · 路径图 · 小剧场" data-en="report · path chart · theatre">侧写报告 · 路径图 · 小剧场</span></div>
+    <div class="heroWrap">
+      <div class="heroMain">
+        <div class="kicker"><span data-zh="山 海 志 异 · 交 互 剧 场" data-en="A SHAN-HAI MONSTER THEATRE">山 海 志 异 · 交 互 剧 场</span></div>
+        <h1 class="title"><span data-zh="怪 物 诊 所" data-en="MONSTER CLINIC">怪 物 诊 所</span>
+          <span class="en">MAD MEDICINE · 山河志怪 · 四诊寻妖</span>
+        </h1>
+        <div class="vitalLine" data-vital></div>
+        <p class="lede"
+          data-zh="每个人的身体，都是一座山河——山河里住着怪物：气虚的是背着风囊的瘦雀，血虚的是驮着河灯的浅鲤，肝郁的是满身打结的老树。你是山海边境「怪物诊所」的坐堂医，以望、闻、问、切四术捕捉线索光点，<b>把雾里现形的精怪一只只收录进《怪物图鉴》</b>。"
+          data-en="Every body is a mountain-range of its own — and monsters dwell in those mountains: a sparrow lugging a wind-sack for weak qi, a pale carp towing river-lanterns for thin blood, an old walking tree knotted with unsaid words. You are the resident physician of the frontier Monster Clinic. <b>File every spirit you unmask into the Bestiary</b> — by Looking, Listening, Asking, and Pulse-taking.">
+          每个人的身体，都是一座山河——山河里住着怪物：气虚的是背着风囊的瘦雀，血虚的是驮着河灯的浅鲤，肝郁的是满身打结的老树。你是山海边境「怪物诊所」的坐堂医，以望、闻、问、切四术捕捉线索光点，<b>把雾里现形的精怪一只只收录进《怪物图鉴》</b>。</p>
+        <div class="introSteps">
+          <div class="istep"><i data-glyph="file"></i><b data-zh="挂 号" data-en="INTAKE">挂 号</b><span data-zh="30 秒 · 可跳过" data-en="30 s · skippable">30 秒 · 可跳过</span></div>
+          <div class="istep"><i data-glyph="orb"></i><b data-zh="寻 妖" data-en="CAPTURE">寻 妖</b><span data-zh="点按光点 · 照图作答" data-en="tap orbs · match the pictures">点按光点 · 照图作答</span></div>
+          <div class="istep"><i data-glyph="badge"></i><b data-zh="收 录" data-en="CLEAR">收 录</b><span data-zh="望闻问切 · 四章四图鉴" data-en="4 chapters · 4 plates">望闻问切 · 四章四图鉴</span></div>
+          <div class="istep"><i data-glyph="gift"></i><b data-zh="图 鉴" data-en="REWARD">图 鉴</b><span data-zh="怪物卡 · 侧写报告 · 志怪剧场" data-en="bestiary · report · fable">怪物卡 · 侧写报告 · 志怪剧场</span></div>
+        </div>
+        <div class="btnRow">
+          <button class="btn" id="btnStart" data-zh="挂 号 · 入 山 寻 妖" data-en="R E G I S T E R · E N T E R">挂 号 · 入 山 寻 妖</button>
+          <button class="btn ghost" id="btnHow" data-zh="坐 诊 手 册" data-en="M A N U A L">坐 诊 手 册</button>
+        </div>
+        <p class="disclaimer" data-zh="本应用为跨学科健康知识交互作品，所有「侧写」与「图鉴」仅供学习参考，不构成医学诊断。如有不适，请及时就医。" data-en="An interactive work for cross-disciplinary health learning. All &quot;profiles&quot; and &quot;bestiary entries&quot; are for reference only and are NOT medical diagnoses.">本应用为跨学科健康知识交互作品，所有「侧写」与「图鉴」仅供学习参考，不构成医学诊断。如有不适，请及时就医。</p>
+      </div>
+      <figure class="heroArt" aria-hidden="true">
+        <img class="inkArt" src="assets/img/pealk.jpg" alt="">
+        <figcaption>山 有 神 焉 <b>·</b> 名 曰 合 瑞</figcaption>
+      </figure>
     </div>
-    <div class="btnRow">
-      <button class="btn" id="btnStart" data-zh="进 入 双 生 诊 室" data-en="E N T E R · T H E  C H A M B E R">进 入 双 生 诊 室</button>
-      <button class="btn ghost" id="btnHow" data-zh="侦 查 手 册" data-en="M A N U A L">侦 查 手 册</button>
-    </div>
-    <p class="disclaimer" data-zh="本应用为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。如有不适，请及时就医。" data-en="An interactive work for cross-disciplinary health learning. All &quot;profiles&quot; are for reference only and are NOT medical diagnoses.">本应用为跨学科健康知识交互作品，所有「侧写」仅供学习参考，不构成医学诊断。如有不适，请及时就医。</p>
   </section>
 
   <!-- 0.5 · 手册 -->
   <section class="screen" id="screen-how">
     <div class="panel">
-      <h3 data-zh="侦 查 手 册" data-en="F I E L D · M A N U A L">侦 查 手 册</h3>
+      <h3 data-zh="坐 诊 手 册" data-en="C L I N I C · M A N U A L">坐 诊 手 册</h3>
       <div class="manualGrid">
-        <div class="mcard cat-observe"><i data-emblem="observe"></i><b data-zh="望 · 金色" data-en="LOOK · gold">望 · 金色</b><span data-zh="对镜看舌、面、眼、形——照着动态图示比对即可" data-en="Tongue, face, eyes, build — match the animated pictures">对镜看舌、面、眼、形——照着动态图示比对即可</span></div>
-        <div class="mcard cat-listen"><i data-emblem="listen"></i><b data-zh="闻 · 青色" data-en="LISTEN · teal">闻 · 青色</b><span data-zh="声音、呼吸、咳痰、口气——每个选项都有波形图" data-en="Voice, breath, cough, mouth — each option has a waveform">声音、呼吸、咳痰、口气——每个选项都有波形图</span></div>
-        <div class="mcard cat-inquire"><i data-emblem="inquire"></i><b data-zh="问 · 朱色" data-en="ASK · cinnabar">问 · 朱色</b><span data-zh="近一个月反复出现的信号，勾选即可，可为 0" data-en="Signals that repeated this month — tick any, zero is fine">近一个月反复出现的信号，勾选即可，可为 0</span></div>
-        <div class="mcard cat-pulse"><i data-emblem="pulse"></i><b data-zh="切 · 月白" data-en="PULSE · moon">切 · 月白</b><span data-zh="寸关尺定位 → 轻中重按压 → 辨脉四问 → 自测心率" data-en="Locate Cun/Guan/Chi → press → 4 pulse questions → real pulse">寸关尺定位 → 轻中重按压 → 辨脉四问 → 自测心率</span></div>
-        <div class="mcard"><i data-glyph="combo3"></i><b data-zh="连击 · 徽章" data-en="COMBO · BADGES">连击 · 徽章</b><span data-zh="25 秒内连续捕捉叠加 COMBO；每收齐一章，解锁徽章与侧写更新" data-en="Captures within 25 s stack COMBO; each chapter cleared unlocks a badge and a profile update">25 秒内连续捕捉叠加 COMBO；每收齐一章，解锁徽章与侧写更新</span></div>
-        <div class="mcard"><i data-glyph="gift"></i><b data-zh="通关奖励" data-en="REWARD">通关奖励</b><span data-zh="侦探段位、六维雷达、可下载的推理路径图、循证交叉、五幕小剧场" data-en="Detective rank, radar, downloadable path chart, graded evidence, 5-act play">侦探段位、六维雷达、可下载的推理路径图、循证交叉、五幕小剧场</span></div>
+        <div class="mcard cat-observe"><img class="mThumb inkArt" src="assets/img/eye.jpg" alt=""><i data-emblem="observe"></i><b data-zh="望 · 观山气色" data-en="LOOK · read the hills">望 · 观山气色</b><span data-zh="对镜看舌、面、眼、形——山河的气色写在脸上，照图比对即可" data-en="Tongue, face, eyes, build — the mountains wear their color; match the pictures">对镜看舌、面、眼、形——山河的气色写在脸上，照图比对即可</span></div>
+        <div class="mcard cat-listen"><img class="mThumb inkArt" src="assets/img/bird.jpg" alt=""><i data-emblem="listen"></i><b data-zh="闻 · 听风辨水" data-en="LISTEN · wind & water">闻 · 听风辨水</b><span data-zh="声音、呼吸、咳痰、口气——风声水声皆是呼吸，选项配有波形图" data-en="Voice, breath, cough, mouth — wind and water are the body's breath, with waveforms">声音、呼吸、咳痰、口气——风声水声皆是呼吸，选项配有波形图</span></div>
+        <div class="mcard cat-inquire"><img class="mThumb inkArt" src="assets/img/world.jpg" alt=""><i data-emblem="inquire"></i><b data-zh="问 · 访民问俗" data-en="ASK · ask the folk">问 · 访民问俗</b><span data-zh="近一个月反复出现的异象，勾选即可，没有就留空" data-en="Omens that repeated this month — tick any, zero is fine">近一个月反复出现的异象，勾选即可，没有就留空</span></div>
+        <div class="mcard cat-pulse"><img class="mThumb inkArt" src="assets/img/img057.jpg" alt=""><i data-emblem="pulse"></i><b data-zh="切 · 搭脉听河" data-en="PULSE · the hidden river">切 · 搭脉听河</b><span data-zh="寸关尺三道闸门 → 轻中重按压 → 辨脉四问 → 自测真实心率" data-en="Three gates of Cun/Guan/Chi → press → 4 pulse questions → real pulse">寸关尺三道闸门 → 轻中重按压 → 辨脉四问 → 自测真实心率</span></div>
+        <div class="mcard"><img class="mThumb inkArt" src="assets/img/keyao.jpg" alt="" style="object-position:50% 18%"><i data-glyph="combo3"></i><b data-zh="连击 · 徽章" data-en="COMBO · BADGES">连击 · 徽章</b><span data-zh="25 秒内连续捕捉叠加 COMBO；每收齐一章，收录一页图鉴、解锁徽章与侧写更新" data-en="Captures within 25 s stack COMBO; each chapter files one bestiary plate, a badge and a profile update">25 秒内连续捕捉叠加 COMBO；每收齐一章，收录一页图鉴、解锁徽章与侧写更新</span></div>
+        <div class="mcard"><img class="mThumb inkArt" src="assets/img/pealk.jpg" alt=""><i data-glyph="gift"></i><b data-zh="通关奖励" data-en="REWARD">通关奖励</b><span data-zh="怪物图鉴卡、侦探段位、六维雷达、可下载推理路径图、循证交叉、山河志怪寓言剧场" data-en="Bestiary plates, detective rank, radar, downloadable path chart, graded evidence, a spirit-fable play">怪物图鉴卡、侦探段位、六维雷达、可下载推理路径图、循证交叉、山河志怪寓言剧场</span></div>
       </div>
       <div class="manualNote" data-zh="每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。" data-en="Each question: <b>multi-select</b>, drag the <b>degree bar</b>, tap “+ when is it worse” to cross-check, add a note or skip; pick “not sure” when unsure. Drag to orbit, ◎ turns to the nearest orb, LIST picks directly.">每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
@@ -1104,12 +1278,12 @@ input[type=range]{accent-color:var(--gold)}
 
   <!-- 1 · 建档 -->
   <section class="screen" id="screen-intake">
-    <div class="kicker" data-zh="FILE 01 · 建立档案" data-en="FILE 01 · INTAKE">FILE 01 · 建立档案</div>
+    <div class="kicker" data-zh="挂 号 · 建 立 医 案" data-en="FILE 01 · INTAKE">挂 号 · 建 立 医 案</div>
     <h2 data-zh="身 体 基 本 面" data-en="T H E · B A S I C S">身 体 基 本 面</h2>
     <div class="divider"></div>
     <div class="panel">
       <div class="caseNo" id="caseNo"></div>
-      <div class="interview" data-zh="别紧张，这不像看病，更像一次聊天。我是你的「身体采访人」——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的名字，和你每天如何度过。" data-en="Relax — this is less a diagnosis than a conversation. I'm your &quot;body interviewer&quot;. Some answers ahead are things you've never noticed. Let's start simple: your name, and how your days pass.">别紧张，这不像看病，更像一次聊天。我是你的「身体采访人」——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的名字，和你每天如何度过。</div>
+      <div class="interview" data-zh="别紧张，这不是看病，是给山里怪物上户口。我是怪物诊所的坐堂医——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的称呼，和你每天如何度过。" data-en="Relax — this is less a diagnosis than registering the mountain's monsters. I'm the clinic's resident physician. Some answers ahead are things you've never noticed. Let's start simple: your alias, and how your days pass.">别紧张，这不是看病，是给山里怪物上户口。我是怪物诊所的坐堂医——接下来的问题里，有些答案你从未留意过。我们从最简单的开始：你的称呼，和你每天如何度过。</div>
       <div class="formGrid">
         <div class="field"><label data-zh="称呼（代号即可）" data-en="Alias">称呼（代号即可）</label><input type="text" id="fName" maxlength="12" placeholder="阿辰 / Chen"></div>
         <div class="field"><label data-zh="年龄段" data-en="Age group">年龄段</label>
@@ -1132,8 +1306,8 @@ input[type=range]{accent-color:var(--gold)}
           <select id="fStim"><option value="none" data-zh="几乎不碰" data-en="Barely any">几乎不碰</option><option value="coffee" data-zh="每日咖啡/浓茶" data-en="Daily coffee / strong tea">每日咖啡/浓茶</option><option value="alcohol" data-zh="常饮酒" data-en="Regular alcohol">常饮酒</option><option value="both" data-zh="咖啡与酒都不少" data-en="Plenty of both">咖啡与酒都不少</option></select></div>
       </div>
       <div class="btnRow" style="margin-top:0">
-        <button class="btn" id="btnIntake" data-zh="存 档 · 走 上 舞 台" data-en="F I L E · T O  T H E  S T A G E">存 档 · 走 上 舞 台</button>
-        <button class="btn ghost" id="btnSkipIntake" data-zh="跳 过 建 档 · 直 接 开 案" data-en="S K I P · S T A R T  N O W">跳 过 建 档 · 直 接 开 案</button>
+        <button class="btn" id="btnIntake" data-zh="立 案 · 入 山" data-en="F I L E · E N T E R">立 案 · 入 山</button>
+        <button class="btn ghost" id="btnSkipIntake" data-zh="免 挂 号 · 直 接 寻 妖" data-en="S K I P · S T A R T  N O W">免 挂 号 · 直 接 寻 妖</button>
       </div>
     </div>
   </section>
@@ -1172,7 +1346,7 @@ input[type=range]{accent-color:var(--gold)}
       <button id="turnRight" aria-label="向右环绕" title="向右环绕">↷</button>
     </div>
     <div id="deduceGate">
-      <button class="btn" id="btnDeduce" data-zh="开 始 推 理" data-en="B E G I N · D E D U C T I O N">开 始 推 理</button>
+      <button class="btn" id="btnDeduce" data-zh="开 坛 辨 证" data-en="B E G I N · D E D U C T I O N">开 坛 辨 证</button>
     </div>
   </section>
 
@@ -1210,7 +1384,7 @@ input[type=range]{accent-color:var(--gold)}
       </div>
       <div style="margin-top:20px;display:none" id="beatInput">
         <label style="font-size:12px;letter-spacing:.2em;color:var(--ink-dim)" id="beatLbl">15 秒内跳动次数：</label>
-        <input type="number" id="fBeats" min="8" max="45" value="18" style="width:80px;background:rgba(5,8,15,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);padding:10px;border-radius:2px;text-align:center;font-size:16px;margin-left:10px">
+        <input type="number" id="fBeats" min="8" max="45" value="18" style="width:80px;background:rgba(13,15,19,.7);border:1px solid rgba(233,228,214,.18);color:var(--ink);padding:10px;border-radius:2px;text-align:center;font-size:16px;margin-left:10px">
         <div><button class="btn" id="btnBeatsDone" data-zh="录 入" data-en="R E C O R D">录 入</button></div>
       </div>
     </div>
@@ -1218,22 +1392,22 @@ input[type=range]{accent-color:var(--gold)}
 
   <!-- 6 · 推理 -->
   <section class="screen" id="screen-deduce">
-    <div class="kicker" data-zh="FINAL · 演绎推理" data-en="FINAL · DEDUCTION">FINAL · 演绎推理</div>
-    <h2 data-zh="线 索 汇 流 · 病 机 浮 现" data-en="C L U E S · C O N V E R G E">线 索 汇 流 · 病 机 浮 现</h2>
+    <div class="kicker" data-zh="终 卷 · 开 坛 辨 证" data-en="FINAL · DEDUCTION">终 卷 · 开 坛 辨 证</div>
+    <h2 data-zh="合 卷 · 群 妖 现 形" data-en="T H E · S P I R I T S · A P P E A R">合 卷 · 群 妖 现 形</h2>
     <div class="vitalLine" data-vital></div>
     <div id="deduceLog"></div>
-    <div style="text-align:center"><button class="btn" id="btnReport" style="display:none" data-zh="领 取 奖 励 · 身 体 侧 写 报 告" data-en="C L A I M · T H E  R E W A R D">领 取 奖 励 · 身 体 侧 写 报 告</button></div>
+    <div style="text-align:center"><button class="btn" id="btnReport" style="display:none" data-zh="领 取 图 鉴 · 身 体 侧 写 报 告" data-en="C L A I M · T H E  R E W A R D">领 取 图 鉴 · 身 体 侧 写 报 告</button></div>
   </section>
 
   <!-- 7 · 报告 -->
   <section class="screen" id="screen-report">
-    <div class="kicker" data-zh="REWARD · 身体状态侧写" data-en="REWARD · BODY PROFILE">REWARD · 身体状态侧写</div>
+    <div class="kicker" data-zh="终卷奖励 · 身体状态侧写" data-en="REWARD · BODY PROFILE">终卷奖励 · 身体状态侧写</div>
     <h2 data-zh="侧 写 报 告" data-en="T H E · P R O F I L E">侧 写 报 告</h2>
-    <div style="margin:10px 0 24px"><span class="stamp" data-zh="身 体 侦 探 事 务 所" data-en="BODY DETECTIVE AGENCY">身 体 侦 探 事 务 所</span></div>
+    <div style="margin:10px 0 24px"><span class="stamp" data-zh="怪 物 诊 所 · 山 海 分 院" data-en="MONSTER CLINIC · SHAN-HAI">怪 物 诊 所 · 山 海 分 院</span></div>
     <div class="reportWrap" id="reportWrap"></div>
     <div class="btnRow" style="margin:26px 0 40px">
       <button class="btn" id="btnExport" data-zh="导 出 报 告 存 档" data-en="E X P O R T · R E P O R T">导 出 报 告 存 档</button>
-      <button class="btn ghost" id="btnScript" data-zh="导 出 推 理 小 剧 场" data-en="E X P O R T · T H E A T R E">导 出 推 理 小 剧 场</button>
+      <button class="btn ghost" id="btnScript" data-zh="导 出 寓 言 小 剧 场" data-en="E X P O R T · F A B L E">导 出 寓 言 小 剧 场</button>
       <button class="btn ghost" id="btnPrint" data-zh="打 印" data-en="P R I N T">打 印</button>
       <button class="btn ghost" id="btnRestart" data-zh="重 新 探 案" data-en="R E S T A R T">重 新 探 案</button>
     </div>
@@ -1351,7 +1525,7 @@ input[type=range]{accent-color:var(--gold)}
     if(Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2])<1.6) LINKS.push([i,j]);
   }
   // 彩色纸屑地面（预解析 RGB，便于随显影度从灰调向彩色插值）
-  const FCOL=['214,112,106','106,212,200','212,175,106','233,228,214','91,143,212'].map(s=>s.split(',').map(Number));
+  const FCOL=['208,84,63','127,191,174','201,154,82','236,227,207','96,134,120'].map(s=>s.split(',').map(Number));
   const FLOOR=[];
   for(let i=0;i<680;i++){
     const a=Math.random()*Math.PI*2,r=0.25+Math.random()*2.8;
@@ -1408,7 +1582,7 @@ input[type=range]{accent-color:var(--gold)}
     ctx.clearRect(0,0,W,H);
     // 底色渐变
     const g=ctx.createRadialGradient(W/2,H*0.45,0,W/2,H*0.45,Math.max(W,H)*0.75);
-    g.addColorStop(0,'#0b1222'); g.addColorStop(1,'#04060c');
+    g.addColorStop(0,'#1b1410'); g.addColorStop(1,'#0a0705');
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
     const viewMx=window.__stageFocus?lockedMx:mx, viewMy=window.__stageFocus?lockedMy:my;
@@ -1439,7 +1613,7 @@ input[type=range]{accent-color:var(--gold)}
       const pr=project(d[0],yy,d[2],ca,sa,camY,cosP,sinP);
       const a=0.10*pr[2];
       if(a<=0.01) continue;
-      ctx.fillStyle=`rgba(140,160,200,${a})`;
+      ctx.fillStyle=`rgba(196,176,140,${a})`;
       ctx.fillRect(pr[0],pr[1],1.4*DPR*pr[2],1.4*DPR*pr[2]);
     }
 
@@ -1462,11 +1636,11 @@ input[type=range]{accent-color:var(--gold)}
       const a=NODES[lk[0]],b=NODES[lk[1]];
       const pa=project(a.p[0],a.p[1]+Math.sin(t*0.2+a.ph)*0.08,a.p[2],ca,sa,camY,cosP,sinP);
       const pb=project(b.p[0],b.p[1]+Math.sin(t*0.2+b.ph)*0.08,b.p[2],ca,sa,camY,cosP,sinP);
-      ctx.strokeStyle=`rgba(150,170,210,${0.10*Math.min(pa[2],pb[2])})`;
+      ctx.strokeStyle=`rgba(190,165,118,${0.10*Math.min(pa[2],pb[2])})`;
       ctx.beginPath();ctx.moveTo(pa[0],pa[1]);ctx.lineTo(pb[0],pb[1]);ctx.stroke();
     }
     // 暗房线框（透视网格空间）
-    ctx.strokeStyle='rgba(120,140,180,0.09)'; ctx.lineWidth=1;
+    ctx.strokeStyle='rgba(176,150,104,0.09)'; ctx.lineWidth=1;
     const RS=2.7, RH=3.1, RC=[[-RS,-RS],[RS,-RS],[RS,RS],[-RS,RS]];
     for(const c of RC){
       const p0=project(c[0],0,c[1],ca,sa,camY,cosP,sinP), p1=project(c[0],RH,c[1],ca,sa,camY,cosP,sinP);
@@ -1486,11 +1660,11 @@ input[type=range]{accent-color:var(--gold)}
     ctx.font=`${10*DPR}px "Songti SC",monospace`;
     for(const nd of NODES){
       const pr=project(nd.p[0],nd.p[1]+Math.sin(t*0.2+nd.ph)*0.08,nd.p[2],ca,sa,camY,cosP,sinP);
-      ctx.fillStyle=`rgba(170,190,225,${0.30*pr[2]})`;
+      ctx.fillStyle=`rgba(205,185,140,${0.30*pr[2]})`;
       ctx.fillRect(pr[0],pr[1],1.8*DPR,1.8*DPR);
       if(pr[2]>0.7){
         const flick=(Math.sin(t*7+nd.ph)>-.7)?1:0.25;   // 偶发闪烁
-        ctx.fillStyle=`rgba(190,205,235,${0.42*pr[2]*flick})`;
+        ctx.fillStyle=`rgba(226,206,160,${0.42*pr[2]*flick})`;
         ctx.fillText(nd.label, pr[0]+5*DPR, pr[1]);
       }
     }
@@ -1501,13 +1675,13 @@ input[type=range]{accent-color:var(--gold)}
       if(pr[2]<0.42) continue;
       const w=pn.w*pr[2]*H*0.42, h=pn.h*pr[2]*H*0.42;
       const x=pr[0]-w/2, y=pr[1]-h/2;
-      ctx.fillStyle=`rgba(7,11,18,${0.55*pr[2]})`; ctx.fillRect(x,y,w,h);
+      ctx.fillStyle=`rgba(20,16,10,${0.55*pr[2]})`; ctx.fillRect(x,y,w,h);
       const fg=ctx.createLinearGradient(x,y,x,y+h);
-      fg.addColorStop(0,`rgba(150,170,210,${(0.08+0.14*chroma)*pr[2]})`); fg.addColorStop(1,'rgba(0,0,0,0)');
+      fg.addColorStop(0,`rgba(190,165,118,${(0.08+0.14*chroma)*pr[2]})`); fg.addColorStop(1,'rgba(0,0,0,0)');
       ctx.fillStyle=fg; ctx.fillRect(x,y,w,h);
       // 画面内容：人像剪影
       const cxp=x+w*0.5, cyp=y+h*0.66, hr=h*0.15;
-      ctx.fillStyle=`rgba(${tint([150,190,215],chroma)},${(0.1+0.16*chroma)*pr[2]})`;
+      ctx.fillStyle=`rgba(${tint([205,180,138],chroma)},${(0.1+0.16*chroma)*pr[2]})`;
       ctx.beginPath(); ctx.arc(cxp,cyp-hr*1.3,hr,0,7); ctx.fill();
       ctx.beginPath(); ctx.moveTo(cxp-hr*1.9,y+h); ctx.quadraticCurveTo(cxp,cyp,cxp+hr*1.9,y+h); ctx.closePath(); ctx.fill();
       ctx.strokeStyle=`rgba(106,212,200,${0.10*chroma*pr[2]})`; ctx.lineWidth=1;
@@ -1579,7 +1753,7 @@ input[type=range]{accent-color:var(--gold)}
     const mid=project(0,0.88,0,ca,sa,camY,cosP,sinP);
     const pulse=mid[2]*(0.8+0.2*Math.sin(t*2.4));
     const rg2=ctx.createRadialGradient(mid[0],mid[1],0,mid[0],mid[1],56*pulse*DPR);
-    rg2.addColorStop(0,'rgba(235,240,255,0.30)'); rg2.addColorStop(1,'rgba(0,0,0,0)');
+    rg2.addColorStop(0,'rgba(255,243,215,0.30)'); rg2.addColorStop(1,'rgba(0,0,0,0)');
     ctx.fillStyle=rg2;
     ctx.beginPath();ctx.arc(mid[0],mid[1],56*pulse*DPR,0,7);ctx.fill();
 
@@ -1594,8 +1768,8 @@ input[type=range]{accent-color:var(--gold)}
         const z=st.off*arc*1.4+Math.cos(t*1.6+p.ph)*0.02*arc;
         const pr=project(x,y,z,ca,sa,camY,cosP,sinP);
         const fade=Math.sin(p.t*Math.PI);
-        const mix=p.t; // 颜色由蓝白渐暖白
-        const r=Math.round(150+(255-150)*mix), gg=Math.round(190+(240-190)*mix), b=Math.round(235+(215-235)*mix);
+        const mix=p.t; // 颜色由赭墨渐暖白
+        const r=Math.round(205+(255-205)*mix), gg=Math.round(180+(240-180)*mix), b=Math.round(140+(210-140)*mix);
         ctx.fillStyle=`rgba(${r},${gg},${b},${0.75*fade*pr[2]})`;
         const s=1.8*DPR*pr[2];
         ctx.fillRect(pr[0]-s/2,pr[1]-s/2,s,s);
@@ -2320,7 +2494,7 @@ function renderPath(ctx,W,H){
   const {pats,clues}=pathData(), f=Math.max(.9,W/900), narrow=W<760;
   ctx.save();ctx.clearRect(0,0,W,H);
   const bg=ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,'#080c16');bg.addColorStop(1,'#04060c');
+  bg.addColorStop(0,'#171209');bg.addColorStop(1,'#0a0705');
   ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(212,175,106,.055)';ctx.lineWidth=1;
   for(let x=0;x<=W;x+=W/26){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
@@ -2448,6 +2622,94 @@ function evHTML(k){
 
 <script>
 /* ============================================================
+   v5 · 触感引擎 FX：全程序化音效（无素材）+ 振动反馈
+   音色参照手机独立游戏：木鱼点按 · 古筝捕捉 · 磬锣通关 · 风铃揭晓
+   宫调五声音阶，连击沿音阶爬升
+   ============================================================ */
+const buzz=p=>{try{if(navigator.vibrate&&!matchMedia('(prefers-reduced-motion:reduce)').matches)navigator.vibrate(p);}catch(e){}};
+const FX=(()=>{
+  let ac=null,master=null;
+  let muted=localStorage.getItem('mm_mute')==='1';
+  const PENTA=[261.63,293.66,329.63,392.00,440.00,523.25,587.33,659.26,784.00,880.00]; // C宫五声两个八度
+  function ensure(){
+    if(!ac){
+      try{
+        ac=new (window.AudioContext||window.webkitAudioContext)();
+        master=ac.createGain();master.gain.value=.42;
+        const comp=ac.createDynamicsCompressor();
+        master.connect(comp);comp.connect(ac.destination);
+      }catch(e){ac=null;}
+    }
+    if(ac&&ac.state==='suspended')ac.resume();
+    return !!ac&&!muted;
+  }
+  function tone(f,{type='sine',dl=0,a=.004,d=.25,g=.4,slide=0}={}){
+    const t0=ac.currentTime+dl;
+    const o=ac.createOscillator(),v=ac.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t0);
+    if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t0+d);
+    v.gain.setValueAtTime(0,t0);
+    v.gain.linearRampToValueAtTime(g,t0+a);
+    v.gain.exponentialRampToValueAtTime(.0008,t0+a+d);
+    o.connect(v);v.connect(master);
+    o.start(t0);o.stop(t0+a+d+.05);
+  }
+  function knock(f,{dl=0,d=.09,g=.5}={}){ // 木鱼：双正弦敲击 + 快衰
+    tone(f,{type:'sine',dl,a:.002,d,g});
+    tone(f*2.76,{type:'sine',dl,a:.002,d:d*.6,g:g*.3});
+  }
+  function pluck(f,{dl=0,g=.4}={}){ // 古筝式拨弦：微失谐双三角波
+    tone(f,{type:'triangle',dl,a:.003,d:.5,g});
+    tone(f*1.004,{type:'triangle',dl,a:.003,d:.42,g:g*.55});
+    tone(f*2,{type:'sine',dl,a:.002,d:.14,g:g*.2});
+  }
+  function swoosh({dl=0,d=.3,g=.12,from=1200,to=240}={}){ // 滤波噪声扫频
+    const t0=ac.currentTime+dl,len=Math.ceil(ac.sampleRate*d);
+    const buf=ac.createBuffer(1,len,ac.sampleRate),ch=buf.getChannelData(0);
+    for(let i=0;i<len;i++)ch[i]=(Math.random()*2-1)*(1-i/len);
+    const src=ac.createBufferSource();src.buffer=buf;
+    const bp=ac.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.1;
+    bp.frequency.setValueAtTime(from,t0);bp.frequency.exponentialRampToValueAtTime(to,t0+d);
+    const v=ac.createGain();v.gain.setValueAtTime(g,t0);v.gain.exponentialRampToValueAtTime(.001,t0+d);
+    src.connect(bp);bp.connect(v);v.connect(master);src.start(t0);
+  }
+  function gong(f=146,{dl=0,g=.5}={}){ // 磬锣：基频 + 非整数泛音长衰减
+    [1,1.48,2.21,3.37].forEach((m,i)=>tone(f*m,{type:'sine',dl,a:.006,d:1.6-(i*.25),g:g/(i+1.3)}));
+    swoosh({dl,d:.5,g:.05,from:900,to:2400});
+  }
+  const api={
+    tap(){if(!ensure())return;knock(620,{g:.3});},
+    lock(){if(!ensure())return;knock(740,{g:.3});knock(980,{dl:.07,d:.07,g:.26});},
+    capture(streak=1){if(!ensure())return;
+      const s=Math.min(PENTA.length-3,Math.max(0,streak-1));
+      pluck(PENTA[s],{g:.4});pluck(PENTA[s+2],{dl:.09,g:.3});
+      if(streak>=3)pluck(PENTA[s+4]||880,{dl:.18,g:.24});},
+    skip(){if(!ensure())return;tone(150,{type:'sine',a:.004,d:.18,g:.22,slide:-60});},
+    chapter(){if(!ensure())return;gong(146,{g:.5});pluck(PENTA[5],{dl:.4,g:.26});pluck(PENTA[7],{dl:.55,g:.22});},
+    reveal(){if(!ensure())return;[0,2,4,5,7].forEach((n,i)=>pluck(PENTA[n],{dl:i*.13,g:.32}));gong(196,{dl:.7,g:.3});},
+    swish(){if(!ensure())return;swoosh({d:.28,g:.1,from:1500,to:300});},
+    get muted(){return muted;},
+    toggle(){muted=!muted;localStorage.setItem('mm_mute',muted?'1':'0');if(!muted)ensure();return muted;}
+  };
+  // 全局微触感：任何可按元素按下即「嗒」一声 + 轻振
+  const TAPSEL='.btn,.opt,.answerNode,.dockItem,.miniChip,.chChip,.archiveNode,.pulsePos,.pressureStep,.tab,#clueToggle,#btnLang,#stageControls button,#dockHead,select,input[type=range]';
+  document.addEventListener('pointerdown',e=>{
+    if(!(e.target instanceof Element))return;
+    ensure();                                  // 首次手势解锁 AudioContext
+    if(e.target.closest(TAPSEL)){api.tap();buzz(5);}
+  },{capture:true,passive:true});
+  document.addEventListener('DOMContentLoaded',()=>{
+    const b=document.getElementById('btnSound');if(!b)return;
+    const paint=()=>{b.textContent=muted?'♪ OFF':'♪ ON';b.classList.toggle('off',muted);};
+    paint();
+    b.addEventListener('click',()=>{api.toggle();paint();if(!muted)api.tap();});
+  });
+  return api;
+})();
+</script>
+
+<script>
+/* ============================================================
    应用引擎：状态 · 导航 · 线索 · 评分
    ============================================================ */
 const $ = s => document.querySelector(s);
@@ -2496,6 +2758,8 @@ function show(id){
   document.body.classList.toggle('stage-live',id==='screen-stage');
   window.scrollTo({top:0});
   if(window.stopCharts) stopCharts();
+  if(window.__navved){ if(id==='screen-report'){FX.reveal();buzz([20,50,20,50,40]);} else FX.swish(); }
+  window.__navved=true;
   renderProgress(id);
 }
 const STEP_ICON={'screen-intake':'file','screen-stage':'orb','screen-deduce':'detail','screen-report':'gift'};
@@ -2555,9 +2819,9 @@ function collectMulti(groups, srcName){
 
 /* ---------- 探案舞台：光圈环绕 ---------- */
 const CATS={
- observe:{zh:'望诊',en:'LOOK',col:'#d4af6a'},
- listen:{zh:'闻诊',en:'LISTEN',col:'#6ad4c8'},
- inquire:{zh:'问诊',en:'ASK',col:'#d4706a'},
+ observe:{zh:'望诊',en:'LOOK',col:'#c99a52'},
+ listen:{zh:'闻诊',en:'LISTEN',col:'#7fbfae'},
+ inquire:{zh:'问诊',en:'ASK',col:'#d6563a'},
  pulse:{zh:'切诊',en:'PULSE',col:'#e9e4d6'}
 };
 let ORBS=[], orbDone=0, orbTotal=0, curOrb=null;
@@ -2642,6 +2906,7 @@ function captureOrb(o){
   if(o.done||o._locking||curOrb) return;
   o._locking=true;
   o.el.classList.add('locking');
+  FX.lock();buzz(8);
   const ret=$('#contactReticle');
   if(ret&&o.sx!=null){ret.style.left=o.sx+'px';ret.style.top=o.sy+'px';ret.classList.add('lock');}
   window.__stageFocus=true;   // 锁定期间暂停自动环绕
@@ -2903,6 +3168,7 @@ function completeOrb(o,record){
     if(state.streak>=3) awardBadge('combo3');
     if(o.customText||(o.ctx&&o.ctx.size)||o._degTouched) awardBadge('detail');
   }
+  if(o.skipped)FX.skip();else{FX.capture(state.streak||1);buzz(state.streak>=3?[12,30,16]:14);}
   emitAbsorption(o);$('#qPanel').classList.add('resolving');updateHUD(true);
   setTimeout(()=>{o.el.classList.remove('absorbed');o._completing=false;closePanel();afterAnswer();focusNext(o);},560);
 }
@@ -3248,6 +3514,7 @@ function checkChapters(){
 function clearedCount(){return CHAPTERS.filter(c=>state.cleared&&state.cleared[c]&&chapterItems(c).length).length;}
 function fireChapterClear(cat,clean){
   const col=CATS[cat].col, allDone=orbDone>=orbTotal;
+  FX.chapter();buzz([40,60,40,60,90]);
   awardXP(clean?25:10,innerWidth*.5,innerHeight*.42);
   awardBadge(cat,clean?'':'silver');
   const chip=document.querySelector('.chChip.cat-'+cat);
@@ -3276,11 +3543,13 @@ function openChapterModal(cat,clean,allDone){
           L(`${main} 水落石出 —— 现在，去看完整侧写。`,`${main} revealed — now read the full profile.`)][Math.min(3,n-1)];
     line+=`<div class="msQuote">${LANG==='en'&&PATTERNS[tops[0][0]].en?PATTERNS[tops[0][0]].en.one:PATTERNS[tops[0][0]].one}</div>`;
   }else line=L('证词清淡，至今未见明显偏颇 —— <b>平和质</b>正在浮出水面。','Testimony stays mild — a <b>balanced constitution</b> is surfacing.');
-  const body=stageBarsHTML(n)+
+  const bk=tops.length?tops[0][0]:null;
+  const beastHTML=bk?`<div class="msBeast"><div class="ring"><img src="assets/img/${BEASTS[bk].img}.jpg" alt="${FABLES[bk].n}"></div><small>${L('雾中现形','FROM THE MIST')} · <b>${L(FABLES[bk].n,FABLES_EN[bk].n)}</b></small></div>`:'';
+  const body=stageBarsHTML(n)+beastHTML+
     `<div class="msVisual"><div class="msEmblem ${clean?'':'silver'}" style="--catc:${CATS[cat].col}">${GLYPH[cat]}</div><canvas class="msRadar" id="msRadar" width="150" height="150"></canvas></div>`+
     `<div class="msLine">${line}</div>`+
-    `<div class="msBonus"><span>+${clean?25:10} XP</span><span>${L('徽章','BADGE')} · ${L(CATS[cat].zh,CATS[cat].en)}${clean?'':L('（银）',' (silver)')}</span><span>${L('章节','CHAPTER')} ${n}/${CHAPTERS.length}</span></div>`;
-  openMilestone(`CHAPTER ${n}/${CHAPTERS.length} · `+L(CATS[cat].zh+'通关',CATS[cat].en+' CLEARED'),
+    `<div class="msBonus"><span>+${clean?25:10} XP</span><span>${L('徽章','BADGE')} · ${L(CATS[cat].zh,CATS[cat].en)}${clean?'':L('（银）',' (silver)')}</span><span>${L('图鉴','BESTIARY')} ${n}/${CHAPTERS.length}</span></div>`;
+  openMilestone(L(`图 鉴 收 录 ${n}/${CHAPTERS.length} · `+CATS[cat].zh+'卷',`BESTIARY ${n}/${CHAPTERS.length} · `+CATS[cat].en),
     STAGE[Math.min(3,n-1)], body,
     allDone?L('揭 晓 全 案 · 开 始 推 理','R E V E A L · D E D U C E'):L('继 续 探 案','K E E P · G O I N G'),
     allDone?()=>{closePanel();startDeduce();}:null);
@@ -3887,7 +4156,8 @@ const PSY_DIMS_EN=[['Stress load','HPA activation & tension (higher = more relea
 function psyProfileHTML(balanced){
   const psyTop=state.top.find(k=>state.scores[k]>=2)||state.top[0];
   const PD=(LANG==='en'&&PATTERNS[psyTop].en)?PATTERNS[psyTop].en.psyDeep:PATTERNS[psyTop].psyDeep;
-  return `<div class="rCard"><h3>${L('心理层面侧写 · 身心交叉','Mind Profile · Body-Mind Cross-Check')}</h3>
+  return `<div class="rCard psyCard"><h3>${L('心理层面侧写 · 身心交叉','Mind Profile · Body-Mind Cross-Check')}</h3>
+    <img class="psyArt inkArt" src="assets/img/defo.jpg" alt="欲灵 · 心理之精" loading="lazy">
     <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:12px">${L('由问诊「心神」组、情志类证词、建档压力与睡眠共同推算。它描述的是「状态」而非「人格」，会随生活改变。','Derived from the Mind group, emotional testimony, stress and sleep intake. It describes a state, not a personality, and shifts with life.')}</div>
     ${PSY_DIMS.map((d,di)=>`<div class="dimRow"><div class="n">${LANG==='en'?PSY_DIMS_EN[di][0]:d[0]}</div><div class="bar"><i style="width:${state.psy[di]}%"></i></div><div class="p">${state.psy[di]}</div></div>
       <div style="font-size:11px;color:var(--ink-dim);margin:-6px 0 12px 100px">${LANG==='en'?PSY_DIMS_EN[di][1]:d[1]}</div>`).join('')}
@@ -3908,8 +4178,8 @@ $('#btnReport').onclick=()=>{
   const rk=rankOf(), filedN=ORBS.filter(o=>o.done&&!o.skipped).length;
 
   let html=`
-  <div class="rewardBanner"><div class="big">${L('案 件 告 破','C A S E   C L O S E D')}</div>
-    <div class="sub">${L('全部线索已归档 · 人物显影完成','All clues filed · the figure is fully developed')}<br>🎁 ${L('通关奖励：'+i.name+' 的人物小传 · 五幕推理小剧场 · 最终药方','Reward unlocked: '+i.name+'&#39;s profile story · 5-act mini-play · the final prescription')}</div>
+  <div class="rewardBanner"><div class="big">${L('图 鉴 收 录','B E S T I A R Y · F I L E D')}</div>
+    <div class="sub">${L('全部异象已归档 · 精怪现形完成','All omens filed · the spirits fully revealed')}<br>🎁 ${L('通关奖励：'+i.name+' 的山河国度 · 怪物图鉴 · 志怪寓言剧场 · 三枚锦囊','Reward unlocked: the kingdom of '+i.name+' · the monster bestiary · a spirit-fable play · three brocade pouches')}</div>
     <div class="rankRow"><div class="rankBadge"><span>${rk[0]}</span></div>
       <div class="rankMeta"><b>${rk[1]}</b>${L('实勘验线索','Clues inspected')} <span data-count="${filedN}">0</span>/${orbTotal} · ${L('经验值','XP')} <span data-count="${state.xp||0}">0</span><br>${L('录入证词','Testimony filed')} ${state.clues.length} ${L('条','items')} · ${L('徽章','Badges')} ${Object.keys(state.badges||{}).length}/${BADGES.length}</div></div>
     <div class="badgeWall">${BADGES.map(b=>{const got=(state.badges||{})[b.id];return `<div class="bw ${got?'on':''} ${got==='silver'?'silver':''}"><i>${GLYPH[b.id]}</i><span>${badgeName(b)}</span></div>`;}).join('')}</div></div>
@@ -3982,10 +4252,37 @@ $('#btnReport').onclick=()=>{
     <div style="font-size:11.5px;color:var(--ink-dim);line-height:1.95;margin-bottom:14px">${L('每一条侧写都应当经得起追问。以下是本案主线在其他学科中的对应证据及其强度分级。','Every profile should survive questioning. Here is how this case’s leads hold up in other disciplines — with graded evidence.')}</div>
     ${evKeys.map(k=>`<div style="margin-bottom:18px"><div class="patternHead" style="margin-bottom:12px"><span class="name">${pName(k)}</span><span class="conf">${L('权重','weight')} ${state.scores[k]}</span></div>${evHTML(k)}</div>`).join('')}</div>`;
 
-  // 人物小传 · 推理小剧场
+  // 怪物图鉴 · 山海志异：主线证型 → 手绘白描怪物卡（仿《山海经》图鉴文）
+  const beastCard=k=>{
+    const f=(LANG==='en'&&FABLES_EN[k])?FABLES_EN[k]:FABLES[k], bz=BEASTS[k];
+    const conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+    return `<div class="beastCard"><span class="seal bSeal">${L('收录','FILED')}</span>
+      <img class="bImg paperArt" src="assets/img/${bz.img}.jpg" alt="${f.n}" loading="lazy">
+      <div class="bName">${f.n}<small>${pName(k)} · ${L('吻合','match')} ${conf}%</small></div>
+      <div class="bDen">${L('栖所','dwelling')} · ${f.den} ｜ ${L('原画','art')} · ${bz.src}</div>
+      <div class="bClassic">${LANG==='en'?bz.classicEN:bz.classic}</div>
+      <div class="bMoral">${L('偈曰','the verse')}：${f.moral}</div></div>`;
+  };
+  if(balanced){
+    const sg=SHAN_GOD;
+    html+=`<div class="rCard"><h3>${L('怪物图鉴 · 山海志异','Monster Bestiary')}</h3>
+      <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.06em;margin-bottom:14px">${L('百怪不生，山神现身 —— 这是图鉴里最难得的一页。','No monsters bred — the Mountain God shows itself. The rarest page in the bestiary.')}</div>
+      <div class="beastGrid"><div class="beastCard shan"><span class="seal bSeal">${L('祥瑞','OMEN')}</span>
+        <img class="bImg paperArt" src="assets/img/${sg.img}.jpg" alt="${sg.zh}" loading="lazy">
+        <div class="bName">${L(sg.zh,sg.en)}<small>${L('平和质','Balanced')}</small></div>
+        <div class="bDen">${L('栖所','dwelling')} · ${L(sg.den[0],sg.den[1])} ｜ ${L('原画','art')} · ${sg.src}</div>
+        <div class="bClassic">${LANG==='en'?sg.classicEN:sg.classic}</div>
+        <div class="bMoral">${L('偈曰','the verse')}：${L('阴平阳秘，精神乃治。','When yin is calm and yang is guarded, the spirit is well.')}</div></div></div></div>`;
+  }else if(shown.length){
+    html+=`<div class="rCard"><h3>${L('怪物图鉴 · 山海志异','Monster Bestiary')}</h3>
+      <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.06em;margin-bottom:14px">${L('本案现形的精怪，已按《山海经》体收录归档 —— 怪即证型，异象即症状。','The spirits unmasked in this case, filed in the manner of the Classic of Mountains and Seas — monsters are patterns, omens are symptoms.')}</div>
+      <div class="beastGrid">${shown.map(beastCard).join('')}</div></div>`;
+  }
+
+  // 山河志怪 · 寓言小剧场
   SCRIPT=buildScript();
-  html+=`<div class="rCard"><h3>${L('人物小传 · 推理小剧场','Profile Story · The Mini-Play')}</h3>
-    <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.08em;margin-bottom:16px">${L(state.clues.length+' 条线索，串成一出五幕小剧 —— 主角是你。点击页面底部「导出推理小剧场」可单独存档。',state.clues.length+' clues woven into a five-act play — starring you. Export it alone via the button at the bottom.')}</div>
+  html+=`<div class="rCard"><h3>${L('山河志怪 · 寓言小剧场','Land & Spirits · The Fable Play')}</h3>
+    <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.08em;margin-bottom:16px">${L(state.clues.length+' 条线索，化作一座山河国度与它的精怪 —— 国度就是你。点击页面底部「导出寓言小剧场」可单独存档。',state.clues.length+' clues unfolded into a kingdom and its spirits — the kingdom is you. Export it alone via the button at the bottom.')}</div>
     ${SCRIPT.map(a=>`<div class="scriptAct"><div class="actTitle">${a.t}</div><div class="actBody">${a.ps.join('')}</div></div>`).join('')}</div>`;
 
   // 整合生活处方（生活调摄 + 习惯调整，去重后取前 8 条）
@@ -4069,6 +4366,10 @@ $('#btnExport').onclick=()=>{
       <p><b>${L('生活调整：','Habits: ')}</b></p><ul>${(p.habit||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
       <p><b>${L('疗养方式：','Retreat & healing: ')}</b></p><ul>${(p.heal||[]).map(x=>`<li>${x}</li>`).join('')}</ul>
       <p><b>${L('生活调摄：','Daily regimen: ')}</b></p><ul>${p.life.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;}).join(''))}
+  ${sec(L('怪物图鉴 · 山海志异','Monster Bestiary'),
+    balanced?`<div class="pat"><h3>${L(SHAN_GOD.zh,SHAN_GOD.en)}</h3><p class="cls">${LANG==='en'?SHAN_GOD.classicEN:SHAN_GOD.classic}</p></div>`
+    :shown.map(k=>{const f=(LANG==='en'&&FABLES_EN[k])?FABLES_EN[k]:FABLES[k];
+      return `<div class="pat"><h3>${f.n} ｜ ${pName(k)}</h3><p class="cls">${LANG==='en'?BEASTS[k].classicEN:BEASTS[k].classic}</p><p><b>${L('偈曰','Verse')}：</b>${f.moral}</p></div>`;}).join(''))}
   <p class="dis">${L(TEA_NOTE,TEA_NOTE_EN)}</p>
   ${sec(L('推理路径图 · 权重演算','Deduction Path · Weight Engine'),`<div class="charts"><img src="${pathPNG}" style="width:100%"></div><p style="font-size:12px;color:#666">${L('左列为证词，右列为证型，连线粗细即贡献权重。','Left: testimony. Right: patterns. Line width = contributed weight.')}</p>`)}
   ${sec(L('跨学科交叉验证','Cross-Discipline Verification'),evKeys.map(k=>`<div class="pat"><h3>${pName(k)}</h3><ul>${evTxt(k)}</ul></div>`).join('')+`<p class="dis">${EV_DISCLAIM[LANG==='en'?1:0]}</p>`)}
@@ -4078,8 +4379,9 @@ $('#btnExport').onclick=()=>{
 <style>body{font-family:"Songti SC","SimSun",serif;max-width:760px;margin:40px auto;padding:0 24px;color:#1c1c1c;line-height:1.9;background:#faf7f0}
 h1{letter-spacing:.3em;border-bottom:2px solid #b8934a;padding-bottom:14px}h2{color:#8a6a24;letter-spacing:.2em;margin-top:36px;border-left:4px solid #b8934a;padding-left:12px}
 h3{color:#444}.pat{border:1px solid #ddd;border-radius:6px;padding:16px 22px;margin:14px 0;background:#fff}
+.cls{font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC",serif;font-size:15px;line-height:2;color:#3a3222;text-align:justify}
 table{border-collapse:collapse;width:100%}td{border:1px solid #e0d8c8;padding:6px 12px;font-size:14px}
-.charts{display:flex;gap:16px;flex-wrap:wrap}.charts img{width:300px;border:1px solid #e0d8c8;border-radius:6px;background:#0a0f1c}
+.charts{display:flex;gap:16px;flex-wrap:wrap}.charts img{width:300px;border:1px solid #e0d8c8;border-radius:6px;background:#12151a}
 ol{font-size:13px;color:#555}.dis{font-size:12px;color:#888;margin-top:40px;border-top:1px solid #ddd;padding-top:14px}</style></head>
 <body><h1>${L('身体状态侧写报告','Body Profile Report')}</h1><p style="color:#8a6a24;letter-spacing:.2em">MAD MEDICINE ｜ ${new Date().toLocaleString(LANG==='en'?'en-US':'zh-CN')}</p>${body}</body></html>`;
   const a=document.createElement('a');
@@ -4091,234 +4393,398 @@ $('#btnPrint').onclick=()=>window.print();
 $('#btnRestart').onclick=()=>location.reload();
 
 /* ============================================================
-   推理小剧场：把线索串成戏剧式人物小传（五幕）
+   山河志怪 · 寓言小剧场
+   身体化作山河国度，证型化作志怪精魅——
+   由身体数据与生活习惯推导的童话式寓言剧本（楔子 + 三卷 + 归途偈）
    ============================================================ */
+/* 志怪图鉴：十证型 → 十精怪（名号 · 栖所 · 形貌 · 异象 · 自白 · 偈语） */
+const FABLES={
+ qi:{n:'谷风雀',den:'中土粮仓顶上的风囊',form:'一只羽色淡白的瘦雀，背着比自己还大的风囊，飞三丈便要歇一歇',
+   omen:'城头旌旗垂而不扬，驿马跑三里就要打盹',
+   say:'囊里的风越来越少，不是我偷懒——是火房的柴总添不够，蒸不出新的风来。',
+   moral:'风不满囊，千帆不动。养气如蓄风，徐徐然后致远。'},
+ xue:{n:'赤河鲤',den:'环城而流的赤河',form:'一尾朱鳞褪成浅粉的鲤，驮着一串渐渐暗下去的河灯',
+   omen:'赤河水位悄悄退了，沿岸灯笼一盏盏发暗，夜里城中人多梦易醒',
+   say:'河水浅了，我驮不动这些灯。上游的雪，一年比一年融得少。',
+   moral:'灯明不在芯，在油；人安不在睡，在血。'},
+ yin:{n:'露井蟾',den:'月下的露水古井',form:'一只伏在井沿的白蟾，背上驮着半轮凉月',
+   omen:'井水一夜低过一夜，入夜后城里反而燥热，更鼓声里总有人翻身',
+   say:'井是夜里蓄水的。你们点灯到三更，月光还没来得及滴进井里，天就亮了。',
+   moral:'井深不怕日头毒；藏得住夜，才经得起昼。'},
+ yang:{n:'暖灶兽',den:'王城地底的大灶',form:'一头毛色如灰烬的伏兽，呼吸之间，灶膛余烬明明灭灭',
+   omen:'城根霜重，井台结冰，百姓清晨都说手脚冰凉',
+   say:'我困了。灶里的火种越来越小，冰雨又总顺着粮仓灌进来，我烘不干这座城。',
+   moral:'火种不灭，不在烈，在续；暖身如守灶，日日添一柴。'},
+ yu:{n:'结木精',den:'将军府后的老林苑',form:'一株会走路的老树，枝条上打满了解不开的绳结',
+   omen:'林苑的风只进不出，满城都听得见树叶叹气',
+   say:'每一句没说出口的话，都会在我枝上打一个结。你看，今年的新结比旧结还多。',
+   moral:'木欲条达，话欲出口；风通了，结自己会开。'},
+ pi:{n:'仓廪官',den:'中土的九座大粮仓',form:'一只穿官服的圆滚田鼠，算盘打得极慢，总在打哈欠',
+   omen:'粮仓返潮，谷米结块，运粮的牛车陷在泥里走不动',
+   say:'仓里进的多、晒的少。生冷的雨一来，连我的账本都长了霉。',
+   moral:'仓廪实不在囤，在转；脾土喜燥，常晒三竿日头。'},
+ tan:{n:'雾泽鲛',den:'城南洼地的雾泽',form:'一条盘在雾里的灰鲛，鳞上挂满化不开的乳白水珠',
+   omen:'洼地浓雾经年不散，雾过之处，人人头重身沉',
+   say:'雾不是我吐的，是沟渠流不动，水汽全闷在了这里。我也想晒晒太阳。',
+   moral:'流水不腐；雾散不靠风，靠沟渠日日疏通。'},
+ re:{n:'蒸岚蟒',den:'御膳坊的屋脊',form:'一条黄鳞巨蟒，盘在烟囱上，被蒸得通体油亮',
+   omen:'御膳坊昼夜起灶，黄色蒸汽压着半座城，沟渠里的水都是烫的',
+   say:'膏粱之雨落得太勤，我吞不完，只好把它蒸上天。城里的苦味，一半是我呼的气。',
+   moral:'灶火七分，留三分清明；湿热之地，先撤一道菜。'},
+ yux:{n:'石桥伯',den:'赤河上的十二孔古桥',form:'一位石头长进皮肤的驼背老人，提着一盏照水的灯',
+   omen:'桥洞下货船越积越多，河水在桥前打转，淤成一片暗紫',
+   say:'船不是一天堵下的。久坐的城，河就慢；河一慢，我这桥洞就成了死结。',
+   moral:'血如河运，贵在流；每日走一程，桥下自然宽。'},
+ huo:{n:'烛宫鸦',den:'王宫千盏灯的灯海',form:'一只衔着火种的赤鸦，眼睛亮得过分',
+   omen:'王宫灯火彻夜不熄，连鼓楼报时的更夫都开始说胡话',
+   say:'是你们一直添灯油的！灯太亮，我停不下来；我停不下来，这城就没有夜。',
+   moral:'心火宜如灯，不宜如炬；留一盏给月亮，其余交还给夜。'}
+};
+const FABLES_EN={
+ qi:{n:'the Grain-Wind Sparrow',den:'the wind-sack atop the central granary',form:'a pale, thin sparrow lugging a wind-sack bigger than itself, resting every few yards',
+   omen:'banners hang limp on the walls, and post-horses doze after three miles',
+   say:'The sack leaks — not from sloth. The furnace below is never fed enough to brew new wind.',
+   moral:'With no wind in the sack, a thousand sails stand still. Store qi as you store wind: slowly, then far.'},
+ xue:{n:'the Red-River Carp',den:'the vermilion river that circles the city',form:'a carp whose scarlet scales have faded to pink, towing a string of dimming river-lanterns',
+   omen:'the river runs shallow, lanterns gutter along the banks, and the townsfolk dream too much',
+   say:'The water is low and the lanterns grow heavy. The snows upstream melt thinner every year.',
+   moral:'A lamp burns on oil, not on wick; a body rests on blood, not on sleep alone.'},
+ yin:{n:'the Dew-Well Toad',den:'the ancient dew well under the moon',form:'a white toad on the well-rim, carrying half a cool moon on its back',
+   omen:'the well drops lower every night; after dark the city turns strangely hot, and people toss between the watch-drums',
+   say:'The well fills only at night. You keep your lamps lit till the third watch — the moonlight never reaches the water before dawn.',
+   moral:'A deep well fears no noon. Hoard the night, and the day cannot scorch you.'},
+ yang:{n:'the Hearth Beast',den:'the great furnace beneath the palace',form:'an ash-furred beast dozing by embers that flare and fade with its breath',
+   omen:'frost thickens at the walls, the well-head ices over, and everyone wakes with cold hands and feet',
+   say:'I grow sleepy. The ember shrinks, and icy rain keeps leaking into the granary. I cannot dry this city alone.',
+   moral:'Keep the ember by feeding it daily, not by burning it bright.'},
+ yu:{n:'the Knotwood Sprite',den:'the old grove behind the general\u2019s manor',form:'a walking elder tree, its branches tied in knots no one can undo',
+   omen:'wind enters the grove but never leaves, and the whole city hears the leaves sigh',
+   say:'Every word you swallow ties one more knot in my branches. Look — this year\u2019s knots outnumber the old.',
+   moral:'Wood wants to stretch; words want out. Let the wind through, and knots untie themselves.'},
+ pi:{n:'the Granary Steward',den:'the nine great granaries of the midlands',form:'a plump field-mouse in official robes, slow at the abacus, forever yawning',
+   omen:'the granaries turn damp, grain clumps, and the ox-carts bog down in mud',
+   say:'More comes in than ever gets sun-dried. One cold rain, and even my ledgers grow mold.',
+   moral:'A full granary is not stored but turned. Earth loves dryness — give it its hours of sun.'},
+ tan:{n:'the Mist-Marsh Jiao',den:'the fog marsh in the southern lowlands',form:'a grey jiao-serpent coiled in fog, hung with milky droplets that never dry',
+   omen:'the marsh fog stands all year; whoever it touches feels heavy-headed and leaden-limbed',
+   say:'The fog is not my breath. The ditches have stopped flowing, so the damp has nowhere to go. I, too, miss the sun.',
+   moral:'Running water never rots. Fog lifts not with wind, but with ditches dredged daily.'},
+ re:{n:'the Steam-Haze Serpent',den:'the roof-ridge of the royal kitchens',form:'a yellow-scaled python coiled on the chimney, steamed glossy with grease',
+   omen:'the kitchens fire day and night, yellow vapor presses on half the city, and the gutters run hot',
+   say:'The rain of rich food falls too often. I cannot swallow it all, so I steam it skyward. Half the bitterness in town is my breath.',
+   moral:'Keep the stove at seven-tenths. In damp heat, remove one dish first.'},
+ yux:{n:'the Old Bridgekeeper',den:'the twelve-arched bridge over the vermilion river',form:'a hunched elder with stone growing into his skin, holding a lamp over the water',
+   omen:'barges jam beneath the arches, and the river eddies and bruises dark purple before the bridge',
+   say:'No jam forms in a day. A sitting city slows its river; a slow river turns my arches into dead knots.',
+   moral:'Blood is river traffic — it lives by moving. Walk a stretch each day, and the arches widen.'},
+ huo:{n:'the Lantern-Palace Crow',den:'the sea of a thousand palace lanterns',form:'a scarlet crow with a live coal in its beak and eyes far too bright',
+   omen:'the palace never darkens, and even the night-watch begin to babble',
+   say:'You keep adding oil! The lamps are too bright for me to stop; and while I circle, this city has no night.',
+   moral:'Let the heart be a lamp, not a torch. Leave one light to the moon; give the rest back to the night.'}
+};
+/* 怪物图鉴 · 视觉档案：十精怪 → 手绘白描（Reference/01. 怪物角色设定 授权素材）
+   img = assets/img 文件名；classic = 仿《山海经》图鉴文（「有兽焉，其状如……」体） */
+const BEASTS={
+ qi:{img:'santana',src:'伦德桑塔纳',
+   classic:'中土之野，有鸟焉，其状如雀而色白，常负风囊，大过于身，名曰谷风雀。其飞三丈而必息，其声如叹。见则其邑少气，人善倦，旌旗不扬。',
+   classicEN:'On the central plains lives a bird like a pale sparrow, forever hauling a wind-sack larger than itself — the Grain-Wind Sparrow. It rests every three zhang and sighs. Where it appears, the county runs short of breath.'},
+ xue:{img:'lofii',src:'爱鱬 Lofii',
+   classic:'有河焉环城而流，其色如朱，名曰赤河。河中有鲤，鳞褪为粉，驮灯而行，名曰赤河鲤。其水日浅，其灯渐昏，见则邑人多梦，寐而不安。',
+   classicEN:'A vermilion river circles the city. In it swims a carp whose scales have faded to pink, towing a string of dimming lanterns — the Red-River Carp. Where the water thins, sleep turns shallow and dreams multiply.'},
+ yin:{img:'mimisha',src:'铂金咪咪莎',
+   classic:'北阙有古井焉，夜承天露，名曰露井。井有灵蟾，曲体如月，缀珠而行，背驮凉月半轮。井水夜耗，见则其邑入夜燥热，人卧反侧，咽干而烦。',
+   classicEN:'Beneath the northern gate lies an old well that drinks the night dew. Its spirit curves like a crescent and wears strings of pearls, half a cool moon on its back. Where the well sinks low, nights run hot and sleepers toss.'},
+ yang:{img:'kenkate',src:'肯卡特勋章',
+   classic:'王城之底，有兽伏焉，其状如彘而毛色如烬，环有金圈，名曰暖灶兽。其息之间，灶火明灭。其困则火种式微，见则四体不温，晨寒彻骨。',
+   classicEN:'Below the royal city crouches a boar-like beast, ash-furred, ringed with a band of gold — the Hearth Beast. Its breath stirs the embers bright or dim. When it dozes, fires fail and hands and feet wake cold.'},
+ yu:{img:'minago',src:'明娜戈礼拜',
+   classic:'东郊有老林焉，其中有木，能言善行，枝角如冠，节节而生，枝皆结绳，名曰结木精。凡人有言而不发者，皆为其枝上一结。见则其邑胸闷善叹，风气不行。',
+   classicEN:'In the old grove east of the city walks a tree that speaks and strides, crowned with branching antlers, its limbs tied in knots — the Knotwood Sprite. Every word left unsaid becomes one more knot. Where it walks, chests tighten and sighs go unanswered.'},
+ pi:{img:'lama',src:'喇嘛菜菜子',
+   classic:'中土有九仓焉，仓有仓官，其体圆滚，其衣如吏，好居花草之间，名曰仓廪官。其性喜生冷甜腻，算缓而多哈欠。见则仓米结块，牛车陷泥，人身重而纳呆。',
+   classicEN:'The nine granaries of the midlands keep a round little steward, robed like a minor clerk, drowsy among the plants — the Granary Steward. It loves cold and sweet things and yawns at the abacus. Where it nods, grain clumps and bodies turn heavy.'},
+ tan:{img:'chaowen',src:'潮天稳',
+   classic:'城南有洼泽焉，常年多雾。泽中有灵，负旋壳而生蝶翼，行则花随，鳞挂乳珠，名曰雾泽鲛。其雾所过，人皆头重如裹，身困而黏。',
+   classicEN:'In the southern lowlands stands a marsh of year-long fog. Its spirit bears a spiral shell and butterfly wings, flowers trailing where it drifts, milky droplets on its scales — the Mist-Marsh Jiao. Whoever its fog touches turns heavy-headed and leaden-limbed.'},
+ re:{img:'feadro',src:'珑怖 Feadro',
+   classic:'膳坊之脊，有蟒盘焉，其状如龙而蛇行，其鳞黄而油亮，吞吐黄岚，名曰蒸岚蟒。膏粱之雨落则其岚愈盛，见则口苦面垢，小溲黄赤。',
+   classicEN:'Coiled on the kitchen ridge lives a python like a small dragon, scales yellow and glossy, breathing yellow steam — the Steam-Haze Serpent. The richer the rain of feasts, the thicker its haze. Where it coils, mouths turn bitter and faces sallow.'},
+ yux:{img:'heilei',src:'黑泪斯基',
+   classic:'赤河之上，有十二孔古桥。桥有石伯，石入肌肤，负翼低垂，驼背提灯，名曰石桥伯。桥下船淤，水回旋而色紫，见则血行不畅，痛有定处。',
+   classicEN:'Across the vermilion river spans a twelve-arched bridge. Its keeper has stone grown into his skin, dark wings hanging heavy, a lamp held over the water — the Old Bridgekeeper. Where the barges jam and eddies bruise purple, the current of blood runs slow.'},
+ huo:{img:'pangdeng',src:'庞妮儿拉灯',
+   classic:'王宫有千灯之海。其中有鸟，其状如鸦而羽鬣如燃，目赤而明，口衔火种，名曰烛宫鸦。灯油不熄则其飞不止，见则心烦不眠，口舌生疮。',
+   classicEN:'The palace keeps a sea of a thousand lamps. Among them flies a crow with a blazing mane and eyes too bright, a live coal in its beak — the Lantern-Palace Crow. While the oil lasts it cannot stop circling; where it circles, hearts race and sleep will not come.'}
+};
+/* 山神 · 平和质的图鉴页（百怪不生时现身） */
+const SHAN_GOD={img:'pealk',src:'合瑞 Pealk',zh:'山神 · 合瑞',en:'the Mountain God Pealk',
+ den:['山河清晏之境','the realm in perfect calm'],
+ classic:'山有神焉，其状如鹿而枝角，节节而生风，名曰合瑞。百怪不侵之境，其现身而为贺。见则山河清晏，阴阳平秘。',
+ classicEN:'A god walks these mountains: deer-shaped, antlered with living branches, wind at each step — Pealk, the Mountain God. It shows itself only where no monster dares to breed. Where it appears, the realm is calm and yin and yang keep their peace.'};
 function buildScript(){
   if(LANG==='en') return buildScriptEN();
   const i=state.intake;
-  const pron=i.sex==='f'?'她':i.sex==='m'?'他':'TA';
   const nm=String(i.name).replace(/</g,'&lt;');
-  const b=bmi(), bmiTxt=b<18.5?'偏瘦':b<24?'匀称':b<28?'偏重':'肥胖';
-  const jobTxt={sit:'久坐办公，与椅子和屏幕为伴',stand:'工作要久站、走动',phys:'靠体力吃饭，身体常年在负荷里',mix:'动静参半，节奏不定'}[i.job];
-  const dietTxt={light:'吃得清淡',oil:'口重，偏爱油腻',sweet:'嗜甜，奶茶不离手',cold:'贪凉，生冷不断',irreg:'三餐不定，外卖为生'}[i.diet];
-  const stimTxt={none:'烟酒咖啡都不碰',coffee:'每天靠咖啡或浓茶吊着精神',alcohol:'常有酒局',both:'咖啡与酒都不少'}[i.stim];
-  const exTxt={0:'几乎不运动',1:'每周动一两次',3:'每周运动三四次',5:'每周运动五次以上'}[i.ex];
+  const b=bmi();
+  const landTxt=b<18.5?'疆土清瘦，山脊分明':b<24?'山河匀停，田亩齐整':b<28?'土地丰腴，仓廪沉实':'国土丰厚，城垣宽缓';
+  const roadTxt={sit:'国人久坐如钟，驿道上草色渐深',stand:'国人终日步行，驿道被脚底磨得发亮',phys:'国人筋骨常年负重，城郭结实而疲惫',mix:'驿道半是车辙半是草，动静各半'}[i.job];
+  const rainTxt={light:'市集的烟火清淡而准时',oil:'天上常落膏粱之雨，沟渠都是油亮的',sweet:'糖霜落得像初雪，一年四季不化',cold:'北边常灌冰雨，直往粮仓里钻',irreg:'集市开市的时辰，全看掌柜心情'}[i.diet];
+  const springTxt={none:'城中泉水清甜',coffee:'城西有一眼苦泉，百姓清晨必饮，饮后眼亮心急',alcohol:'城南酒旗常年不倒',both:'苦泉与酒旗，各占半城'}[i.stim];
+  const nightTxt=i.sleep<6?'守夜人总提前吹灯，城楼不到子时就黑了':i.sleep>=8?'守夜人尽忠，灯油充足，城楼按时安歇':'守夜人大体准时，偶尔也偷偷早退';
+  const drumTxt=i.stress>=8?'议事殿的鼓一昼夜未停，连麻雀都记住了鼓点':i.stress>=6?'议事殿的鼓时紧时慢，听得人心头发紧':'议事殿的鼓声尚算从容';
+  const riverTxt={0:'城中河道已许久没有行船',1:'河道每旬开闸一两回',3:'河道每旬开闸三四回，水声琅琅',5:'河道日日行船，水花明亮'}[i.ex];
   const topS=state.scores[state.top[0]];
   const balanced=topS<3;
   const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
   const els=Object.entries(state.elements).sort((a,b)=>b[1]-a[1]);
   const bySrc={};
   state.clues.forEach(c=>{(bySrc[c.src]=bySrc[c.src]||[]).push(c.txt);});
-  const oneSentence=s=>{const t=s.split('。')[0];return t.length>64?t.slice(0,64)+'……':t;};
+  const pick=(a,bk)=>[...(bySrc[a]||[]),...(bySrc[bk]||[])];
   // 台词构造器
-  const DR =(t)=>`<p class="line"><span class="who dr">医　生</span>　${t}</p>`;
-  const VI =(t)=>`<p class="line"><span class="who">来访者</span>　${t}</p>`;
+  const DR =(t)=>`<p class="line"><span class="who dr">行脚医</span>　${t}</p>`;
+  const SP =(n,t)=>`<p class="line"><span class="who sp">${n}</span>　${t}</p>`;
   const NA =(t)=>`<p class="line"><span class="who" style="color:var(--ink-dim)">旁　白</span>　${t}</p>`;
-  const SC =(t)=>`<p class="scene">【场景】${t}</p>`;
+  const SC =(t)=>`<p class="scene">【画】${t}</p>`;
+  const omens=s=>s.map(x=>x.replace('：','——')).join('；');
   const acts=[];
 
-  /* 第一幕 · 初诊 */
-  acts.push({t:'第一幕 · 初 诊', ps:[
-    SC('深夜。一间亮着暖灯的诊室，两个人隔桌对坐。桌上摊着一本空白的卷宗：'+state.caseNo+'。'),
-    DR('「怎么称呼？」'),
-    VI('「'+nm+'。」'),
-    DR('「'+i.age+'。平时的一天，是怎么过的？」'),
-    VI('「'+jobTxt+'。'+dietTxt+'，'+stimTxt+'。」'),
-    DR('「睡得好吗？运动呢？」'),
-    VI('「每晚 '+i.sleep+' 个小时。压力的话……十分满分，我给 '+i.stress+' 分。'+exTxt+'。」'),
-    NA('医生在卷宗上写下：身高 '+i.h+'cm，体重 '+i.w+'kg，BMI '+b.toFixed(1)+'，身形'+bmiTxt+'。然后抬起头：「哪里不舒服？」'+pron+'想了想：「说不上来，就是觉得……不太对。」——最值得查的案子，往往从这句「说不上来」开始。')
+  /* 楔子 · 身化山河 */
+  acts.push({t:'楔子 · 身 化 山 河', ps:[
+    SC('入夜。一盏灯灭下去的工夫，一个人的身体摊开成一座山河国度——这是志怪书里最旧的一条规矩。'),
+    NA('这座国度名叫「'+nm+'」，国龄 '+i.age+'。'+landTxt+'。心为宫城，灯火居中；脾为粮仓，坐镇中土；肝为林苑，列于东郊；肺为云楼，高悬西境；肾为深井，藏在北方。'),
+    NA(roadTxt+'。'+rainTxt+'。'+springTxt+'。'),
+    NA(nightTxt+'；'+drumTxt+'；'+riverTxt+'。'),
+    NA('这一夜，一位行脚医背着药箱入境。通关文牒上只有一行小字：卷宗 '+state.caseNo+'。')
   ]});
 
-  /* 第二幕 · 身体的证词 */
-  const ps2=[SC('灯光推近。取证开始——不用仪器，只用眼睛、耳朵、问题，和三根手指。')];
-  if(bySrc['望诊']) ps2.push(
-    DR('「站到镜前去，伸出舌头。看着这个你最熟悉、也最陌生的人。」'),
-    NA(pron+'照做了。'+bySrc['望诊'].map(x=>x.replace('：','——')).join('；')+'。这些细节，'+pron+'以前从未留意。')
+  /* 卷一 · 入山见异 */
+  const ps1=[SC('行脚医不用仪器。他只带了四样东西：一双眼，一对耳，一肚子问题，和三根手指。')];
+  const oLook=pick('望诊','LOOK'),oListen=pick('闻诊','LISTEN'),oAsk=pick('问诊','ASK'),oPulse=pick('切诊','Palpation');
+  if(oLook.length) ps1.push(
+    DR('「先看。山河的气色，是写在脸上的。」'),
+    NA('他登上城楼四望，在《异象册》第一页记下：'+omens(oLook)+'。')
   );
-  if(bySrc['闻诊']) ps2.push(
-    DR('「闭上眼睛，回想你今天说的第一段话。声音有多大？说到第几句开始累？」'),
-    NA('声音与呼吸的证词被一一记下：'+bySrc['闻诊'].map(x=>x.replace('：','——')).join('；')+'。')
+  if(oListen.length) ps1.push(
+    DR('「再听。风声、水声、人声，都是国度的呼吸。」'),
+    NA('侧耳半晌，第二页记下：'+omens(oListen)+'。')
   );
-  if(bySrc['问诊']) ps2.push(
-    DR('「接下来，我要带你回到过去一个月的身体里。不用想算不算病——只问一句：它最近是不是常常发生？」'),
-    VI('「'+bySrc['问诊'].slice(0,8).map(x=>x.replace(/^.*? · /,'')).join('。')+'。」'+(bySrc['问诊'].length>8?'（另有 '+String(bySrc['问诊'].length-8)+' 条证词收入卷宗）':'')),
-    NA('有些答案出口时，'+pron+'自己愣了一下——原来身体早就说过，只是没人听。')
+  if(oAsk.length) ps1.push(
+    DR('「然后问。问茶馆里的老人，问守夜的更夫——这一个月，城里出过什么怪事？」'),
+    NA('百姓七嘴八舌，第三页写得密密麻麻：'+oAsk.slice(0,8).map(x=>x.replace(/^.*? · /,'')).join('；')+(oAsk.length>8?'……（另有 '+(oAsk.length-8)+' 条异闻收入册中）':'')+'。')
   );
-  if(bySrc['切诊']) ps2.push(
-    DR('「最后，把手伸出来。三根手指，搭在寸、关、尺上。」'),
-    NA(bySrc['切诊'].join('。')+'。脉象落定，像案发现场最后一张照片。')
+  if(oPulse.length) ps1.push(
+    DR('「最后搭桥。把手腕给我——寸、关、尺，是通往地底暗河的三道闸门。」'),
+    NA(oPulse.join('。')+'。地底河的水声，被他原样抄进了册子末页。')
   );
-  ps2.push(NA('四诊合参，共录得 '+state.clues.length+' 条线索。身体从不说谎，它只是说得含蓄。'));
-  acts.push({t:'第二幕 · 身体的证词', ps:ps2});
+  ps1.push(NA('合册。共 '+state.clues.length+' 条异象，没有一条是巧合——志怪书里说：山河不说谎，它只是说得像谜语。'));
+  acts.push({t:'卷一 · 入 山 见 异', ps:ps1});
 
-  /* 第三幕 · 拼图与指认 */
-  const ps3=[SC('诊室安静。线索在桌上一字排开，医生开始拼图。')];
-  ps3.push(DR('「五行的天平称过了：'+els[0][0]+'行最盛（'+els[0][1]+' 点），'+els[4][0]+'行最弱（'+els[4][1]+' 点）。」'));
+  /* 卷二 · 精怪现形 */
+  const ps2=[SC('子夜。行脚医在城心燃起一撮安神香。香烟升到半空，排成一杆五行的秤——'+els[0][0]+'行最重（'+els[0][1]+' 点），'+els[4][0]+'行最轻（'+els[4][1]+' 点）。')];
   if(balanced){
-    ps3.push(DR('「反复推演，诸证权重皆轻——这不是悬案，是好消息。你的身体正站在『阴平阳秘』的均衡里。」'),
-      NA('没有嫌疑人。这具身体的案子，是一桩「无案之案」——而侦探最喜欢的结局，正是没有凶手。'));
+    ps2.push(
+      NA('香烟久久不偏不倚。没有精怪现形——山林安静，河道通畅，灯火不多不少。'),
+      SP('山　神','「医者远来辛苦。此国阴平阳秘，百怪不生。你册子上那几条小异象，是日子本来的皱纹，不是妖。」'),
+      DR('「无案之案，是行脚医最爱的结局。那我只留一句话：别把好日子过坏。」')
+    );
   }else{
     shown.forEach((k,idx)=>{
-      const p=PATTERNS[k], conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
-      ps3.push(DR('「嫌疑人 '+('一二三'[idx])+' 号：<b>'+p.name+'</b>（'+p.eng+'，吻合度 '+conf+'%）——'+p.one+'」'));
-      ps3.push(NA('西医的放大镜下，这条线索对应：'+oneSentence(p.west)+'。而在心理画像里，'+pron+'或许是这样的人：'+oneSentence(p.psy)+'。'));
+      const p=PATTERNS[k],f=FABLES[k],conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+      ps2.push(
+        SC('香烟忽然偏向'+(['一','二','三'][idx])+'处——'+f.den+'。'),
+        NA('雾里走出'+f.form+'。城中的异象有了注脚：'+f.omen+'。'),
+        SP(f.n,'「'+f.say+'」'),
+        DR('「原来是你。」行脚医在册上写下真名：<b>'+p.name+'</b>（'+p.eng+'），现形度 '+conf+'%。——'+p.one)
+      );
     });
+    ps2.push(NA('志怪书的老规矩：精怪皆非恶物。它们只是山河失衡时，最先醒来、替你喊疼的那一个。'));
   }
-  acts.push({t:'第三幕 · 拼图与指认', ps:ps3});
+  acts.push({t:'卷二 · 精 怪 现 形', ps:ps2});
 
-  /* 第四幕 · 给这具身体的处方 */
-  const ps4=[SC('医生合上卷宗，开始写一张不一样的处方。')];
+  /* 卷三 · 三枚锦囊 */
+  const ps3=[SC('天将明。行脚医不开药方，只从箱底取出三枚锦囊，放在城门口的石墩上。')];
   if(balanced){
-    ps4.push(DR('「对平和的人，处方只有一句话：别把好日子过坏。规律三餐，23 点前入睡，每周 150 分钟运动。」'),
-      DR('「想喝茶的话——陈皮 3g、枸杞 6g 泡水为底；春加玫瑰，夏加菊花，秋加百合，冬加桂圆。顺时而饮，是为上策。」'));
+    ps3.push(
+      DR('「第一囊是茶：陈皮三钱、枸杞六钱为底——春添玫瑰，夏添菊花，秋添百合，冬添桂圆，跟着节气喝。」'),
+      DR('「第二囊是规矩：三餐按时，亥时安睡，每周让河道行船一百五十分钟。」'),
+      DR('「第三囊是空的——留给来年入境复查的我。」')
+    );
   }else{
-    const p0=PATTERNS[shown[0]];
+    const p0=PATTERNS[shown[0]],f0=FABLES[shown[0]];
     if(p0.tea&&p0.tea.length){
-      ps4.push(DR('「第一味药，不在药房，在茶盏里。<b>'+p0.tea[0].n+'</b>：'+p0.tea[0].f+'。'+p0.tea[0].m+'。'+p0.tea[0].w+'。」'));
-      if(p0.tea[1]) ps4.push(DR('「若想换着喝，还有 <b>'+p0.tea[1].n+'</b>：'+p0.tea[1].f+'。（'+p0.tea[1].w+'）」'));
+      ps3.push(DR('「第一囊，用来与'+f0.n+'讲和：<b>'+p0.tea[0].n+'</b>——'+p0.tea[0].f+'。'+p0.tea[0].m+'。'+p0.tea[0].w+'。」'+(p0.tea[1]?'（囊底另附一纸：想换口味时，可用「'+p0.tea[1].n+'」交替。）':'')));
     }
     const habits=(p0.habit||[]).slice(0,3);
-    if(habits.length) ps4.push(DR('「然后是日子本身——'+habits.join('；')+'。」'));
+    if(habits.length) ps3.push(DR('「第二囊装着日子本身——'+habits.join('；')+'。精怪听得懂的语言从来不是药，是作息。」'));
     const heals=(p0.heal||[]).slice(0,3);
-    if(heals.length) ps4.push(DR('「至于疗养：'+heals.join('；')+'。」'));
+    if(heals.length) ps3.push(DR('「第三囊最轻，装的是休养：'+heals.join('；')+'。」'));
     if(shown[1]){
-      const p1=PATTERNS[shown[1]];
-      ps4.push(NA('处方角落还有一行小字：兼顾「'+p1.name+'」这条暗线'+(p1.tea&&p1.tea[0]?'，'+p1.tea[0].n+'可交替饮用':'')+'——破案要抓主犯，也不能放过从犯。'));
+      const f1=FABLES[shown[1]],p1=PATTERNS[shown[1]];
+      ps3.push(NA('临行他回头补了一句：「'+f1.den+'里还蛰伏着一位名为「'+p1.name+'」的'+f1.n+'，尚未成气候'+(p1.tea&&p1.tea[0]?'——'+p1.tea[0].n+'可以一并照看':'')+'。安抚主怪，莫忘小妖。」'));
     }
   }
-  acts.push({t:'第四幕 · 给这具身体的处方', ps:ps4});
+  acts.push({t:'卷三 · 三 枚 锦 囊', ps:ps3});
 
-  /* 尾声 · 未完待续 */
-  acts.push({t:'尾声 · 未完待续', ps:[
-    SC(''+pron+'推门离开时，天快亮了。卷宗合上，却没有归档。'),
-    NA('三十天后，'+pron+'会回到这里，再探一次案。证型的权重会移动，线索簿会重写——身体这本案卷，永远在续写。'),
-    NA('把线索串成故事的医生只是引路人。真正的侦探是'+pron+'自己；而最终的判决，交给时间、生活，与专业医师。（本剧由四诊线索自动演绎，仅供健康学习，不构成医学诊断。）')
-  ]});
+  /* 卷终 · 归途偈 */
+  const psE=[SC('晨钟响起。山河开始折叠——城池、粮仓、河道，一寸寸收回成呼吸与心跳。')];
+  if(shown.length){
+    shown.slice(0,2).forEach(k=>{psE.push(NA('临收卷，'+FABLES[k].n+'留下一句偈：「'+FABLES[k].moral+'」'));});
+  }else{
+    psE.push(NA('山神留下一句偈：「国泰不在无事，在有常。」'));
+  }
+  psE.push(
+    NA('你醒来。窗外天光，国度在皮肤之下继续运转。三十天后，行脚医会再次入境——届时锦囊是否打开过，山河自己会说。'),
+    NA('（本寓言由你的四诊线索自动演绎：精怪即证型，异象即症状，锦囊即生活处方。它是一面镜子，不是一纸诊断——若山河持续失序，请寻专业医师。）')
+  );
+  acts.push({t:'卷终 · 归 途 偈', ps:psE});
   return acts;
 }
 
-/* English five-act version of the mini-play */
+/* English version of the fable play */
 function buildScriptEN(){
   const i=state.intake;
-  const pron=i.sex==='f'?'she':i.sex==='m'?'he':'they';
-  const PRON=i.sex==='f'?'She':i.sex==='m'?'He':'They';
   const nm=String(i.name).replace(/</g,'&lt;');
-  const b=bmi(), bmiTxt=b<18.5?'slim':b<24?'well-proportioned':b<28?'heavyset':'obese';
-  const jobTxt={sit:'desk-bound, married to a chair and a screen',stand:'on their feet all day',phys:'physical labor, the body always under load',mix:'a shifting mix of motion and stillness'}[i.job];
-  const dietTxt={light:'eats lightly',oil:'loves it greasy',sweet:'a sweet tooth, milk tea always in hand',cold:'cold and raw food, constantly',irreg:'irregular meals, living on delivery'}[i.diet];
-  const stimTxt={none:'no cigarettes, no alcohol, no coffee',coffee:'runs on coffee or strong tea',alcohol:'frequent drinking nights',both:'plenty of coffee and alcohol'}[i.stim];
-  const exTxt={0:'barely exercises',1:'moves once or twice a week',3:'exercises three or four times a week',5:'trains five-plus times a week'}[i.ex];
+  const b=bmi();
+  const landTxt=b<18.5?'a lean land of sharp ridgelines':b<24?'an even land of tidy fields':b<28?'a rich land with heavy granaries':'a generous land of wide, easy walls';
+  const roadTxt={sit:'Its people sit like bells; grass creeps over the post-roads',stand:'Its people walk all day; the post-roads are polished bright by footsoles',phys:'Its people haul and carry; the ramparts are sturdy but weary',mix:'The post-roads are half wheel-rut, half grass — motion and stillness in equal parts'}[i.job];
+  const rainTxt={light:'The market smoke is light and punctual',oil:'A rain of rich grease falls often; the gutters gleam with oil',sweet:'Sugar-frost falls like first snow and never melts, all four seasons',cold:'Icy rain blows in from the north, straight into the granaries',irreg:'The market opens whenever the shopkeepers feel like it'}[i.diet];
+  const springTxt={none:'The city springs run sweet',coffee:'By the west gate lies a bitter spring; the people drink it at dawn, and their eyes brighten while their hearts race',alcohol:'In the south quarter, the wine-banners never come down',both:'The bitter spring and the wine-banners each claim half the city'}[i.stim];
+  const nightTxt=i.sleep<6?'The night-watch snuffs the lamps early; the towers go dark before the midnight hour':i.sleep>=8?'The night-watch is faithful, the lamp-oil plentiful, the towers rest on time':'The night-watch is mostly punctual, though it sneaks off early now and then';
+  const drumTxt=i.stress>=8?'the council drums have not stopped for a day and a night — even the sparrows know the rhythm':i.stress>=6?'the council drums beat fast then slow, tightening every chest':'the council drums keep a reasonably easy time';
+  const riverTxt={0:'No barge has moved on the canals for a long while',1:'The locks open once or twice a tenday',3:'The locks open three or four times a tenday, and the water sings',5:'Barges run daily, the spray bright'}[i.ex];
   const topS=state.scores[state.top[0]];
   const balanced=topS<3;
   const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
   const els=Object.entries(state.elements).sort((a,b)=>b[1]-a[1]);
   const bySrc={};
   state.clues.forEach(c=>{(bySrc[c.src]=bySrc[c.src]||[]).push(c.txt);});
+  const pick=(a,bk)=>[...(bySrc[a]||[]),...(bySrc[bk]||[])];
   const FP=k=>Object.assign({},PATTERNS[k],PATTERNS[k].en||{});
-  const oneSentence=s=>{const t=s.split('. ')[0].split('。')[0];return t.length>80?t.slice(0,80)+'…':t;};
-  const DR =(t)=>`<p class="line"><span class="who dr">DOCTOR</span>　${t}</p>`;
-  const VI =(t)=>`<p class="line"><span class="who">VISITOR</span>　${t}</p>`;
+  const DR =(t)=>`<p class="line"><span class="who dr">PHYSICIAN</span>　${t}</p>`;
+  const SP =(n,t)=>`<p class="line"><span class="who sp">${n.toUpperCase()}</span>　${t}</p>`;
   const NA =(t)=>`<p class="line"><span class="who" style="color:var(--ink-dim)">NARRATOR</span>　${t}</p>`;
   const SC =(t)=>`<p class="scene">[SCENE] ${t}</p>`;
+  const omens=s=>s.map(x=>x.replace('：',' — ')).join('; ');
   const acts=[];
 
-  /* Act I · First Visit */
-  acts.push({t:'ACT I · FIRST VISIT', ps:[
-    SC('Late night. A warmly lit consulting room. Two people sit across a table, an empty file between them: '+state.caseNo+'.'),
-    DR('"What shall I call you?"'),
-    VI('"'+nm+'."'),
-    DR('"'+i.age+'. Walk me through an ordinary day."'),
-    VI('"'+jobTxt+'. '+PRON+' '+dietTxt+'; '+stimTxt+'."'),
-    DR('"Sleep? Exercise?"'),
-    VI('"'+i.sleep+' hours a night. Stress… out of ten, a '+i.stress+'. And '+pron+' '+exTxt+'."'),
-    NA('The doctor writes: '+i.h+'cm, '+i.w+'kg, BMI '+b.toFixed(1)+', build '+bmiTxt+'. Then looks up: "So what troubles you?" A pause. "Hard to say. Something just feels… off." — The best cases always begin with "hard to say."')
+  /* Prologue · The Body Becomes a Land */
+  acts.push({t:'PROLOGUE · THE BODY BECOMES A LAND', ps:[
+    SC('Nightfall. In the time it takes one lamp to go out, a human body unfolds into a kingdom of mountains and rivers — the oldest rule in the book of strange tales.'),
+    NA('The kingdom is called "'+nm+'", founded '+i.age+' years past — '+landTxt+'. The heart is the palace, lamps at the center; the spleen its granaries in the midlands; the liver a grove at the east; the lungs a cloud-tower in the west; the kidneys a deep well in the north.'),
+    NA(roadTxt+'. '+rainTxt+'. '+springTxt+'.'),
+    NA(nightTxt+'; '+drumTxt+'; '+riverTxt+'.'),
+    NA('On this night, a wandering physician crosses the border, medicine chest on his back. His papers bear a single line: Case file '+state.caseNo+'.')
   ]});
 
-  /* Act II · Testimony of the Body */
-  const ps2=[SC('The light closes in. Evidence gathering — no machines, only eyes, ears, questions, and three fingertips.')];
-  if(bySrc['LOOK']) ps2.push(
-    DR('"Stand before the mirror. Show your tongue. Look at this person you know best — and least."'),
-    NA(PRON+' obeys. '+bySrc['LOOK'].map(x=>x.replace('：',' — ')).join('; ')+'. Details never noticed before.')
+  /* Book I · Strange Signs */
+  const ps1=[SC('The physician carries no instruments. Only four things: a pair of eyes, a pair of ears, a belly full of questions, and three fingertips.')];
+  const oLook=pick('望诊','LOOK'),oListen=pick('闻诊','LISTEN'),oAsk=pick('问诊','ASK'),oPulse=pick('切诊','Palpation');
+  if(oLook.length) ps1.push(
+    DR('"First, look. A land wears its weather on its face."'),
+    NA('He climbs the wall and surveys the land, and on the first page of his Book of Signs he writes: '+omens(oLook)+'.')
   );
-  if(bySrc['LISTEN']) ps2.push(
-    DR('"Close your eyes. Recall the first thing you said today. How loud was your voice? At which sentence did it tire?"'),
-    NA('Testimony of voice and breath, entered into the file: '+bySrc['LISTEN'].map(x=>x.replace('：',' — ')).join('; ')+'.')
+  if(oListen.length) ps1.push(
+    DR('"Then, listen. Wind, water, voices — these are a kingdom\u2019s breathing."'),
+    NA('After a long while of listening, the second page reads: '+omens(oListen)+'.')
   );
-  if(bySrc['ASK']) ps2.push(
-    DR('"Now I will walk you back through your own body of the past month. Never mind whether it counts as illness — only answer: has it happened often?"'),
-    VI('"'+bySrc['ASK'].slice(0,8).map(x=>x.replace(/^.*? · /,'').replace(/^.*?:\s*/,'')).join('. ')+'."'+(bySrc['ASK'].length>8?' (+'+String(bySrc['ASK'].length-8)+' more statements filed)':'')),
-    NA('Some answers surprise even '+pron+' — the body had been speaking all along. Nobody was listening.')
+  if(oAsk.length) ps1.push(
+    DR('"Then, ask. Ask the elders in the teahouse, ask the night-watch — what strange things has this city seen this past month?"'),
+    NA('The townsfolk all speak at once, and the third page fills to the margins: '+oAsk.slice(0,8).map(x=>x.replace(/^.*? · /,'').replace(/^.*?:\s*/,'')).join('; ')+(oAsk.length>8?'… (+'+(oAsk.length-8)+' more strange reports filed)':'')+'.')
   );
-  if(bySrc['Palpation']) ps2.push(
-    DR('"Finally — your wrist. Three fingers, on cun, guan and chi."'),
-    NA(bySrc['Palpation'].join('. ')+'. The pulse settles like the last photograph of a scene.')
+  if(oPulse.length) ps1.push(
+    DR('"Last, the bridge. Give me your wrist — cun, guan, chi: three locks on the underground river."'),
+    NA(oPulse.join('. ')+'. The sound of the buried river is copied, note for note, onto the final page.')
   );
-  ps2.push(NA(state.clues.length+' clues in total. The body never lies; it merely speaks quietly.'));
-  acts.push({t:'ACT II · TESTIMONY OF THE BODY', ps:ps2});
+  ps1.push(NA('The book closes. '+state.clues.length+' strange signs, and not one a coincidence — for the book of strange tales says: a land never lies, it only speaks in riddles.'));
+  acts.push({t:'BOOK I · STRANGE SIGNS', ps:ps1});
 
-  /* Act III · The Line-up */
-  const ps3=[SC('Silence. The clues lie in a row. The doctor begins to assemble the picture.')];
-  ps3.push(DR('"The five-element scale reads: '+EL(els[0][0])+' strongest ('+els[0][1]+' pts), '+EL(els[4][0])+' weakest ('+els[4][1]+' pts)."'));
+  /* Book II · The Spirits Show Themselves */
+  const ps2=[SC('Midnight. At the city\u2019s heart the physician lights a pinch of calming incense. The smoke climbs and settles into a five-element scale — '+EL(els[0][0])+' weighs heaviest ('+els[0][1]+' pts), '+EL(els[4][0])+' lightest ('+els[4][1]+' pts).')];
   if(balanced){
-    ps3.push(DR('"Every weight stays light — this is no mystery, it is good news. Your body stands in balance: calm yin, guarded yang."'),
-      NA('No suspect. A case without a crime — the ending every detective secretly loves.'));
+    ps2.push(
+      NA('The smoke hangs perfectly still. No spirit appears — the groves are quiet, the canals run clear, the lamps burn neither too many nor too few.'),
+      SP('Mountain God','"You have come far, physician. This land holds its yin calm and its yang guarded; no strangeness breeds here. Those small signs in your book are the ordinary wrinkles of living — not monsters."'),
+      DR('"A case without a case — the ending every wanderer loves best. Then I leave a single sentence: do not ruin a good life."')
+    );
   }else{
     shown.forEach((k,idx)=>{
-      const p=FP(k), conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
-      ps3.push(DR('"Suspect number '+['one','two','three'][idx]+': <b>'+p.name+'</b> (match '+conf+'%) — '+p.one+'"'));
-      ps3.push(NA('Under the western lens: '+oneSentence(p.west)+'. And the psychological sketch: '+pron+' may well be someone who '+oneSentence(p.psy)+'.'));
+      const p=FP(k),f=FABLES_EN[k],conf=Math.min(95,Math.round(38+60*state.scores[k]/topS));
+      ps2.push(
+        SC('The smoke suddenly leans toward '+['one place','a second place','a third place'][idx]+' — '+f.den+'.'),
+        NA('Out of the mist steps '+f.form+'. The city\u2019s signs find their footnote: '+f.omen+'.'),
+        SP(f.n.replace(/^the /,''),'"'+f.say+'"'),
+        DR('"So it was you." The physician writes the true name in his book: <b>'+p.name+'</b>, manifestation '+conf+'%. — '+p.one)
+      );
     });
+    ps2.push(NA('The old rule of strange tales: spirits are never villains. They are merely the first to wake — and to cry out on your behalf — when a land loses its balance.'));
   }
-  acts.push({t:'ACT III · THE LINE-UP', ps:ps3});
+  acts.push({t:'BOOK II · THE SPIRITS SHOW THEMSELVES', ps:ps2});
 
-  /* Act IV · A Prescription for This Body */
-  const ps4=[SC('The doctor closes the file and begins to write an unusual prescription.')];
+  /* Book III · Three Brocade Pouches */
+  const ps3=[SC('Toward dawn. The physician writes no prescription. He takes three brocade pouches from the bottom of his chest and sets them on the stone post by the city gate.')];
   if(balanced){
-    ps4.push(DR('"For the balanced, one line only: do not ruin a good life. Regular meals, asleep by 23:00, 150 minutes of movement a week."'),
-      DR('"If you want tea — chenpi 3g and goji 6g as a base; rose in spring, chrysanthemum in summer, lily in autumn, longan in winter. Drink with the seasons."'));
+    ps3.push(
+      DR('"The first pouch is tea: chenpi three qian and goji six as the base — rose in spring, chrysanthemum in summer, lily in autumn, longan in winter. Drink with the seasons."'),
+      DR('"The second pouch holds the rules: meals on time, asleep by the hour of the Boar, and let the canals run barges one hundred and fifty minutes a week."'),
+      DR('"The third pouch is empty — it is for me, when I cross your border again next year."')
+    );
   }else{
-    const p0=FP(shown[0]);
+    const p0=FP(shown[0]),f0=FABLES_EN[shown[0]];
     if(p0.tea&&p0.tea.length){
-      ps4.push(DR('"The first medicine is not from a pharmacy but a teacup. <b>'+p0.tea[0].n+'</b>: '+p0.tea[0].f+'. '+p0.tea[0].m+'. '+p0.tea[0].w+'."'));
-      if(p0.tea[1]) ps4.push(DR('"To alternate: <b>'+p0.tea[1].n+'</b> — '+p0.tea[1].f+'. ('+p0.tea[1].w+')"'));
+      ps3.push(DR('"The first pouch makes peace with '+f0.n+': <b>'+p0.tea[0].n+'</b> — '+p0.tea[0].f+'. '+p0.tea[0].m+'. '+p0.tea[0].w+'."'+(p0.tea[1]?' (A slip at the bottom adds: alternate with '+p0.tea[1].n+' when you want a change.)':'')));
     }
     const habits=(p0.habit||[]).slice(0,3);
-    if(habits.length) ps4.push(DR('"Then, the days themselves — '+habits.join('; ')+'."'));
+    if(habits.length) ps3.push(DR('"The second pouch holds the days themselves — '+habits.join('; ')+'. The only language spirits understand is never medicine. It is routine."'));
     const heals=(p0.heal||[]).slice(0,3);
-    if(heals.length) ps4.push(DR('"And for retreat and repair: '+heals.join('; ')+'."'));
+    if(heals.length) ps3.push(DR('"The third pouch is the lightest. It holds rest: '+heals.join('; ')+'."'));
     if(shown[1]){
-      const p1=FP(shown[1]);
-      ps4.push(NA('A note in the margin: mind the second thread, "'+p1.name+'"'+(p1.tea&&p1.tea[0]?' — '+p1.tea[0].n+' may be alternated':'')+'. Catch the ringleader, but never ignore the accomplice.'));
+      const f1=FABLES_EN[shown[1]],p1=FP(shown[1]);
+      ps3.push(NA('At the gate he turns back once: "In '+f1.den+' there also drowses '+f1.n+', true name \u201c'+p1.name+'\u201d, not yet grown strong'+(p1.tea&&p1.tea[0]?' — '+p1.tea[0].n+' will tend to it as well':'')+'. Soothe the great spirit, but do not forget the small one."'));
     }
   }
-  acts.push({t:'ACT IV · A PRESCRIPTION FOR THIS BODY', ps:ps4});
+  acts.push({t:'BOOK III · THREE BROCADE POUCHES', ps:ps3});
 
-  /* Epilogue */
-  acts.push({t:'EPILOGUE · TO BE CONTINUED', ps:[
-    SC('As '+pron+' steps out, dawn is breaking. The file closes — but is never archived.'),
-    NA('In thirty days '+pron+' will return and open the case again. Weights will shift, the clue book will be rewritten — the body is a dossier forever in draft.'),
-    NA('The doctor who strung clues into a story was only a guide. The real detective is '+pron+' — and the final verdict belongs to time, to life, and to licensed physicians. (Generated from your own answers; for health education only, not a medical diagnosis.)')
-  ]});
+  /* Final · The Parting Verse */
+  const psE=[SC('The morning bell. The land begins to fold — walls, granaries, canals, inch by inch, back into breath and heartbeat.')];
+  if(shown.length){
+    shown.slice(0,2).forEach(k=>{psE.push(NA('As the scroll closes, '+FABLES_EN[k].n+' leaves one verse: "'+FABLES_EN[k].moral+'"'));});
+  }else{
+    psE.push(NA('The Mountain God leaves one verse: "A kingdom\u2019s peace lies not in nothing happening, but in things happening on time."'));
+  }
+  psE.push(
+    NA('You wake. Daylight at the window; the kingdom runs on beneath your skin. In thirty days the wandering physician will cross the border again — and whether the pouches were ever opened, the land itself will tell.'),
+    NA('(This fable is spun automatically from your four-examination clues: spirits are patterns, signs are symptoms, pouches are lifestyle prescriptions. It is a mirror, not a diagnosis — if the land stays in disorder, seek a licensed physician.)')
+  );
+  acts.push({t:'FINAL · THE PARTING VERSE', ps:psE});
   return acts;
 }
 $('#btnScript').onclick=()=>{
   if(!SCRIPT.length) return;
   const i=state.intake;
-  const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('推理小剧场','The Mini-Play')} · ${state.caseNo}</title>
+  const topS=state.scores[state.top[0]], balanced=topS<3;
+  const shown=balanced?[]:state.top.slice(0,3).filter(k=>state.scores[k]>=2);
+  const appendix=balanced
+    ? `<p class="cls"><b>${L(SHAN_GOD.zh,SHAN_GOD.en)}</b> — ${LANG==='en'?SHAN_GOD.classicEN:SHAN_GOD.classic}</p>`
+    : shown.map(k=>{const f=(LANG==='en'&&FABLES_EN[k])?FABLES_EN[k]:FABLES[k];
+        return `<p class="cls"><b>${f.n}</b>（${L('原画','art')} · ${BEASTS[k].src}）— ${LANG==='en'?BEASTS[k].classicEN:BEASTS[k].classic}</p>`;}).join('');
+  const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('山河志怪 · 寓言小剧场','The Fable Play')} · ${state.caseNo}</title>
 <style>body{font-family:"Songti SC","SimSun",serif;max-width:680px;margin:48px auto;padding:0 26px;color:#1c1c1c;line-height:2.1;background:#f7f3ea}
 h1{text-align:center;letter-spacing:.35em;font-size:26px}h2{text-align:center;color:#8a6a24;font-size:13px;letter-spacing:.3em;font-weight:normal;margin-bottom:40px}
 h3{letter-spacing:.25em;color:#8a6a24;margin-top:40px;border-bottom:1px dashed #c9b98a;padding-bottom:6px}
 p{margin:10px 0}.scene{color:#777;font-size:13px}.line{text-indent:0}
-.who{font-weight:bold;color:#8a6a24;margin-right:.5em}.who.dr{color:#3a5c58}
+.who{font-weight:bold;color:#8a6a24;margin-right:.5em}.who.dr{color:#3a5c58}.who.sp{color:#b03a2e}
+.cls{font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC",serif;font-size:14.5px;line-height:2.1;color:#3a3222;text-align:justify}
 .dis{font-size:12px;color:#999;margin-top:48px;text-align:center}</style></head>
-<body><h1>${L('身体侧写 · 推理小剧场','Body Profile · The Mini-Play')}</h1>
-<h2>${L('卷宗','File')} ${state.caseNo} ｜ ${L('主角','Starring')}：${String(i.name).replace(/</g,'&lt;')} ｜ ${new Date().toLocaleDateString(LANG==='en'?'en-US':'zh-CN')}</h2>
+<body><h1>${L('身体侧写 · 山河志怪寓言','Body Profile · A Fable of Land & Spirits')}</h1>
+<h2>${L('卷宗','File')} ${state.caseNo} ｜ ${L('国度','Kingdom')}：${String(i.name).replace(/</g,'&lt;')} ｜ ${new Date().toLocaleDateString(LANG==='en'?'en-US':'zh-CN')}</h2>
 ${SCRIPT.map(a=>`<h3>${a.t}</h3>${a.ps.join('')}`).join('')}
+<h3>${L('附录 · 怪物图鉴','APPENDIX · MONSTER BESTIARY')}</h3>
+${appendix}
 <p class="dis">MAD MEDICINE ｜ ${L('本剧由四诊线索自动演绎生成，仅供健康学习，不构成医学诊断','Auto-generated from your four-examination clues. For health education only — not a medical diagnosis.')}</p>
 </body></html>`;
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([doc],{type:'text/html;charset=utf-8'}));
-  a.download=`${L('推理小剧场','MiniPlay')}_${state.caseNo}.html`;
+  a.download=`${L('寓言小剧场','FablePlay')}_${state.caseNo}.html`;
   a.click(); URL.revokeObjectURL(a.href);
 };
 
@@ -4341,7 +4807,7 @@ show('screen-intro');
   if(!/patrol/i.test(location.search+location.hash))return;
   const chip=document.createElement('button');
   chip.type='button';
-  chip.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:99;padding:10px 20px;border:1px solid var(--gold);border-radius:999px;background:rgba(7,10,18,.94);color:var(--gold-bright);font:11px/1 monospace;letter-spacing:.24em;cursor:pointer;box-shadow:0 0 18px rgba(212,175,106,.3)';
+  chip.style.cssText='position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:99;padding:10px 20px;border:1px solid var(--gold);border-radius:999px;background:rgba(16,18,23,.94);color:var(--gold-bright);font:11px/1 monospace;letter-spacing:.24em;cursor:pointer;box-shadow:0 0 18px rgba(212,175,106,.3)';
   chip.textContent='巡夜待命 · 等待录制信号（或点我开演）';
   document.body.appendChild(chip);
   document.title='巡夜 · '+document.title;   /* 让共享选择器里更容易认出本页 */
