@@ -17,15 +17,17 @@
    视觉：双人对坐、意念相通、环绕镜头（粒子生成艺术）
    ============================================================ */
 :root{
-  --bg:#0a0b0e;
-  --bg2:#121419;
-  --ink:#ece5d1;
-  --ink-dim:#a29a84;
+  --bg:#090c15;
+  --bg2:#12172a;
+  --ink:#eae6d6;
+  --ink-dim:#9a94a8;
   --gold:#c99a52;
   --gold-bright:#eeca86;
-  --teal:#7fbfae;
+  --teal:#6fae9e;
+  --azure:#6f9fb8;
+  --violet:#9a7fc0;
   --cinnabar:#d6563a;
-  --card:rgba(21,24,30,.84);
+  --card:rgba(18,22,38,.86);
   --line:rgba(201,154,82,.28);
   --paper:#ece3c9;
   --serif:"Songti SC","STSong","STZhongsong","SimSun","Noto Serif SC",serif;
@@ -1095,13 +1097,79 @@ h2{position:relative}
    图鉴：宣纸原色 + multiply 融合 → 白描直接印在纸上
    ============================================================ */
 ::selection{background:rgba(214,86,58,.4);color:#fff}
-/* 墨线游丝：手写流水纹平铺，极淡，贴着画面边缘缓慢漂移 */
-#inkline{position:fixed;inset:-6%;z-index:1;pointer-events:none;opacity:.5;mix-blend-mode:screen;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='560' viewBox='0 0 560 560'%3E%3Cg fill='none' stroke='%23ece5d1' stroke-opacity='.5' stroke-width='1'%3E%3Cpath d='M-20 96C90 40 170 168 292 112S474 28 590 96'/%3E%3Cpath d='M-20 130C96 76 178 198 300 144S482 66 590 130'/%3E%3Cpath d='M-20 164C102 112 186 226 308 174S490 104 590 164'/%3E%3Cpath d='M-20 384C88 330 172 450 296 394S478 310 590 378'/%3E%3Cpath d='M-20 418C94 366 180 478 304 426S486 346 590 410'/%3E%3Cpath d='M-20 452C100 404 188 508 312 460S494 384 590 444'/%3E%3Cpath d='M118 -20C66 92 172 182 122 304S46 482 124 590'/%3E%3Cpath d='M152 -20C102 98 202 190 154 312S80 490 158 590'/%3E%3Cpath d='M418 -20C370 86 468 176 422 300S350 474 426 590'/%3E%3Cpath d='M452 -20C404 92 500 184 454 308S382 482 458 590'/%3E%3C/g%3E%3Cg fill='%23ece5d1' fill-opacity='.5'%3E%3Ccircle cx='86' cy='302' r='1.4'/%3E%3Ccircle cx='102' cy='322' r='1'/%3E%3Ccircle cx='68' cy='334' r='.9'/%3E%3Ccircle cx='112' cy='348' r='1.1'/%3E%3Ccircle cx='470' cy='212' r='1.3'/%3E%3Ccircle cx='490' cy='230' r='.9'/%3E%3Ccircle cx='452' cy='244' r='1.1'/%3E%3Ccircle cx='250' cy='482' r='1.3'/%3E%3Ccircle cx='270' cy='498' r='.9'/%3E%3C/g%3E%3C/svg%3E");
-  background-size:560px 560px;animation:inkDrift 110s linear infinite;
-  -webkit-mask-image:radial-gradient(ellipse 74% 68% at 50% 46%,transparent 26%,#000 80%);
-  mask-image:radial-gradient(ellipse 74% 68% at 50% 46%,transparent 26%,#000 80%)}
-@keyframes inkDrift{to{background-position:560px 280px}}
+/* ============================================================
+   v7 · 山海经宇宙背景：墨涡深渊 + 云气白描 + 矿物光霭 + 粒子星河
+   素材出自 Reference/Background-01（墨涡等高线）与 Background-03（云气松枝）
+   screen 混合让墨纹如星云浮出夜色，粒子画布在其间闪烁
+   ============================================================ */
+#nebula{position:fixed;inset:-12%;z-index:1;pointer-events:none;opacity:.14;mix-blend-mode:screen;
+  background:url("assets/img/bg-vortex.jpg") center/cover no-repeat;
+  filter:contrast(1.06) brightness(.9);
+  -webkit-mask-image:radial-gradient(ellipse 64% 58% at 50% 44%,rgba(0,0,0,.34) 0%,#000 80%);
+  mask-image:radial-gradient(ellipse 64% 58% at 50% 44%,rgba(0,0,0,.34) 0%,#000 80%);
+  animation:nebulaDrift 160s ease-in-out infinite alternate}
+@keyframes nebulaDrift{from{transform:translate3d(-1.6%,-1%,0) scale(1)}to{transform:translate3d(1.6%,1%,0) scale(1.07)}}
+#cloudSea{position:fixed;inset:-8%;z-index:1;pointer-events:none;opacity:.09;mix-blend-mode:screen;
+  background:url("assets/img/bg-clouds.jpg") 50% 88%/165% auto no-repeat;
+  animation:cloudDrift 130s ease-in-out infinite alternate;
+  -webkit-mask-image:linear-gradient(to top,#000 8%,rgba(0,0,0,.42) 30%,transparent 62%);
+  mask-image:linear-gradient(to top,#000 8%,rgba(0,0,0,.42) 30%,transparent 62%)}
+@keyframes cloudDrift{from{background-position:45% 82%}to{background-position:56% 79%}}
+/* 矿物光霭：石青 / 青莲 / 朱砂三缕极光，山海经夜空的呼吸 */
+#aurora{position:fixed;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;
+  background:
+    radial-gradient(ellipse 46% 34% at 10% 86%,rgba(111,159,184,.11),transparent 70%),
+    radial-gradient(ellipse 42% 32% at 90% 10%,rgba(154,127,192,.12),transparent 70%),
+    radial-gradient(ellipse 30% 24% at 84% 90%,rgba(214,86,58,.055),transparent 70%);
+  animation:auroraBreathe 24s ease-in-out infinite alternate}
+@keyframes auroraBreathe{from{opacity:.45}to{opacity:.78}}
+body.stage-live #nebula{opacity:.08}
+body.stage-live #cloudSea{opacity:.05}
+body.stage-live #aurora{opacity:.5}
+@media(prefers-reduced-motion:reduce){#nebula,#cloudSea,#aurora{animation:none}}
+/* 首页堂徽：卢布喏喏花拓片印，悬于卷首 */
+.heroTotem{width:58px;height:58px;object-fit:cover;border-radius:50%;opacity:.92;
+  box-shadow:0 0 0 1px rgba(201,154,82,.4),0 0 26px rgba(201,154,82,.16);
+  margin-bottom:14px;animation:heroFloat 8s ease-in-out infinite}
+/* 首页左席 · 九尾欲灵：与右席山神对望，一欲一守 */
+.heroSpirit{position:relative;flex:0 0 min(270px,24vw);pointer-events:none;user-select:none;margin-left:1vw;order:-1}
+.heroSpirit img{width:100%;display:block;opacity:.8;animation:heroFloat 9s ease-in-out infinite reverse}
+.heroSpirit figcaption{position:absolute;left:-6px;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;
+  letter-spacing:.4em;font-size:11.5px;color:rgba(234,230,214,.42);font-family:var(--serif)}
+.heroSpirit figcaption b{color:var(--violet);font-weight:400}
+@media(max-width:900px){
+  .heroSpirit{position:absolute;left:-18%;top:50%;transform:translateY(-50%);width:56vw;max-width:250px;opacity:.4;z-index:1}
+  .heroSpirit figcaption{display:none}
+  .heroTotem{width:44px;height:44px;margin-bottom:10px}
+}
+/* 辨证屏 · 蛇身翠翠：群妖现形时的暗处见证者 */
+.deduceSpirit{position:fixed;right:-3%;bottom:0;width:min(30vw,330px);pointer-events:none;user-select:none;z-index:0;opacity:.3}
+.deduceSpirit img{width:100%;display:block}
+/* 辨证屏底纹：故障骷髅拓影（Reference/Background-02）——现形前的病灶深渊 */
+#screen-deduce.active::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url("assets/img/bg-skull.jpg") center 26%/min(54vh,82vw) no-repeat;
+  opacity:.11;mix-blend-mode:screen}
+/* ---------- 坐堂引导签：始终告诉玩家下一步 ---------- */
+#guideTip{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);
+  z-index:9;display:none;align-items:center;gap:10px;max-width:min(580px,88vw);
+  background:linear-gradient(150deg,rgba(18,22,38,.94),rgba(11,14,25,.94));
+  border:1px solid rgba(201,154,82,.42);border-radius:8px;padding:9px 14px 9px 10px;
+  box-shadow:0 14px 36px rgba(0,0,0,.55);pointer-events:none}
+#guideTip.show{display:flex;animation:guideIn .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes guideIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+#guideTip .gIcon{flex:0 0 32px;width:32px;height:32px;border-radius:50%;overflow:hidden;
+  box-shadow:0 0 0 1px rgba(201,154,82,.5),0 0 14px rgba(201,154,82,.2)}
+#guideTip .gIcon img{width:100%;height:100%;object-fit:cover}
+#guideTip .gTxt{font-size:12px;line-height:1.75;letter-spacing:.03em;color:var(--ink)}
+#guideTip .gTxt b{color:var(--gold-bright);font-weight:600}
+#guideTip .gStep{flex:0 0 auto;align-self:stretch;display:flex;align-items:center;
+  font-size:9.5px;letter-spacing:.22em;color:var(--ink-dim);writing-mode:vertical-rl;
+  border-left:1px dashed rgba(201,154,82,.32);padding-left:8px}
+body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:auto}
+#deduceGate.show~#guideTip{bottom:calc(132px + env(safe-area-inset-bottom))}
+.guideGlow{animation:guideGlow 1.7s ease-in-out infinite!important}
+@keyframes guideGlow{0%,100%{box-shadow:0 0 0 0 rgba(238,202,134,0)}50%{box-shadow:0 0 0 4px rgba(238,202,134,.2),0 0 24px rgba(238,202,134,.38)}}
+@media(max-width:700px){#guideTip .gStep{display:none}#guideTip .gTxt{font-size:11px}}
 /* 竖排卷边引文（超宽屏两侧） */
 .scrollTag{position:fixed;top:50%;transform:translateY(-50%);z-index:2;pointer-events:none;
   writing-mode:vertical-rl;letter-spacing:.5em;font-family:var(--serif);font-size:13px;
@@ -1204,7 +1272,9 @@ h2{position:relative}
 </div>
 <div id="vignette"></div>
 <div id="paper"></div>
-<div id="inkline"></div>
+<div id="nebula"></div>
+<div id="cloudSea"></div>
+<div id="aurora"></div>
 <div id="scanlines"></div>
 <div id="grain"></div>
 <div class="scrollTag l" aria-hidden="true">身 即 山 河 <b>·</b> 怪 即 未 病</div>
@@ -1231,6 +1301,7 @@ h2{position:relative}
   <section class="screen" id="screen-intro">
     <div class="heroWrap">
       <div class="heroMain">
+        <img class="heroTotem inkArt" src="assets/img/lubu.jpg" alt="诊所堂徽 · 卢布喏喏花">
         <div class="kicker"><span data-zh="山 海 志 异 · 交 互 剧 场" data-en="A SHAN-HAI MONSTER THEATRE">山 海 志 异 · 交 互 剧 场</span></div>
         <h1 class="title"><span data-zh="怪 物 诊 所" data-en="MONSTER CLINIC">怪 物 诊 所</span>
           <span class="en">MAD MEDICINE · 山河志怪 · 四诊寻妖</span>
@@ -1255,6 +1326,10 @@ h2{position:relative}
       <figure class="heroArt" aria-hidden="true">
         <img class="inkArt" src="assets/img/pealk.jpg" alt="">
         <figcaption>山 有 神 焉 <b>·</b> 名 曰 合 瑞</figcaption>
+      </figure>
+      <figure class="heroSpirit" aria-hidden="true">
+        <img class="inkArt" src="assets/img/yuling.jpg" alt="">
+        <figcaption>青 丘 有 狐 <b>·</b> 名 曰 欲 灵</figcaption>
       </figure>
     </div>
   </section>
@@ -1348,6 +1423,7 @@ h2{position:relative}
     <div id="deduceGate">
       <button class="btn" id="btnDeduce" data-zh="开 坛 辨 证" data-en="B E G I N · D E D U C T I O N">开 坛 辨 证</button>
     </div>
+    <div id="guideTip" role="status" aria-live="polite"><span class="gIcon"><img class="inkArt" src="assets/img/keyao.jpg" alt=""></span><span class="gTxt"></span><span class="gStep">坐堂提示</span></div>
   </section>
 
   <!-- 切诊模块（舞台浮层调用） -->
@@ -1392,6 +1468,7 @@ h2{position:relative}
 
   <!-- 6 · 推理 -->
   <section class="screen" id="screen-deduce">
+    <figure class="deduceSpirit" aria-hidden="true"><img class="inkArt" src="assets/img/cuicui.jpg" alt=""></figure>
     <div class="kicker" data-zh="终 卷 · 开 坛 辨 证" data-en="FINAL · DEDUCTION">终 卷 · 开 坛 辨 证</div>
     <h2 data-zh="合 卷 · 群 妖 现 形" data-en="T H E · S P I R I T S · A P P E A R">合 卷 · 群 妖 现 形</h2>
     <div class="vitalLine" data-vital></div>
@@ -2747,6 +2824,7 @@ function applyLang(){
   if(ORBS.length){ buildDock(); renderChapters(); renderBadges(); ORBS.forEach(o=>{const em=o.el&&o.el.querySelector('em'); if(em) em.textContent=L(CATS[o.cat].zh,CATS[o.cat].en)+' '+String(o.order+1).padStart(2,'0');}); }
   if(orbTotal) updateHUD();
   closePanel();
+  if(window.__guideRefresh) window.__guideRefresh();
 }
 
 /* ---------- 导航与进度 ---------- */
@@ -2756,6 +2834,7 @@ function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('#'+id).classList.add('active');
   document.body.classList.toggle('stage-live',id==='screen-stage');
+  if(id!=='screen-stage'&&typeof setGuide==='function') setGuide(null);
   window.scrollTo({top:0});
   if(window.stopCharts) stopCharts();
   if(window.__navved){ if(id==='screen-report'){FX.reveal();buzz([20,50,20,50,40]);} else FX.swish(); }
@@ -2849,6 +2928,29 @@ function showSignal(message){
   toast.textContent=message;toast.classList.add('show');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1800);
 }
+/* ---------- 坐堂引导签：实时提示下一步操作 ---------- */
+const GUIDE={
+  intro:{zh:'<b>拖动画面</b>环绕山河，找到发亮的线索光点；<b>点按光点</b>开始采集。找不到？点右下 <b>◎</b> 自动转向最近的线索。',en:'<b>Drag</b> to orbit the realm, then <b>tap a glowing orb</b> to gather its omen. Lost? Tap <b>◎</b> below to face the nearest clue.'},
+  question:{zh:'照图<b>点选一至多项</b>最贴合的表现，可拖「程度条」标轻重；选好后点底部「<b>确 认</b>」归档；确无异常就点「<b>无 异 常</b>」。',en:'<b>Pick one or more</b> matching signs (drag the degree bar for weight), then tap <b>CONFIRM</b> to file — or <b>NORMAL</b> if nothing is off.'},
+  confirm:{zh:'选好了 —— 点「<b>确 认</b>」把这枚异象收进医案册。',en:'Set — tap <b>CONFIRM</b> to file this omen into the case book.'},
+  pulse:{zh:'切诊开始：跟随<b>指法教学</b>，依次完成搭脉、辨脉四问与自测心率。',en:'Palpation begins: follow the <b>finger tutorial</b> — gates, four pulse questions, then your real pulse.'},
+  next:{zh:'已收录！点<b>下一枚光点</b>继续勘验，或点右下 <b>◎</b> 自动定位最近的剩余线索。',en:'Filed! Tap the <b>next orb</b> to continue, or hit <b>◎</b> to face the nearest remaining clue.'},
+  deduce:{zh:'全部异象已归档 —— 点下方「<b>开 坛 辨 证</b>」，让群妖现形。',en:'Every omen is filed — tap <b>BEGIN DEDUCTION</b> below and unmask the spirits.'}
+};
+let guideKey=null;
+function clearGuideGlow(){document.querySelectorAll('.guideGlow').forEach(e=>e.classList.remove('guideGlow'));}
+function setGuide(key,targetSel){
+  guideKey=key;
+  const tip=$('#guideTip'); if(!tip) return;
+  clearGuideGlow();
+  if(!key||!GUIDE[key]){tip.classList.remove('show');return;}
+  const g=GUIDE[key];
+  tip.querySelector('.gTxt').innerHTML=L(g.zh,g.en);
+  tip.querySelector('.gStep').textContent=L('坐堂提示','CLINIC CUE');
+  tip.classList.add('show');
+  if(targetSel){const t=document.querySelector(targetSel);if(t)t.classList.add('guideGlow');}
+}
+window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
 function scanClues(){
   const rest=ORBS.filter(o=>!o.done);
   if(!rest.length){showSignal(L('全部线索已归档','All clues filed'));return;}
@@ -3139,6 +3241,7 @@ function afterAnswer(){
     :L('全部线索归档 · 可以开始推理','All clues filed · ready to deduce'));
   if(left===0&&ORBS.every(o=>!o.skipped)) awardBadge('flawless');
   checkChapters();
+  setGuide(left>0?'next':'deduce',left>0?'#locateClue':'#btnDeduce');
 }
 /* 自动接力：归档后镜头转向同章下一条未捕捉的光点，保持节奏 */
 function focusNext(o){
@@ -3198,6 +3301,7 @@ function openOrb(o){
     $('#btnTimer').disabled=false;
     if(timerIv){clearInterval(timerIv);timerIv=null;}
     enterPulse(); applyPulseLang();
+    setGuide('pulse');
     return;
   }
   // 望 / 闻 / 问 统一流程：可多选并存的证词，每条独立程度条，外加情境交叉标签
@@ -3214,6 +3318,7 @@ function openOrb(o){
     count.textContent=normalPick?L('正常 · 可改','NORMAL · EDITABLE'):marks.size?L(`已选 ${marks.size} · 可改`,`${marks.size} PICKED · EDITABLE`):L('未选 = 无异常','NONE = NORMAL');
     archive.textContent=normalPick?L('确 认','CONFIRM'):marks.size?L('确 认','CONFIRM'):L('无 异 常','NORMAL');
     archive.classList.toggle('ready',!!(normalPick||marks.size));
+    setGuide((normalPick||marks.size)?'confirm':'question',(normalPick||marks.size)?'.archiveNode':null);
   };refresh();
   addAnswerNodes(inner,items,(item,node)=>{
     if(o._completing)return;
@@ -3256,6 +3361,10 @@ function closePanel(){
   curOrb=null;window.__stageFocus=false;document.body.classList.remove('stage-answering');
   if(prev&&prev.el){prev.el.classList.remove('focused');syncOrbState(prev);}
   if(pulseAnim){cancelAnimationFrame(pulseAnim);pulseAnim=null;}
+  if(guideKey==='question'||guideKey==='confirm'||guideKey==='pulse'){
+    const left=ORBS.filter(o=>!o.done).length;
+    setGuide(left>0?'intro':'deduce',left>0?'#locateClue':'#btnDeduce');
+  }
 }
 $('#qPanelClose').onclick=closePanel;
 $('#qPanel').addEventListener('click',e=>{if(e.target.id==='qPanel')closePanel();});
@@ -3264,7 +3373,7 @@ $('#btnSkipRest').onclick=e=>{e.stopPropagation();skipRest();};
 $('#turnLeft').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(-.48);};
 $('#locateClue').onclick=e=>{e.stopPropagation();scanClues();};
 $('#turnRight').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(.48);};
-$('#btnDeduce').onclick=()=>{ closePanel(); startDeduce(); };
+$('#btnDeduce').onclick=()=>{ setGuide(null); closePanel(); startDeduce(); };
 /* 切诊光圈完成（由把脉模块末尾调用） */
 function markPulseDone(){
   const orb=ORBS.find(o=>o.cat==='pulse');
@@ -3300,6 +3409,7 @@ function enterStage(useForm){
   addClue(L('建档','Intake'), `${state.intake.name} · ${state.intake.age} · BMI ${bmi().toFixed(1)} · ${L('睡眠','sleep')}${state.intake.sleep}h · ${L('压力','stress')}${state.intake.stress}/10`, {});
   buildStage();
   show('screen-stage');
+  setGuide('intro','#locateClue');
   if(useForm) setTimeout(showIntakeProfile,650);   // 初步侧写：建档后的第一幅人物轮廓
 }
 function bmi(){ return state.intake.w / Math.pow(state.intake.h/100,2); }
