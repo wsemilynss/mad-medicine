@@ -3588,10 +3588,8 @@ function ringRelayout(){
   requestAnimationFrame(()=>layoutAnswerRing($('#qPanelInner'),{animate:true}));
 }
 /* opts: recenter 重新居中证词卡 · reset 按环形重排 · animate 平滑过渡 · soft 拖动中的轻量迭代 · pin 正被拖动的选项 */
-function layoutAnswerRing(inner,opts={}){
-  if(!inner||innerWidth<700) return;
+function solveRing(inner,opts){
   const panel=$('#qPanel');
-  if(!panel.classList.contains('open')||panel.classList.contains('pulse-open')) return;
   const card=inner.querySelector('.focusQuestion'), nodes=[...inner.querySelectorAll('.answerNode')];
   if(!card||!nodes.length) return;
   const G=RING_GAP, B=ringBounds();
