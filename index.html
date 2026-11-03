@@ -487,7 +487,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
 .answerNode.sel::after{content:"REC";position:absolute;right:6px;top:4px;color:currentColor;font:8px/1 monospace;letter-spacing:.08em}
 #qPanel.resolving .focusQuestion,#qPanel.resolving .answerNode{animation:fieldCollapse .48s ease-in forwards!important}
 @keyframes fieldCollapse{to{left:calc(50vw - var(--focus-x));top:calc(55vh - var(--focus-y));transform:translate(-50%,-50%) scale(.04);opacity:0}}
-#qPanelClose{position:fixed;left:calc(var(--focus-x,50vw) + max(135px,min(14.5vw,195px)) + 18px);top:calc(var(--focus-y,48vh) - 52px);
+#qPanelClose{position:fixed;left:calc(var(--focus-x,50vw) + var(--card-hw,max(135px,min(14.5vw,195px))) + 18px);top:calc(var(--focus-y,48vh) - 52px);
   width:34px;height:34px;pointer-events:auto;cursor:pointer;background:rgba(13,15,19,.72);border:1px solid rgba(233,228,214,.2);
   border-radius:50%;color:var(--ink-dim);font-size:18px;z-index:2;opacity:0;transition:.2s}
 #qPanel.open #qPanelClose{opacity:1}
