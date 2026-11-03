@@ -3455,10 +3455,9 @@ function updateHUD(animate=false){
 }
 function placeFocus(o){
   const mobile=innerWidth<700;
-  // 桌面端：焦点横向留出整圈星环的位置，避免边缘节点被推回来压住证词卡
-  const margin=Math.min(390,innerWidth*.34)+130;
-  const x=mobile?innerWidth*.5:(margin*2>innerWidth?innerWidth*.5:Math.max(margin,Math.min(innerWidth-margin,o.sx||innerWidth*.5)));
-  const y=mobile?innerHeight*.43:Math.max(innerHeight*.31,Math.min(innerHeight*.67,o.sy||innerHeight*.48));
+  // 证词卡始终居中（桌面端落定后由 layoutAnswerRing 按安全区再精确居中），选项围绕它散开
+  const x=innerWidth*.5;
+  const y=mobile?innerHeight*.43:innerHeight*.47;
   const panel=$('#qPanel');
   panel.style.setProperty('--focus-x',x+'px');panel.style.setProperty('--focus-y',y+'px');
   panel.style.setProperty('--focus-color',CATS[o.cat].col);
