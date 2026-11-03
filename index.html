@@ -1325,6 +1325,7 @@ body.stage-answering #streakTag{opacity:0!important;transition:opacity .2s}
   /* 答题时：收成左上角光珠（JS 自动收起），展开时也不挡右上关闭钮与底部题目抽屉 */
   body.stage-answering #guideTip{top:calc(60px + env(safe-area-inset-top));bottom:auto;left:12px;transform:none;
     animation:none;max-width:calc(100vw - 88px)}
+  body.stage-answering #guideTip:not(.mini){width:calc(100vw - 88px)}
   #deduceGate.show~#guideTip{bottom:calc(222px + env(safe-area-inset-bottom))}
 }
 /* 答题时右缘「医案册」竖签让位，免得压住选项 */
