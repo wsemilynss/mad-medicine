@@ -3174,16 +3174,27 @@ function setGuide(key,targetSel){
   if(targetSel){const t=document.querySelector(targetSel);if(t)t.classList.add('guideGlow');}
 }
 window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
-/* ---------- 提示签：可收成光珠、可拖动换位（光珠点按重新展开） ---------- */
+/* ---------- 提示签：可收成光珠、可拖动换位（光珠点按重新展开）
+   手机端：文字最多两行（点按展开全文）；答题时自动收成左上角光珠，不挡题目；
+   新提示展开 9 秒后自动收起，✕ 随时可收 ---------- */
 (function(){
   const tip=$('#guideTip'); if(!tip) return;
   const fold=tip.querySelector('.gFold');
-  let mini=false, dragS=null;
-  const setMini=v=>{ mini=v; tip.classList.toggle('mini',v); if(!v) tip.classList.remove('unread'); };
-  if(fold) fold.addEventListener('click',e=>{e.stopPropagation();setMini(true);});
+  const isMobile=()=>innerWidth<700;
+  const answeringM=()=>isMobile()&&document.body.classList.contains('stage-answering');
+  let mini=false, userMini=false, dragS=null, autoT=null, lastKey=null;
+  const setMini=v=>{ mini=v; tip.classList.toggle('mini',v); if(v) tip.classList.remove('expanded'); else tip.classList.remove('unread'); };
+  const autoFold=ms=>{ clearTimeout(autoT); if(isMobile()) autoT=setTimeout(()=>{ if(!dragS) setMini(true); },ms); };
+  const syncFoldGlyph=()=>{ if(fold) fold.textContent=isMobile()?'✕':'—'; };
+  syncFoldGlyph();
+  if(fold){
+    fold.addEventListener('pointerdown',e=>e.stopPropagation());
+    fold.addEventListener('click',e=>{e.stopPropagation();clearTimeout(autoT);userMini=true;setMini(true);});
+  }
   tip.addEventListener('pointerdown',e=>{
     if(e.target.closest('.gFold')) return;
     dragS={x:e.clientX,y:e.clientY,moved:false};
+    clearTimeout(autoT);
     try{tip.setPointerCapture(e.pointerId);}catch(err){}
   });
   tip.addEventListener('pointermove',e=>{
@@ -3202,10 +3213,13 @@ window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
     tip.style.top=Math.max(4,Math.min(innerHeight-tip.offsetHeight-4,parseFloat(tip.style.top)+dy))+'px';
   });
   const up=()=>{ if(!dragS) return; const wasDrag=dragS.moved; dragS=null;
-    if(!wasDrag&&mini) setMini(false); };
+    if(wasDrag){ if(!mini&&isMobile()) autoFold(9000); return; }
+    if(mini){ userMini=false; setMini(false); if(isMobile()) autoFold(answeringM()?6000:9000); }
+    else if(isMobile()){ tip.classList.toggle('expanded'); autoFold(9000); } };
   tip.addEventListener('pointerup',up);
   tip.addEventListener('pointercancel',()=>{dragS=null;});
   addEventListener('resize',()=>{
+    syncFoldGlyph();
     if(!tip.classList.contains('free')) return;
     const r=tip.getBoundingClientRect();
     if(r.right>innerWidth||r.bottom>innerHeight||r.left<0||r.top<0){
@@ -3213,9 +3227,16 @@ window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
       tip.style.top=Math.max(4,Math.min(innerHeight-tip.offsetHeight-4,r.top))+'px';
     }
   });
-  // 新提示到达而提示签处于光珠态时，挂一颗「未读」高光
   const _set=setGuide;
-  setGuide=function(key,sel){ _set(key,sel); if(key&&tip.classList.contains('mini')) tip.classList.add('unread'); };
+  setGuide=function(key,sel){
+    _set(key,sel);
+    const changed=key!==lastKey; lastKey=key;
+    if(!key){ clearTimeout(autoT); return; }
+    if(answeringM()){ if(!mini){ clearTimeout(autoT); setMini(true); } }
+    else if(isMobile()&&changed&&!userMini){ setMini(false); autoFold(9000); }
+    // 新提示到达而提示签处于光珠态时，挂一颗「未读」高光
+    if(changed&&mini) tip.classList.add('unread');
+  };
 })();
 function scanClues(){
   const rest=ORBS.filter(o=>!o.done);
