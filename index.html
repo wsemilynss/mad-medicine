@@ -1314,12 +1314,19 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
 /* 答题时提示签移到顶部，与连击标同排可能相碰——答题期间连击标让位 */
 body.stage-answering #streakTag{opacity:0!important;transition:opacity .2s}
 @media(max-width:700px){
-  /* 常态避开底部线索抽屉（收起态 128px），答题时避开右上关闭钮 */
-  #guideTip{bottom:calc(140px + env(safe-area-inset-bottom))}
-  body.stage-answering #guideTip{top:calc(112px + env(safe-area-inset-top));bottom:auto}
+  /* 常态避开底部线索抽屉（收起态 128px）：最多两行，点按展开全文，✕ 收成光珠 */
+  #guideTip{bottom:calc(140px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px);gap:8px;padding:6px 6px 6px 8px}
+  #guideTip .gIcon{flex:0 0 26px;width:26px;height:26px}
+  #guideTip .gTxt{font-size:11px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #guideTip.expanded .gTxt{-webkit-line-clamp:unset;line-clamp:unset}
+  #guideTip .gFold{width:32px;height:32px;align-self:center;font-size:14px;color:var(--ink);border-color:rgba(233,228,214,.35)}
+  /* 答题时：收成左上角光珠（JS 自动收起），展开时也不挡右上关闭钮与底部题目抽屉 */
+  body.stage-answering #guideTip{top:calc(60px + env(safe-area-inset-top));bottom:auto;left:12px;transform:none;
+    animation:none;max-width:calc(100vw - 88px)}
   #deduceGate.show~#guideTip{bottom:calc(222px + env(safe-area-inset-bottom))}
-  #guideTip .gFold{width:26px;height:26px}
 }
+/* 答题时右缘「医案册」竖签让位，免得压住选项 */
+body.stage-answering .bookEdge{opacity:0;pointer-events:none}
 /* 证词卡与答案星环：缓慢漂浮；桌面端可拖拽换位（连线随动） */
 @media(min-width:701px){
   .focusQuestion{cursor:grab;animation:qFloat 5.6s ease-in-out infinite}
