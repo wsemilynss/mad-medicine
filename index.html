@@ -5494,6 +5494,42 @@ show('screen-intro');
 </script>
 
 <script>
+/* 版本自检：GitHub Pages 会让浏览器缓存页面 10 分钟，手机端常停留在旧版。
+   打开或切回页面时比对服务器 Last-Modified：开场页直接刷新；游戏进行中只提示，不打断进度 */
+(function(){
+  if(!/^https?:$/.test(location.protocol)) return;
+  const here=Date.parse(document.lastModified)||0;
+  let busy=false;
+  function showChip(key){
+    if(document.getElementById('updChip')) return;
+    const b=document.createElement('button');
+    b.id='updChip'; b.type='button';
+    b.textContent=(typeof LANG!=='undefined'&&LANG==='en')?'NEW VERSION · TAP TO REFRESH':'网页已更新 · 点此刷新';
+    b.style.cssText='position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translateX(-50%);z-index:60;padding:10px 18px;border:1px solid var(--gold);border-radius:999px;background:rgba(16,18,23,.95);color:var(--gold-bright);font:12px/1 sans-serif;letter-spacing:.14em;cursor:pointer;box-shadow:0 0 18px rgba(212,175,106,.35)';
+    b.onclick=()=>{sessionStorage.setItem(key,'1');location.reload();};
+    document.body.appendChild(b);
+  }
+  async function check(onLoad){
+    if(busy) return; busy=true;
+    try{
+      const url=location.href.split('#')[0];
+      const r=await fetch(url,{method:'HEAD',cache:'no-cache'});
+      const lm=Date.parse(r.headers.get('last-modified')||'');
+      if(!lm||lm<=here+1000) return;
+      const key='mm-upd-'+lm;
+      if(sessionStorage.getItem(key)) return;
+      await fetch(url,{cache:'reload'}).catch(()=>{}); // 刷新浏览器缓存里的副本，reload 才能拿到新版
+      const idle=document.querySelector('#screen-intro.active');
+      if(onLoad||idle){ sessionStorage.setItem(key,'1'); location.reload(); }
+      else showChip(key);
+    }catch(e){}finally{busy=false;}
+  }
+  check(true);
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') check(false); });
+})();
+</script>
+
+<script>
 /* ============================================================
    巡夜模式（?patrol / #patrol）：配合 design-evolution.html 的「自动巡夜录制」
    本页被新开为录制目标时，自行演示 开场→手册→建档→舞台→推理→报告 全流程，
