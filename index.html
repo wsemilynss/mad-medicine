@@ -1340,6 +1340,17 @@ body.stage-answering .bookEdge{opacity:0;pointer-events:none}
   #qPanel.open .answerNode{animation:answerDecode .42s var(--answer-delay,0ms) ease forwards,
     nodeFloat 6.4s ease-in-out calc(var(--float-d,0s) + .55s) infinite}
   .answerNode.dragging{filter:brightness(1.35);z-index:3}
+  /* 空间不足时的紧凑星环（由 layoutAnswerRing 逐级启用） */
+  #qPanel.ringCompact .focusQuestion{width:clamp(250px,26vw,330px);padding:11px 14px 12px}
+  #qPanel.ringCompact .focusLead{-webkit-line-clamp:1;line-clamp:1}
+  #qPanel.ringCompact .answerNode{width:clamp(138px,15vw,184px);min-height:44px;padding:7px 8px}
+  #qPanel.ringCompact .answerNode .optArt{width:34px;height:34px}
+  #qPanel.ringCompact .answerNode .answerText{font-size:11.5px}
+  #qPanel.ringTight .focusQuestion{width:clamp(230px,24vw,290px)}
+  #qPanel.ringTight .focusTitle{font-size:15px}
+  #qPanel.ringTight .answerNode{width:clamp(124px,13vw,160px)}
+  #qPanel.ringTight .answerNode .optArt{width:28px;height:28px}
+  #qPanel.ringTight .answerNode .answerText{font-size:11px}
 }
 @keyframes qFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
 @keyframes nodeFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-6px)}}
