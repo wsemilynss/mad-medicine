@@ -3623,8 +3623,8 @@ function solveRing(inner,opts){
     panel.style.setProperty('--focus-x',c.x+'px');panel.style.setProperty('--focus-y',c.y+'px');
     if(curOrb){curOrb.focusX=c.x;curOrb.focusY=c.y;}
   }
-  const obs=[{x:c.x,y:c.y,hw:cw2+G,hh:ch2+G}];
-  const cb=ringObstacle($('#qPanelClose'),4); if(cb) obs.push(cb);
+  // 关闭钮带 transition，实测会取到过渡中的旧位置，这里按 CSS 公式直接推算
+  const obs=[{x:c.x,y:c.y,hw:cw2+G,hh:ch2+G},{x:c.x+cw2+18+17,y:c.y-52+17,hw:21,hh:21}];
   if(tipOb) obs.push(tipOb);
   obs.push(...docks);
   const n0=nodes.length;
