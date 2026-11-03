@@ -35,6 +35,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
+html{overflow-x:hidden}  /* 双侧怪物出血图撑出文档滚动宽，根级一并裁掉（移动端防横向误滑） */
 body{
   background:var(--bg);
   color:var(--ink);
@@ -914,7 +915,7 @@ body.stage-answering #stageControls{opacity:.12;pointer-events:none}
   .chChip.clear::after{display:none}
   #hudVis{display:none}
   #clueDock.open #hudVis{display:flex}
-  #badgeToast{right:10px;left:10px;top:auto;bottom:calc(128px + env(safe-area-inset-bottom));transform:translateY(120%)}
+  #badgeToast{right:10px;left:10px;top:auto;bottom:calc(202px + env(safe-area-inset-bottom));transform:translateY(120%)}
   #badgeToast.show{transform:none}
   .cfEmblem{width:92px;height:92px}
   .msVisual{gap:12px}.msEmblem{width:70px;height:70px}.msRadar{width:130px;height:130px}
@@ -1102,16 +1103,15 @@ h2{position:relative}
    素材出自 Reference/Background-01（墨涡等高线）与 Background-03（云气松枝）
    screen 混合让墨纹如星云浮出夜色，粒子画布在其间闪烁
    ============================================================ */
-#nebula{position:fixed;inset:-12%;z-index:1;pointer-events:none;opacity:.14;mix-blend-mode:screen;
-  background:url("assets/img/bg-vortex.jpg") center/cover no-repeat;
-  filter:contrast(1.06) brightness(.9);
-  -webkit-mask-image:radial-gradient(ellipse 64% 58% at 50% 44%,rgba(0,0,0,.34) 0%,#000 80%);
-  mask-image:radial-gradient(ellipse 64% 58% at 50% 44%,rgba(0,0,0,.34) 0%,#000 80%);
-  animation:nebulaDrift 160s ease-in-out infinite alternate}
-@keyframes nebulaDrift{from{transform:translate3d(-1.6%,-1%,0) scale(1)}to{transform:translate3d(1.6%,1%,0) scale(1.07)}}
+#cosmos{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:0;pointer-events:none;
+  opacity:.55;mix-blend-mode:screen;
+  -webkit-mask-image:radial-gradient(ellipse 68% 62% at 50% 46%,#000 30%,rgba(0,0,0,.55) 68%,transparent 92%);
+  mask-image:radial-gradient(ellipse 68% 62% at 50% 46%,#000 30%,rgba(0,0,0,.55) 68%,transparent 92%)}
+body.stage-live #cosmos{opacity:.32}
 #cloudSea{position:fixed;inset:-8%;z-index:1;pointer-events:none;opacity:.09;mix-blend-mode:screen;
   background:url("assets/img/bg-clouds.jpg") 50% 88%/165% auto no-repeat;
   animation:cloudDrift 130s ease-in-out infinite alternate;
+  transform:translate3d(calc(var(--mx,0)*-16px),calc(var(--my,0)*-9px),0);
   -webkit-mask-image:linear-gradient(to top,#000 8%,rgba(0,0,0,.42) 30%,transparent 62%);
   mask-image:linear-gradient(to top,#000 8%,rgba(0,0,0,.42) 30%,transparent 62%)}
 @keyframes cloudDrift{from{background-position:45% 82%}to{background-position:56% 79%}}
@@ -1121,16 +1121,48 @@ h2{position:relative}
     radial-gradient(ellipse 46% 34% at 10% 86%,rgba(111,159,184,.11),transparent 70%),
     radial-gradient(ellipse 42% 32% at 90% 10%,rgba(154,127,192,.12),transparent 70%),
     radial-gradient(ellipse 30% 24% at 84% 90%,rgba(214,86,58,.055),transparent 70%);
+  transform:translate3d(calc(var(--mx,0)*24px),calc(var(--my,0)*15px),0);
   animation:auroraBreathe 24s ease-in-out infinite alternate}
 @keyframes auroraBreathe{from{opacity:.45}to{opacity:.78}}
-body.stage-live #nebula{opacity:.08}
 body.stage-live #cloudSea{opacity:.05}
 body.stage-live #aurora{opacity:.5}
-@media(prefers-reduced-motion:reduce){#nebula,#cloudSea,#aurora{animation:none}}
+@media(prefers-reduced-motion:reduce){#cloudSea,#aurora{animation:none;transform:none}}
 /* 首页堂徽：卢布喏喏花拓片印，悬于卷首 */
 .heroTotem{width:58px;height:58px;object-fit:cover;border-radius:50%;opacity:.92;
   box-shadow:0 0 0 1px rgba(201,154,82,.4),0 0 26px rgba(201,154,82,.16);
   margin-bottom:14px;animation:heroFloat 8s ease-in-out infinite}
+/* 首页层级：文字为主、图为衬——双怪退居两侧并向中线渐隐，不再压字 */
+.heroMain{z-index:3}
+.heroArt,.heroSpirit{z-index:1}
+.heroArt img{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 34%),linear-gradient(0deg,transparent 0,#000 14%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(90deg,transparent 0,#000 34%),linear-gradient(0deg,transparent 0,#000 14%);
+  mask-composite:intersect}
+.heroSpirit img{
+  -webkit-mask-image:linear-gradient(270deg,transparent 0,#000 34%),linear-gradient(0deg,transparent 0,#000 14%);
+  -webkit-mask-composite:source-in;
+  mask-image:linear-gradient(270deg,transparent 0,#000 34%),linear-gradient(0deg,transparent 0,#000 14%);
+  mask-composite:intersect}
+@media(max-width:1200px){
+  .heroArt{flex-basis:min(260px,24vw)}
+  .heroSpirit{flex-basis:min(200px,19vw)}
+  .heroArt img,.heroSpirit img{opacity:.55}
+}
+/* 四步流程图标 → 朱砂方玺：与图鉴印、分院印同一印谱 */
+.istep i{position:relative;width:46px;height:46px;filter:none}
+.istep i .glyph{display:none}
+.istep i::after{position:absolute;inset:2px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:21px;color:#f0d9c8;letter-spacing:0;
+  border:1.5px solid rgba(214,86,58,.78);border-radius:6px;
+  background:linear-gradient(150deg,rgba(214,86,58,.2),rgba(214,86,58,.06));
+  box-shadow:inset 0 0 0 2px rgba(214,86,58,.12),inset 0 0 12px rgba(214,86,58,.14),0 0 16px rgba(214,86,58,.16);
+  text-shadow:0 0 8px rgba(214,86,58,.4)}
+.istep:nth-child(1) i::after{content:"挂";transform:rotate(-3deg)}
+.istep:nth-child(2) i::after{content:"寻";transform:rotate(2.5deg)}
+.istep:nth-child(3) i::after{content:"收";transform:rotate(-2deg)}
+.istep:nth-child(4) i::after{content:"鉴";transform:rotate(3deg)}
+@media(max-width:700px){.istep i{width:38px;height:38px}.istep i::after{font-size:17px;inset:1px}}
 /* 首页左席 · 九尾欲灵：与右席山神对望，一欲一守 */
 .heroSpirit{position:relative;flex:0 0 min(270px,24vw);pointer-events:none;user-select:none;margin-left:1vw;order:-1}
 .heroSpirit img{width:100%;display:block;opacity:.8;animation:heroFloat 9s ease-in-out infinite reverse}
@@ -1261,9 +1293,97 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
     mask-image:linear-gradient(180deg,transparent 0%,#000 22% 82%,transparent 100%)}
   #screen-intake .panel{margin-right:min(20vw,300px)}
 }
+/* ============================================================
+   v8 · 可操作信息层：提示签可收拢成光珠/可拖放 · 证词星环漂浮可拖 · 撒网捕捉
+   ============================================================ */
+/* 坐堂提示签：可拖动换位、可收成一枚光珠（点光珠重新展开） */
+#guideTip{pointer-events:auto;cursor:grab;touch-action:none;user-select:none;transition:opacity .25s}
+#guideTip:active{cursor:grabbing}
+#guideTip.free{transform:none;animation:none}
+#guideTip .gFold{flex:0 0 auto;align-self:flex-start;width:22px;height:22px;padding:0;
+  border:1px solid rgba(233,228,214,.22);background:transparent;color:var(--ink-dim);
+  font:11px/1 monospace;border-radius:50%;cursor:pointer}
+#guideTip .gFold:hover{color:var(--gold-bright);border-color:var(--gold)}
+#guideTip.mini{gap:0;padding:5px;width:46px;height:46px;justify-content:center;border-radius:50%;
+  cursor:pointer;animation:miniPulse 2.6s ease-in-out infinite}
+#guideTip.mini .gTxt,#guideTip.mini .gStep,#guideTip.mini .gFold{display:none}
+#guideTip.mini .gIcon{flex:0 0 34px;width:34px;height:34px}
+#guideTip.mini.unread .gIcon{box-shadow:0 0 0 2px var(--gold-bright),0 0 20px rgba(238,202,134,.85)}
+@keyframes miniPulse{0%,100%{box-shadow:0 0 0 0 rgba(238,202,134,.3),0 14px 36px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 8px rgba(238,202,134,0),0 14px 36px rgba(0,0,0,.55)}}
+#clueDock.open~#guideTip{opacity:0;pointer-events:none}
+/* 答题时提示签移到顶部，与连击标同排可能相碰——答题期间连击标让位 */
+body.stage-answering #streakTag{opacity:0!important;transition:opacity .2s}
+@media(max-width:700px){
+  /* 常态避开底部线索抽屉（收起态 128px），答题时避开右上关闭钮 */
+  #guideTip{bottom:calc(140px + env(safe-area-inset-bottom))}
+  body.stage-answering #guideTip{top:calc(112px + env(safe-area-inset-top));bottom:auto}
+  #deduceGate.show~#guideTip{bottom:calc(222px + env(safe-area-inset-bottom))}
+  #guideTip .gFold{width:26px;height:26px}
+}
+/* 证词卡与答案星环：缓慢漂浮；桌面端可拖拽换位（连线随动） */
+@media(min-width:701px){
+  .focusQuestion{cursor:grab;animation:qFloat 5.6s ease-in-out infinite}
+  .focusQuestion:active{cursor:grabbing}
+  .focusQuestion.dragging{animation:none}
+  .answerNode{cursor:grab;touch-action:none}
+  .answerNode:active{cursor:grabbing}
+  #qPanel.open .answerNode{animation:answerDecode .42s var(--answer-delay,0ms) ease forwards,
+    nodeFloat 6.4s ease-in-out calc(var(--float-d,0s) + .55s) infinite}
+  .answerNode.dragging{filter:brightness(1.35);z-index:3}
+}
+@keyframes qFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-7px)}}
+@keyframes nodeFloat{0%,100%{transform:translate(-50%,-50%) translateY(0)}50%{transform:translate(-50%,-50%) translateY(-6px)}}
+/* 撒网涟漪：按住舞台撒出，网住的微光现形 */
+.netRing{position:fixed;z-index:6;pointer-events:none;transform:translate(-50%,-50%);border-radius:50%;
+  border:1.5px solid rgba(238,202,134,.85);
+  box-shadow:0 0 26px rgba(212,175,106,.32),inset 0 0 34px rgba(212,175,106,.1)}
+.netRing i{position:absolute;left:50%;top:50%;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;
+  background:var(--gold-bright);box-shadow:0 0 12px var(--gold-bright)}
+.netRing::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px dashed rgba(238,202,134,.3);
+  animation:orbSpin 6s linear infinite}
+.netRing.fade{opacity:0;transform:translate(-50%,-50%) scale(1.12);transition:opacity .4s ease,transform .4s ease}
+.orb.hooked i{transform:rotate(45deg) scale(1.4);box-shadow:0 0 30px currentColor}
+.orb.hooked b{opacity:.9;border-style:solid}
+/* ---------- 侧栏边缘触发签：侧栏可收进屏幕边缘，留下带呼吸提示的展开/关闭把手 ---------- */
+#clueDock.edge{transform:translateX(calc(-100% - 24px));pointer-events:none}
+#dockEdgeBtn{display:none;position:absolute;right:12px;top:12px;width:26px;height:26px;padding:0;
+  border:1px solid rgba(233,228,214,.2);border-radius:50%;background:rgba(13,15,19,.6);
+  color:var(--ink-dim);font-size:13px;cursor:pointer;align-items:center;justify-content:center}
+#dockEdgeBtn:hover{color:var(--gold);border-color:var(--gold)}
+.dockEdge,.bookEdge{position:fixed;top:50%;writing-mode:vertical-rl;font:10px/1 monospace;letter-spacing:.32em;
+  color:var(--gold-bright);background:rgba(16,18,23,.92);border:1px solid var(--line);
+  padding:16px 7px;cursor:pointer;display:flex;align-items:center;gap:9px;backdrop-filter:blur(6px)}
+.dockEdge::before,.bookEdge::before{font-size:12px;letter-spacing:0;color:var(--teal);transition:transform .3s}
+.dockEdge{left:0;z-index:8;transform:translate(-105%,-50%);border-radius:0 8px 8px 0;border-left:0;
+  box-shadow:5px 0 20px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:transform .35s ease,opacity .3s}
+.dockEdge::before{content:"▸"}
+#clueDock.edge~.dockEdge{transform:translate(0,-50%);opacity:1;pointer-events:auto;animation:edgeNudgeL 3s ease-in-out 1s infinite}
+@keyframes edgeNudgeL{0%,100%{margin-left:0}50%{margin-left:5px}}
+.dockEdge:hover,.bookEdge:hover{filter:brightness(1.3);box-shadow:0 0 18px rgba(212,175,106,.3)}
+body.stage-answering .dockEdge{opacity:0!important;pointer-events:none}
+.bookEdge{right:0;z-index:19;transform:translate(0,-50%);border-radius:8px 0 0 8px;border-right:0;
+  box-shadow:-5px 0 20px rgba(0,0,0,.45);animation:edgeNudgeR 3.4s ease-in-out 1.2s infinite;
+  transition:right .35s ease}
+.bookEdge::before{content:"◂"}
+@keyframes edgeNudgeR{0%,100%{margin-right:0}50%{margin-right:5px}}
+#clueBook.open~.bookEdge{right:340px;animation:none}
+#clueBook.open~.bookEdge::before{transform:rotate(180deg)}
+@media(max-width:700px){
+  #dockEdgeBtn{display:flex}
+  #clueBook.open~.bookEdge{right:min(86vw,340px)}
+  /* 移动端：线索抽屉可整个收进下缘，留一枚呼吸拉片 */
+  #clueDock.edge{transform:translateY(118%)}
+  .dockEdge{left:50%;top:auto;bottom:0;writing-mode:horizontal-tb;letter-spacing:.2em;
+    transform:translate(-50%,105%);border-radius:10px 10px 0 0;border-bottom:0;border-left:1px solid var(--line);
+    padding:8px 22px;box-shadow:0 -5px 20px rgba(0,0,0,.45)}
+  .dockEdge::before{content:"▴"}
+  #clueDock.edge~.dockEdge{transform:translate(-50%,0);animation:edgeNudgeM 3s ease-in-out 1s infinite}
+  @keyframes edgeNudgeM{0%,100%{margin-bottom:0}50%{margin-bottom:4px}}
+}
 </style>
 </head>
 <body>
+<canvas id="cosmos"></canvas>
 <canvas id="bg"></canvas>
 <div id="figLayer" aria-hidden="true">
   <video class="figGrain" autoplay muted loop playsinline webkit-playsinline preload="auto"><source src="reference-figures.mp4" type="video/mp4"></video>
@@ -1272,7 +1392,6 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
 </div>
 <div id="vignette"></div>
 <div id="paper"></div>
-<div id="nebula"></div>
 <div id="cloudSea"></div>
 <div id="aurora"></div>
 <div id="scanlines"></div>
@@ -1294,6 +1413,7 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
   <div class="sub" data-zh="望闻问切收来的异象，皆入此册，以待辨证" data-en="Every omen gathered by the four examinations is filed here, awaiting diagnosis">望闻问切收来的异象，皆入此册，以待辨证</div>
   <div id="clueList"><div class="clueEmpty" data-zh="尚未收录异象 —— 入山之后，异象将在此归档。" data-en="No omens yet — they will be filed here once you enter the mountains.">尚未收录异象 —— 入山之后，异象将在此归档。</div></div>
 </aside>
+<button class="bookEdge" id="bookEdge" data-zh="医 案 册" data-en="C A S E" title="展开 / 收起医案册 · Toggle case book">医 案 册</button>
 
 <div id="app">
 
@@ -1313,7 +1433,7 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
           每个人的身体，都是一座山河——山河里住着怪物：气虚的是背着风囊的瘦雀，血虚的是驮着河灯的浅鲤，肝郁的是满身打结的老树。你是山海边境「怪物诊所」的坐堂医，以望、闻、问、切四术捕捉线索光点，<b>把雾里现形的精怪一只只收录进《怪物图鉴》</b>。</p>
         <div class="introSteps">
           <div class="istep"><i data-glyph="file"></i><b data-zh="挂 号" data-en="INTAKE">挂 号</b><span data-zh="30 秒 · 可跳过" data-en="30 s · skippable">30 秒 · 可跳过</span></div>
-          <div class="istep"><i data-glyph="orb"></i><b data-zh="寻 妖" data-en="CAPTURE">寻 妖</b><span data-zh="点按光点 · 照图作答" data-en="tap orbs · match the pictures">点按光点 · 照图作答</span></div>
+          <div class="istep"><i data-glyph="orb"></i><b data-zh="寻 妖" data-en="CAPTURE">寻 妖</b><span data-zh="点按或撒网 · 照图作答" data-en="tap or cast the net">点按或撒网 · 照图作答</span></div>
           <div class="istep"><i data-glyph="badge"></i><b data-zh="收 录" data-en="CLEAR">收 录</b><span data-zh="望闻问切 · 四章四图鉴" data-en="4 chapters · 4 plates">望闻问切 · 四章四图鉴</span></div>
           <div class="istep"><i data-glyph="gift"></i><b data-zh="图 鉴" data-en="REWARD">图 鉴</b><span data-zh="怪物卡 · 侧写报告 · 志怪剧场" data-en="bestiary · report · fable">怪物卡 · 侧写报告 · 志怪剧场</span></div>
         </div>
@@ -1346,7 +1466,7 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
         <div class="mcard"><img class="mThumb inkArt" src="assets/img/keyao.jpg" alt="" style="object-position:50% 18%"><i data-glyph="combo3"></i><b data-zh="连击 · 徽章" data-en="COMBO · BADGES">连击 · 徽章</b><span data-zh="25 秒内连续捕捉叠加 COMBO；每收齐一章，收录一页图鉴、解锁徽章与侧写更新" data-en="Captures within 25 s stack COMBO; each chapter files one bestiary plate, a badge and a profile update">25 秒内连续捕捉叠加 COMBO；每收齐一章，收录一页图鉴、解锁徽章与侧写更新</span></div>
         <div class="mcard"><img class="mThumb inkArt" src="assets/img/pealk.jpg" alt=""><i data-glyph="gift"></i><b data-zh="通关奖励" data-en="REWARD">通关奖励</b><span data-zh="怪物图鉴卡、侦探段位、六维雷达、可下载推理路径图、循证交叉、山河志怪寓言剧场" data-en="Bestiary plates, detective rank, radar, downloadable path chart, graded evidence, a spirit-fable play">怪物图鉴卡、侦探段位、六维雷达、可下载推理路径图、循证交叉、山河志怪寓言剧场</span></div>
       </div>
-      <div class="manualNote" data-zh="每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。" data-en="Each question: <b>multi-select</b>, drag the <b>degree bar</b>, tap “+ when is it worse” to cross-check, add a note or skip; pick “not sure” when unsure. Drag to orbit, ◎ turns to the nearest orb, LIST picks directly.">每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，◎ 转向最近的光点，LIST 可直选。</div>
+      <div class="manualNote" data-zh="每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，<b>按住画面</b>可撒出涟漪网——网住的微光会现形，松手收网；◎ 转向最近的光点，LIST 可直选。证词卡与选项都可随手拖开。" data-en="Each question: <b>multi-select</b>, drag the <b>degree bar</b>, tap “+ when is it worse” to cross-check, add a note or skip; pick “not sure” when unsure. Drag to orbit; <b>press &amp; hold</b> to cast a ripple net — glints inside reveal themselves, release to reel in. ◎ turns to the nearest orb, LIST picks directly. Cards and options can be dragged aside.">每题可<b>多选并存</b>、拖<b>程度条</b>、点「＋ 何时更明显」做交叉印证、自述补充或跳过；不确定就选「不确定」。拖动画面环绕镜头，<b>按住画面</b>可撒出涟漪网——网住的微光会现形，松手收网；◎ 转向最近的光点，LIST 可直选。证词卡与选项都可随手拖开。</div>
       <div style="text-align:center"><button class="btn" id="btnHowBack" data-zh="明 白 了" data-en="G O T · I T">明 白 了</button></div>
     </div>
   </section>
@@ -1394,6 +1514,7 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
     <aside id="clueDock">
       <div id="dockHead">
         <span id="dockToggle">LIST</span>
+        <button id="dockEdgeBtn" aria-label="收起线索板到屏幕边缘" title="收起线索板到屏幕边缘 / Dock to edge">⇣</button>
         <div id="hudMode" data-vital></div>
         <div id="hudProg"></div>
         <div id="signalTrack"><span id="signalFill"></span></div>
@@ -1406,11 +1527,12 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
             <div id="liveWeights"></div>
           </div>
         </div>
-        <div id="hudHint" data-zh="点按光点捕捉 · 收齐一章解锁徽章" data-en="Tap an orb to capture · clear a chapter to unlock a badge">点按光点捕捉 · 收齐一章解锁徽章</div>
+        <div id="hudHint" data-zh="点按光点捕捉 · 按住撒网捞一群 · 收齐一章解锁徽章" data-en="Tap an orb · press &amp; hold to cast the net · clear a chapter for a badge">点按光点捕捉 · 按住撒网捞一群 · 收齐一章解锁徽章</div>
         <button id="btnSkipRest" data-zh="跳过剩余 · 直接推理 →" data-en="Skip the rest · deduce now →">跳过剩余 · 直接推理 →</button>
       </div>
       <div id="dockBody"></div>
     </aside>
+    <button class="dockEdge" id="dockEdge" data-zh="线 索 板" data-en="C L U E S" title="点我展开线索板 / Tap to open clue list">线 索 板</button>
     <div id="qPanel"><button id="qPanelClose" aria-label="关闭当前线索" title="关闭当前线索">✕</button><div id="qPanelInner"></div></div>
     <div id="signalToast"></div>
     <div id="streakTag"><b>×2</b>COMBO</div>
@@ -1423,7 +1545,7 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
     <div id="deduceGate">
       <button class="btn" id="btnDeduce" data-zh="开 坛 辨 证" data-en="B E G I N · D E D U C T I O N">开 坛 辨 证</button>
     </div>
-    <div id="guideTip" role="status" aria-live="polite"><span class="gIcon"><img class="inkArt" src="assets/img/keyao.jpg" alt=""></span><span class="gTxt"></span><span class="gStep">坐堂提示</span></div>
+    <div id="guideTip" role="status" aria-live="polite"><span class="gIcon"><img class="inkArt" src="assets/img/keyao.jpg" alt=""></span><span class="gTxt"></span><span class="gStep">坐堂提示</span><button class="gFold" aria-label="收起提示" title="收起提示">—</button></div>
   </section>
 
   <!-- 切诊模块（舞台浮层调用） -->
@@ -1624,8 +1746,8 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
 
   let mx=0,my=0;
   addEventListener('pointermove',e=>{mx=(e.clientX/innerWidth-.5);my=(e.clientY/innerHeight-.5);});
-  // 拖动环绕镜头（点击光圈/面板/控件时不触发）
-  let dragAng=0, dragX=null, focusDelta=0;
+  // 拖动环绕镜头（点击光圈/面板/控件时不触发）；按住不动则撒出涟漪网
+  let dragAng=0, dragX=null, focusDelta=0, castArm=null;
   window.stageRotate=delta=>{focusDelta=0;dragAng+=delta;};
   window.stageFocusWorld=(x,z)=>{
     const current=autoAng+dragAng+mx*.35;
@@ -1634,12 +1756,26 @@ body.stage-answering #guideTip{top:calc(64px + env(safe-area-inset-top));bottom:
   };
   addEventListener('pointerdown',e=>{
     const c=e.target.closest;
-    if(c&&(c.call(e.target,'.orb')||c.call(e.target,'#qPanel')||c.call(e.target,'button')||c.call(e.target,'input')||c.call(e.target,'select')||c.call(e.target,'#clueBook')||c.call(e.target,'#topbar'))) return;
+    if(c&&(c.call(e.target,'.orb')||c.call(e.target,'#qPanel')||c.call(e.target,'button')||c.call(e.target,'input')||c.call(e.target,'select')||c.call(e.target,'#clueBook')||c.call(e.target,'#topbar')||c.call(e.target,'#clueDock')||c.call(e.target,'#guideTip')||c.call(e.target,'#milestoneModal'))) return;
     focusDelta=0;dragX=e.clientX;
+    if(document.body.classList.contains('stage-live')&&!window.__stageFocus&&window.netBegin&&!castArm){
+      const px=e.clientX,py=e.clientY;
+      castArm={x:px,y:py,t:setTimeout(()=>{castArm=null;dragX=null;window.netBegin(px,py);},250)};
+    }
   });
-  addEventListener('pointermove',e=>{ if(dragX!==null){ dragAng+=(e.clientX-dragX)*0.008; dragX=e.clientX; }});
-  addEventListener('pointerup',()=>dragX=null);
-  addEventListener('pointercancel',()=>dragX=null);
+  addEventListener('pointermove',e=>{
+    if(dragX!==null){ dragAng+=(e.clientX-dragX)*0.008; dragX=e.clientX; }
+    if(castArm&&Math.hypot(e.clientX-castArm.x,e.clientY-castArm.y)>12){clearTimeout(castArm.t);castArm=null;}
+    if(window.netMove) window.netMove(e.clientX,e.clientY);
+  });
+  addEventListener('pointerup',()=>{ dragX=null;
+    if(castArm){clearTimeout(castArm.t);castArm=null;}
+    if(window.netEnd) window.netEnd();
+  });
+  addEventListener('pointercancel',()=>{ dragX=null;
+    if(castArm){clearTimeout(castArm.t);castArm=null;}
+    if(window.netCancel) window.netCancel();
+  });
 
   function project(x,y,z,ca,sa,camY,cosP,sinP){
     // 世界→相机：绕Y轴旋转（环绕镜头），再绕X轴俯仰
@@ -2367,6 +2503,20 @@ huo:{name:'Heart Fire',organ:'Heart',one:'The mind\'s lamp burns too bright: lig
  habit:['Phone out of the bedroom 1h before sleep','Dark, quiet, cool bedroom (18-22°C)','Never check the clock on night waking'],
  heal:['10-min body scan or 4-7-8 breathing in bed','Warm foot soak 15 min to draw fire downward','Write the worry list before bed — archive the brain']}
 };
+/* 生活调摄英文版（对应 PATTERNS[k].life）——补齐英文报告「整合生活处方」与导出存档 */
+const LIFE_EN={
+ qi:['Fixed wake-up time, rising with the yang','A 20-minute midday nap restores the heart','Stand and move every 45 minutes at work — long sitting drains qi'],
+ xue:['Lights out by 23:00 — "in sleep, blood returns to the liver"; late nights are the biggest leak','After each hour of screen use, gaze far away for a moment — long gazing injures blood','Avoid intense exercise and cold exposure during the period'],
+ yin:['Late nights are yin\u2019s worst enemy — in bed by 23:00 beats any tonic','When afternoon flushing strikes, sit quietly somewhere cool and ventilated','Dim screens at night so yin can settle and store'],
+ yang:['Keep waist, belly and feet warm — "cold rises from the feet"','10-15 min of morning sunlight sets the body clock and feeds yang','A warm foot soak (about 40\u00b0C, 15-20 min) is the simplest daily yang builder'],
+ yu:['Keep 15 minutes of daily "purposeless time" — no output, no optimizing','Write the worries down (expressive writing is evidence-based)','Keep one hobby done purely for joy — a channel of release'],
+ pi:['Eat a proper breakfast between 7-9 a.m., when the stomach meridian peaks','When overthinking, walk 10 minutes before deciding','Keep your home dry and aired — outer damp invites inner damp'],
+ tan:['Fixed mealtimes; no late-night eating','Dry-brush or massage the limbs after bathing to move the lymph','Track waistline (men <90cm, women <85cm) — it matters more than weight'],
+ re:['Dehumidify your home to 40-60% humidity','Choose breathable fabrics next to the skin; stay dry','Late nights push damp-heat upward (breakouts, mouth ulcers) — a steady routine is the root cure'],
+ yux:['Stay warm, especially waist, belly and legs — "blood congeals in cold"','Warm foot soak plus calf massage before bed','Never hold one posture (crossed or tucked legs) longer than 30 minutes'],
+ huo:['Build a fixed pre-sleep ritual: dim lights, no screens, warm foot soak','Bed is for sleep only — if awake past 20 minutes, get up somewhere dim','Write a "worry list" before bed to archive the brain']
+};
+for(const k in LIFE_EN){ PATTERNS_EN[k].life=LIFE_EN[k]; }
 for(const k in PATTERNS_EN){ PATTERNS[k].en = PATTERNS_EN[k]; PATTERNS[k].en.theory=THEORY_EN[k]; PATTERNS[k].en.psyDeep=PSYDEEP_EN[k]; }
 </script>
 
@@ -2735,10 +2885,61 @@ const FX=(()=>{
     tone(f,{type:'sine',dl,a:.002,d,g});
     tone(f*2.76,{type:'sine',dl,a:.002,d:d*.6,g:g*.3});
   }
-  function pluck(f,{dl=0,g=.4}={}){ // 古筝式拨弦：微失谐双三角波
-    tone(f,{type:'triangle',dl,a:.003,d:.5,g});
-    tone(f*1.004,{type:'triangle',dl,a:.003,d:.42,g:g*.55});
-    tone(f*2,{type:'sine',dl,a:.002,d:.14,g:g*.2});
+  /* 共享噪声源（鼓槌击音 / 木鱼音头 / 风声） */
+  let _nb=null;
+  function noiseBuf(){
+    if(_nb) return _nb;
+    const len=Math.floor(44100*.6), b=ac.createBuffer(1,len,ac.sampleRate), c=b.getChannelData(0);
+    for(let i=0;i<len;i++) c[i]=Math.random()*2-1;
+    _nb=b; return b;
+  }
+  /* 古筝 / 古琴：Karplus-Strong 拨弦物理建模（噪声脉冲 → 低通反馈弦） */
+  const _ksCache={};
+  function ksBuffer(f,dur){
+    const key=Math.round(f)+'_'+dur;
+    if(_ksCache[key]) return _ksCache[key];
+    const sr=ac.sampleRate, N=Math.max(2,Math.round(sr/f)), len=Math.floor(sr*dur);
+    const buf=ac.createBuffer(1,len,sr), out=buf.getChannelData(0);
+    const ring=new Float32Array(N);
+    for(let i=0;i<N;i++) ring[i]=Math.random()*2-1;
+    let idx=0;
+    for(let i=0;i<len;i++){
+      const cur=ring[idx], nxt=ring[(idx+1)%N];
+      ring[idx]=0.996*0.5*(cur+nxt);
+      out[i]=cur;
+      idx=(idx+1)%N;
+    }
+    _ksCache[key]=buf; return buf;
+  }
+  function pluck(f,{dl=0,g=.4,dur=1.5}={}){ // 古筝拨弦
+    const t0=ac.currentTime+dl;
+    const src=ac.createBufferSource(); src.buffer=ksBuffer(f,dur);
+    const v=ac.createGain(); v.gain.setValueAtTime(g,t0); v.gain.exponentialRampToValueAtTime(.001,t0+dur);
+    const bp=ac.createBiquadFilter(); bp.type='lowpass'; bp.frequency.value=4200;
+    src.connect(bp); bp.connect(v); v.connect(master); src.start(t0);
+    // 面板共鸣
+    tone(f*2.02,{type:'sine',dl,a:.004,d:dur*.5,g:g*.14});
+  }
+  function drum(f=110,{dl=0,g=.6,d=.55}={}){ // 堂鼓：膜音骤降 + 槌击噪声
+    const t0=ac.currentTime+dl;
+    const o=ac.createOscillator(), v=ac.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(f*1.9,t0); o.frequency.exponentialRampToValueAtTime(f*.62,t0+.14);
+    v.gain.setValueAtTime(g,t0); v.gain.exponentialRampToValueAtTime(.001,t0+d);
+    o.connect(v); v.connect(master); o.start(t0); o.stop(t0+d+.05);
+    const n=ac.createBufferSource(); n.buffer=noiseBuf();
+    const lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=380;
+    const nv=ac.createGain(); nv.gain.setValueAtTime(g*.55,t0); nv.gain.exponentialRampToValueAtTime(.001,t0+.08);
+    n.connect(lp); lp.connect(nv); nv.connect(master); n.start(t0); n.stop(t0+.12);
+  }
+  function woodfish(f=760,{dl=0,d=.09,g=.42}={}){ // 木鱼：鼓腔双音 + 高频音头
+    tone(f,{type:'sine',dl,a:.002,d,g});
+    tone(f*2.71,{type:'sine',dl,a:.001,d:d*.55,g:g*.26});
+    const t0=ac.currentTime+dl;
+    const n=ac.createBufferSource(); n.buffer=noiseBuf();
+    const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=f*3.1; bp.Q.value=7;
+    const nv=ac.createGain(); nv.gain.setValueAtTime(g*.34,t0); nv.gain.exponentialRampToValueAtTime(.001,t0+.028);
+    n.connect(bp); bp.connect(nv); nv.connect(master); n.start(t0); n.stop(t0+.05);
   }
   function swoosh({dl=0,d=.3,g=.12,from=1200,to=240}={}){ // 滤波噪声扫频
     const t0=ac.currentTime+dl,len=Math.ceil(ac.sampleRate*d);
@@ -2754,19 +2955,40 @@ const FX=(()=>{
     [1,1.48,2.21,3.37].forEach((m,i)=>tone(f*m,{type:'sine',dl,a:.006,d:1.6-(i*.25),g:g/(i+1.3)}));
     swoosh({dl,d:.5,g:.05,from:900,to:2400});
   }
+  /* 山谷风声：循环噪声 + 缓慢呼吸的带通，舞台常驻环境音 */
+  let windNodes=null;
+  function windStart(){
+    if(windNodes||!ensure()) return;
+    const n=ac.createBufferSource(); n.buffer=noiseBuf(); n.loop=true;
+    const bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=250; bp.Q.value=.42;
+    const v=ac.createGain(); v.gain.value=0;
+    n.connect(bp); bp.connect(v); v.connect(master); n.start();
+    const lfo=ac.createOscillator(); lfo.frequency.value=.06;
+    const lg=ac.createGain(); lg.gain.value=.011;
+    lfo.connect(lg); lg.connect(v.gain); lfo.start();
+    v.gain.setTargetAtTime(.02,ac.currentTime,2.5);
+    windNodes={n,lfo,v};
+  }
+  function windStop(){
+    if(!windNodes) return;
+    const w=windNodes; windNodes=null;
+    w.v.gain.setTargetAtTime(0,ac.currentTime,.7);
+    setTimeout(()=>{try{w.n.stop();w.lfo.stop();}catch(e){}},2600);
+  }
   const api={
-    tap(){if(!ensure())return;knock(620,{g:.3});},
-    lock(){if(!ensure())return;knock(740,{g:.3});knock(980,{dl:.07,d:.07,g:.26});},
+    tap(){if(!ensure())return;woodfish(720,{d:.06,g:.22});},
+    lock(){if(!ensure())return;woodfish(620,{g:.3});woodfish(930,{dl:.07,d:.06,g:.22});},
     capture(streak=1){if(!ensure())return;
       const s=Math.min(PENTA.length-3,Math.max(0,streak-1));
-      pluck(PENTA[s],{g:.4});pluck(PENTA[s+2],{dl:.09,g:.3});
+      pluck(PENTA[s],{g:.42});pluck(PENTA[s+2],{dl:.09,g:.3});
       if(streak>=3)pluck(PENTA[s+4]||880,{dl:.18,g:.24});},
-    skip(){if(!ensure())return;tone(150,{type:'sine',a:.004,d:.18,g:.22,slide:-60});},
-    chapter(){if(!ensure())return;gong(146,{g:.5});pluck(PENTA[5],{dl:.4,g:.26});pluck(PENTA[7],{dl:.55,g:.22});},
-    reveal(){if(!ensure())return;[0,2,4,5,7].forEach((n,i)=>pluck(PENTA[n],{dl:i*.13,g:.32}));gong(196,{dl:.7,g:.3});},
+    skip(){if(!ensure())return;drum(150,{d:.34,g:.18});},
+    chapter(){if(!ensure())return;drum(118,{g:.55});gong(146,{dl:.06,g:.42});pluck(PENTA[5],{dl:.42,g:.24});pluck(PENTA[7],{dl:.58,g:.2});},
+    reveal(){if(!ensure())return;[0,2,4,5,7].forEach((n,i)=>pluck(PENTA[n],{dl:i*.14,g:.3}));gong(196,{dl:.75,g:.28});drum(96,{dl:.9,g:.3});},
     swish(){if(!ensure())return;swoosh({d:.28,g:.1,from:1500,to:300});},
+    wind:{start(){windStart();},stop(){windStop();}},
     get muted(){return muted;},
-    toggle(){muted=!muted;localStorage.setItem('mm_mute',muted?'1':'0');if(!muted)ensure();return muted;}
+    toggle(){muted=!muted;localStorage.setItem('mm_mute',muted?'1':'0');if(!muted)ensure();else windStop();return muted;}
   };
   // 全局微触感：任何可按元素按下即「嗒」一声 + 轻振
   const TAPSEL='.btn,.opt,.answerNode,.dockItem,.miniChip,.chChip,.archiveNode,.pulsePos,.pressureStep,.tab,#clueToggle,#btnLang,#stageControls button,#dockHead,select,input[type=range]';
@@ -2834,6 +3056,7 @@ function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   $('#'+id).classList.add('active');
   document.body.classList.toggle('stage-live',id==='screen-stage');
+  if(id==='screen-stage'){ FX.wind&&FX.wind.start(); } else { FX.wind&&FX.wind.stop(); }
   if(id!=='screen-stage'&&typeof setGuide==='function') setGuide(null);
   window.scrollTo({top:0});
   if(window.stopCharts) stopCharts();
@@ -2930,7 +3153,7 @@ function showSignal(message){
 }
 /* ---------- 坐堂引导签：实时提示下一步操作 ---------- */
 const GUIDE={
-  intro:{zh:'<b>拖动画面</b>环绕山河，找到发亮的线索光点；<b>点按光点</b>开始采集。找不到？点右下 <b>◎</b> 自动转向最近的线索。',en:'<b>Drag</b> to orbit the realm, then <b>tap a glowing orb</b> to gather its omen. Lost? Tap <b>◎</b> below to face the nearest clue.'},
+  intro:{zh:'<b>拖动画面</b>环绕山河；<b>点按光点</b>直接捕捉，或<b>按住不放</b>撒出涟漪网——网住的微光会现形，松手收网。找不到？点右下 <b>◎</b> 自动转向。',en:'<b>Drag</b> to orbit; <b>tap an orb</b> to capture, or <b>press &amp; hold</b> to cast a ripple net — glints inside reveal themselves, release to reel in. Lost? Tap <b>◎</b> below.'},
   question:{zh:'照图<b>点选一至多项</b>最贴合的表现，可拖「程度条」标轻重；选好后点底部「<b>确 认</b>」归档；确无异常就点「<b>无 异 常</b>」。',en:'<b>Pick one or more</b> matching signs (drag the degree bar for weight), then tap <b>CONFIRM</b> to file — or <b>NORMAL</b> if nothing is off.'},
   confirm:{zh:'选好了 —— 点「<b>确 认</b>」把这枚异象收进医案册。',en:'Set — tap <b>CONFIRM</b> to file this omen into the case book.'},
   pulse:{zh:'切诊开始：跟随<b>指法教学</b>，依次完成搭脉、辨脉四问与自测心率。',en:'Palpation begins: follow the <b>finger tutorial</b> — gates, four pulse questions, then your real pulse.'},
@@ -2951,6 +3174,49 @@ function setGuide(key,targetSel){
   if(targetSel){const t=document.querySelector(targetSel);if(t)t.classList.add('guideGlow');}
 }
 window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
+/* ---------- 提示签：可收成光珠、可拖动换位（光珠点按重新展开） ---------- */
+(function(){
+  const tip=$('#guideTip'); if(!tip) return;
+  const fold=tip.querySelector('.gFold');
+  let mini=false, dragS=null;
+  const setMini=v=>{ mini=v; tip.classList.toggle('mini',v); if(!v) tip.classList.remove('unread'); };
+  if(fold) fold.addEventListener('click',e=>{e.stopPropagation();setMini(true);});
+  tip.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.gFold')) return;
+    dragS={x:e.clientX,y:e.clientY,moved:false};
+    try{tip.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  tip.addEventListener('pointermove',e=>{
+    if(!dragS) return;
+    const dx=e.clientX-dragS.x, dy=e.clientY-dragS.y;
+    if(!dragS.moved){
+      if(Math.hypot(dx,dy)<7) return;
+      dragS.moved=true;
+      const r=tip.getBoundingClientRect();
+      tip.classList.add('free');
+      tip.style.left=r.left+'px'; tip.style.top=r.top+'px';
+      tip.style.right='auto'; tip.style.bottom='auto';
+    }
+    dragS.x=e.clientX; dragS.y=e.clientY;
+    tip.style.left=Math.max(4,Math.min(innerWidth-tip.offsetWidth-4,parseFloat(tip.style.left)+dx))+'px';
+    tip.style.top=Math.max(4,Math.min(innerHeight-tip.offsetHeight-4,parseFloat(tip.style.top)+dy))+'px';
+  });
+  const up=()=>{ if(!dragS) return; const wasDrag=dragS.moved; dragS=null;
+    if(!wasDrag&&mini) setMini(false); };
+  tip.addEventListener('pointerup',up);
+  tip.addEventListener('pointercancel',()=>{dragS=null;});
+  addEventListener('resize',()=>{
+    if(!tip.classList.contains('free')) return;
+    const r=tip.getBoundingClientRect();
+    if(r.right>innerWidth||r.bottom>innerHeight||r.left<0||r.top<0){
+      tip.style.left=Math.max(4,Math.min(innerWidth-tip.offsetWidth-4,r.left))+'px';
+      tip.style.top=Math.max(4,Math.min(innerHeight-tip.offsetHeight-4,r.top))+'px';
+    }
+  });
+  // 新提示到达而提示签处于光珠态时，挂一颗「未读」高光
+  const _set=setGuide;
+  setGuide=function(key,sel){ _set(key,sel); if(key&&tip.classList.contains('mini')) tip.classList.add('unread'); };
+})();
 function scanClues(){
   const rest=ORBS.filter(o=>!o.done);
   if(!rest.length){showSignal(L('全部线索已归档','All clues filed'));return;}
@@ -3019,6 +3285,62 @@ function captureOrb(o){
     openOrb(o);
   },520);
 }
+
+/* ---------- 撒网捕捉：按住舞台撒出涟漪网，网住的微光现形，松手收网 ---------- */
+let _net=null;
+function netBegin(x,y){
+  if(_net||curOrb||!ORBS.length) return;
+  ORBS.forEach(o=>o._pinged=false);
+  const el=document.createElement('div'); el.className='netRing'; el.innerHTML='<i></i>';
+  document.body.appendChild(el);
+  _net={x,y,r:26,el,hooked:new Set(),t0:performance.now()};
+  el.style.left=x+'px'; el.style.top=y+'px';
+  const rMax=Math.min(340,Math.max(innerWidth,innerHeight)*.34);
+  const step=now=>{
+    if(!_net) return;
+    const k=Math.min(1,(now-_net.t0)/900);
+    _net.r=26+(rMax-26)*(1-Math.pow(1-k,2));
+    if(k>=1) _net.r=rMax*(1+.03*Math.sin(now/260));   // 满网后轻轻呼吸
+    paintNet(); netScan();
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function paintNet(){ if(!_net)return; _net.el.style.width=_net.el.style.height=(_net.r*2)+'px'; }
+function netScan(){
+  const n=_net; if(!n) return;
+  ORBS.forEach(o=>{
+    if(o.done||o===curOrb||o.sx==null) return;
+    const d=Math.hypot(o.sx-n.x,o.sy-n.y);
+    if(Math.abs(d-n.r)<26&&!o._pinged){              // 涟漪前沿扫过 → 现形一闪
+      o._pinged=true;
+      o.el.classList.remove('locating');void o.el.offsetWidth;o.el.classList.add('locating');
+      setTimeout(()=>o.el.classList.remove('locating'),900);
+    }
+    const inNet=d<n.r-4;
+    if(inNet&&!n.hooked.has(o)){n.hooked.add(o);o.el.classList.add('hooked');}
+    else if(!inNet&&n.hooked.has(o)){n.hooked.delete(o);o.el.classList.remove('hooked');}
+  });
+}
+function netMove(x,y){ if(!_net)return; _net.x=x;_net.y=y;_net.el.style.left=x+'px';_net.el.style.top=y+'px'; }
+function netEnd(){
+  const n=_net; if(!n) return; _net=null;
+  n.el.classList.add('fade'); setTimeout(()=>n.el.remove(),420);
+  const hits=[...n.hooked]; n.hooked.forEach(o=>o.el.classList.remove('hooked'));
+  if(hits.length){
+    hits.sort((a,b)=>Math.hypot(a.sx-n.x,a.sy-n.y)-Math.hypot(b.sx-n.x,b.sy-n.y));
+    const prey=hits[0];
+    hits.slice(1).forEach(o=>{o.el.classList.remove('locating');void o.el.offsetWidth;o.el.classList.add('locating');setTimeout(()=>o.el.classList.remove('locating'),900);});
+    captureOrb(prey);
+  }else{
+    // 空网：全屏微光回声 —— 看不见的光点也会应一声
+    const rest=ORBS.filter(o=>!o.done);
+    rest.forEach(o=>{o.el.classList.remove('locating');void o.el.offsetWidth;o.el.classList.add('locating');setTimeout(()=>o.el.classList.remove('locating'),1200);});
+    showSignal(rest.length?L('涟漪荡空 · 远处微光回应，循光再撒','Empty net · distant glints answer — cast toward the light'):L('所有线索都已归档','All clues filed'));
+    if(window.FX&&FX.swish)FX.swish();
+  }
+}
+function netCancel(){ const n=_net; if(!n)return; _net=null; n.hooked.forEach(o=>o.el.classList.remove('hooked')); n.el.remove(); }
 
 /* ---------- 线索板：稳定的可浏览清单（发现机制的核心） ---------- */
 function dockShortLabel(o){
@@ -3220,7 +3542,107 @@ function addAnswerNodes(inner,items,onChoose,art){
     rng.addEventListener('input',()=>{paint();node.dispatchEvent(new CustomEvent('degree',{detail:+rng.value}));});
     node.onclick=e=>{e.stopPropagation();onChoose(item,node);};
     node.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onChoose(item,node);}};
+    if(!mobile){ node.style.setProperty('--float-d',(i*0.7)+'s'); node._wire=wire; enableNodeDrag(node,inner); }
     inner.appendChild(node);
+  });
+  // 桌面端：星环落定后把彼此/与证词卡遮挡的选项缓缓推开，再原地漂浮
+  if(!mobile) requestAnimationFrame(()=>requestAnimationFrame(()=>scatterAnswerNodes(inner,card)));
+}
+/* 桌面端：两两测量选项与证词卡的包围盒，沿重叠最浅的轴推开，平滑过渡后清除 transition */
+function scatterAnswerNodes(inner,card){
+  const nodes=[...inner.querySelectorAll('.answerNode')];
+  if(!nodes.length) return;
+  const r0=inner.getBoundingClientRect();
+  const pts=nodes.map(n=>({n,
+    x:parseFloat(getComputedStyle(n).getPropertyValue('--answer-x'))||0,
+    y:parseFloat(getComputedStyle(n).getPropertyValue('--answer-y'))||0,
+    hw:n.offsetWidth/2, hh:n.offsetHeight/2}));
+  const obs=card?[{x:0,y:0,hw:card.offsetWidth/2+8,hh:card.offsetHeight/2+8,card:true}]:[];
+  const PAD=14;
+  for(let round=0;round<32;round++){
+    let pushed=false;
+    const all=pts.concat(obs);
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<all.length;j++){
+      const a=pts[i],b=all[j];
+      const ox=a.hw+b.hw+PAD-Math.abs(a.x-b.x);
+      const oy=a.hh+b.hh+PAD-Math.abs(a.y-b.y);
+      if(ox>0&&oy>0){
+        pushed=true;
+        if(ox<oy){const s=(b.x>=a.x?-1:1)*ox/(b.card?1:2);a.x+=s;if(!b.card)b.x-=s;}
+        else{const s=(b.y>=a.y?-1:1)*oy/(b.card?1:2);a.y+=s;if(!b.card)b.y-=s;}
+      }
+    }
+    if(!pushed)break;
+  }
+  pts.forEach(p=>{
+    const nx=Math.max(p.hw+10-r0.left,Math.min(innerWidth-p.hw-10-r0.left,p.x));
+    const ny=Math.max(p.hh+72-r0.top,Math.min(innerHeight-p.hh-215-r0.top,p.y));
+    if(Math.abs(nx-p.x)<1&&Math.abs(ny-p.y)<1) return;
+    const n=p.n, ease='cubic-bezier(.22,.8,.3,1)';
+    n.style.transition=`left .8s ${ease},top .8s ${ease}`;
+    n.style.setProperty('--answer-x',nx+'px'); n.style.setProperty('--answer-y',ny+'px');
+    if(n._wire){n._wire.style.transition=`width .8s ${ease},transform .8s ${ease}`;
+      n._wire.style.width=Math.hypot(nx,ny)+'px'; n._wire.style.transform=`rotate(${Math.atan2(ny,nx)}rad)`;}
+    setTimeout(()=>{n.style.transition='';if(n._wire)n._wire.style.transition='';},880);
+  });
+}
+/* 桌面端：答案星环的选项可随手拖开，连线随动；拖过不触发点选 */
+function enableNodeDrag(node,inner){
+  node.addEventListener('pointerdown',e=>{
+    if(e.target.closest('input,button')) return;
+    const r0=inner.getBoundingClientRect();
+    const sx=e.clientX,sy=e.clientY;
+    const ox=parseFloat(getComputedStyle(node).getPropertyValue('--answer-x'))||0;
+    const oy=parseFloat(getComputedStyle(node).getPropertyValue('--answer-y'))||0;
+    let moved=false; node._dragged=false;
+    node.style.transition='none'; if(node._wire) node._wire.style.transition='none';
+    try{node.setPointerCapture(e.pointerId);}catch(err){}
+    const mv=e=>{
+      const dx=e.clientX-sx,dy=e.clientY-sy;
+      if(!moved&&Math.hypot(dx,dy)<6) return;
+      if(!moved){moved=true;node.classList.add('dragging');node.style.animationPlayState='paused';}
+      const hw=118,hh=52;
+      const nx=Math.max(hw+10-r0.left,Math.min(innerWidth-hw-10-r0.left,ox+dx));
+      const ny=Math.max(hh+72-r0.top,Math.min(innerHeight-hh-215-r0.top,oy+dy));
+      node.style.setProperty('--answer-x',nx+'px');node.style.setProperty('--answer-y',ny+'px');
+      if(node._wire){node._wire.style.width=Math.hypot(nx,ny)+'px';node._wire.style.transform=`rotate(${Math.atan2(ny,nx)}rad)`;}
+    };
+    const up=()=>{
+      node.classList.remove('dragging');node.style.animationPlayState='';
+      node.style.transition=''; if(node._wire) node._wire.style.transition='';
+      node.removeEventListener('pointermove',mv);node.removeEventListener('pointerup',up);node.removeEventListener('pointercancel',up);
+      if(moved) node._dragged=true;
+    };
+    node.addEventListener('pointermove',mv);node.addEventListener('pointerup',up);node.addEventListener('pointercancel',up);
+  });
+  node.addEventListener('click',e=>{
+    if(node._dragged){node._dragged=false;e.stopImmediatePropagation();e.preventDefault();}
+  },true);
+}
+/* 桌面端：证词卡可拖动换位（整圈星环随之平移） */
+function dragFocusCard(card,o){
+  card.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button,input,select,.miniChip,.customWrap,.customToggle,.ctxLbl,.focusLead,.archiveNode,.skipOrbBtn')) return;
+    const panel=$('#qPanel');
+    const sx=e.clientX,sy=e.clientY,x0=o.focusX,y0=o.focusY;
+    let moved=false;
+    try{card.setPointerCapture(e.pointerId);}catch(err){}
+    card.style.animation='none';
+    const mv=e=>{
+      const dx=e.clientX-sx,dy=e.clientY-sy;
+      if(!moved&&Math.hypot(dx,dy)<6) return;
+      moved=true; card.classList.add('dragging');
+      const margin=Math.min(390,innerWidth*.34)+130, narrow=margin*2>innerWidth;
+      const nx=narrow?innerWidth*.5:Math.max(margin,Math.min(innerWidth-margin,x0+dx));
+      const ny=Math.max(innerHeight*.24,Math.min(innerHeight*.74,y0+dy));
+      panel.style.setProperty('--focus-x',nx+'px');panel.style.setProperty('--focus-y',ny+'px');
+      o.focusX=nx;o.focusY=ny;
+    };
+    const up=()=>{
+      card.classList.remove('dragging');card.style.animation='';
+      card.removeEventListener('pointermove',mv);card.removeEventListener('pointerup',up);card.removeEventListener('pointercancel',up);
+    };
+    card.addEventListener('pointermove',mv);card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);
   });
 }
 function emitAbsorption(o){
@@ -3309,6 +3731,7 @@ function openOrb(o){
   const items=isAsk?o.g.items:o.g.opts, artList=isAsk?inquireArt(items):ART[o.g.key];
   const qTitle=isAsk?(LANG==='en'?o.g.ge:o.g.g.split(' ')[0]):(LANG==='en'?(o.g.qe||o.g.q):o.g.q.split('（')[0]);
   const prompt=focusQuestion(o,true),marks=new Map();let normalPick=null;inner.appendChild(prompt);
+  if(innerWidth>=701) dragFocusCard(prompt,o);
   const count=prompt.querySelector('.focusCount'),archive=prompt.querySelector('.archiveNode'),pick=prompt.querySelector('.focusPick');
   prompt.querySelector('.degreeRow').innerHTML=`<span class="degreeLbl">${L('可多选 · 拖动程度','MULTI · DRAG DEGREE')}</span>`;
   const refresh=()=>{
@@ -3369,6 +3792,22 @@ function closePanel(){
 $('#qPanelClose').onclick=closePanel;
 $('#qPanel').addEventListener('click',e=>{if(e.target.id==='qPanel')closePanel();});
 $('#dockHead').onclick=()=>{ $('#clueDock').classList.toggle('open'); };
+/* 线索板三态：展开 → 收进屏幕边缘（留呼吸竖签）→ 点签恢复；医案册同理（右缘竖签恒在） */
+(function(){
+  const dock=$('#clueDock'), edgeBtn=$('#dockEdgeBtn'), toggle=$('#dockToggle');
+  const syncT=()=>{ if(toggle) toggle.textContent=dock.classList.contains('open')?'⇤':'LIST'; };
+  const toEdge=v=>{ dock.classList.toggle('edge',v); };
+  if(toggle) toggle.addEventListener('click',e=>{ e.stopPropagation();
+    if(dock.classList.contains('edge')){ toEdge(false); dock.classList.add('open'); }
+    else if(dock.classList.contains('open')) toEdge(true);
+    else dock.classList.add('open');
+    syncT(); });
+  if(edgeBtn) edgeBtn.addEventListener('click',e=>{ e.stopPropagation(); toEdge(true); });
+  const de=$('#dockEdge'); if(de) de.addEventListener('click',()=>{ toEdge(false); dock.classList.add('open'); syncT(); });
+  dock.addEventListener('transitionend',syncT);
+  $('#dockHead').addEventListener('click',syncT);
+  const be=$('#bookEdge'); if(be) be.addEventListener('click',()=>{ $('#clueBook').classList.toggle('open'); });
+})();
 $('#btnSkipRest').onclick=e=>{e.stopPropagation();skipRest();};
 $('#turnLeft').onclick=e=>{e.stopPropagation();window.stageRotate&&window.stageRotate(-.48);};
 $('#locateClue').onclick=e=>{e.stopPropagation();scanClues();};
@@ -3428,8 +3867,8 @@ function applyIntakeWeights(){
   if(b>=26){add('tan',2);add('pi',1);} else if(b<18.5){add('xue',1);add('yin',1);}
   if(i.age==='46-55'||i.age==='56+'){add('yang',1);add('yin',1);}
   const parts=[];
-  for(const k in W){state.weights[k]+=W[k]; parts.push(`${PATTERNS[k].name}+${W[k]}`);}
-  if(parts.length) addClue(L('建档推演','Intake analysis'),L('生活档案指向：','Lifestyle points to: ')+parts.join('、'),{});
+  for(const k in W){state.weights[k]+=W[k]; parts.push(`${pName(k)}+${W[k]}`);}
+  if(parts.length) addClue(L('建档推演','Intake analysis'),L('生活档案指向：','Lifestyle points to: ')+parts.join(L('、',', ')),{});
 }
 
 /* ---------- 阶段侧写奖励：建档后的首幅侧写；之后的更新由章节通关（checkChapters）驱动 ---------- */
@@ -4369,7 +4808,7 @@ $('#btnReport').onclick=()=>{
     return `<div class="beastCard"><span class="seal bSeal">${L('收录','FILED')}</span>
       <img class="bImg paperArt" src="assets/img/${bz.img}.jpg" alt="${f.n}" loading="lazy">
       <div class="bName">${f.n}<small>${pName(k)} · ${L('吻合','match')} ${conf}%</small></div>
-      <div class="bDen">${L('栖所','dwelling')} · ${f.den} ｜ ${L('原画','art')} · ${bz.src}</div>
+      <div class="bDen">${L('栖所','dwelling')} · ${f.den} ｜ ${L('原画','art')} · ${L(bz.src,bz.srcEN)}</div>
       <div class="bClassic">${LANG==='en'?bz.classicEN:bz.classic}</div>
       <div class="bMoral">${L('偈曰','the verse')}：${f.moral}</div></div>`;
   };
@@ -4378,9 +4817,9 @@ $('#btnReport').onclick=()=>{
     html+=`<div class="rCard"><h3>${L('怪物图鉴 · 山海志异','Monster Bestiary')}</h3>
       <div style="font-size:12px;color:var(--ink-dim);letter-spacing:.06em;margin-bottom:14px">${L('百怪不生，山神现身 —— 这是图鉴里最难得的一页。','No monsters bred — the Mountain God shows itself. The rarest page in the bestiary.')}</div>
       <div class="beastGrid"><div class="beastCard shan"><span class="seal bSeal">${L('祥瑞','OMEN')}</span>
-        <img class="bImg paperArt" src="assets/img/${sg.img}.jpg" alt="${sg.zh}" loading="lazy">
+        <img class="bImg paperArt" src="assets/img/${sg.img}.jpg" alt="${L(sg.zh,sg.en)}" loading="lazy">
         <div class="bName">${L(sg.zh,sg.en)}<small>${L('平和质','Balanced')}</small></div>
-        <div class="bDen">${L('栖所','dwelling')} · ${L(sg.den[0],sg.den[1])} ｜ ${L('原画','art')} · ${sg.src}</div>
+        <div class="bDen">${L('栖所','dwelling')} · ${L(sg.den[0],sg.den[1])} ｜ ${L('原画','art')} · ${L(sg.src,sg.srcEN)}</div>
         <div class="bClassic">${LANG==='en'?sg.classicEN:sg.classic}</div>
         <div class="bMoral">${L('偈曰','the verse')}：${L('阴平阳秘，精神乃治。','When yin is calm and yang is guarded, the spirit is well.')}</div></div></div></div>`;
   }else if(shown.length){
@@ -4595,39 +5034,39 @@ const FABLES_EN={
 /* 怪物图鉴 · 视觉档案：十精怪 → 手绘白描（Reference/01. 怪物角色设定 授权素材）
    img = assets/img 文件名；classic = 仿《山海经》图鉴文（「有兽焉，其状如……」体） */
 const BEASTS={
- qi:{img:'santana',src:'伦德桑塔纳',
+ qi:{img:'santana',src:'伦德桑塔纳',srcEN:'Lund Santana',
    classic:'中土之野，有鸟焉，其状如雀而色白，常负风囊，大过于身，名曰谷风雀。其飞三丈而必息，其声如叹。见则其邑少气，人善倦，旌旗不扬。',
    classicEN:'On the central plains lives a bird like a pale sparrow, forever hauling a wind-sack larger than itself — the Grain-Wind Sparrow. It rests every three zhang and sighs. Where it appears, the county runs short of breath.'},
- xue:{img:'lofii',src:'爱鱬 Lofii',
+ xue:{img:'lofii',src:'爱鱬 Lofii',srcEN:'Airu Lofii',
    classic:'有河焉环城而流，其色如朱，名曰赤河。河中有鲤，鳞褪为粉，驮灯而行，名曰赤河鲤。其水日浅，其灯渐昏，见则邑人多梦，寐而不安。',
    classicEN:'A vermilion river circles the city. In it swims a carp whose scales have faded to pink, towing a string of dimming lanterns — the Red-River Carp. Where the water thins, sleep turns shallow and dreams multiply.'},
- yin:{img:'mimisha',src:'铂金咪咪莎',
+ yin:{img:'mimisha',src:'铂金咪咪莎',srcEN:'Bojin Mimisha',
    classic:'北阙有古井焉，夜承天露，名曰露井。井有灵蟾，曲体如月，缀珠而行，背驮凉月半轮。井水夜耗，见则其邑入夜燥热，人卧反侧，咽干而烦。',
    classicEN:'Beneath the northern gate lies an old well that drinks the night dew. Its spirit curves like a crescent and wears strings of pearls, half a cool moon on its back. Where the well sinks low, nights run hot and sleepers toss.'},
- yang:{img:'kenkate',src:'肯卡特勋章',
+ yang:{img:'kenkate',src:'肯卡特勋章',srcEN:'Kenkate Medal',
    classic:'王城之底，有兽伏焉，其状如彘而毛色如烬，环有金圈，名曰暖灶兽。其息之间，灶火明灭。其困则火种式微，见则四体不温，晨寒彻骨。',
    classicEN:'Below the royal city crouches a boar-like beast, ash-furred, ringed with a band of gold — the Hearth Beast. Its breath stirs the embers bright or dim. When it dozes, fires fail and hands and feet wake cold.'},
- yu:{img:'minago',src:'明娜戈礼拜',
+ yu:{img:'minago',src:'明娜戈礼拜',srcEN:'Minago Libai',
    classic:'东郊有老林焉，其中有木，能言善行，枝角如冠，节节而生，枝皆结绳，名曰结木精。凡人有言而不发者，皆为其枝上一结。见则其邑胸闷善叹，风气不行。',
    classicEN:'In the old grove east of the city walks a tree that speaks and strides, crowned with branching antlers, its limbs tied in knots — the Knotwood Sprite. Every word left unsaid becomes one more knot. Where it walks, chests tighten and sighs go unanswered.'},
- pi:{img:'lama',src:'喇嘛菜菜子',
+ pi:{img:'lama',src:'喇嘛菜菜子',srcEN:'Lama Caicaizi',
    classic:'中土有九仓焉，仓有仓官，其体圆滚，其衣如吏，好居花草之间，名曰仓廪官。其性喜生冷甜腻，算缓而多哈欠。见则仓米结块，牛车陷泥，人身重而纳呆。',
    classicEN:'The nine granaries of the midlands keep a round little steward, robed like a minor clerk, drowsy among the plants — the Granary Steward. It loves cold and sweet things and yawns at the abacus. Where it nods, grain clumps and bodies turn heavy.'},
- tan:{img:'chaowen',src:'潮天稳',
+ tan:{img:'chaowen',src:'潮天稳',srcEN:'Chaotianwen',
    classic:'城南有洼泽焉，常年多雾。泽中有灵，负旋壳而生蝶翼，行则花随，鳞挂乳珠，名曰雾泽鲛。其雾所过，人皆头重如裹，身困而黏。',
    classicEN:'In the southern lowlands stands a marsh of year-long fog. Its spirit bears a spiral shell and butterfly wings, flowers trailing where it drifts, milky droplets on its scales — the Mist-Marsh Jiao. Whoever its fog touches turns heavy-headed and leaden-limbed.'},
- re:{img:'feadro',src:'珑怖 Feadro',
+ re:{img:'feadro',src:'珑怖 Feadro',srcEN:'Longbu Feadro',
    classic:'膳坊之脊，有蟒盘焉，其状如龙而蛇行，其鳞黄而油亮，吞吐黄岚，名曰蒸岚蟒。膏粱之雨落则其岚愈盛，见则口苦面垢，小溲黄赤。',
    classicEN:'Coiled on the kitchen ridge lives a python like a small dragon, scales yellow and glossy, breathing yellow steam — the Steam-Haze Serpent. The richer the rain of feasts, the thicker its haze. Where it coils, mouths turn bitter and faces sallow.'},
- yux:{img:'heilei',src:'黑泪斯基',
+ yux:{img:'heilei',src:'黑泪斯基',srcEN:'Heileiski',
    classic:'赤河之上，有十二孔古桥。桥有石伯，石入肌肤，负翼低垂，驼背提灯，名曰石桥伯。桥下船淤，水回旋而色紫，见则血行不畅，痛有定处。',
    classicEN:'Across the vermilion river spans a twelve-arched bridge. Its keeper has stone grown into his skin, dark wings hanging heavy, a lamp held over the water — the Old Bridgekeeper. Where the barges jam and eddies bruise purple, the current of blood runs slow.'},
- huo:{img:'pangdeng',src:'庞妮儿拉灯',
+ huo:{img:'pangdeng',src:'庞妮儿拉灯',srcEN:'Pangnier Ladeng',
    classic:'王宫有千灯之海。其中有鸟，其状如鸦而羽鬣如燃，目赤而明，口衔火种，名曰烛宫鸦。灯油不熄则其飞不止，见则心烦不眠，口舌生疮。',
    classicEN:'The palace keeps a sea of a thousand lamps. Among them flies a crow with a blazing mane and eyes too bright, a live coal in its beak — the Lantern-Palace Crow. While the oil lasts it cannot stop circling; where it circles, hearts race and sleep will not come.'}
 };
 /* 山神 · 平和质的图鉴页（百怪不生时现身） */
-const SHAN_GOD={img:'pealk',src:'合瑞 Pealk',zh:'山神 · 合瑞',en:'the Mountain God Pealk',
+const SHAN_GOD={img:'pealk',src:'合瑞 Pealk',srcEN:'Herui Pealk',zh:'山神 · 合瑞',en:'the Mountain God Pealk',
  den:['山河清晏之境','the realm in perfect calm'],
  classic:'山有神焉，其状如鹿而枝角，节节而生风，名曰合瑞。百怪不侵之境，其现身而为贺。见则山河清晏，阴阳平秘。',
  classicEN:'A god walks these mountains: deer-shaped, antlered with living branches, wind at each step — Pealk, the Mountain God. It shows itself only where no monster dares to breed. Where it appears, the realm is calm and yin and yang keep their peace.'};
@@ -4876,7 +5315,7 @@ $('#btnScript').onclick=()=>{
   const appendix=balanced
     ? `<p class="cls"><b>${L(SHAN_GOD.zh,SHAN_GOD.en)}</b> — ${LANG==='en'?SHAN_GOD.classicEN:SHAN_GOD.classic}</p>`
     : shown.map(k=>{const f=(LANG==='en'&&FABLES_EN[k])?FABLES_EN[k]:FABLES[k];
-        return `<p class="cls"><b>${f.n}</b>（${L('原画','art')} · ${BEASTS[k].src}）— ${LANG==='en'?BEASTS[k].classicEN:BEASTS[k].classic}</p>`;}).join('');
+        return `<p class="cls"><b>${f.n}</b>（${L('原画','art')} · ${L(BEASTS[k].src,BEASTS[k].srcEN)}）— ${LANG==='en'?BEASTS[k].classicEN:BEASTS[k].classic}</p>`;}).join('');
   const doc=`<!DOCTYPE html><html lang="${LANG==='en'?'en':'zh-CN'}"><head><meta charset="UTF-8"><title>${L('山河志怪 · 寓言小剧场','The Fable Play')} · ${state.caseNo}</title>
 <style>body{font-family:"Songti SC","SimSun",serif;max-width:680px;margin:48px auto;padding:0 26px;color:#1c1c1c;line-height:2.1;background:#f7f3ea}
 h1{text-align:center;letter-spacing:.35em;font-size:26px}h2{text-align:center;color:#8a6a24;font-size:13px;letter-spacing:.3em;font-weight:normal;margin-bottom:40px}

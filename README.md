@@ -44,7 +44,7 @@ https://<你的用户名>.github.io/<仓库名>/
 
 ## 自动同步发布
 
-双击 `启动自动同步.bat`（或运行 `node auto-sync.js`）后保持窗口开启：每次保存 `index.html` / `design-evolution.html` 等待发布文件，脚本会自动提交并推送到 GitHub，GitHub Pages 随即重新发布，网页端与手机端共用同一网址、约 1 分钟后同时看到最新版本。按 `Ctrl+C` 停止。
+双击 `启动自动同步.bat`（使用 Windows 自带 PowerShell，无需 Node.js；也可运行 `node auto-sync.js`）后保持窗口开启：脚本每秒检查一次改动，每次保存 `index.html` / `design-evolution.html` 等待发布文件，脚本会自动提交并推送到 GitHub，GitHub Pages 随即重新发布，网页端与手机端共用同一网址、约 1 分钟后同时看到最新版本。按 `Ctrl+C` 停止。
 
 ## 文件说明
 
