@@ -3238,10 +3238,14 @@ window.__guideRefresh=()=>{ if(guideKey) setGuide(guideKey); };
     }
   });
   const _set=setGuide;
+  let ringFolded=false;
+  // 桌面端答题空间不足时由星环布局调用：临时收成光珠，答题结束后自动恢复
+  window.__guideFold=()=>{ if(!mini&&!isMobile()){ ringFolded=true; setMini(true); } };
   setGuide=function(key,sel){
     _set(key,sel);
     const changed=key!==lastKey; lastKey=key;
     if(!key){ clearTimeout(autoT); return; }
+    if(ringFolded&&!document.body.classList.contains('stage-answering')){ ringFolded=false; if(!userMini) setMini(false); }
     if(answeringM()){ if(!mini){ clearTimeout(autoT); setMini(true); } }
     else if(isMobile()&&changed&&!userMini){ setMini(false); autoFold(9000); }
     // 新提示到达而提示签处于光珠态时，挂一颗「未读」高光
