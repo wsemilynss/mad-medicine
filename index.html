@@ -3471,13 +3471,13 @@ function focusQuestion(o,withAction=false){
   box.innerHTML=`<div class="focusMeta"><span>${L(cat.zh,cat.en)} / ${String(o.order+1).padStart(2,'0')}</span><span>DECODED</span></div><div class="focusHead"><i class="focusIcon">${glyph}</i><div><div class="focusTitle"></div>${sub?'<div class="focusSub"></div>':''}</div></div>${lead?'<div class="focusLead"></div>':''}${withAction?'<div class="focusActions"><span class="focusPick"></span><span class="focusCount"></span><button class="archiveNode"></button></div>':''}<div class="degreeRow"></div>`;
   box.querySelector('.focusTitle').textContent=orbLabel(o);
   if(sub)box.querySelector('.focusSub').textContent=sub;
-  if(lead){const ld=box.querySelector('.focusLead');ld.textContent=lead;ld.onclick=e=>{e.stopPropagation();ld.classList.toggle('full');};}
+  if(lead){const ld=box.querySelector('.focusLead');ld.textContent=lead;ld.onclick=e=>{e.stopPropagation();ld.classList.toggle('full');ringRelayout();};}
   // 情境交叉：何时加重（可多选），默认折叠为一行，点开才展示标签；只在选中了异常证词时计入权重
   o.ctx=o.ctx||new Set();
   const cr=document.createElement('div'); cr.className='ctxRow'+(o.ctx.size?' open':'');
   const lbl=document.createElement('span'); lbl.className='ctxLbl';
   const paintLbl=()=>{lbl.textContent=(cr.classList.contains('open')?'− ':'＋ ')+L('何时更明显？交叉印证','WHEN IS IT WORSE? CROSS-CHECK')+(o.ctx.size?` · ${o.ctx.size}`:'');};
-  lbl.onclick=e=>{e.stopPropagation();cr.classList.toggle('open');paintLbl();};
+  lbl.onclick=e=>{e.stopPropagation();cr.classList.toggle('open');paintLbl();ringRelayout();};
   paintLbl(); cr.appendChild(lbl);
   CONTEXTS.forEach(c=>{
     const chip=document.createElement('span'); chip.className='miniChip'+(o.ctx.has(c)?' on':''); chip.textContent=L(c[0],c[2]);
@@ -3495,7 +3495,7 @@ function focusQuestion(o,withAction=false){
   ci.value=o.customText||'';
   ci.oninput=()=>{o.customText=ci.value.trim();};
   ci.onclick=e=>e.stopPropagation();
-  ct.onclick=e=>{e.stopPropagation();cw.classList.add('open');ci.focus();};
+  ct.onclick=e=>{e.stopPropagation();cw.classList.add('open');ci.focus();ringRelayout();};
   cw.appendChild(ct); cw.appendChild(ci);
   const sk=document.createElement('button'); sk.className='skipOrbBtn';
   sk.textContent=L('跳过此线索','Skip this clue');
