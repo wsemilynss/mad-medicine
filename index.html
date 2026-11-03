@@ -3597,6 +3597,7 @@ function solveRing(inner,opts){
   const tipOb=tip&&tip.classList.contains('show')?ringObstacle(tip,4):null;
   const docks=[...panel.querySelectorAll('.confirmDock,.ctxDock')].map(el=>ringObstacle(el,6)).filter(Boolean);
   const cw2=card.offsetWidth/2, ch2=card.offsetHeight/2;
+  panel.style.setProperty('--card-hw',cw2+'px');
   let c=ringCenter();
   if(opts.recenter){
     // 在「提示签下沿 ~ 底部操作栏上沿」之间垂直居中
