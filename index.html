@@ -1316,6 +1316,8 @@ body.stage-answering #streakTag{opacity:0!important;transition:opacity .2s}
 @media(max-width:700px){
   /* 常态避开底部线索抽屉（收起态 128px）：最多两行，点按展开全文，✕ 收成光珠 */
   #guideTip{bottom:calc(140px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px);gap:8px;padding:6px 6px 6px 8px}
+  #guideTip:not(.mini){width:calc(100vw - 24px)}
+  #guideTip .gTxt{flex:1;min-width:0}
   #guideTip .gIcon{flex:0 0 26px;width:26px;height:26px}
   #guideTip .gTxt{font-size:11px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   #guideTip.expanded .gTxt{-webkit-line-clamp:unset;line-clamp:unset}
