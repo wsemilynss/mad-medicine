@@ -3696,10 +3696,13 @@ function dragFocusCard(card,o){
       if(!moved&&Math.hypot(dx,dy)<6) return;
       if(!moved){moved=true;card.classList.add('dragging');card.style.animation='none';}
       const B=ringBounds(), cw2=card.offsetWidth/2, ch2=card.offsetHeight/2;
-      let maxY=B.b-ch2;
-      const cd=panel.querySelector('.confirmDock');
-      if(cd){const r=cd.getBoundingClientRect(); if(r.height) maxY=Math.min(maxY,r.top-8-ch2);}
       const nx=Math.max(B.l+cw2,Math.min(B.r-cw2,x0+dx));
+      // 底部操作栏（确认栏 / 情境条）与卡片横向重叠时，卡片不能压到它们上面
+      let maxY=B.b-ch2;
+      panel.querySelectorAll('.confirmDock,.ctxDock').forEach(el=>{
+        const r=el.getBoundingClientRect();
+        if(r.height&&r.top>innerHeight*.5&&r.left<nx+cw2&&r.right>nx-cw2) maxY=Math.min(maxY,r.top-8-ch2);
+      });
       const ny=Math.max(B.t+ch2,Math.min(Math.max(B.t+ch2,maxY),y0+dy));
       panel.style.setProperty('--focus-x',nx+'px');panel.style.setProperty('--focus-y',ny+'px');
       o.focusX=nx;o.focusY=ny;
@@ -3711,6 +3714,11 @@ function dragFocusCard(card,o){
       if(moved) layoutAnswerRing(inner,{animate:true});
     };
     card.addEventListener('pointermove',mv);card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);
+  });
+  // 双击证词卡：回到居中环绕的初始排布
+  card.addEventListener('dblclick',e=>{
+    if(e.target.closest('button,input,select,.miniChip,.customWrap,.ctxLbl,.focusLead')) return;
+    layoutAnswerRing($('#qPanelInner'),{recenter:true,reset:true,animate:true});
   });
 }
 function emitAbsorption(o){
