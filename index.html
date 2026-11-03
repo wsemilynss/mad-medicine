@@ -3659,6 +3659,32 @@ function solveRing(inner,opts){
     ps.forEach(p=>{ if(!p.pin) clamp(p); });
     if(!moved) break;
   }
+  // 残余遮挡数：>0 说明当前尺寸放不下，由外层换紧凑样式重排
+  let bad=0;
+  ps.forEach((a,i)=>{
+    if(!fits(a,a.x,a.y)) bad++;
+    if(!a.pin) obs.forEach(b=>{ if(a.hw+b.hw-Math.abs(a.x-b.x)>1&&a.hh+b.hh-Math.abs(a.y-b.y)>1) bad++; });
+    for(let j=i+1;j<ps.length;j++){const b=ps[j]; if(a.hw+b.hw-Math.abs(a.x-b.x)>1&&a.hh+b.hh-Math.abs(a.y-b.y)>1) bad++;}
+  });
+  return {ps,c,bad};
+}
+/* 外层：先用常规尺寸求解；放不下时逐级换紧凑样式（选项/证词卡缩小），最后把提示签收成光珠 */
+function layoutAnswerRing(inner,opts={}){
+  if(!inner||innerWidth<700) return;
+  const panel=$('#qPanel');
+  if(!panel.classList.contains('open')||panel.classList.contains('pulse-open')) return;
+  if(opts.reset&&!opts.soft) panel.classList.remove('ringCompact','ringTight');
+  let res=solveRing(inner,opts);
+  if(!res) return;
+  if(res.bad&&!opts.soft){
+    const steps=[()=>panel.classList.add('ringCompact'),()=>panel.classList.add('ringTight'),()=>window.__guideFold&&window.__guideFold()];
+    for(const step of steps){
+      if(!res.bad) break;
+      step();
+      res=solveRing(inner,{...opts,recenter:true,reset:true});
+    }
+  }
+  const {ps,c}=res;
   const ease='cubic-bezier(.22,.8,.3,1)', dur=opts.soft?.32:.7;
   ps.forEach(p=>{
     if(p.pin) return;
