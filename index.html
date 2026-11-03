@@ -3503,33 +3503,14 @@ function focusQuestion(o,withAction=false){
   foot.appendChild(cw); foot.appendChild(sk); box.appendChild(foot);
   return box;
 }
-function answerPositions(count,ry){
-  const rx=Math.min(390,innerWidth*.34); ry=ry||Math.min(205,innerHeight*.235);
-  return Array.from({length:count},(_,i)=>{
-    const angle=-Math.PI/2+(Math.PI*2*i/count)+(count%2?0:.18);
-    return {x:Math.cos(angle)*rx,y:Math.sin(angle)*ry};
-  });
-}
 function addAnswerNodes(inner,items,onChoose,art){
   const mobile=innerWidth<700;
-  const card=inner.querySelector('.focusQuestion'), cardH=card?card.offsetHeight:0;
-  const ry=mobile?0:Math.min(innerHeight*.5-130,Math.max(innerHeight*.235,cardH/2+58));
-  const positions=answerPositions(items.length,ry);
-  const fr=inner.getBoundingClientRect();
   items.forEach((item,i)=>{
-    let pos=positions[i];
-    if(!mobile){ // 桌面星环：把节点收进视口边界内（顶部避开顶栏，底部留出确认栏与情境条）
-      const hw=118,hh=52;
-      const ax=Math.max(hw+10,Math.min(innerWidth-hw-10,fr.left+pos.x));
-      const ay=Math.max(hh+72,Math.min(innerHeight-hh-215,fr.top+pos.y));
-      pos={x:ax-fr.left,y:ay-fr.top};
-    }
-    const dist=Math.hypot(pos.x,pos.y);
     const wire=document.createElement('span');wire.className='answerWire';
-    wire.style.width=dist+'px';wire.style.transform=`rotate(${Math.atan2(pos.y,pos.x)}rad)`;
     inner.appendChild(wire);
     const node=document.createElement('div');node.className='answerNode';node.setAttribute('role','button');node.tabIndex=0;
-    node.style.setProperty('--answer-x',pos.x+'px');node.style.setProperty('--answer-y',pos.y+'px');node.style.setProperty('--answer-delay',(i*55)+'ms');
+    // 桌面端：选项先从证词卡中心绽出，随后由 layoutAnswerRing 推到环绕位置
+    node.style.setProperty('--answer-x','0px');node.style.setProperty('--answer-y','0px');node.style.setProperty('--answer-delay',(i*55)+'ms');
     node.innerHTML=`<div class="answerMain">${art&&art[i]?artSVG(art[i]):''}<span class="answerIndex">${String(i+1).padStart(2,'0')}</span><span class="answerText"></span></div>`+
       `<div class="answerDeg"><input type="range" min="0" max="4" value="2" aria-label="${L('程度','Degree')}"><div class="answerDegLbl"><span>${L('程度','DEGREE')}</span><b></b></div></div>`;
     node.querySelector('.answerText').textContent=optText(item);
@@ -3539,78 +3520,162 @@ function addAnswerNodes(inner,items,onChoose,art){
     rng.addEventListener('click',e=>e.stopPropagation());
     rng.addEventListener('pointerdown',e=>e.stopPropagation());
     rng.addEventListener('input',()=>{paint();node.dispatchEvent(new CustomEvent('degree',{detail:+rng.value}));});
-    node.onclick=e=>{e.stopPropagation();onChoose(item,node);};
-    node.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onChoose(item,node);}};
+    // 选中后选项会展开程度条变高，需重新散开避免压住邻居
+    node.onclick=e=>{e.stopPropagation();onChoose(item,node);ringRelayout();};
+    node.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onChoose(item,node);ringRelayout();}};
     if(!mobile){ node.style.setProperty('--float-d',(i*0.7)+'s'); node._wire=wire; enableNodeDrag(node,inner); }
     inner.appendChild(node);
   });
-  // 桌面端：星环落定后把彼此/与证词卡遮挡的选项缓缓推开，再原地漂浮
-  if(!mobile) requestAnimationFrame(()=>requestAnimationFrame(()=>scatterAnswerNodes(inner,card)));
+  // 桌面端：等确认栏、提示签都就位后，居中证词卡并让选项环绕散开
+  if(!mobile) requestAnimationFrame(()=>requestAnimationFrame(()=>layoutAnswerRing(inner,{recenter:true,reset:true,animate:true})));
 }
-/* 桌面端：两两测量选项与证词卡的包围盒，沿重叠最浅的轴推开，平滑过渡后清除 transition */
-function scatterAnswerNodes(inner,card){
-  const nodes=[...inner.querySelectorAll('.answerNode')];
-  if(!nodes.length) return;
-  const r0=inner.getBoundingClientRect();
-  const pts=nodes.map(n=>({n,
-    x:parseFloat(getComputedStyle(n).getPropertyValue('--answer-x'))||0,
-    y:parseFloat(getComputedStyle(n).getPropertyValue('--answer-y'))||0,
-    hw:n.offsetWidth/2, hh:n.offsetHeight/2}));
-  const obs=card?[{x:0,y:0,hw:card.offsetWidth/2+8,hh:card.offsetHeight/2+8,card:true}]:[];
-  const PAD=14;
-  for(let round=0;round<32;round++){
-    let pushed=false;
-    const all=pts.concat(obs);
-    for(let i=0;i<pts.length;i++)for(let j=i+1;j<all.length;j++){
-      const a=pts[i],b=all[j];
-      const ox=a.hw+b.hw+PAD-Math.abs(a.x-b.x);
-      const oy=a.hh+b.hh+PAD-Math.abs(a.y-b.y);
-      if(ox>0&&oy>0){
-        pushed=true;
-        if(ox<oy){const s=(b.x>=a.x?-1:1)*ox/(b.card?1:2);a.x+=s;if(!b.card)b.x-=s;}
-        else{const s=(b.y>=a.y?-1:1)*oy/(b.card?1:2);a.y+=s;if(!b.card)b.y-=s;}
+/* ============================================================
+   桌面端答案星环：问题居中、选项环绕；把证词卡、关闭钮、提示签、
+   情境条与确认栏都视为障碍物，选项之间互相推开，始终不遮挡
+   ============================================================ */
+const RING_GAP=14;
+function ringCenter(){
+  const p=$('#qPanel');
+  return {x:parseFloat(p.style.getPropertyValue('--focus-x'))||innerWidth/2,
+          y:parseFloat(p.style.getPropertyValue('--focus-y'))||innerHeight/2};
+}
+function ringObstacle(el,pad){
+  if(!el) return null;
+  const r=el.getBoundingClientRect();
+  if(r.width<2||r.height<2) return null;
+  const cs=getComputedStyle(el);
+  if(cs.display==='none'||cs.visibility==='hidden'||+cs.opacity<.05) return null;
+  return {x:r.left+r.width/2,y:r.top+r.height/2,hw:r.width/2+pad,hh:r.height/2+pad};
+}
+function setNodePos(n,x,y){
+  n.style.setProperty('--answer-x',x+'px');n.style.setProperty('--answer-y',y+'px');
+  if(n._wire){n._wire.style.width=Math.hypot(x,y)+'px';n._wire.style.transform=`rotate(${Math.atan2(y,x)}rad)`;}
+}
+function ringBounds(){ return {l:10,r:innerWidth-10,t:64,b:innerHeight-10}; }
+function ringRelayout(){
+  if(innerWidth<700) return;
+  requestAnimationFrame(()=>layoutAnswerRing($('#qPanelInner'),{animate:true}));
+}
+/* opts: recenter 重新居中证词卡 · reset 按环形重排 · animate 平滑过渡 · soft 拖动中的轻量迭代 · pin 正被拖动的选项 */
+function layoutAnswerRing(inner,opts={}){
+  if(!inner||innerWidth<700) return;
+  const panel=$('#qPanel');
+  if(!panel.classList.contains('open')||panel.classList.contains('pulse-open')) return;
+  const card=inner.querySelector('.focusQuestion'), nodes=[...inner.querySelectorAll('.answerNode')];
+  if(!card||!nodes.length) return;
+  const G=RING_GAP, B=ringBounds();
+  const tip=$('#guideTip');
+  const tipOb=tip&&tip.classList.contains('show')?ringObstacle(tip,4):null;
+  const docks=[...panel.querySelectorAll('.confirmDock,.ctxDock')].map(el=>ringObstacle(el,6)).filter(Boolean);
+  const cw2=card.offsetWidth/2, ch2=card.offsetHeight/2;
+  let c=ringCenter();
+  if(opts.recenter){
+    // 在「提示签下沿 ~ 底部操作栏上沿」之间垂直居中
+    let top=B.t, bot=B.b;
+    if(tipOb&&tipOb.y<innerHeight*.4) top=Math.max(top,tipOb.y+tipOb.hh);
+    docks.forEach(d=>{ if(d.y>innerHeight*.5) bot=Math.min(bot,d.y-d.hh); });
+    c={x:innerWidth/2,y:Math.max(top+ch2+G,Math.min(bot-ch2-G,(top+bot)/2))};
+    panel.style.setProperty('--focus-x',c.x+'px');panel.style.setProperty('--focus-y',c.y+'px');
+    if(curOrb){curOrb.focusX=c.x;curOrb.focusY=c.y;}
+  }
+  const obs=[{x:c.x,y:c.y,hw:cw2+G,hh:ch2+G}];
+  const cb=ringObstacle($('#qPanelClose'),4); if(cb) obs.push(cb);
+  if(tipOb) obs.push(tipOb);
+  obs.push(...docks);
+  const n0=nodes.length;
+  const ps=nodes.map((n,i)=>{
+    const hw=n.offsetWidth/2+G/2, hh=n.offsetHeight/2+G/2;
+    let x,y;
+    if(opts.reset||n._rx==null){
+      // 均匀分布在证词卡四周：沿方向射线贴住卡片外框，再横向略放宽
+      const a=-Math.PI/2+Math.PI*2*i/n0+(n0%2?0:Math.PI/n0);
+      const ca=Math.cos(a), sa=Math.sin(a);
+      const r=Math.min((cw2+G+hw)/Math.max(.001,Math.abs(ca)),(ch2+G+hh)/Math.max(.001,Math.abs(sa)));
+      x=c.x+ca*r*1.12; y=c.y+sa*r;
+    }else{x=c.x+n._rx;y=c.y+n._ry;}
+    return {n,x,y,hw,hh,pin:n===opts.pin};
+  });
+  const fits=(p,x,y)=>x-p.hw>=B.l-.5&&x+p.hw<=B.r+.5&&y-p.hh>=B.t-.5&&y+p.hh<=B.b+.5;
+  const clamp=p=>{p.x=Math.max(B.l+p.hw,Math.min(B.r-p.hw,p.x));p.y=Math.max(B.t+p.hh,Math.min(B.b-p.hh,p.y));};
+  // 把 p 从矩形 b 中移出：四个方向里选「不出界且位移最小」的一个
+  const exit=(p,b)=>{
+    const c4=[[b.x+b.hw+p.hw,p.y],[b.x-b.hw-p.hw,p.y],[p.x,b.y+b.hh+p.hh],[p.x,b.y-b.hh-p.hh]]
+      .map(([x,y])=>({x,y,d:Math.hypot(x-p.x,y-p.y),ok:fits(p,x,y)}))
+      .sort((u,v)=>(v.ok-u.ok)||(u.d-v.d));
+    p.x=c4[0].x;p.y=c4[0].y;
+  };
+  const iters=opts.soft?30:160;
+  for(let it=0;it<iters;it++){
+    let moved=false;
+    for(const p of ps){
+      if(p.pin) continue; // 拖动中的选项允许暂时悬停在卡片上，松手后再推出
+      for(const b of obs){
+        if(p.hw+b.hw-Math.abs(p.x-b.x)>0&&p.hh+b.hh-Math.abs(p.y-b.y)>0){exit(p,b);moved=true;}
       }
     }
-    if(!pushed)break;
+    for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){
+      const a=ps[i],b=ps[j];
+      const ox=a.hw+b.hw-Math.abs(a.x-b.x), oy=a.hh+b.hh-Math.abs(a.y-b.y);
+      if(ox<=0||oy<=0) continue;
+      moved=true;
+      if(a.pin||b.pin){ a.pin?exit(b,a):exit(a,b); continue; }
+      const sx=a.x<b.x?-1:a.x>b.x?1:(i%2?1:-1), sy=a.y<b.y?-1:a.y>b.y?1:(j%2?1:-1);
+      const xa=a.x+sx*ox/2, xb=b.x-sx*ox/2, ya=a.y+sy*oy/2, yb=b.y-sy*oy/2;
+      const xOk=fits(a,xa,a.y)&&fits(b,xb,b.y), yOk=fits(a,a.x,ya)&&fits(b,b.x,yb);
+      if(xOk&&(ox<=oy||!yOk)){a.x=xa;b.x=xb;}
+      else if(yOk){a.y=ya;b.y=yb;}
+      else if(ox<=oy){a.x=xa;b.x=xb;} else {a.y=ya;b.y=yb;}
+    }
+    ps.forEach(p=>{ if(!p.pin) clamp(p); });
+    if(!moved) break;
   }
-  pts.forEach(p=>{
-    const nx=Math.max(p.hw+10-r0.left,Math.min(innerWidth-p.hw-10-r0.left,p.x));
-    const ny=Math.max(p.hh+72-r0.top,Math.min(innerHeight-p.hh-215-r0.top,p.y));
-    if(Math.abs(nx-p.x)<1&&Math.abs(ny-p.y)<1) return;
-    const n=p.n, ease='cubic-bezier(.22,.8,.3,1)';
-    n.style.transition=`left .8s ${ease},top .8s ${ease}`;
-    n.style.setProperty('--answer-x',nx+'px'); n.style.setProperty('--answer-y',ny+'px');
-    if(n._wire){n._wire.style.transition=`width .8s ${ease},transform .8s ${ease}`;
-      n._wire.style.width=Math.hypot(nx,ny)+'px'; n._wire.style.transform=`rotate(${Math.atan2(ny,nx)}rad)`;}
-    setTimeout(()=>{n.style.transition='';if(n._wire)n._wire.style.transition='';},880);
+  const ease='cubic-bezier(.22,.8,.3,1)', dur=opts.soft?.32:.7;
+  ps.forEach(p=>{
+    if(p.pin) return;
+    const n=p.n, rx=p.x-c.x, ry=p.y-c.y;
+    const changed=n._rx==null||Math.abs(rx-n._rx)>.5||Math.abs(ry-n._ry)>.5;
+    n._rx=rx;n._ry=ry;
+    if(!changed) return;
+    if(opts.animate||opts.soft){
+      n.style.transition=`left ${dur}s ${ease},top ${dur}s ${ease}`;
+      if(n._wire) n._wire.style.transition=`width ${dur}s ${ease},transform ${dur}s ${ease}`;
+      clearTimeout(n._tt);
+      n._tt=setTimeout(()=>{ if(!n.classList.contains('dragging')){n.style.transition='';if(n._wire)n._wire.style.transition='';} },dur*1000+80);
+    }
+    setNodePos(n,rx,ry);
   });
 }
-/* 桌面端：答案星环的选项可随手拖开，连线随动；拖过不触发点选 */
+addEventListener('resize',()=>{clearTimeout(window.__ringRT);window.__ringRT=setTimeout(()=>{
+  if(innerWidth<700) return;
+  layoutAnswerRing($('#qPanelInner'),{recenter:true,reset:true,animate:true});
+},200);});
+/* 桌面端：选项可随手拖到屏幕任意空位（含下方），其它选项实时让位，连线随动；拖过不触发点选 */
 function enableNodeDrag(node,inner){
   node.addEventListener('pointerdown',e=>{
-    if(e.target.closest('input,button')) return;
-    const r0=inner.getBoundingClientRect();
-    const sx=e.clientX,sy=e.clientY;
-    const ox=parseFloat(getComputedStyle(node).getPropertyValue('--answer-x'))||0;
-    const oy=parseFloat(getComputedStyle(node).getPropertyValue('--answer-y'))||0;
-    let moved=false; node._dragged=false;
-    node.style.transition='none'; if(node._wire) node._wire.style.transition='none';
+    if(e.button>0||e.target.closest('input,button')) return;
+    const sx=e.clientX,sy=e.clientY,c=ringCenter();
+    const ox=node._rx||0, oy=node._ry||0;
+    let moved=false,raf=0; node._dragged=false;
     try{node.setPointerCapture(e.pointerId);}catch(err){}
-    const mv=e=>{
-      const dx=e.clientX-sx,dy=e.clientY-sy;
+    const mv=ev=>{
+      const dx=ev.clientX-sx,dy=ev.clientY-sy;
       if(!moved&&Math.hypot(dx,dy)<6) return;
-      if(!moved){moved=true;node.classList.add('dragging');node.style.animationPlayState='paused';}
-      const hw=118,hh=52;
-      const nx=Math.max(hw+10-r0.left,Math.min(innerWidth-hw-10-r0.left,ox+dx));
-      const ny=Math.max(hh+72-r0.top,Math.min(innerHeight-hh-215-r0.top,oy+dy));
-      node.style.setProperty('--answer-x',nx+'px');node.style.setProperty('--answer-y',ny+'px');
-      if(node._wire){node._wire.style.width=Math.hypot(nx,ny)+'px';node._wire.style.transform=`rotate(${Math.atan2(ny,nx)}rad)`;}
+      if(!moved){
+        moved=true;node.classList.add('dragging');node.style.animationPlayState='paused';
+        clearTimeout(node._tt);node.style.transition='none';if(node._wire)node._wire.style.transition='none';
+      }
+      const B=ringBounds(), hw=node.offsetWidth/2, hh=node.offsetHeight/2;
+      const ax=Math.max(B.l+hw,Math.min(B.r-hw,c.x+ox+dx));
+      const ay=Math.max(B.t+hh,Math.min(B.b-hh,c.y+oy+dy));
+      node._rx=ax-c.x;node._ry=ay-c.y;
+      setNodePos(node,node._rx,node._ry);
+      if(!raf) raf=requestAnimationFrame(()=>{raf=0;if(node.classList.contains('dragging'))layoutAnswerRing(inner,{soft:true,pin:node});});
     };
     const up=()=>{
       node.classList.remove('dragging');node.style.animationPlayState='';
       node.style.transition=''; if(node._wire) node._wire.style.transition='';
       node.removeEventListener('pointermove',mv);node.removeEventListener('pointerup',up);node.removeEventListener('pointercancel',up);
-      if(moved) node._dragged=true;
+      if(moved){node._dragged=true;layoutAnswerRing(inner,{animate:true});}
     };
     node.addEventListener('pointermove',mv);node.addEventListener('pointerup',up);node.addEventListener('pointercancel',up);
   });
@@ -3618,28 +3683,32 @@ function enableNodeDrag(node,inner){
     if(node._dragged){node._dragged=false;e.stopImmediatePropagation();e.preventDefault();}
   },true);
 }
-/* 桌面端：证词卡可拖动换位（整圈星环随之平移） */
+/* 桌面端：证词卡可拖动换位，整圈选项随之平移；靠近屏幕边缘时选项自动让位 */
 function dragFocusCard(card,o){
   card.addEventListener('pointerdown',e=>{
-    if(e.target.closest('button,input,select,.miniChip,.customWrap,.customToggle,.ctxLbl,.focusLead,.archiveNode,.skipOrbBtn')) return;
-    const panel=$('#qPanel');
+    if(e.button>0||e.target.closest('button,input,select,.miniChip,.customWrap,.customToggle,.ctxLbl,.focusLead,.archiveNode,.skipOrbBtn')) return;
+    const panel=$('#qPanel'), inner=$('#qPanelInner');
     const sx=e.clientX,sy=e.clientY,x0=o.focusX,y0=o.focusY;
-    let moved=false;
+    let moved=false,raf=0;
     try{card.setPointerCapture(e.pointerId);}catch(err){}
-    card.style.animation='none';
-    const mv=e=>{
-      const dx=e.clientX-sx,dy=e.clientY-sy;
+    const mv=ev=>{
+      const dx=ev.clientX-sx,dy=ev.clientY-sy;
       if(!moved&&Math.hypot(dx,dy)<6) return;
-      moved=true; card.classList.add('dragging');
-      const margin=Math.min(390,innerWidth*.34)+130, narrow=margin*2>innerWidth;
-      const nx=narrow?innerWidth*.5:Math.max(margin,Math.min(innerWidth-margin,x0+dx));
-      const ny=Math.max(innerHeight*.24,Math.min(innerHeight*.74,y0+dy));
+      if(!moved){moved=true;card.classList.add('dragging');card.style.animation='none';}
+      const B=ringBounds(), cw2=card.offsetWidth/2, ch2=card.offsetHeight/2;
+      let maxY=B.b-ch2;
+      const cd=panel.querySelector('.confirmDock');
+      if(cd){const r=cd.getBoundingClientRect(); if(r.height) maxY=Math.min(maxY,r.top-8-ch2);}
+      const nx=Math.max(B.l+cw2,Math.min(B.r-cw2,x0+dx));
+      const ny=Math.max(B.t+ch2,Math.min(Math.max(B.t+ch2,maxY),y0+dy));
       panel.style.setProperty('--focus-x',nx+'px');panel.style.setProperty('--focus-y',ny+'px');
       o.focusX=nx;o.focusY=ny;
+      if(!raf) raf=requestAnimationFrame(()=>{raf=0;layoutAnswerRing(inner,{soft:true});});
     };
     const up=()=>{
       card.classList.remove('dragging');card.style.animation='';
       card.removeEventListener('pointermove',mv);card.removeEventListener('pointerup',up);card.removeEventListener('pointercancel',up);
+      if(moved) layoutAnswerRing(inner,{animate:true});
     };
     card.addEventListener('pointermove',mv);card.addEventListener('pointerup',up);card.addEventListener('pointercancel',up);
   });
